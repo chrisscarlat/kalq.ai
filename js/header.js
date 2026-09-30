@@ -46,7 +46,7 @@ function initLogoCollapse() {
 }
 
 //=================================== Language ===================================//
-// English and German switch the page content. TODO: translations for FR, ES, IT, PL (they show English).
+// English and German, both fully translated.
 function initLangSwitcher(root) {
     if (!root) return;
     const items = [...root.querySelectorAll("[data-lang]")];

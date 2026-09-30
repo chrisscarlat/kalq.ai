@@ -1,4 +1,4 @@
-// Page translations. German is the default, English is complete, other languages fall back to English.
+// Page translations: German (default) and English.
 // Strings come from i18n/strings.json via tools/build_pages.py.
 import { STRINGS } from "./strings.js";
 
@@ -6,7 +6,7 @@ const CONTENT_LANGS = ["en", "de"];
 const MARQUEE_REPEAT = 60;
 let current = "de"; // matches the generated HTML
 
-export const contentLang = code => CONTENT_LANGS.includes(code) ? code : "en";
+export const contentLang = code => CONTENT_LANGS.includes(code) ? code : "de";
 
 export function t(key) {
     const entry = STRINGS[key];

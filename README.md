@@ -18,7 +18,7 @@ The HTML pages are generated. Edit `tools/build_pages.py` (markup) or `i18n/stri
 
     python3 tools/build_pages.py
 
-Templates are written in English; the script tags them with `data-i18n`, writes the pages in German (the default language) and writes `js/strings.js` from the JSON. Everything is translated in German and English. FR, ES, IT and PL can be picked in the switcher but show English until their strings are added.
+Templates are written in English; the script tags them with `data-i18n`, writes the pages in German (the default language) and writes `js/strings.js` from the JSON. The site has two languages, German and English, both fully translated.
 
 ## Brand
 
@@ -28,4 +28,4 @@ Templates are written in English; the script tags them with `data-i18n`, writes 
 
 ## Open TODOs
 
-Hover and header images, Impressum data, Datenschutz text, FR/ES/IT/PL translations.
+Hover and header images, Impressum data, Datenschutz text.

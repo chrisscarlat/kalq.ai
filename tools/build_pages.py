@@ -14,8 +14,7 @@ HERO_WORD = f'<svg viewBox="{wm_vb}" fill="currentColor" role="img" aria-label="
 
 DESC = "Kalq turns a part's geometry into one technical truth and two separate commercial engines, for buyers and suppliers of manufactured parts."
 
-LANGS = [("en", "E", "ENGLISH", "English"), ("de", "D", "DEUTSCH", "Deutsch"), ("fr", "F", "FRANÇAIS", "Français"),
-         ("es", "S", "ESPAÑOL", "Español"), ("it", "I", "ITALIANO", "Italiano"), ("pl", "P", "POLSKI", "Polski")]
+LANGS = [("en", "E", "ENGLISH", "English"), ("de", "D", "DEUTSCH", "Deutsch")]
 lang_items = "\n".join(
     f'''                <button type="button" class="lang__item" data-lang="{c}" lang="{c}" aria-label="{n}" aria-pressed="false">
                     <span class="lang__inner"><span class="lang__short"><span>{s}</span></span><span class="lang__full"><span>{f}</span></span></span>

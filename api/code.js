@@ -22,6 +22,7 @@ async function tooManyAttempts(ipHash) {
     memoryAttempts.set(ipHash, recent);
 
     let stored = 0;
+    if (!isConfigured()) return recent.length > MAX_ATTEMPTS;
     try {
         stored = await count("gate_attempts", `ip_hash=eq.${ipHash}&created_at=gte.${new Date(now - WINDOW_MS).toISOString()}`);
         await insert("gate_attempts", { ip_hash: ipHash });
@@ -42,7 +43,7 @@ async function guestIdentity(ipHash) {
 
 export async function POST(request) {
     const { ACCESS_CODE, GATE_COOKIE_SECRET, IP_HASH_SALT } = process.env;
-    if (!ACCESS_CODE || !GATE_COOKIE_SECRET || !IP_HASH_SALT || !isConfigured()) return json({ error: "config" }, 500);
+    if (!ACCESS_CODE || !GATE_COOKIE_SECRET || !IP_HASH_SALT) return json({ error: "config" }, 500);
 
     const { code, access_token: accessToken } = await readJson(request);
     const ipHash = sha256(IP_HASH_SALT + clientIp(request)).toString("hex"); // the raw IP is never stored
@@ -50,6 +51,13 @@ export async function POST(request) {
     if (await tooManyAttempts(ipHash)) return json({ error: "rate_limited" }, 429);
     if (!sameCode(String(code || "").trim().toUpperCase(), ACCESS_CODE.trim().toUpperCase())) {
         return json({ error: "wrong_code" }, 401);
+    }
+
+    // Until Supabase is connected: guests still get in, with an animal from the IP hash and no stored session
+    if (!isConfigured()) {
+        const identity = identityFromHash(ipHash);
+        const cookie = await signGate({ role: "guest", uid: `guest-${ipHash.slice(0, 16)}` }, GATE_COOKIE_SECRET);
+        return json({ role: "guest", ...identity, supabase: false }, 200, { "Set-Cookie": gateCookieHeader(cookie) });
     }
 
     const user = await getUser(accessToken);

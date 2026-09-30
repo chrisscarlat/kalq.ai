@@ -131,7 +131,9 @@ async function submitCode() {
     say(null);
     setBusy(true);
     try {
-        const sb = await client();
+        // Without Supabase configured yet the server checks the code alone
+        const sb = await client().catch(() => null);
+        if (!sb) return finishCode(await post("/api/code", { code: code() }), null);
         // Reuse the browser's anonymous session so a returning guest keeps their animal
         let { data: { session } } = await sb.auth.getSession();
         if (session && !session.user.is_anonymous) {
@@ -143,19 +145,22 @@ async function submitCode() {
             if (error) throw error;
             session = data.session;
         }
-        const res = await post("/api/code", { code: code(), access_token: session.access_token });
-        if (res.ok) {
-            await sb.auth.refreshSession(); // JWT now carries role, animal and colour
-            return go();
-        }
-        const { error } = await res.json().catch(() => ({}));
-        setBusy(false);
-        wrong(error === "wrong_code" ? "wrong" : error === "rate_limited" ? "rate" : "failed");
+        return finishCode(await post("/api/code", { code: code(), access_token: session.access_token }), sb);
     } catch (error) {
         console.error(error);
         setBusy(false);
         wrong("failed");
     }
+}
+
+async function finishCode(res, sb) {
+    if (res.ok) {
+        if (sb) await sb.auth.refreshSession(); // JWT now carries role, animal and colour
+        return go();
+    }
+    const { error } = await res.json().catch(() => ({}));
+    setBusy(false);
+    wrong(error === "wrong_code" ? "wrong" : error === "rate_limited" ? "rate" : "failed");
 }
 
 //=================================== Google and LinkedIn ===================================//

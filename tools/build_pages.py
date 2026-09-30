@@ -525,6 +525,64 @@ datenschutz = head("Kalq | Privacy policy") + '''                <!-- Datenschut
                 </section>
 ''' + FOOTER + TAIL
 write("datenschutz.html", datenschutz)
+# ---------------- Gate (temporary, see middleware.js) ----------------
+# Standalone: only files the middleware lets through without a cookie. Copy lives in js/gate.js (EN and DE).
+GATE_MARK = MARK.replace('class="site-logo__mark"', 'class="gate_mark"')
+cells = "\n".join(f'                    <input class="gate_cell" type="text" inputmode="text" maxlength="1" autocomplete="{"one-time-code" if i == 0 else "off"}" autocapitalize="characters" spellcheck="false" aria-label="Code {i + 1}/6">' for i in range(6))
+gate_html = f"""<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Kalq</title>
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/assets/favicon.png" type="image/png">
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="/css/gate.css">
+</head>
+
+<body>
+    <main class="gate">
+        <div class="gate_card">
+            <div class="gate_logo">
+                {GATE_MARK}
+                <span class="gate_word">{WORD}</span>
+            </div>
+
+            <form class="gate_form" novalidate>
+                <p class="gate_label" data-gate-text="label">Zugangscode</p>
+                <div class="gate_cells">
+{cells}
+                </div>
+                <p class="gate_message" role="alert" aria-live="polite"></p>
+            </form>
+
+            <div class="gate_or"><span data-gate-text="or">oder</span></div>
+
+            <div class="gate_logins">
+                <button type="button" class="gate_login" data-provider="google">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.35 11.1H12v2.98h5.35c-.23 1.42-1.66 4.17-5.35 4.17-3.22 0-5.85-2.67-5.85-5.95S8.78 6.35 12 6.35c1.83 0 3.06.78 3.76 1.45l2.57-2.47C16.68 3.78 14.55 2.8 12 2.8 6.92 2.8 2.8 6.92 2.8 12s4.12 9.2 9.2 9.2c5.31 0 8.83-3.73 8.83-8.99 0-.6-.07-1.06-.15-1.51Z"/></svg>
+                    <span data-gate-text="google">Weiter mit Google</span>
+                </button>
+                <button type="button" class="gate_login" data-provider="linkedin_oidc">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0Z"/></svg>
+                    <span data-gate-text="linkedin">Weiter mit LinkedIn</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+    <script src="/js/gate.js" type="module"></script>
+</body>
+
+</html>
+"""
+open(f"{ROOT}/gate.html", "w", encoding="utf-8").write(gate_html)
+
 # Every translatable key must appear in some page
 pages = "".join(open(f"{ROOT}/{n}", encoding="utf-8").read() for n in ["index.html", "platform.html", "company.html", "impressum.html", "datenschutz.html"])
 missing = [k for k in STRINGS if not k.startswith(SKIP) and f'data-i18n="{k}"' not in pages]

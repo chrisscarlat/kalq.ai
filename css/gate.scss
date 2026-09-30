@@ -1,0 +1,225 @@
+// Gate page. Standalone on purpose: main.css sits behind the gate.
+// Compile: npx sass --no-source-map css/gate.scss css/gate.css
+@font-face {
+    font-family: "Clash Grotesk";
+    src: url(../fonts/ClashGrotesk-Light.woff2) format("woff2");
+    font-weight: 300;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Clash Grotesk";
+    src: url(../fonts/ClashGrotesk-Regular.woff2) format("woff2");
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Clash Grotesk";
+    src: url(../fonts/ClashGrotesk-Medium.woff2) format("woff2");
+    font-weight: 500;
+    font-display: swap;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    background: #101010;
+    color: #fff;
+    font-family: "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+.gate {
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    background: radial-gradient(circle at 50% 35%, #1d1d1d 0%, #101010 60%);
+}
+
+/* Same glass as the four dot dropdown */
+.gate_card {
+    width: 100%;
+    max-width: 420px;
+    padding: 2.75rem 2rem 2rem;
+    background: rgba(16, 16, 16, 0.55);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 28px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+    text-align: center;
+}
+
+.gate_logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+
+    .gate_mark {
+        width: 120px;
+        height: 120px;
+        color: #fff;
+        overflow: visible;
+    }
+
+    .gate_word svg {
+        display: block;
+        height: 20px;
+        width: auto;
+    }
+}
+
+.gate_form {
+    margin-top: 2.5rem;
+}
+
+.gate_label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.55;
+}
+
+.gate_cells {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+
+    &.is-wrong {
+        animation: gate-shake 0.45s ease;
+    }
+}
+
+.gate_cell {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: transparent;
+    color: #fff;
+    font: 500 1.25rem/1 "Clash Grotesk", sans-serif;
+    text-align: center;
+    text-transform: uppercase;
+    caret-color: transparent;
+    outline: none;
+    transition: border-color 0.2s ease, background 0.2s ease;
+
+    &:focus {
+        border-color: #fff;
+    }
+
+    &.is-filled {
+        background: rgba(255, 255, 255, 0.08);
+    }
+}
+
+.gate_cells:disabled,
+.gate_form.is-busy .gate_cell {
+    opacity: 0.5;
+}
+
+.gate_message {
+    min-height: 1.5em;
+    margin-top: 0.9rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.gate_or {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.25rem 0;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.45;
+
+    &::before,
+    &::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.3);
+    }
+}
+
+.gate_logins {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.gate_login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    font: 400 1rem/1 "Clash Grotesk", sans-serif;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+
+    svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    &:hover,
+    &:focus-visible {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
+        outline: none;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: progress;
+    }
+}
+
+@keyframes gate-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(7px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(3px); }
+}
+
+@media (max-width: 400px) {
+    .gate_card {
+        padding: 2.25rem 1.25rem 1.5rem;
+    }
+
+    .gate_cell {
+        width: 42px;
+        height: 42px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gate_cells.is-wrong {
+        animation: none;
+    }
+}

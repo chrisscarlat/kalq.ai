@@ -47,8 +47,8 @@ const LETTERS = [
 // Diagonals tilt out of the plane during the 3D turn (sign per ray keeps opposite rays on one straight axis)
 const LIFT = { ne: 1, sw: -1, nw: -1, se: 1, n: 0, s: 0, e: 0, w: 0 };
 
-export function logoAnimation() {
-    const svg = document.querySelector(".site-logo__mark");
+// Runs on the header mark by default. The gate page passes its own larger mark.
+export function logoAnimation(svg = document.querySelector(".site-logo__mark"), { delay = 2.5 } = {}) {
     if (!svg || svg.dataset.animated) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     svg.dataset.animated = "true";
@@ -100,7 +100,7 @@ export function logoAnimation() {
         });
     };
 
-    const tl = gsap.timeline({ repeat: -1, delay: 2.5, repeatDelay: 2.5, onUpdate: render });
+    const tl = gsap.timeline({ repeat: -1, delay, repeatDelay: 2.5, onUpdate: render });
 
     LETTERS.forEach(letter => {
         toShape(tl, letter, tl.duration());   // unused rays shrink, the rest open into the letter

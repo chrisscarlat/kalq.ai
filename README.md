@@ -29,3 +29,12 @@ Templates are written in English; the script tags them with `data-i18n`, writes 
 ## Open TODOs
 
 Hover and header images, Impressum data, Datenschutz text.
+
+## Gate (temporary)
+
+Every page needs the signed `kalq_gate` cookie, otherwise `middleware.js` shows `gate.html`. Guests enter the access code (`/api/code`, they get an animal), editors log in with Google or LinkedIn (`/api/session`). Shared server code is in `lib/`. `vercel.json` and `robots.txt` keep the gated site out of search engines.
+
+- Local testing needs `npx vercel dev` (middleware and `/api` do not run under `python3 -m http.server`).
+- Gate styles: `npx sass --no-source-map css/gate.scss css/gate.css`
+- Database: `supabase/migrations/`, apply with `supabase db push` or the SQL editor.
+- Env vars (Vercel, Production and Preview): `ACCESS_CODE`, `GATE_COOKIE_SECRET`, `IP_HASH_SALT`, plus `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` from the Supabase integration.

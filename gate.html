@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Kalq</title>
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/assets/favicon.png" type="image/png">
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="/css/gate.css">
+</head>
+
+<body>
+    <main class="gate">
+        <div class="gate_card">
+            <div class="gate_logo">
+                <svg class="gate_mark" viewBox="0 0 174 174" fill="none" stroke="currentColor" stroke-width="7.38" aria-hidden="true"><line data-ray="e" x1="101.81" y1="86.99" x2="173.98" y2="86.99"/><line data-ray="w" x1="72.16" y1="87.01" x2="0" y2="87.01"/><line data-ray="s" x1="87.01" y1="101.84" x2="87.01" y2="174"/><line data-ray="n" x1="87.01" y1="72.16" x2="87.01" y2="0"/><line data-ray="se" x1="84.26" y1="84.26" x2="135.29" y2="135.29"/><line data-ray="ne" x1="99.04" y1="75.62" x2="132.83" y2="41.82"/><line data-ray="sw" x1="74.64" y1="99.7" x2="40.85" y2="133.49"/><line data-ray="nw" x1="74.62" y1="74.31" x2="40.83" y2="40.51"/></svg>
+                <span class="gate_word"><svg viewBox="56 0 2490 690" fill="currentColor" aria-hidden="true"><path d="M164 680H56V10H164V296H319L495 10H618L410 342L617 680H493L321 400H164ZM772 680H659L920 10H1075L1336 680H1219L1151 506H840ZM948 232 878 409H1113L1043 232L1000 108H992ZM1897 680H1432V10H1540V583H1897ZM2234 690Q2091 690 2006 596Q1921 502 1921 345Q1921 188 2006 94Q2091 0 2234 0Q2376 0 2461 94Q2546 188 2546 345Q2546 502 2461 596Q2376 690 2234 690ZM2082.5 530.5Q2129 586 2234 586Q2339 586 2385 530.5Q2431 475 2431 345Q2431 215 2385 159.5Q2339 104 2234 104Q2129 104 2082.5 159.5Q2036 215 2036 345Q2036 475 2082.5 530.5Z"/><path d="M2270.3 330.7 L2546.0 606.5 L2546.0 680.0 L2472.5 680.0 L2196.7 404.3Z"/></svg></span>
+            </div>
+
+            <form class="gate_form" novalidate>
+                <p class="gate_label" data-gate-text="label">Zugangscode</p>
+                <div class="gate_cells">
+                    <input class="gate_cell" type="text" inputmode="text" maxlength="1" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" aria-label="Code 1/6">
+                    <input class="gate_cell" type="text" inputmode="text" maxlength="1" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Code 2/6">
+                    <input class="gate_cell" type="text" inputmode="text" maxlength="1" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Code 3/6">
+                    <input class="gate_cell" type="text" inputmode="text" maxlength="1" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Code 4/6">
+                    <input class="gate_cell" type="text" inputmode="text" maxlength="1" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Code 5/6">
+                    <input class="gate_cell" type="text" inputmode="text" maxlength="1" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Code 6/6">
+                </div>
+                <p class="gate_message" role="alert" aria-live="polite"></p>
+            </form>
+
+            <div class="gate_or"><span data-gate-text="or">oder</span></div>
+
+            <div class="gate_logins">
+                <button type="button" class="gate_login" data-provider="google">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.35 11.1H12v2.98h5.35c-.23 1.42-1.66 4.17-5.35 4.17-3.22 0-5.85-2.67-5.85-5.95S8.78 6.35 12 6.35c1.83 0 3.06.78 3.76 1.45l2.57-2.47C16.68 3.78 14.55 2.8 12 2.8 6.92 2.8 2.8 6.92 2.8 12s4.12 9.2 9.2 9.2c5.31 0 8.83-3.73 8.83-8.99 0-.6-.07-1.06-.15-1.51Z"/></svg>
+                    <span data-gate-text="google">Weiter mit Google</span>
+                </button>
+                <button type="button" class="gate_login" data-provider="linkedin_oidc">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0Z"/></svg>
+                    <span data-gate-text="linkedin">Weiter mit LinkedIn</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+    <script src="/js/gate.js" type="module"></script>
+</body>
+
+</html>

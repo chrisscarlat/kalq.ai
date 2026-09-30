@@ -1,0 +1,16 @@
+.about {
+    background: $dark;
+    color: $light;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    @include verticalGap;
+
+    #container {
+        max-width: 960px;
+        width: 100%;
+        height: fit-content;
+    }
+}

@@ -1,0 +1,221 @@
+/* Global header. Blend mode sits on the header itself so it inverts over light and dark sections. */
+.site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    color: #fff;
+    mix-blend-mode: difference;
+    z-index: 30;
+    pointer-events: none;
+
+    > * {
+        pointer-events: auto;
+    }
+
+    button {
+        background: none;
+        border: 0;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+    }
+}
+
+/* Logo: symbol plus wordmark, wordmark collapses on scroll */
+.site-logo {
+    display: flex;
+    align-items: center;
+    color: #fff;
+
+    .site-logo__mark {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+    }
+
+    .site-logo__word {
+        display: grid;
+        grid-template-columns: 1fr;
+        opacity: 1;
+        margin-left: 0.75rem;
+        transition: grid-template-columns 0.6s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.4s ease, margin 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+
+        > span {
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        svg {
+            display: block;
+            height: 22px;
+            width: auto;
+        }
+    }
+}
+
+.site-header.is-compact .site-logo__word {
+    grid-template-columns: 0fr;
+    opacity: 0;
+    margin-left: 0;
+}
+
+.site-header__right {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+/* Language switcher: only the active language at rest, the others appear as letters on hover */
+.lang {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+
+    .lang__item {
+        display: grid;
+        grid-template-columns: 0fr;
+        opacity: 0;
+        padding: 0.35rem 0;
+        line-height: 1;
+        transition: grid-template-columns 0.45s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.3s ease, padding 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+
+        > .lang__inner {
+            display: flex;
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        &.is-active {
+            grid-template-columns: 1fr;
+            opacity: 1;
+        }
+
+        &:focus-visible {
+            outline: 1px solid currentColor;
+            outline-offset: 2px;
+        }
+    }
+
+    // Short letter and full name, one of them collapsed
+    .lang__short,
+    .lang__full {
+        display: grid;
+        transition: grid-template-columns 0.45s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.3s ease;
+
+        > span {
+            overflow: hidden;
+            min-width: 0;
+            white-space: nowrap;
+        }
+    }
+
+    .lang__short {
+        grid-template-columns: 1fr;
+    }
+
+    .lang__full {
+        grid-template-columns: 0fr;
+        opacity: 0;
+    }
+
+    .lang__item.is-active:not(.is-dimmed),
+    .lang__item.is-preview {
+        .lang__short {
+            grid-template-columns: 0fr;
+            opacity: 0;
+        }
+
+        .lang__full {
+            grid-template-columns: 1fr;
+            opacity: 1;
+        }
+    }
+
+    &.is-open .lang__item {
+        grid-template-columns: 1fr;
+        opacity: 1;
+        padding: 0.35rem 0.35rem;
+    }
+}
+
+/* Four dot menu toggle */
+.site-menu-toggle {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .dots {
+        display: grid;
+        grid-template-columns: repeat(2, 6px);
+        grid-template-rows: repeat(2, 6px);
+        gap: 6px;
+        transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+
+        span {
+            background: #fff;
+            border-radius: 50%;
+        }
+    }
+
+    &[aria-expanded="true"] .dots {
+        transform: rotate(45deg);
+    }
+
+    &:focus-visible {
+        outline: 1px solid #fff;
+        outline-offset: 2px;
+        border-radius: 50%;
+    }
+}
+
+@media (max-width: 540px) {
+    .site-header {
+        padding: 1rem;
+    }
+
+    .site-logo {
+        .site-logo__mark {
+            width: 30px;
+            height: 30px;
+        }
+
+        .site-logo__word {
+            margin-left: 0.6rem;
+
+            svg {
+                height: 18px;
+            }
+        }
+    }
+
+    .site-header__right {
+        gap: 0.5rem;
+    }
+
+    .lang {
+        font-size: 0.78rem;
+        letter-spacing: 0.06em;
+
+        &.is-open .lang__item {
+            padding: 0.35rem 0.3rem;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .site-header *,
+    .site-menu,
+    .site-menu * {
+        transition: none !important;
+    }
+}

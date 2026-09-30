@@ -1,0 +1,87 @@
+// Section We Do
+.about_weDo {
+    background: $dark;
+    color: $light;
+
+    #container {
+        .borderSeprator {
+            background: $grey1;
+        }
+    }
+}
+
+// Section Awwards
+.about_awwards {
+    background: $light;
+    color: $dark;
+
+    #container {
+        .borderSeprator {
+            background: $grey2;
+        }
+    }
+}
+
+// For both sections
+.about_weDo,
+.about_awwards {
+    @include verticalGap;
+
+    #container {
+        h3 {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .para {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            >div {
+                max-width: 900px;
+                width: 100%;
+
+                h5 {
+                    &:nth-child(2) {
+                        margin-top: 2rem;
+                    }
+                }
+            }
+        }
+    }
+
+    .parallax_img {
+        height: 100vh;
+        margin-top: 8rem;
+        border-radius: 50px;
+
+        img {
+            filter: brightness(80%);
+        }
+    }
+}
+
+/* BreakPoitns */
+@media (max-width: 1040px) {
+
+    .about_weDo,
+    .about_awwards {
+        .parallax_img {
+            margin-top: 8rem;
+            max-height: 600px;
+        }
+    }
+}
+
+@media (max-width: 540px) {
+
+    .about_weDo,
+    .about_awwards {
+        .parallax_img {
+            margin-top: 5rem;
+            max-height: 500px;
+            border-radius: 20px;
+        }
+    }
+}

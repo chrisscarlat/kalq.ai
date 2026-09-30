@@ -1,0 +1,69 @@
+/* Glass dropdown. Lives outside the blended header and is not a <nav>, the global nav rules would break it. */
+.site-menu {
+    position: fixed;
+    top: 4.9rem;
+    right: 2rem;
+    min-width: 240px;
+    padding: 0.6rem;
+    background: rgba(16, 16, 16, 0.55);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    z-index: 31;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px) scale(0.98);
+    transform-origin: top right;
+    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.65, 0, 0.35, 1), visibility 0s linear 0.4s;
+
+    &.is-open {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    a {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #fff;
+        font-size: 1.6rem;
+        font-weight: 300;
+        letter-spacing: -0.02em;
+        padding: 0.7rem 1rem;
+        border-radius: 12px;
+        transition: background 0.2s ease;
+
+        &::after {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #fff;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        &:hover,
+        &:focus-visible {
+            background: rgba(255, 255, 255, 0.08);
+            outline: none;
+        }
+
+        &[aria-current="page"]::after {
+            opacity: 1;
+        }
+    }
+}
+
+@media (max-width: 540px) {
+    .site-menu {
+        top: 4rem;
+        right: 1rem;
+        left: 1rem;
+        min-width: 0;
+    }
+}

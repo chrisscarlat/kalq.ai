@@ -1,0 +1,42 @@
+/* Impressum and Datenschutz */
+.legal {
+    background: $light;
+    min-height: 100vh;
+    padding: 12rem 0 8rem;
+
+    #container {
+        max-width: 960px;
+    }
+
+    h2 {
+        margin-bottom: 1rem;
+    }
+
+    .legal_lead {
+        opacity: 0.5;
+    }
+
+    .legal_block {
+        margin-top: 3rem;
+
+        h5 {
+            margin-bottom: 0.75rem;
+        }
+
+        p {
+            font-size: 1.15rem;
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+    }
+}
+
+@media (max-width: 540px) {
+    .legal {
+        padding: 8rem 0 4rem;
+    }
+}

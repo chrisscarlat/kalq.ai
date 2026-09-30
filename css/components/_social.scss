@@ -1,0 +1,139 @@
+.social {
+    background: $light;
+    @include verticalGap;
+
+    /* Marquee */
+    .marquee {
+        width: 100vw;
+        max-width: 100%;
+        height: 12rem;
+        overflow-x: hidden;
+        position: relative;
+
+        .track {
+            position: absolute;
+            white-space: nowrap;
+            will-change: transform;
+            animation: marquee 100s linear infinite;
+        }
+
+        @keyframes marquee {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(-50%);
+            }
+        }
+    }
+
+    /* Items */
+    .social_wrapper {
+        padding-top: 5rem;
+
+        .item {
+            display: block;
+            position: relative;
+            padding: 2rem 0;
+            border-bottom: 1px solid $grey2;
+            overflow: hidden;
+
+            #container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                z-index: 2;
+                position: relative;
+                transition: all 0.3s ease-in-out;
+
+                i {
+                    font-size: 2rem;
+                    transform: rotate(-45deg);
+                    transition: transform 0.3s ease-in-out;
+                }
+            }
+
+            .overlay {
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                background: $dark;
+                transform: scaleY(0);
+                transition: transform 0.3s ease-in-out;
+            }
+
+            &:hover {
+                color: $light;
+
+                #container {
+                    padding: 0 7rem;
+
+                    i {
+                        font-size: 2rem;
+                        transform: rotate(0deg);
+                    }
+                }
+
+                .overlay {
+                    transform: scaleY(1);
+                }
+            }
+
+            &:last-child {
+                border-bottom: none;
+            }
+        }
+    }
+}
+
+/* breakPoints */
+@media (max-width: 768px) {
+    .social {
+        .social_wrapper {
+            .item {
+                &:hover {
+                    #container {
+                        padding: 0 4rem;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 540px) {
+    .social {
+        .marquee {
+            height: 7rem;
+        }
+        .social_wrapper {
+            padding-top: 2rem;
+            .item {
+                padding: 1.5rem 0;
+                #container {
+                    i {
+                        font-size: 1.5rem;
+                    }
+                }
+                &:hover {
+                    #container {
+                        padding: 0 2rem;
+
+                        i {
+                            font-size: 1.5rem;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .social .marquee .track {
+        animation: none;
+    }
+}

@@ -1,0 +1,109 @@
+/* Smooth Scroller */
+.site-main.no_scroll {
+    height: 100vh;
+    overflow: hidden;
+    position: fixed;
+}
+
+/* Progress Bar */
+.progressBar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 4px;
+    background: #fff;
+    mix-blend-mode: difference;
+    z-index: 20;
+}
+
+/* Underline Link */
+.underLine_Link {
+    position: relative;
+    color: #fff;
+    mix-blend-mode: difference;
+    z-index: 10;
+    display: inline-block;
+
+    &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -5%;
+        background: #fff;
+        mix-blend-mode: difference;
+        width: 100%;
+        height: 2px;
+        transform: scale(0);
+        transition: all 1s cubic-bezier(0.075, 0.82, 0.165, 1);
+    }
+
+    &:hover {
+        &::before {
+            transform: scale(1);
+        }
+    }
+}
+
+/* button */
+.btn {
+    position: relative;
+    display: block;
+    border: 1.5px solid #fff;
+    width: fit-content;
+    color: #fff;
+    border-radius: 50px;
+    font-size: 1rem;
+    padding: 12px 24px;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+    mix-blend-mode: difference;
+
+    span {
+        z-index: 2;
+        mix-blend-mode: difference;
+        position: relative;
+        color: #fff;
+    }
+
+    &::before {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        bottom: -100%;
+        background: #fff;
+        z-index: 1;
+        border-radius: 100%;
+        transition: all 0.3s ease-in-out;
+    }
+
+    &:hover {
+        &::before {
+            bottom: 0%;
+            border-radius: 0;
+        }
+    }
+}
+
+/* Parallax Image */
+.parallax_img {
+    overflow: hidden;
+    position: relative;
+
+    img {
+        position: absolute;
+        top: -2%;
+        left: 0;
+        height: 120%;
+        width: 100%;
+        object-fit: cover;
+    }
+}
+
+@import "loader";
+@import "header";
+@import "menu";
+@import "social";
+@import "footer";

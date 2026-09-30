@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalq | Die Entscheidungsebene für Fertigungsteile</title>
+    <!-- Pages are German; hide translatable text until js/i18n.js has applied another stored language -->
+    <script>try { var l = localStorage.getItem("kalq-lang"); if (l && l !== "de") document.documentElement.classList.add("i18n-pending"); } catch (e) { }</script>
+    <meta name="description" content="Kalq macht aus der Geometrie eines Teils eine technische Wahrheit und zwei getrennte kommerzielle Engines, für Einkäufer und Lieferanten von Fertigungsteilen.">
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="./assets/favicon.png" type="image/png">
+    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+    <link rel="preload" href="./fonts/ClashGrotesk-Light.woff2" as="font" type="font/woff2" crossorigin>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body data-barba="wrapper">
+    <!-- Progress Bar -->
+    <div class="progressBar"></div>
+
+    <!-- Loader -->
+    <div class="loader"></div>
+
+    <!-- Header (outside the Barba container, persists across transitions) -->
+    <header class="site-header">
+        <a href="index.html" class="site-logo" aria-label="Kalq Startseite" data-i18n-aria="aria.home">
+            <svg class="site-logo__mark" viewBox="0 0 174 174" fill="none" stroke="currentColor" stroke-width="7.38" aria-hidden="true"><line data-ray="e" x1="101.81" y1="86.99" x2="173.98" y2="86.99"/><line data-ray="w" x1="72.16" y1="87.01" x2="0" y2="87.01"/><line data-ray="s" x1="87.01" y1="101.84" x2="87.01" y2="174"/><line data-ray="n" x1="87.01" y1="72.16" x2="87.01" y2="0"/><line data-ray="se" x1="84.26" y1="84.26" x2="135.29" y2="135.29"/><line data-ray="ne" x1="99.04" y1="75.62" x2="132.83" y2="41.82"/><line data-ray="sw" x1="74.64" y1="99.7" x2="40.85" y2="133.49"/><line data-ray="nw" x1="74.62" y1="74.31" x2="40.83" y2="40.51"/></svg>
+            <span class="site-logo__word"><span><svg viewBox="56 0 2490 690" fill="currentColor" aria-hidden="true"><path d="M164 680H56V10H164V296H319L495 10H618L410 342L617 680H493L321 400H164ZM772 680H659L920 10H1075L1336 680H1219L1151 506H840ZM948 232 878 409H1113L1043 232L1000 108H992ZM1897 680H1432V10H1540V583H1897ZM2234 690Q2091 690 2006 596Q1921 502 1921 345Q1921 188 2006 94Q2091 0 2234 0Q2376 0 2461 94Q2546 188 2546 345Q2546 502 2461 596Q2376 690 2234 690ZM2082.5 530.5Q2129 586 2234 586Q2339 586 2385 530.5Q2431 475 2431 345Q2431 215 2385 159.5Q2339 104 2234 104Q2129 104 2082.5 159.5Q2036 215 2036 345Q2036 475 2082.5 530.5Z"/><path d="M2270.3 330.7 L2546.0 606.5 L2546.0 680.0 L2472.5 680.0 L2196.7 404.3Z"/></svg></span></span>
+        </a>
+        <div class="site-header__right">
+            <div class="lang" data-lang-switcher role="group" aria-label="Sprache" data-i18n-aria="aria.language">
+                <button type="button" class="lang__item" data-lang="en" lang="en" aria-label="English" aria-pressed="false">
+                    <span class="lang__inner"><span class="lang__short"><span>E</span></span><span class="lang__full"><span>ENGLISH</span></span></span>
+                </button>
+                <button type="button" class="lang__item" data-lang="de" lang="de" aria-label="Deutsch" aria-pressed="false">
+                    <span class="lang__inner"><span class="lang__short"><span>D</span></span><span class="lang__full"><span>DEUTSCH</span></span></span>
+                </button>
+                <button type="button" class="lang__item" data-lang="fr" lang="fr" aria-label="Français" aria-pressed="false">
+                    <span class="lang__inner"><span class="lang__short"><span>F</span></span><span class="lang__full"><span>FRANÇAIS</span></span></span>
+                </button>
+                <button type="button" class="lang__item" data-lang="es" lang="es" aria-label="Español" aria-pressed="false">
+                    <span class="lang__inner"><span class="lang__short"><span>S</span></span><span class="lang__full"><span>ESPAÑOL</span></span></span>
+                </button>
+                <button type="button" class="lang__item" data-lang="it" lang="it" aria-label="Italiano" aria-pressed="false">
+                    <span class="lang__inner"><span class="lang__short"><span>I</span></span><span class="lang__full"><span>ITALIANO</span></span></span>
+                </button>
+                <button type="button" class="lang__item" data-lang="pl" lang="pl" aria-label="Polski" aria-pressed="false">
+                    <span class="lang__inner"><span class="lang__short"><span>P</span></span><span class="lang__full"><span>POLSKI</span></span></span>
+                </button>
+            </div>
+            <button type="button" class="site-menu-toggle" aria-expanded="false" aria-controls="site-menu" aria-label="Open menu">
+                <span class="dots" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Menu dropdown (not a nav, not inside the blended header) -->
+    <div class="site-menu" id="site-menu" aria-label="Hauptmenü" data-i18n-aria="aria.menu">
+        <a href="index.html" data-i18n="nav.home">Start</a>
+        <a href="platform.html" data-i18n="nav.platform">Plattform</a>
+        <a href="company.html" data-i18n="nav.company">Unternehmen</a>
+    </div>
+
+    <!-- Image for platform hover list -->
+    <div id="fixed-img"></div>
+
+    <!---------- Content ---------->
+    <div id="site-main">
+        <div class="scrollbar-container" data-scrollbar style="overflow: hidden; height: 100vh;">
+            <div id="main" data-barba="container" data-page="home">
+                <!-- Hero -->
+                <section class="header">
+                    <video class="hero_video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+                        <source src="assets/video-hero-6mb-low.mp4" type="video/mp4">
+                    </video>
+                    <div class="hero_overlay"></div>
+                    <div class="hero_content">
+                        <h1 class="hero_title"><svg viewBox="56 0 2490 690" fill="currentColor" role="img" aria-label="KALQ"><path d="M164 680H56V10H164V296H319L495 10H618L410 342L617 680H493L321 400H164ZM772 680H659L920 10H1075L1336 680H1219L1151 506H840ZM948 232 878 409H1113L1043 232L1000 108H992ZM1897 680H1432V10H1540V583H1897ZM2234 690Q2091 690 2006 596Q1921 502 1921 345Q1921 188 2006 94Q2091 0 2234 0Q2376 0 2461 94Q2546 188 2546 345Q2546 502 2461 596Q2376 690 2234 690ZM2082.5 530.5Q2129 586 2234 586Q2339 586 2385 530.5Q2431 475 2431 345Q2431 215 2385 159.5Q2339 104 2234 104Q2129 104 2082.5 159.5Q2036 215 2036 345Q2036 475 2082.5 530.5Z"/><path d="M2270.3 330.7 L2546.0 606.5 L2546.0 680.0 L2472.5 680.0 L2196.7 404.3Z"/></svg></h1>
+                        <p class="hero_slogan">
+                            <span data-i18n="hero.line1">Ein technischer Kern.</span> <br class="mobile_br"><span data-i18n="hero.line2">Zwei kommerzielle Engines.</span><br>
+                            <span data-i18n="hero.line3">Bessere industrielle Entscheidungen.</span>
+                        </p>
+                    </div>
+                    <div class="block"></div>
+                </section>
+
+                <!-- About -->
+                <section class="about">
+                    <div id="container">
+                        <h5 data-i18n="home.about">Kalq ist die Entscheidungsebene für Fertigungsteile. Aus einer STEP-Datei und einer Zeichnung entsteht eine technische Wahrheit über ein Teil. Diese Wahrheit speist zwei getrennte kommerzielle Engines: eine für die Einkäufer, die das Teil beschaffen, eine für die Lieferanten, die es fertigen.</h5>
+                        <div class="numbering">
+                            <div>
+                                <h2>2</h2>
+                                <p data-i18n="home.count1">Kommerzielle Engines</p>
+                            </div>
+                            <div>
+                                <h2>3</h2>
+                                <p data-i18n="home.count2">Preiswahrheiten, nie vermischt</p>
+                            </div>
+                            <div>
+                                <h2>8</h2>
+                                <p data-i18n="home.count3">Plattformmodule</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Platform -->
+                <section class="expertise">
+                    <div id="container">
+                        <div class="title_heading">
+                            <h2 data-i18n="nav.platform">Plattform</h2>
+                            <a href="platform.html" class="btn">
+                                <span data-i18n="home.platformCta">Plattform entdecken</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- TODO: replace placeholder hover images -->
+                    <div class="expertise_wrapper">
+                        <div class="elem" data-image="https://images.unsplash.com/photo-1483058712412-4245e9b90334?q=80&w=2070&auto=format&fit=crop">
+                            <div class="overlay"></div>
+                            <div class="title">
+                                <p>01</p>
+                                <h4 data-i18n="module.shouldCost">Soll-Kosten</h4>
+                            </div>
+                        </div>
+                        <div class="elem" data-image="https://plus.unsplash.com/premium_photo-1661914978519-52a11fe159a7?q=80&w=1935&auto=format&fit=crop">
+                            <div class="overlay"></div>
+                            <div class="title">
+                                <p>02</p>
+                                <h4 data-i18n="module.supplierFit">Lieferanten-Fit</h4>
+                            </div>
+                        </div>
+                        <div class="elem" data-image="https://images.unsplash.com/photo-1579412690850-bd41cd0af397?q=80&w=1965&auto=format&fit=crop">
+                            <div class="overlay"></div>
+                            <div class="title">
+                                <p>03</p>
+                                <h4 data-i18n="module.rfq">Anfrage &amp; Vergabe</h4>
+                            </div>
+                        </div>
+                        <div class="elem" data-image="https://images.unsplash.com/photo-1641862039942-5815d8f74938?q=80&w=2070&auto=format&fit=crop">
+                            <div class="overlay"></div>
+                            <div class="title">
+                                <p>04</p>
+                                <h4 data-i18n="module.machine">Maschinenintelligenz</h4>
+                            </div>
+                        </div>
+                        <div class="elem" data-image="https://images.unsplash.com/photo-1476365518243-f738bf58443d?q=80&w=1887&auto=format&fit=crop">
+                            <div class="overlay"></div>
+                            <div class="title">
+                                <p>05</p>
+                                <h4 data-i18n="module.mfgCost">Fertigungskosten</h4>
+                            </div>
+                        </div>
+                        <div class="elem" data-image="https://images.unsplash.com/photo-1526413232644-8a40f03cc03b?q=80&w=1887&auto=format&fit=crop">
+                            <div class="overlay"></div>
+                            <div class="title">
+                                <p>06</p>
+                                <h4 data-i18n="module.quote">Preis &amp; Angebot</h4>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Our approach -->
+                <section class="Belief">
+                    <div id="container">
+                        <h2 data-i18n="home.approach">Unser Ansatz</h2>
+                        <div class="borderSeprator"></div>
+                        <div>
+                            <h5 data-i18n="home.approach1">Jedes Fertigungsteil wird zweimal kalkuliert. Der Einkäufer schätzt, was es kosten sollte. Der Lieferant ermittelt, was die Fertigung kosten wird. Beide gehen von derselben Zeichnung aus, und beide bauen dasselbe technische Verständnis von Grund auf neu auf, von Hand und unter Zeitdruck.</h5>
+                            <h5 data-i18n="home.approach2">Kalq erledigt diese Arbeit einmal. Es liest die Geometrie, leitet Features und Prozessrouten ab und ordnet sie realen Maschinen und deren Wirtschaftlichkeit zu. Einkäufer und Lieferanten teilen die technische Wahrheit. Ihre kommerziellen Daten bleiben voneinander abgeschottet. Verglichen, nie vermischt.</h5>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Social Section -->
+                <section class="social">
+                    <!-- marquee -->
+                    <div class="marquee" aria-hidden="true">
+                        <div class="track">
+                            <h2 class="content fontLarge" data-i18n-marquee="social.marquee">&nbsp;Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen ·&nbsp;</h2>
+                        </div>
+                    </div>
+                    <div id="container">
+                        <p data-i18n="social.label">Social Media und Kontakt</p>
+                    </div>
+                    <div class="social_wrapper">
+                        <a class="item" href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener">
+                            <div class="overlay"></div>
+                            <div id="container">
+                                <h4>LinkedIn</h4>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </div>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- Footer -->
+                <footer>
+                    <div id="container">
+                        <div class="footer_header">
+                            <div class="footer_heading">
+                                <h2 data-i18n="footer.heading1">Der Beweis</h2>
+                                <h2 data-i18n="footer.heading2">am echten Teil</h2>
+                            </div>
+                            <p class="footer_sub" data-i18n="footer.sub">Wir starten mit CNC-Drehteilen in Deutschland. Wenn Sie solche Teile einkaufen oder fertigen, bewerben Sie sich für das Pilotprojekt.</p>
+                            <div class="footer_btns_wrapper">
+                                <a href="mailto:office@kalq.ai" class="btn">
+                                    <span>office@kalq.ai</span>
+                                </a>
+                                <a href="mailto:office@kalq.ai?subject=Kalq%20pilot" class="btn">
+                                    <span data-i18n="footer.pilot">Für das Pilotprojekt bewerben</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="footer_bottom">
+                            <p>
+                                <span>© 2026 Kalq</span>
+                                <span aria-hidden="true">·</span>
+                                <a href="impressum.html" class="underLine_Link" data-i18n="footer.impressum">Impressum</a>
+                                <span aria-hidden="true">·</span>
+                                <a href="datenschutz.html" class="underLine_Link" data-i18n="footer.privacy">Datenschutz</a>
+                            </p>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <!---------- SCRIPTS ---------->
+    <!-- BARBA -->
+    <script src="https://unpkg.com/@barba/core"></script>
+    <!-- JQUERY -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/smooth-scrollbar/8.7.2/smooth-scrollbar.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <!-- CUSTOM -->
+    <script src="js/main.js" type="module" defer></script>
+</body>
+
+</html>

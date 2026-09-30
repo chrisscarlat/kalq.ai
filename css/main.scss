@@ -1,0 +1,36 @@
+$light: #fff;
+$dark: #101010;
+$grey1: #333333;
+$grey2: #d9d9d9;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body,
+html {
+    height: 100%;
+    width: 100%;
+    overscroll-behavior: none;
+}
+
+body {
+    background: $light;
+    color: $dark;
+    font-family: "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+// Small devices
+@mixin mobile {
+    @media (max-width: 540px) {
+        @content;
+    }
+}
+
+@import "utilities/utilities";
+@import "components/components";
+@import "pages/pages";

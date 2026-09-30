@@ -1,0 +1,327 @@
+{
+    "_note": "German is the default (pages are generated in German). English must match the template text in tools/build_pages.py. Languages without an entry fall back to English.",
+    "meta.description": {
+        "en": "Kalq turns a part's geometry into one technical truth and two separate commercial engines, for buyers and suppliers of manufactured parts.",
+        "de": "Kalq macht aus der Geometrie eines Teils eine technische Wahrheit und zwei getrennte kommerzielle Engines, für Einkäufer und Lieferanten von Fertigungsteilen."
+    },
+    "title.home": {
+        "en": "Kalq | The decision layer for manufactured parts",
+        "de": "Kalq | Die Entscheidungsebene für Fertigungsteile"
+    },
+    "title.platform": {
+        "en": "Kalq | Platform",
+        "de": "Kalq | Plattform"
+    },
+    "title.company": {
+        "en": "Kalq | Company",
+        "de": "Kalq | Unternehmen"
+    },
+    "title.impressum": {
+        "en": "Kalq | Legal notice",
+        "de": "Kalq | Impressum"
+    },
+    "title.datenschutz": {
+        "en": "Kalq | Privacy policy",
+        "de": "Kalq | Datenschutz"
+    },
+    "aria.home": {
+        "en": "Kalq home",
+        "de": "Kalq Startseite"
+    },
+    "aria.language": {
+        "en": "Language",
+        "de": "Sprache"
+    },
+    "aria.menu": {
+        "en": "Main menu",
+        "de": "Hauptmenü"
+    },
+    "aria.menuOpen": {
+        "en": "Open menu",
+        "de": "Menü öffnen"
+    },
+    "aria.menuClose": {
+        "en": "Close menu",
+        "de": "Menü schließen"
+    },
+    "nav.home": {
+        "en": "Home",
+        "de": "Start"
+    },
+    "nav.platform": {
+        "en": "Platform",
+        "de": "Plattform"
+    },
+    "nav.company": {
+        "en": "Company",
+        "de": "Unternehmen"
+    },
+    "social.marquee": {
+        "en": "Follow Kalq ·",
+        "de": "Kalq folgen ·"
+    },
+    "social.label": {
+        "en": "Social Media and Contacts",
+        "de": "Social Media und Kontakt"
+    },
+    "footer.heading1": {
+        "en": "Prove it on",
+        "de": "Der Beweis"
+    },
+    "footer.heading2": {
+        "en": "real parts",
+        "de": "am echten Teil"
+    },
+    "footer.sub": {
+        "en": "We are starting with CNC turned parts in Germany. If you buy or make them, apply for the pilot.",
+        "de": "Wir starten mit CNC-Drehteilen in Deutschland. Wenn Sie solche Teile einkaufen oder fertigen, bewerben Sie sich für das Pilotprojekt."
+    },
+    "footer.pilot": {
+        "en": "Apply for the pilot",
+        "de": "Für das Pilotprojekt bewerben"
+    },
+    "home.about": {
+        "en": "Kalq is the decision layer for manufactured parts. From a STEP file and a drawing, it builds one technical truth about a part. That truth feeds two separate commercial engines: one for the buyers who source the part, one for the suppliers who make it.",
+        "de": "Kalq ist die Entscheidungsebene für Fertigungsteile. Aus einer STEP-Datei und einer Zeichnung entsteht eine technische Wahrheit über ein Teil. Diese Wahrheit speist zwei getrennte kommerzielle Engines: eine für die Einkäufer, die das Teil beschaffen, eine für die Lieferanten, die es fertigen."
+    },
+    "home.count1": {
+        "en": "Commercial engines",
+        "de": "Kommerzielle Engines"
+    },
+    "home.count2": {
+        "en": "Price truths, never mixed",
+        "de": "Preiswahrheiten, nie vermischt"
+    },
+    "home.count3": {
+        "en": "Platform modules",
+        "de": "Plattformmodule"
+    },
+    "home.platformCta": {
+        "en": "Explore the platform",
+        "de": "Plattform entdecken"
+    },
+    "home.approach": {
+        "en": "Our approach",
+        "de": "Unser Ansatz"
+    },
+    "home.approach1": {
+        "en": "Every manufactured part is priced twice. The buyer estimates what it should cost. The supplier works out what it will cost to make. Both start from the same drawing, and both rebuild the same technical understanding from scratch, by hand, under time pressure.",
+        "de": "Jedes Fertigungsteil wird zweimal kalkuliert. Der Einkäufer schätzt, was es kosten sollte. Der Lieferant ermittelt, was die Fertigung kosten wird. Beide gehen von derselben Zeichnung aus, und beide bauen dasselbe technische Verständnis von Grund auf neu auf, von Hand und unter Zeitdruck."
+    },
+    "home.approach2": {
+        "en": "Kalq does that work once. It reads the geometry, derives features and process routes, and matches them to real machines and their economics. Buyers and suppliers share the technical truth. Their commercial data stays sealed from each other. Compared, never mixed.",
+        "de": "Kalq erledigt diese Arbeit einmal. Es liest die Geometrie, leitet Features und Prozessrouten ab und ordnet sie realen Maschinen und deren Wirtschaftlichkeit zu. Einkäufer und Lieferanten teilen die technische Wahrheit. Ihre kommerziellen Daten bleiben voneinander abgeschottet. Verglichen, nie vermischt."
+    },
+    "platform.header": {
+        "en": "One technical core. Two commercial engines.",
+        "de": "Ein technischer Kern. Zwei kommerzielle Engines."
+    },
+    "platform.introTitle": {
+        "en": "From geometry to a decision you can defend.",
+        "de": "Von der Geometrie zu einer Entscheidung, die Sie vertreten können."
+    },
+    "platform.intro": {
+        "en": "A part enters as a STEP file and a drawing. Kalq turns it into features, process alternatives and a route on real machines. From there, two engines take over. One answers the buyer's questions. The other answers the supplier's.",
+        "de": "Ein Teil kommt als STEP-Datei und Zeichnung herein. Kalq macht daraus Features, Prozessalternativen und eine Route auf realen Maschinen. Ab dort übernehmen zwei Engines. Die eine beantwortet die Fragen des Einkäufers. Die andere die des Lieferanten."
+    },
+    "platform.buyer": {
+        "en": "· Buyer",
+        "de": "· Einkauf"
+    },
+    "platform.supplier": {
+        "en": "· Supplier",
+        "de": "· Lieferant"
+    },
+    "platform.shouldCost.lead": {
+        "en": "What the part should cost, built bottom up.",
+        "de": "Was das Teil kosten sollte, von Grund auf kalkuliert."
+    },
+    "platform.shouldCost.text": {
+        "en": "Cost from geometry, material, process route and machine economics, so negotiations start from a number you can explain.",
+        "de": "Kosten aus Geometrie, Werkstoff, Prozessroute und Maschinenwirtschaftlichkeit, damit Verhandlungen mit einer Zahl beginnen, die Sie erklären können."
+    },
+    "platform.supplierFit.lead": {
+        "en": "Which suppliers can actually make it.",
+        "de": "Welche Lieferanten es tatsächlich fertigen können."
+    },
+    "platform.supplierFit.text": {
+        "en": "Matching on real capabilities, machine parks and performance, not on catalogue categories.",
+        "de": "Abgleich nach realen Fähigkeiten, Maschinenparks und Leistung, nicht nach Katalogkategorien."
+    },
+    "platform.rfq.lead": {
+        "en": "Source, compare and award in one flow.",
+        "de": "Anfragen, vergleichen und vergeben in einem Ablauf."
+    },
+    "platform.rfq.text": {
+        "en": "Structured requests, comparable quotes and a documented decision, followed by realized savings.",
+        "de": "Strukturierte Anfragen, vergleichbare Angebote und eine dokumentierte Entscheidung, gefolgt von realisierten Einsparungen."
+    },
+    "platform.machine.lead": {
+        "en": "Your machine park as a capability and cost graph.",
+        "de": "Ihr Maschinenpark als Fähigkeits- und Kostengraph."
+    },
+    "platform.machine.text": {
+        "en": "Capability, performance, economics, operations and evidence per machine, kept current as you work.",
+        "de": "Fähigkeit, Leistung, Wirtschaftlichkeit, Betrieb und Nachweise je Maschine, aktuell gehalten, während Sie arbeiten."
+    },
+    "platform.mfgCost.lead": {
+        "en": "What it costs you to make it, on your machines.",
+        "de": "Was die Fertigung Sie kostet, auf Ihren Maschinen."
+    },
+    "platform.mfgCost.text": {
+        "en": "Routing and cost on your own shop floor, in minutes instead of hours.",
+        "de": "Arbeitsplan und Kosten in Ihrer eigenen Fertigung, in Minuten statt Stunden."
+    },
+    "platform.quote.lead": {
+        "en": "From cost to a quote you can win and still earn on.",
+        "de": "Von den Kosten zu einem Angebot, mit dem Sie gewinnen und trotzdem verdienen."
+    },
+    "platform.quote.text": {
+        "en": "Margin logic, pricing and quote output, with every result feeding back into better estimates.",
+        "de": "Margenlogik, Preisfindung und Angebotserstellung, wobei jedes Ergebnis in bessere Kalkulationen zurückfließt."
+    },
+    "company.header": {
+        "en": "One part truth. Two commercial engines. Better industrial decisions.",
+        "de": "Eine Wahrheit zum Teil. Zwei kommerzielle Engines. Bessere industrielle Entscheidungen."
+    },
+    "company.why": {
+        "en": "Why Kalq exists",
+        "de": "Warum es Kalq gibt"
+    },
+    "company.whyText": {
+        "en": "Buyers negotiate with an incomplete picture of cost. Suppliers calculate under pressure with knowledge that lives in a few heads. Both lose time, margin and trust on work the other side has already done. Kalq exists to give both sides the same technical footing, while keeping their business apart.",
+        "de": "Einkäufer verhandeln mit einem unvollständigen Bild der Kosten. Lieferanten kalkulieren unter Druck, mit Wissen, das in wenigen Köpfen steckt. Beide verlieren Zeit, Marge und Vertrauen bei Arbeit, die die andere Seite schon erledigt hat. Kalq gibt beiden Seiten dieselbe technische Grundlage und hält ihre Geschäfte dennoch getrennt."
+    },
+    "company.shared": {
+        "en": "Shared semantics, isolated economics",
+        "de": "Gemeinsame Semantik, getrennte Ökonomie"
+    },
+    "company.shared1": {
+        "en": "Buyers and suppliers use the same understanding of a part. Nothing else crosses over. Each tenant's prices, margins and machine data stay in their own space, used only for the purpose they were given for.",
+        "de": "Einkäufer und Lieferanten nutzen dasselbe Verständnis eines Teils. Sonst wird nichts geteilt. Preise, Margen und Maschinendaten jedes Mandanten bleiben in seinem eigenen Bereich und werden nur für den Zweck genutzt, für den sie bereitgestellt wurden."
+    },
+    "company.shared2": {
+        "en": "Data is hosted in the EU. Every automated result can be reviewed and overruled by a person. And Kalq stays neutral: it does not sell parts, and it does not take a side in the deal.",
+        "de": "Die Daten werden in der EU gehostet. Jedes automatisierte Ergebnis kann von einem Menschen geprüft und übersteuert werden. Und Kalq bleibt neutral: Kalq verkauft keine Teile und ergreift im Geschäft keine Partei."
+    },
+    "company.prices": {
+        "en": "Three prices, kept apart",
+        "de": "Drei Preise, klar getrennt"
+    },
+    "company.pricesText": {
+        "en": "Should Cost is what a part should cost. Quote Cost is what it costs a specific supplier to make. Market Price is what the market actually pays. Kalq shows all three side by side and never blends them into one number, because each answers a different question.",
+        "de": "Soll-Kosten sind, was ein Teil kosten sollte. Angebotskosten sind, was die Fertigung einen bestimmten Lieferanten kostet. Der Marktpreis ist, was der Markt tatsächlich zahlt. Kalq zeigt alle drei nebeneinander und verschmilzt sie nie zu einer Zahl, denn jeder beantwortet eine andere Frage."
+    },
+    "hero.line1": {
+        "en": "One technical core.",
+        "de": "Ein technischer Kern."
+    },
+    "hero.line2": {
+        "en": "Two commercial engines.",
+        "de": "Zwei kommerzielle Engines."
+    },
+    "hero.line3": {
+        "en": "Better industrial decisions.",
+        "de": "Bessere industrielle Entscheidungen."
+    },
+    "module.shouldCost": {
+        "en": "Should Cost",
+        "de": "Soll-Kosten"
+    },
+    "module.supplierFit": {
+        "en": "Supplier Fit",
+        "de": "Lieferanten-Fit"
+    },
+    "module.rfq": {
+        "en": "RFQ & Award",
+        "de": "Anfrage & Vergabe"
+    },
+    "module.machine": {
+        "en": "Machine Intelligence",
+        "de": "Maschinenintelligenz"
+    },
+    "module.mfgCost": {
+        "en": "Manufacturing Cost",
+        "de": "Fertigungskosten"
+    },
+    "module.quote": {
+        "en": "Price & Quote",
+        "de": "Preis & Angebot"
+    },
+    "footer.impressum": {
+        "en": "Legal notice",
+        "de": "Impressum"
+    },
+    "footer.privacy": {
+        "en": "Privacy",
+        "de": "Datenschutz"
+    },
+    "legal.lead": {
+        "en": "Information pursuant to § 5 DDG",
+        "de": "Angaben gemäß § 5 DDG"
+    },
+    "legal.provider": {
+        "en": "Provider",
+        "de": "Anbieter"
+    },
+    "legal.company": {
+        "en": "[TODO: Company name]",
+        "de": "[TODO: Firmenname]"
+    },
+    "legal.street": {
+        "en": "[TODO: Street and number]",
+        "de": "[TODO: Straße und Hausnummer]"
+    },
+    "legal.city": {
+        "en": "[TODO: Postcode and city]",
+        "de": "[TODO: PLZ und Ort]"
+    },
+    "legal.country": {
+        "en": "[TODO: Country]",
+        "de": "[TODO: Land]"
+    },
+    "legal.representedBy": {
+        "en": "Represented by",
+        "de": "Vertreten durch"
+    },
+    "legal.director": {
+        "en": "[TODO: Managing director]",
+        "de": "[TODO: Geschäftsführung]"
+    },
+    "legal.contact": {
+        "en": "Contact",
+        "de": "Kontakt"
+    },
+    "legal.email": {
+        "en": "Email:",
+        "de": "E-Mail:"
+    },
+    "legal.register": {
+        "en": "Register entry",
+        "de": "Registereintrag"
+    },
+    "legal.court": {
+        "en": "Register court: [TODO]",
+        "de": "Registergericht: [TODO]"
+    },
+    "legal.number": {
+        "en": "Register number: [TODO]",
+        "de": "Registernummer: [TODO]"
+    },
+    "legal.vat": {
+        "en": "VAT ID",
+        "de": "Umsatzsteuer-ID"
+    },
+    "legal.vatText": {
+        "en": "VAT identification number pursuant to § 27a of the German VAT Act: [TODO]",
+        "de": "Umsatzsteuer-Identifikationsnummer gemäß § 27a Umsatzsteuergesetz: [TODO]"
+    },
+    "privacy.title": {
+        "en": "Privacy policy",
+        "de": "Datenschutzerklärung"
+    },
+    "privacy.text": {
+        "en": "[TODO: insert privacy policy]",
+        "de": "[TODO: Datenschutztext einfügen]"
+    }
+}

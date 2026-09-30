@@ -1,0 +1,80 @@
+.about_goals {
+    @include verticalGap;
+
+    #container {
+        h5 {
+            max-width: 960px;
+            width: 100%;
+        }
+
+        .img_wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 8rem;
+            gap: 5rem;
+
+            .parallax_img {
+                height: 60vh;
+                width: 25vw;
+                border-radius: 30px;
+
+                &:nth-child(2) {
+                    margin-top: 8rem;
+                }
+            }
+        }
+    }
+}
+
+/* Breakpoints */
+@media (max-width: 1040px) {
+    .about_goals {
+        #container {
+            .img_wrapper {
+                gap: 2rem;
+
+                .parallax_img {
+                    width: 35vw;
+                    max-height: 500px;
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 820px) {
+    .about_goals {
+        #container {
+            .img_wrapper {
+                gap: 2rem;
+
+                .parallax_img {
+                    width: 40vw;
+                    max-height: 400px;
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 540px) {
+    .about_goals {
+        #container {
+            .img_wrapper {
+                gap: 1rem;
+                flex-direction: column;
+                margin-top: 5rem;
+
+                .parallax_img {
+                    width: 100%;
+                    max-height: 400px;
+                    border-radius: 20px;
+
+                    &:nth-child(2) {
+                        margin-top: 0;
+                    }
+                }
+            }
+        }
+    }
+}

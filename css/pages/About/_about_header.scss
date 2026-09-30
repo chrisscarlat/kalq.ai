@@ -1,0 +1,31 @@
+.about_header {
+    height: 100vh;
+    background: $light;
+    position: relative;
+
+    #container {
+        display: flex;
+        align-items: center;
+
+        h2 {
+            max-width: 960px;
+        }
+    }
+}
+
+// Header image
+.about_header_img {
+    .parallax_img {
+        height: 100vh;
+        overflow: hidden;
+    }
+}
+
+/* Breakpoints */
+@media (max-width: 1040px) {
+    .about_header_img {
+        .parallax_img {
+            height: 80vh;
+        }
+    }
+}

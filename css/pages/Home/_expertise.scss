@@ -1,0 +1,96 @@
+.expertise {
+    background: $light;
+    @include verticalGap;
+
+    .expertise_wrapper {
+        padding-top: 5rem;
+
+        .elem {
+            position: relative;
+            height: 150px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0 4rem;
+            border-bottom: 1px solid $grey2;
+            overflow: hidden;
+            cursor: pointer;
+
+            .title {
+                display: flex;
+                gap: 10px;
+                z-index: 2;
+                transition: color 0.3s ease-in-out;
+            }
+
+            .overlay {
+                width: 100%;
+                height: 100%;
+                background: $dark;
+                position: absolute;
+                left: 0;
+                top: -100%;
+                transition: all 0.3s ease;
+            }
+
+            &:hover {
+                .overlay {
+                    top: 0;
+                }
+
+                color: $light;
+            }
+
+            &:last-child {
+                border: none;
+            }
+        }
+    }
+}
+
+//============= Hover image
+#fixed-img {
+    height: 29vw;
+    width: 23vw;
+    background-size: cover;
+    background-position: center;
+    border-radius: 20px;
+    position: fixed;
+    z-index: 10;
+    left: 55%;
+    top: 20%;
+    display: block;
+    pointer-events: none;
+    opacity: 0;
+
+    &.visible {
+        opacity: 1;
+    }
+}
+
+/* BreakPoints */
+@media (max-width: 768px) {
+    #fixed-img {
+        display: none;
+    }
+
+    .expertise {
+        .expertise_wrapper {
+            .elem {
+                height: 120px;
+                padding: 0 2rem;
+            }
+        }
+    }
+}
+
+@media (max-width: 540px) {
+    .expertise {
+        .expertise_wrapper {
+            .elem {
+                height: 120px;
+                padding: 0 1rem;
+            }
+        }
+    }
+}

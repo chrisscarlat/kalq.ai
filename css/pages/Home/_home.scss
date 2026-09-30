@@ -1,0 +1,18 @@
+.title_heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+@media (max-width: 540px) {
+    .title_heading {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2rem;
+    }
+}
+
+@import "header";
+@import "about";
+@import "expertise";
+@import "belief";

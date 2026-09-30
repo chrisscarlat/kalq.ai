@@ -1,0 +1,49 @@
+@import "Home/home";
+@import "About/about";
+@import "Expertise/expertise";
+@import "Legal/legal";
+
+/* Mousemove Parallax Block For Header */
+.block {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg); // parallel to the Q tail and the mark's centre diagonal
+    width: 40px;
+    height: 100vh;
+    background: #fff;
+    mix-blend-mode: difference;
+}
+
+/* Animated Numbering */
+.numbering {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 5rem;
+    margin-top: 5rem;
+
+    p {
+        opacity: 0.3;
+    }
+}
+
+/* Border Seprator */
+.borderSeprator {
+    height: 1px;
+    width: 100%;
+    background: $grey2;
+    margin: 3rem 0;
+}
+
+/* BreakPoints */
+@media (max-width: 540px) {
+    .block {
+        width: 25px;
+        height: 60vh;
+    }
+
+    .borderSeprator {
+        margin: 2rem 0;
+    }
+}

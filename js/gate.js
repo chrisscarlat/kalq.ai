@@ -12,6 +12,8 @@ const TEXT = {
         rate: "Zu viele Versuche. Bitte warten Sie einige Minuten.",
         domain: "Dieser Login ist für Kolleginnen und Kollegen von Certil und Neurawork. Nutzen Sie den Zugangscode oder bitten Sie um eine Einladung.",
         failed: "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+        impressum: "Impressum",
+        privacy: "Datenschutz",
     },
     en: {
         label: "Access code",
@@ -22,6 +24,8 @@ const TEXT = {
         rate: "Too many attempts. Please wait a few minutes.",
         domain: "This login is for Certil and Neurawork colleagues. Use the access code or ask for an invite.",
         failed: "Something went wrong. Please try again.",
+        impressum: "Legal notice",
+        privacy: "Privacy",
     },
 };
 

@@ -199,6 +199,29 @@ body {
     }
 }
 
+.gate {
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.gate_footer {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    opacity: 0.55;
+
+    a {
+        color: #fff;
+        text-decoration: none;
+
+        &:hover,
+        &:focus-visible {
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+    }
+}
+
 @keyframes gate-shake {
     0%, 100% { transform: translateX(0); }
     20% { transform: translateX(-8px); }

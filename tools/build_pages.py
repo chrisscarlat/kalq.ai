@@ -474,40 +474,40 @@ write("company.html", company)
 impressum = head("Kalq | Legal notice") + '''                <!-- Impressum. TODO: fill in company data -->
                 <section class="legal">
                     <div id="container">
-                        <h2>Legal notice</h2>
-                        <p class="legal_lead">Information pursuant to § 5 DDG</p>
+                        <h2 data-kalq-key="impressum.header.title">Legal notice</h2>
+                        <p class="legal_lead" data-kalq-key="impressum.header.lead">Information pursuant to § 5 DDG</p>
 
                         <div class="legal_block">
-                            <h5>Provider</h5>
+                            <h5 data-kalq-key="impressum.provider.title">Provider</h5>
                             <p>
-                                <span>[TODO: Company name]</span><br>
-                                <span>[TODO: Street and number]</span><br>
-                                <span>[TODO: Postcode and city]</span><br>
-                                <span>[TODO: Country]</span>
+                                <span data-kalq-key="impressum.provider.company">[TODO: Company name]</span><br>
+                                <span data-kalq-key="impressum.provider.street">[TODO: Street and number]</span><br>
+                                <span data-kalq-key="impressum.provider.city">[TODO: Postcode and city]</span><br>
+                                <span data-kalq-key="impressum.provider.country">[TODO: Country]</span>
                             </p>
                         </div>
 
                         <div class="legal_block">
-                            <h5>Represented by</h5>
-                            <p>[TODO: Managing director]</p>
+                            <h5 data-kalq-key="impressum.representative.title">Represented by</h5>
+                            <p data-kalq-key="impressum.representative.name">[TODO: Managing director]</p>
                         </div>
 
                         <div class="legal_block">
-                            <h5>Contact</h5>
-                            <p><span>Email:</span> <a href="mailto:office@kalq.ai">office@kalq.ai</a></p>
+                            <h5 data-kalq-key="impressum.contact.title">Contact</h5>
+                            <p><span data-kalq-key="impressum.contact.label">Email:</span> <a href="mailto:office@kalq.ai" data-kalq-key="impressum.contact.email">office@kalq.ai</a></p>
                         </div>
 
                         <div class="legal_block">
-                            <h5>Register entry</h5>
+                            <h5 data-kalq-key="impressum.register.title">Register entry</h5>
                             <p>
-                                <span>Register court: [TODO]</span><br>
-                                <span>Register number: [TODO]</span>
+                                <span data-kalq-key="impressum.register.court">Register court: [TODO]</span><br>
+                                <span data-kalq-key="impressum.register.number">Register number: [TODO]</span>
                             </p>
                         </div>
 
                         <div class="legal_block">
-                            <h5>VAT ID</h5>
-                            <p>VAT identification number pursuant to § 27a of the German VAT Act: [TODO]</p>
+                            <h5 data-kalq-key="impressum.vat.title">VAT ID</h5>
+                            <p data-kalq-key="impressum.vat.text">VAT identification number pursuant to § 27a of the German VAT Act: [TODO]</p>
                         </div>
                     </div>
                 </section>
@@ -517,9 +517,9 @@ write("impressum.html", impressum)
 datenschutz = head("Kalq | Privacy policy") + '''                <!-- Datenschutz. TODO: insert privacy policy -->
                 <section class="legal">
                     <div id="container">
-                        <h2>Privacy policy</h2>
+                        <h2 data-kalq-key="datenschutz.header.title">Privacy policy</h2>
                         <div class="legal_block">
-                            <p>[TODO: insert privacy policy]</p>
+                            <p data-kalq-key="datenschutz.body.text">[TODO: insert privacy policy]</p>
                         </div>
                     </div>
                 </section>
@@ -572,6 +572,11 @@ gate_html = f"""<!DOCTYPE html>
                 </button>
             </div>
         </div>
+        <p class="gate_footer">
+            <a href="/impressum.html" data-gate-text="impressum">Impressum</a>
+            <span aria-hidden="true">·</span>
+            <a href="/datenschutz.html" data-gate-text="privacy">Datenschutz</a>
+        </p>
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -588,7 +593,12 @@ pages = "".join(open(f"{ROOT}/{n}", encoding="utf-8").read() for n in ["index.ht
 missing = [k for k in STRINGS if not k.startswith(SKIP) and f'data-i18n="{k}"' not in pages]
 assert not missing, f"untagged keys: {missing}"
 
-with open(f"{ROOT}/js/strings.js", "w", encoding="utf-8") as f:
-    f.write("// Generated by tools/build_pages.py from i18n/strings.json. Do not edit by hand.\n")
-    f.write("export const STRINGS = " + json.dumps(STRINGS, ensure_ascii=False, indent=4) + ";\n")
+# Copy used by the public legal pages goes to strings-public.js (served without the gate cookie),
+# everything else to strings.js, which stays behind the gate.
+legal = "".join(open(f"{ROOT}/{n}", encoding="utf-8").read() for n in ["impressum.html", "datenschutz.html"])
+public_keys = {k for k in STRINGS if f'"{k}"' in legal} | {"title.impressum", "title.datenschutz", "meta.description", "aria.menuOpen", "aria.menuClose"}
+for name, keys in (("strings-public.js", public_keys), ("strings.js", set(STRINGS) - public_keys)):
+    with open(f"{ROOT}/js/{name}", "w", encoding="utf-8") as f:
+        f.write("// Generated by tools/build_pages.py from i18n/strings.json. Do not edit by hand.\n")
+        f.write("export const STRINGS = " + json.dumps({k: STRINGS[k] for k in STRINGS if k in keys}, ensure_ascii=False, indent=4) + ";\n")
 print("ok")

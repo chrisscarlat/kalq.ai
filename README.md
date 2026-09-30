@@ -32,7 +32,7 @@ Hover and header images, Impressum data, Datenschutz text.
 
 ## Gate (temporary)
 
-Every page needs the signed `kalq_gate` cookie, otherwise `middleware.js` shows `gate.html`. Guests enter the access code (`/api/code`, they get an animal), editors log in with Google or LinkedIn (`/api/session`). Shared server code is in `lib/`. `vercel.json` and `robots.txt` keep the gated site out of search engines.
+Every page needs the signed `kalq_gate` cookie, otherwise `middleware.js` shows `gate.html`. Guests enter the access code (`/api/code`, they get an animal), editors log in with Google or LinkedIn (`/api/session`). Shared server code is in `lib/`. Impressum and Datenschutz are public (linked from the gate footer) together with the styles and scripts they need; their copy comes from `js/strings-public.js`, the rest of the site's copy stays in the gated `js/strings.js`. Gated requests get the gate with status 401. `vercel.json` and `robots.txt` keep the gated site out of search engines.
 
 - Local testing needs `npx vercel dev` (middleware and `/api` do not run under `python3 -m http.server`).
 - Gate styles: `npx sass --no-source-map css/gate.scss css/gate.css`

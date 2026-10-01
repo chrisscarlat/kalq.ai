@@ -114,8 +114,7 @@ FOOTER = '''
                     <div id="container">
                         <div class="footer_header">
                             <div class="footer_heading">
-                                <h2>Prove it on</h2>
-                                <h2>real parts</h2>
+                                <h2 data-i18n="footer.heading" data-kalq-key="site.footer.heading" data-kalq-format="lines">Prove it on<br>real parts</h2>
                             </div>
                             <p class="footer_sub">
                                 We are starting with CNC turned parts in Germany. If you buy or make them, apply for the
@@ -195,10 +194,19 @@ MODULES = [
 
 SKIP = ("title.", "meta.", "aria.", "social.marquee")
 
-def localize(html, page):
-    """Swap tagged English text for the default language."""
-    html = re.sub(r'(<(\w+)[^>]*\sdata-i18n="([^"]+)"[^>]*>)(.*?)(</\2>)',
-                  lambda m: m.group(1) + escape(tr(m.group(3)), quote=False) + m.group(5), html, flags=re.S)
+def to_html(text, fmt):
+    """Line blocks: one line per \\n. Paragraph blocks: paragraphs split by a blank line."""
+    if fmt == "paragraphs":
+        return "".join("<p>" + "<br>".join(escape(l, quote=False) for l in para.split("\n")) + "</p>" for para in text.split("\n\n"))
+    return "<br>".join(escape(l, quote=False) for l in text.split("\n"))
+
+def localize(html, page, lang=None):
+    """Swap tagged English text for the default language (formatted blocks become HTML)."""
+    def fill(m):
+        fmt = re.search(r'data-kalq-format="(\w+)"', m.group(1))
+        value = tr(m.group(3), lang or DEFAULT_LANG)
+        return m.group(1) + (to_html(value, fmt.group(1)) if fmt else escape(value, quote=False)) + m.group(5)
+    html = re.sub(r'(<(\w+)[^>]*\sdata-i18n="([^"]+)"[^>]*>)(.*?)(</\2>)', fill, html, flags=re.S)
     html = re.sub(r'(aria-label=")[^"]*(" data-i18n-aria="([^"]+)")', lambda m: m.group(1) + escape(tr(m.group(3))) + m.group(2), html)
     html = re.sub(r'(data-i18n-marquee="social.marquee">)[^<]*', lambda m: m.group(1) + "&nbsp;" + " ".join([escape(tr("social.marquee"), quote=False)] * 60) + "&nbsp;", html)
     html = re.sub(r"<title>[^<]*</title>", f"<title>{escape(tr('title.' + page), quote=False)}</title>", html)
@@ -227,15 +235,13 @@ MODULE_SLUGS = {"shouldCost": "should-cost", "supplierFit": "supplier-fit", "rfq
 FIXED_KEYS = {
     "nav.home": "site.menu.home", "nav.company": "site.menu.company",
     "social.label": "site.social.label",
-    "footer.heading1": "site.footer.heading1", "footer.heading2": "site.footer.heading2", "footer.sub": "site.footer.sub",
+    "footer.sub": "site.footer.sub",
     "footer.pilot": "site.footer.pilot", "footer.impressum": "site.footer.impressum", "footer.privacy": "site.footer.privacy",
-    "hero.line1": "home.hero.line1", "hero.line2": "home.hero.line2", "hero.line3": "home.hero.line3",
     "home.about": "home.about.text", "home.count1": "home.about.count1.label", "home.count2": "home.about.count2.label",
     "home.count3": "home.about.count3.label", "home.platformCta": "home.platform.cta", "home.approach": "home.approach.title",
-    "home.approach1": "home.approach.p1", "home.approach2": "home.approach.p2",
     "platform.header": "platform.header.title", "platform.introTitle": "platform.intro.title", "platform.intro": "platform.intro.text",
     "company.header": "company.header.title", "company.why": "company.why.title", "company.whyText": "company.why.text",
-    "company.shared": "company.shared.title", "company.shared1": "company.shared.p1", "company.shared2": "company.shared.p2",
+    "company.shared": "company.shared.title",
     "company.prices": "company.prices.title", "company.pricesText": "company.prices.text",
 }
 
@@ -290,10 +296,8 @@ home = head("Kalq | The decision layer for manufactured parts") + f'''          
                     <div class="hero_overlay"></div>
                     <div class="hero_content">
                         <h1 class="hero_title">{HERO_WORD}</h1>
-                        <p class="hero_slogan">
-                            <span>One technical core.</span> <br class="mobile_br"><span>Two commercial engines.</span><br>
-                            <span>Better industrial decisions.</span>
-                        </p>
+                        <!-- One block, one animated line per line break -->
+                        <p class="hero_slogan" data-i18n="hero.slogan" data-kalq-key="home.hero.slogan" data-kalq-format="lines">One technical core. Two commercial engines.<br>Better industrial decisions.</p>
                     </div>
                     <div class="block"></div>
                 </section>
@@ -346,17 +350,7 @@ home = head("Kalq | The decision layer for manufactured parts") + f'''          
                         <h2>Our approach</h2>
                         <div class="borderSeprator"></div>
                         <div>
-                            <h5>
-                                Every manufactured part is priced twice. The buyer estimates what it should cost. The
-                                supplier works out what it will cost to make. Both start from the same drawing, and both
-                                rebuild the same technical understanding from scratch, by hand, under time pressure.
-                            </h5>
-                            <h5>
-                                Kalq does that work once. It reads the geometry, derives features and process routes, and
-                                matches them to real machines and their economics. Buyers and suppliers share the
-                                technical truth. Their commercial data stays sealed from each other. Compared, never
-                                mixed.
-                            </h5>
+                            <div class="kalq-paras" data-i18n="home.approachText" data-kalq-key="home.approach.text" data-kalq-format="paragraphs"></div>
                         </div>
                     </div>
                 </section>
@@ -380,6 +374,7 @@ def card(i, m):
 
 platform = head("Kalq | Platform") + f'''                <!-- Header -->
                 <section class="expertise_header">
+                    <div class="hero_media" data-kalq-key="platform.hero.media" data-kalq-type="image"></div>
                     <div id="container">
                         <h2>
                             One technical core. Two commercial engines.
@@ -430,6 +425,7 @@ write("platform.html", platform)
 # ---------------- Company ----------------
 company = head("Kalq | Company") + '''                <!-- Header -->
                 <section class="about_header">
+                    <div class="hero_media" data-kalq-key="company.hero.media" data-kalq-type="image"></div>
                     <div id="container">
                         <h2>
                             One part truth. Two commercial engines. Better industrial decisions.
@@ -478,16 +474,7 @@ company = head("Kalq | Company") + '''                <!-- Header -->
                         <div class="borderSeprator"></div>
                         <div class="para">
                             <div>
-                                <h5>
-                                    Buyers and suppliers use the same understanding of a part. Nothing else crosses over.
-                                    Each tenant's prices, margins and machine data stay in their own space, used only for
-                                    the purpose they were given for.
-                                </h5>
-                                <h5>
-                                    Data is hosted in the EU. Every automated result can be reviewed and overruled by a
-                                    person. And Kalq stays neutral: it does not sell parts, and it does not take a side in
-                                    the deal.
-                                </h5>
+                                <div class="kalq-paras" data-i18n="company.sharedText" data-kalq-key="company.shared.text" data-kalq-format="paragraphs"></div>
                             </div>
                         </div>
 
@@ -534,12 +521,7 @@ impressum = head("Kalq | Legal notice") + '''                <!-- Impressum. TOD
 
                         <div class="legal_block">
                             <h5 data-kalq-key="impressum.provider.title">Provider</h5>
-                            <p>
-                                <span data-kalq-key="impressum.provider.company">[TODO: Company name]</span><br>
-                                <span data-kalq-key="impressum.provider.street">[TODO: Street and number]</span><br>
-                                <span data-kalq-key="impressum.provider.city">[TODO: Postcode and city]</span><br>
-                                <span data-kalq-key="impressum.provider.country">[TODO: Country]</span>
-                            </p>
+                            <p data-i18n="legal.address" data-kalq-key="impressum.provider.address" data-kalq-format="lines"></p>
                         </div>
 
                         <div class="legal_block">
@@ -554,10 +536,7 @@ impressum = head("Kalq | Legal notice") + '''                <!-- Impressum. TOD
 
                         <div class="legal_block">
                             <h5 data-kalq-key="impressum.register.title">Register entry</h5>
-                            <p>
-                                <span data-kalq-key="impressum.register.court">Register court: [TODO]</span><br>
-                                <span data-kalq-key="impressum.register.number">Register number: [TODO]</span>
-                            </p>
+                            <p data-i18n="legal.registerText" data-kalq-key="impressum.register.text" data-kalq-format="lines"></p>
                         </div>
 
                         <div class="legal_block">

@@ -44,14 +44,6 @@ export const STRINGS = {
         "en": "Company",
         "de": "Unternehmen"
     },
-    "footer.heading1": {
-        "en": "Prove it on",
-        "de": "Der Beweis"
-    },
-    "footer.heading2": {
-        "en": "real parts",
-        "de": "am echten Teil"
-    },
     "footer.sub": {
         "en": "We are starting with CNC turned parts in Germany. If you buy or make them, apply for the pilot.",
         "de": "Wir starten mit CNC-Drehteilen in Deutschland. Wenn Sie solche Teile einkaufen oder fertigen, bewerben Sie sich für das Pilotprojekt."
@@ -76,22 +68,6 @@ export const STRINGS = {
         "en": "Provider",
         "de": "Anbieter"
     },
-    "legal.company": {
-        "en": "[TODO: Company name]",
-        "de": "[TODO: Firmenname]"
-    },
-    "legal.street": {
-        "en": "[TODO: Street and number]",
-        "de": "[TODO: Straße und Hausnummer]"
-    },
-    "legal.city": {
-        "en": "[TODO: Postcode and city]",
-        "de": "[TODO: PLZ und Ort]"
-    },
-    "legal.country": {
-        "en": "[TODO: Country]",
-        "de": "[TODO: Land]"
-    },
     "legal.representedBy": {
         "en": "Represented by",
         "de": "Vertreten durch"
@@ -112,14 +88,6 @@ export const STRINGS = {
         "en": "Register entry",
         "de": "Registereintrag"
     },
-    "legal.court": {
-        "en": "Register court: [TODO]",
-        "de": "Registergericht: [TODO]"
-    },
-    "legal.number": {
-        "en": "Register number: [TODO]",
-        "de": "Registernummer: [TODO]"
-    },
     "legal.vat": {
         "en": "VAT ID",
         "de": "Umsatzsteuer-ID"
@@ -135,5 +103,17 @@ export const STRINGS = {
     "privacy.text": {
         "en": "[TODO: insert privacy policy]",
         "de": "[TODO: Datenschutztext einfügen]"
+    },
+    "footer.heading": {
+        "de": "Der Beweis\nam echten Teil",
+        "en": "Prove it on\nreal parts"
+    },
+    "legal.address": {
+        "de": "[TODO: Firmenname]\n[TODO: Straße und Hausnummer]\n[TODO: PLZ und Ort]\n[TODO: Land]",
+        "en": "[TODO: Company name]\n[TODO: Street and number]\n[TODO: Postcode and city]\n[TODO: Country]"
+    },
+    "legal.registerText": {
+        "de": "Registergericht: [TODO]\nRegisternummer: [TODO]",
+        "en": "Register court: [TODO]\nRegister number: [TODO]"
     }
 };

@@ -2,34 +2,13 @@
 // data-kalq-key blocks. Text goes through i18n.js (one version per language), media is applied here.
 // Keyed blocks stay hidden (html.kalq-loading) until this ran, at most TIMEOUT_MS.
 import { applyLanguage, currentLang, setEditedContent } from "./i18n.js";
+import { renderBlock, sanitize } from "./blocks.js";
 
 const TIMEOUT_MS = 1500;
 const store = new Map(); // key -> { type, de, en, media }
 
-// Only <br>, <em>, <strong> and <a href> survive, everything else is unwrapped to its text.
-// A <template> parses inertly, so nothing in the input runs or loads.
-const ALLOWED = new Set(["BR", "EM", "STRONG", "A"]);
-const SAFE_HREF = /^(https?:|mailto:|\/|#|[\w-]+\.html(#.*)?$)/i;
-
-export function sanitize(html) {
-    const template = document.createElement("template");
-    template.innerHTML = html;
-    const out = document.createDocumentFragment();
-    const walk = (node, parent) => node.childNodes.forEach((child) => {
-        if (child.nodeType === Node.TEXT_NODE) return parent.append(child.textContent);
-        if (child.nodeType !== Node.ELEMENT_NODE) return;
-        if (!ALLOWED.has(child.tagName)) return walk(child, parent);
-        const el = document.createElement(child.tagName.toLowerCase());
-        if (child.tagName === "A") {
-            const href = (child.getAttribute("href") || "").trim();
-            if (SAFE_HREF.test(href)) el.setAttribute("href", href);
-        }
-        walk(child, el);
-        parent.append(el);
-    });
-    walk(template.content, out);
-    return out;
-}
+// Sanitising and rendering live in blocks.js; sanitize stays importable from here
+export { sanitize };
 
 const textFor = (key, lang) => {
     const entry = store.get(key);
@@ -37,10 +16,58 @@ const textFor = (key, lang) => {
     return entry[lang] ?? null;
 };
 
-setEditedContent((key, lang) => {
-    const html = textFor(key, lang);
-    return html == null ? null : sanitize(html);
-});
+setEditedContent((key, lang) => textFor(key, lang));
+
+// Any media slot takes an image or a video: the file decides, the element is swapped when needed
+const VIDEO_URL = /\.(mp4|webm|mov|m4v)(\?|#|$)/i;
+export const isVideoUrl = (url) => VIDEO_URL.test(url || "");
+const SKIP_ATTRS = new Set(["src", "autoplay", "muted", "loop", "playsinline", "preload", "poster", "alt", "loading", "width", "height"]);
+
+function mediaNode(url, like) {
+    const video = isVideoUrl(url);
+    const node = document.createElement(video ? "video" : "img");
+    if (like) [...like.attributes].forEach((a) => { if (!SKIP_ATTRS.has(a.name)) node.setAttribute(a.name, a.value); });
+    if (video) {
+        node.muted = true;
+        node.loop = true;
+        node.playsInline = true;
+        node.autoplay = true;
+        ["muted", "loop", "playsinline", "autoplay"].forEach((a) => node.setAttribute(a, ""));
+        node.setAttribute("aria-hidden", "true");
+        node.src = url;
+        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) node.play?.()?.catch(() => { });
+    } else {
+        node.alt = "";
+        node.src = url;
+    }
+    return node;
+}
+
+const currentUrl = (node) => (node.tagName === "VIDEO" ? node.querySelector("source")?.getAttribute("src") || node.getAttribute("src") : node.getAttribute("src"));
+
+export function setMedia(el, url) {
+    // Hover rows on Home keep their image in data-image
+    if (el.hasAttribute("data-image")) { el.dataset.image = url; return; }
+    // Hero slots: a wrapper that holds the image or video, or nothing
+    if (el.classList.contains("hero_media")) {
+        const section = el.closest("section");
+        if (!url) { el.replaceChildren(); section?.classList.remove("has-media"); return; }
+        const old = el.firstElementChild;
+        if (!old || currentUrl(old) !== url) el.replaceChildren(mediaNode(url, old || Object.assign(document.createElement("i"), { className: "hero_media__el" })));
+        section?.classList.add("has-media");
+        return;
+    }
+    // <img> or <video> in the page: same kind updates, other kind replaces the element
+    if (!url || currentUrl(el) === url) return;
+    const wantVideo = isVideoUrl(url);
+    if (wantVideo === (el.tagName === "VIDEO")) {
+        const source = el.querySelector("source");
+        if (source) { source.setAttribute("src", url); el.load(); el.play?.()?.catch(() => { }); }
+        else el.setAttribute("src", url);
+    } else {
+        el.replaceWith(mediaNode(url, el));
+    }
+}
 
 // Blocks that are not translated: media, counter numbers, email addresses
 export function applyDirect(root) {
@@ -49,20 +76,12 @@ export function applyDirect(root) {
         if (!entry) return;
         const type = el.dataset.kalqType || "text";
 
-        if (type === "image" && entry.media) {
-            if (el.tagName === "IMG") { if (el.getAttribute("src") !== entry.media) el.setAttribute("src", entry.media); }
-            else el.dataset.image = entry.media; // hover rows keep their image in data-image
-        } else if (type === "video" && entry.media) {
-            const source = el.querySelector("source");
-            if (source && source.getAttribute("src") !== entry.media) {
-                source.setAttribute("src", entry.media);
-                el.load();
-                el.play?.()?.catch(() => { });
-            }
+        if ((type === "image" || type === "video") && "media" in entry) {
+            setMedia(el, entry.media);
         } else if (type === "text" && !el.hasAttribute("data-i18n") && !el.hasAttribute("data-i18n-marquee")) {
             const html = textFor(el.dataset.kalqKey, currentLang()) ?? entry.de ?? entry.en;
             if (html == null) return;
-            el.replaceChildren(sanitize(html));
+            renderBlock(el, html);
             // An edited email address also changes where the link goes
             const link = el.closest('a[href^="mailto:"]');
             if (link && /^[^\s@]+@[^\s@]+$/.test(el.textContent.trim())) {

@@ -244,11 +244,25 @@
     }
 }
 
-.kalq-replace {
+// Media controls in edit mode: top right of a slot, vertical centre right in a hero
+.kalq-media-tools {
     position: absolute;
     top: 1rem;
     right: 1rem;
     z-index: 6;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.4rem;
+
+    &.is-hero {
+        top: 50%;
+        right: 2rem;
+        transform: translateY(-50%);
+    }
+}
+
+.kalq-replace {
     padding: 0.55rem 1rem;
     border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 999px;
@@ -257,6 +271,7 @@
     backdrop-filter: blur(12px);
     color: #fff;
     font: 500 0.85rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+    white-space: nowrap;
     cursor: pointer;
 
     &:hover,
@@ -271,10 +286,20 @@
     }
 }
 
-// Hover rows on Home: their image is not visible, so the button sits on the row
-.elem .kalq-replace {
+.kalq-remove {
+    background: rgba(16, 16, 16, 0.45);
+}
+
+// Hover rows on Home: their image is not visible, so the controls sit on the row
+.elem .kalq-media-tools {
     top: 50%;
     transform: translateY(-50%);
+}
+
+@media (max-width: 540px) {
+    .kalq-media-tools.is-hero {
+        right: 1rem;
+    }
 }
 
 // Live update highlight in the author's colour

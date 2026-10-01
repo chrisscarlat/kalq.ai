@@ -2,23 +2,26 @@
 // Saves go straight to Supabase with the editor's own login (RLS: editors only, as themselves) and are live for
 // everyone at once: the page channel only says "this block changed", every browser then reloads it from the server.
 // While someone edits a block, the others see it locked (see setLock in collab.js).
-import { applyDirect, sanitize, setLocalContent } from "./content.js";
+import { applyDirect, setLocalContent } from "./content.js";
+import { editableHtml, renderBlock, serializeBlock } from "./blocks.js";
 import { applyLanguage, currentLang } from "./i18n.js";
 
 const MAX_BYTES = 50 * 1024 * 1024;
-const ACCEPT = { image: "image/jpeg,image/png,image/webp,image/avif,image/gif", video: "video/mp4,video/webm" };
+// Every slot takes an image or a video
+const ACCEPT = "image/jpeg,image/png,image/webp,image/avif,image/gif,video/mp4,video/webm";
+const HERO = ".header, .expertise_header, .about_header";
 
 const TEXT = {
     de: {
         edit: "Bearbeiten (E)", saved: "Gespeichert", failed: "Speichern fehlgeschlagen",
         locked: (n) => `${n} bearbeitet gerade`, relogin: "Bitte melden Sie sich erneut an, um zu bearbeiten.",
-        replace: "Ersetzen", uploading: "Wird hochgeladen", tooLarge: "Die Datei ist größer als 50 MB.",
+        replace: "Ersetzen", add: "Bild oder Video hinzufügen", remove: "Entfernen", uploading: "Wird hochgeladen", tooLarge: "Die Datei ist größer als 50 MB.",
         empty: "Leerer Text wird nicht gespeichert.", marquee: "Laufschrift",
     },
     en: {
         edit: "Edit (E)", saved: "Saved", failed: "Could not save",
         locked: (n) => `${n} is editing`, relogin: "Please log in again to edit.",
-        replace: "Replace", uploading: "Uploading", tooLarge: "The file is larger than 50 MB.",
+        replace: "Replace", add: "Add image or video", remove: "Remove", uploading: "Uploading", tooLarge: "The file is larger than 50 MB.",
         empty: "Empty text is not saved.", marquee: "Marquee text",
     },
 };
@@ -36,10 +39,13 @@ const pageOf = (key) => (key.startsWith("site.") ? "site" : collab.page);
 const isTranslated = (node) => node.hasAttribute("data-i18n") || node.hasAttribute("data-i18n-marquee");
 const label = (key) => `Edited ${key.split(".").slice(1).join(" ")}`;
 
-const toHtml = (fragment) => {
-    const box = document.createElement("div");
-    box.append(fragment);
-    return box.innerHTML.replace(/(<br>\s*)+$/, "").trim();
+// The saved form of some rendered HTML, to tell whether an edit changed anything
+const savedForm = (node, html) => {
+    const probe = document.createElement("div");
+    if (node.dataset.kalqFormat) probe.dataset.kalqFormat = node.dataset.kalqFormat;
+    probe.innerHTML = html;
+    if (probe.dataset.kalqFormat === "lines") probe.innerHTML = editableHtml(probe); // rendered lines back to line<br>line
+    return serializeBlock(probe);
 };
 
 async function editorSession() {
@@ -76,7 +82,12 @@ function onKey(e) {
     e.stopPropagation(); // keep smooth-scrollbar and the shortcuts out of the text
     if (e.key === "Escape") { e.preventDefault(); stopEditing(false); }
     else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); stopEditing(true); }
-    else if (e.key === "Enter") { e.preventDefault(); document.execCommand("insertLineBreak"); }
+    else if (e.key === "Enter") {
+        // Paragraph blocks: Enter starts a paragraph, Shift+Enter breaks the line. Elsewhere Enter breaks the line.
+        e.preventDefault();
+        const paragraphs = editing?.el.dataset.kalqFormat === "paragraphs";
+        document.execCommand(paragraphs && !e.shiftKey ? "insertParagraph" : "insertLineBreak");
+    }
 }
 
 function onPaste(e) {
@@ -102,6 +113,9 @@ function startEditing(node) {
     }
 
     editing = { el: node, key, original: node.innerHTML };
+    // Line blocks are edited as plain "line<br>line"; new paragraphs become <p>
+    if (node.dataset.kalqFormat === "lines") node.innerHTML = editableHtml(node);
+    document.execCommand("defaultParagraphSeparator", false, "p");
     node.contentEditable = "true";
     node.classList.add("kalq-is-editing");
     node.addEventListener("keydown", onKey);
@@ -122,12 +136,12 @@ async function stopEditing(keep) {
     node.classList.remove("kalq-is-editing");
     collab.setLock(null);
 
-    const before = toHtml(sanitize(original));
-    const after = toHtml(sanitize(node.innerHTML));
+    const before = savedForm(node, original);
+    const after = serializeBlock(node);
     if (!keep || after === before) { node.innerHTML = original; return; }
     if (!node.textContent.trim()) { node.innerHTML = original; collab.toast(t("empty"), "error"); return; }
 
-    node.replaceChildren(sanitize(after));
+    renderBlock(node, after);
     // Translated blocks save the language being shown, the others (numbers, email) both languages
     const langs = isTranslated(node) ? [currentLang()] : ["de", "en"];
     try {
@@ -141,28 +155,53 @@ async function stopEditing(keep) {
 }
 
 //=================================== Media ===================================//
+// The slot element can be swapped (image <-> video), so always look it up by key
+const slot = (key) => document.querySelector(`[data-kalq-key="${CSS.escape(key)}"]`);
+const isEmptySlot = (node) => node.classList.contains("hero_media") && !node.firstElementChild;
+
 function replaceButtons() {
-    document.querySelectorAll(".kalq-replace").forEach((b) => b.remove());
+    document.querySelectorAll(".kalq-media-tools").forEach((b) => b.remove());
     if (!on) return;
     document.querySelectorAll('[data-kalq-type="image"], [data-kalq-type="video"]').forEach((node) => {
-        const host = node.tagName === "IMG" || node.tagName === "VIDEO" ? node.parentElement : node;
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "kalq-replace";
-        btn.textContent = t("replace");
-        btn.dataset.forKey = keyOf(node);
-        btn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); pickFile(node, btn); });
-        host.append(btn);
+        const key = keyOf(node);
+        const host = node.classList.contains("hero_media") ? node.closest("section")
+            : node.tagName === "IMG" || node.tagName === "VIDEO" ? node.parentElement : node;
+        const tools = document.createElement("div");
+        tools.className = "kalq-media-tools";
+        if (host.matches(HERO)) tools.classList.add("is-hero"); // vertical centre, right
+        const add = (label, cls, fn) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = cls;
+            btn.textContent = label;
+            btn.dataset.forKey = key;
+            btn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); fn(btn); });
+            tools.append(btn);
+        };
+        add(isEmptySlot(node) ? t("add") : t("replace"), "kalq-replace", (btn) => pickFile(key, btn));
+        if (node.classList.contains("hero_media") && !isEmptySlot(node)) add(t("remove"), "kalq-replace kalq-remove", () => setSlot(key, ""));
+        host.append(tools);
     });
 }
 
-function pickFile(node, btn) {
-    const key = keyOf(node);
+async function setSlot(key, url) {
     if (locks.has(key)) return collab.toast(t("locked")(locks.get(key).name), "error");
-    const type = typeOf(node);
+    const node = slot(key);
+    try {
+        await save(key, typeOf(node), [null], url);
+        applyDirect(document);
+        replaceButtons();
+        collab.toast(t("saved"));
+    } catch (error) {
+        fail(error);
+    }
+}
+
+function pickFile(key, btn) {
+    if (locks.has(key)) return collab.toast(t("locked")(locks.get(key).name), "error");
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = ACCEPT[type];
+    input.accept = ACCEPT;
     input.addEventListener("change", async () => {
         const file = input.files[0];
         if (!file) return;
@@ -177,15 +216,14 @@ function pickFile(node, btn) {
             const { error } = await collab.sb.storage.from("site-media").upload(path, file, { contentType: file.type, upsert: false });
             if (error) throw error;
             const { data } = collab.sb.storage.from("site-media").getPublicUrl(path);
-            await save(key, type, [null], data.publicUrl);
+            await save(key, typeOf(slot(key)), [null], data.publicUrl);
             applyDirect(document);
             collab.toast(t("saved"));
         } catch (error) {
             fail(error);
         } finally {
-            btn.disabled = false;
-            btn.textContent = t("replace");
             collab.setLock(null);
+            replaceButtons();
         }
     });
     input.click();
@@ -205,7 +243,7 @@ function setMode(next) {
 function onClick(e) {
     if (!on) return;
     const node = e.target.closest?.("[data-kalq-key]");
-    if (!node || e.target.closest(".kalq-replace, .kalq-toolbar")) return;
+    if (!node || e.target.closest(".kalq-media-tools, .kalq-toolbar")) return;
     if (typeOf(node) !== "text") return;
     e.preventDefault();
     e.stopPropagation();

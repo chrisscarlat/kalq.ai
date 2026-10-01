@@ -71,10 +71,8 @@
                     <div class="hero_overlay"></div>
                     <div class="hero_content">
                         <h1 class="hero_title"><svg viewBox="56 0 2490 690" fill="currentColor" role="img" aria-label="KALQ"><path d="M164 680H56V10H164V296H319L495 10H618L410 342L617 680H493L321 400H164ZM772 680H659L920 10H1075L1336 680H1219L1151 506H840ZM948 232 878 409H1113L1043 232L1000 108H992ZM1897 680H1432V10H1540V583H1897ZM2234 690Q2091 690 2006 596Q1921 502 1921 345Q1921 188 2006 94Q2091 0 2234 0Q2376 0 2461 94Q2546 188 2546 345Q2546 502 2461 596Q2376 690 2234 690ZM2082.5 530.5Q2129 586 2234 586Q2339 586 2385 530.5Q2431 475 2431 345Q2431 215 2385 159.5Q2339 104 2234 104Q2129 104 2082.5 159.5Q2036 215 2036 345Q2036 475 2082.5 530.5Z"/><path d="M2270.3 330.7 L2546.0 606.5 L2546.0 680.0 L2472.5 680.0 L2196.7 404.3Z"/></svg></h1>
-                        <p class="hero_slogan">
-                            <span data-i18n="hero.line1" data-kalq-key="home.hero.line1">Ein technischer Kern.</span> <br class="mobile_br"><span data-i18n="hero.line2" data-kalq-key="home.hero.line2">Zwei kommerzielle Engines.</span><br>
-                            <span data-i18n="hero.line3" data-kalq-key="home.hero.line3">Bessere industrielle Entscheidungen.</span>
-                        </p>
+                        <!-- One block, one animated line per line break -->
+                        <p class="hero_slogan" data-i18n="hero.slogan" data-kalq-key="home.hero.slogan" data-kalq-format="lines">Ein technischer Kern. Zwei kommerzielle Engines.<br>Bessere industrielle Entscheidungen.</p>
                     </div>
                     <div class="block"></div>
                 </section>
@@ -164,8 +162,7 @@
                         <h2 data-i18n="home.approach" data-kalq-key="home.approach.title">Unser Ansatz</h2>
                         <div class="borderSeprator"></div>
                         <div>
-                            <h5 data-i18n="home.approach1" data-kalq-key="home.approach.p1">Jedes Fertigungsteil wird zweimal kalkuliert. Der Einkäufer schätzt, was es kosten sollte. Der Lieferant ermittelt, was die Fertigung kosten wird. Beide gehen von derselben Zeichnung aus, und beide bauen dasselbe technische Verständnis von Grund auf neu auf, von Hand und unter Zeitdruck.</h5>
-                            <h5 data-i18n="home.approach2" data-kalq-key="home.approach.p2">Kalq erledigt diese Arbeit einmal. Es liest die Geometrie, leitet Features und Prozessrouten ab und ordnet sie realen Maschinen und deren Wirtschaftlichkeit zu. Einkäufer und Lieferanten teilen die technische Wahrheit. Ihre kommerziellen Daten bleiben voneinander abgeschottet. Verglichen, nie vermischt.</h5>
+                            <div class="kalq-paras" data-i18n="home.approachText" data-kalq-key="home.approach.text" data-kalq-format="paragraphs"><p>Jedes Fertigungsteil wird zweimal kalkuliert. Der Einkäufer schätzt, was es kosten sollte. Der Lieferant ermittelt, was die Fertigung kosten wird. Beide gehen von derselben Zeichnung aus, und beide bauen dasselbe technische Verständnis von Grund auf neu auf, von Hand und unter Zeitdruck.</p><p>Kalq erledigt diese Arbeit einmal. Es liest die Geometrie, leitet Features und Prozessrouten ab und ordnet sie realen Maschinen und deren Wirtschaftlichkeit zu. Einkäufer und Lieferanten teilen die technische Wahrheit. Ihre kommerziellen Daten bleiben voneinander abgeschottet. Verglichen, nie vermischt.</p></div>
                         </div>
                     </div>
                 </section>
@@ -197,8 +194,7 @@
                     <div id="container">
                         <div class="footer_header">
                             <div class="footer_heading">
-                                <h2 data-i18n="footer.heading1" data-kalq-key="site.footer.heading1">Der Beweis</h2>
-                                <h2 data-i18n="footer.heading2" data-kalq-key="site.footer.heading2">am echten Teil</h2>
+                                <h2 data-i18n="footer.heading" data-kalq-key="site.footer.heading" data-kalq-format="lines">Der Beweis<br>am echten Teil</h2>
                             </div>
                             <p class="footer_sub" data-i18n="footer.sub" data-kalq-key="site.footer.sub">Wir starten mit CNC-Drehteilen in Deutschland. Wenn Sie solche Teile einkaufen oder fertigen, bewerben Sie sich für das Pilotprojekt.</p>
                             <div class="footer_btns_wrapper">

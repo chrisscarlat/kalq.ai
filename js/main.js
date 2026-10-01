@@ -4,6 +4,7 @@ import { initHeader, refreshHeader } from "./header.js";
 import { logoAnimation } from "./logoAnimation.js";
 import { applyLanguage } from "./i18n.js";
 import { loadPageContent } from "./content.js";
+import { animateLines } from "./blocks.js";
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -12,7 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     [barbaPageTransition, smoothScroller, initHeader, logoAnimation, mouseMoveParallaxLine].forEach(func => func());
     // Counters, hover images and the video read their content, so they start after edited content is applied
     await loadPageContent();
-    [animateNumbering, expertiseHover, heroVideo, parallaxImg].forEach(func => func());
+    [animateNumbering, expertiseHover, heroVideo, parallaxImg, animateLines].forEach(func => func());
 });
 
 let bodyScrollBar;
@@ -79,7 +80,8 @@ function barbaPageTransition() {
             animateNumbering,
             expertiseHover,
             heroVideo,
-            parallaxImg].forEach(func => func());
+            parallaxImg,
+            animateLines].forEach(func => func());
     }
 
     const scrollToTop = () => bodyScrollBar ? bodyScrollBar.scrollTo(0, 0, 0) : window.scrollTo(0, 0);
@@ -123,7 +125,7 @@ function parallaxImg() {
     }
 
     parallaxImages.forEach(function (parallaxCnt) {
-        let pimage = parallaxCnt.querySelector(".parallax_img img");
+        let pimage = parallaxCnt.querySelector("img, video"); // a slot can hold either
 
         let tl8 = gsap.timeline({
             scrollTrigger: {

@@ -64,3 +64,11 @@ Everyone through the gate can comment: `C` or the bubble button, then click anyw
 ## History, restore, invites (Phase 6)
 
 The clock opens the side panel on Versions: save batches newest first, for this page or the whole site. A click previews the page as it was right after that batch (live updates pause, `Esc` or "Exit preview" ends it). Editors can restore the block, the page or the whole site; `restore_to` copies the old content as new revisions in one batch that points back at the previewed one, so nothing is lost and a restore can be restored. Order comes from the `seq` column (insert order), never from timestamps. Editors invite colleagues from the toolbar (`/api/invite`: adds the email to `invites` and sends a Supabase invite).
+
+## Line blocks, paragraph blocks, media slots
+
+- `data-kalq-format="lines"` (hero slogan, footer heading, Impressum address and register): one block, every line break is a line that rises in with a stagger (`js/blocks.js`). Add or remove lines by editing.
+- `data-kalq-format="paragraphs"` ("Unser Ansatz", Company "Gemeinsame Semantik"): one block with `<p>` paragraphs. In edit mode Enter starts a paragraph, Shift+Enter breaks a line.
+- In `i18n/strings.json` these use `\n` between lines and a blank line between paragraphs.
+- Media slots take an image or a video, the file decides. Platform and Company have a hero slot (`*.hero.media`), empty until an editor adds something; in edit mode hero controls sit vertically centred on the right.
+- `supabase/migrations/20261001180000_merge_blocks.sql` copies the old split blocks' current content into the new blocks once; the old revisions stay in the history.

@@ -14,7 +14,7 @@ const PUBLIC = [
     /^\/favicon\.ico$/,
     /^\/robots\.txt$/,
     /^\/css\/(gate|main|collab)\.css$/,
-    /^\/js\/(gate|logoAnimation|main|header|i18n|strings-public|content|collab|expertiseHoverimg|verticleLine)\.js$/,
+    /^\/js\/(gate|logoAnimation|main|header|i18n|strings-public|content|blocks|collab|expertiseHoverimg|verticleLine)\.js$/,
     /^\/(impressum|datenschutz)(\.html)?$/,
 ];
 

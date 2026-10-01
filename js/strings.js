@@ -44,14 +44,6 @@ export const STRINGS = {
         "en": "Our approach",
         "de": "Unser Ansatz"
     },
-    "home.approach1": {
-        "en": "Every manufactured part is priced twice. The buyer estimates what it should cost. The supplier works out what it will cost to make. Both start from the same drawing, and both rebuild the same technical understanding from scratch, by hand, under time pressure.",
-        "de": "Jedes Fertigungsteil wird zweimal kalkuliert. Der Einkäufer schätzt, was es kosten sollte. Der Lieferant ermittelt, was die Fertigung kosten wird. Beide gehen von derselben Zeichnung aus, und beide bauen dasselbe technische Verständnis von Grund auf neu auf, von Hand und unter Zeitdruck."
-    },
-    "home.approach2": {
-        "en": "Kalq does that work once. It reads the geometry, derives features and process routes, and matches them to real machines and their economics. Buyers and suppliers share the technical truth. Their commercial data stays sealed from each other. Compared, never mixed.",
-        "de": "Kalq erledigt diese Arbeit einmal. Es liest die Geometrie, leitet Features und Prozessrouten ab und ordnet sie realen Maschinen und deren Wirtschaftlichkeit zu. Einkäufer und Lieferanten teilen die technische Wahrheit. Ihre kommerziellen Daten bleiben voneinander abgeschottet. Verglichen, nie vermischt."
-    },
     "platform.header": {
         "en": "One technical core. Two commercial engines.",
         "de": "Ein technischer Kern. Zwei kommerzielle Engines."
@@ -136,14 +128,6 @@ export const STRINGS = {
         "en": "Shared semantics, isolated economics",
         "de": "Gemeinsame Semantik, getrennte Ökonomie"
     },
-    "company.shared1": {
-        "en": "Buyers and suppliers use the same understanding of a part. Nothing else crosses over. Each tenant's prices, margins and machine data stay in their own space, used only for the purpose they were given for.",
-        "de": "Einkäufer und Lieferanten nutzen dasselbe Verständnis eines Teils. Sonst wird nichts geteilt. Preise, Margen und Maschinendaten jedes Mandanten bleiben in seinem eigenen Bereich und werden nur für den Zweck genutzt, für den sie bereitgestellt wurden."
-    },
-    "company.shared2": {
-        "en": "Data is hosted in the EU. Every automated result can be reviewed and overruled by a person. And Kalq stays neutral: it does not sell parts, and it does not take a side in the deal.",
-        "de": "Die Daten werden in der EU gehostet. Jedes automatisierte Ergebnis kann von einem Menschen geprüft und übersteuert werden. Und Kalq bleibt neutral: Kalq verkauft keine Teile und ergreift im Geschäft keine Partei."
-    },
     "company.prices": {
         "en": "Three prices, kept apart",
         "de": "Drei Preise, klar getrennt"
@@ -151,18 +135,6 @@ export const STRINGS = {
     "company.pricesText": {
         "en": "Should Cost is what a part should cost. Quote Cost is what it costs a specific supplier to make. Market Price is what the market actually pays. Kalq shows all three side by side and never blends them into one number, because each answers a different question.",
         "de": "Soll-Kosten sind, was ein Teil kosten sollte. Angebotskosten sind, was die Fertigung einen bestimmten Lieferanten kostet. Der Marktpreis ist, was der Markt tatsächlich zahlt. Kalq zeigt alle drei nebeneinander und verschmilzt sie nie zu einer Zahl, denn jeder beantwortet eine andere Frage."
-    },
-    "hero.line1": {
-        "en": "One technical core.",
-        "de": "Ein technischer Kern."
-    },
-    "hero.line2": {
-        "en": "Two commercial engines.",
-        "de": "Zwei kommerzielle Engines."
-    },
-    "hero.line3": {
-        "en": "Better industrial decisions.",
-        "de": "Bessere industrielle Entscheidungen."
     },
     "module.shouldCost": {
         "en": "Should Cost",
@@ -187,5 +159,17 @@ export const STRINGS = {
     "module.quote": {
         "en": "Price & Quote",
         "de": "Preis & Angebot"
+    },
+    "hero.slogan": {
+        "de": "Ein technischer Kern. Zwei kommerzielle Engines.\nBessere industrielle Entscheidungen.",
+        "en": "One technical core. Two commercial engines.\nBetter industrial decisions."
+    },
+    "home.approachText": {
+        "de": "Jedes Fertigungsteil wird zweimal kalkuliert. Der Einkäufer schätzt, was es kosten sollte. Der Lieferant ermittelt, was die Fertigung kosten wird. Beide gehen von derselben Zeichnung aus, und beide bauen dasselbe technische Verständnis von Grund auf neu auf, von Hand und unter Zeitdruck.\n\nKalq erledigt diese Arbeit einmal. Es liest die Geometrie, leitet Features und Prozessrouten ab und ordnet sie realen Maschinen und deren Wirtschaftlichkeit zu. Einkäufer und Lieferanten teilen die technische Wahrheit. Ihre kommerziellen Daten bleiben voneinander abgeschottet. Verglichen, nie vermischt.",
+        "en": "Every manufactured part is priced twice. The buyer estimates what it should cost. The supplier works out what it will cost to make. Both start from the same drawing, and both rebuild the same technical understanding from scratch, by hand, under time pressure.\n\nKalq does that work once. It reads the geometry, derives features and process routes, and matches them to real machines and their economics. Buyers and suppliers share the technical truth. Their commercial data stays sealed from each other. Compared, never mixed."
+    },
+    "company.sharedText": {
+        "de": "Einkäufer und Lieferanten nutzen dasselbe Verständnis eines Teils. Sonst wird nichts geteilt. Preise, Margen und Maschinendaten jedes Mandanten bleiben in seinem eigenen Bereich und werden nur für den Zweck genutzt, für den sie bereitgestellt wurden.\n\nDie Daten werden in der EU gehostet. Jedes automatisierte Ergebnis kann von einem Menschen geprüft und übersteuert werden. Und Kalq bleibt neutral: Kalq verkauft keine Teile und ergreift im Geschäft keine Partei.",
+        "en": "Buyers and suppliers use the same understanding of a part. Nothing else crosses over. Each tenant's prices, margins and machine data stay in their own space, used only for the purpose they were given for.\n\nData is hosted in the EU. Every automated result can be reviewed and overruled by a person. And Kalq stays neutral: it does not sell parts, and it does not take a side in the deal."
     }
 };

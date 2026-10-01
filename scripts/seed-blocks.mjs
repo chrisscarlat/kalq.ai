@@ -25,6 +25,7 @@ const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET
 const strings = JSON.parse(readFileSync(`${ROOT}i18n/strings.json`, "utf8"));
 const attr = (tag, name) => (tag.match(new RegExp(`\\s${name}="([^"]*)"`)) || [])[1];
 const decode = (s) => s.replace(/&nbsp;/g, " ").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const clean = (html) => decode(html.replace(/<(?!\/?(br|em|strong|a)\b)[^>]+>/gi, "").replace(/\s+/g, " ").trim());
 
 const blocks = new Map(); // key -> { page, type }
@@ -40,15 +41,21 @@ for (const [file, pageName] of Object.entries(PAGES)) {
         blocks.set(key, { page, type });
 
         if (type === "image") {
-            revisions.push({ block_key: key, page, lang: null, content: attr(whole, "src") || attr(whole, "data-image") });
+            const src = attr(whole, "src") || attr(whole, "data-image");
+            if (src) revisions.push({ block_key: key, page, lang: null, content: src }); // empty hero slots stay empty
         } else if (type === "video") {
             const after = html.slice(m.index);
             revisions.push({ block_key: key, page, lang: null, content: attr(after.match(/<source[^>]*>/)[0], "src") });
         } else {
             const i18n = attr(whole, "data-i18n") || attr(whole, "data-i18n-marquee");
             const inner = html.slice(m.index + whole.length, html.indexOf(`</${tagName}>`, m.index + whole.length));
-            const de = i18n ? strings[i18n].de ?? strings[i18n].en : clean(inner);
-            const en = i18n ? strings[i18n].en : clean(inner);
+            // Line and paragraph blocks store HTML, like an edit would (see js/blocks.js)
+            const format = attr(whole, "data-kalq-format");
+            const asHtml = (text) => !format ? text : format === "paragraphs"
+                ? text.split(/\n{2,}/).map((p) => `<p>${p.split("\n").map(esc).join("<br>")}</p>`).join("")
+                : text.split("\n").map(esc).join("<br>");
+            const de = i18n ? asHtml(strings[i18n].de ?? strings[i18n].en) : clean(inner);
+            const en = i18n ? asHtml(strings[i18n].en) : clean(inner);
             revisions.push({ block_key: key, page, lang: "de", content: de }, { block_key: key, page, lang: "en", content: en });
         }
     }

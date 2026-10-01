@@ -1,4 +1,4 @@
-// Gate page: access code for guests, Google or LinkedIn for editors.
+// Gate page: access code for guests (no account), Google or LinkedIn for editors.
 // The server decides (see api/code.js, api/session.js); this only drives the UI and the Supabase session.
 import { logoAnimation } from "./logoAnimation.js";
 
@@ -131,22 +131,8 @@ async function submitCode() {
     say(null);
     setBusy(true);
     try {
-        // Without Supabase configured yet the server checks the code alone
-        const sb = await client().catch(() => null);
-        if (!sb) return finishCode(await post("/api/code", { code: code() }), null);
-        // Reuse the browser's anonymous session so a returning guest keeps their animal
-        let { data: { session } } = await sb.auth.getSession();
-        if (session && !session.user.is_anonymous) {
-            await sb.auth.signOut();
-            session = null;
-        }
-        if (!session) {
-            const { data, error } = await sb.auth.signInAnonymously();
-            // Anonymous sign-ins off in Supabase: the code alone still lets a guest in
-            if (error) return finishCode(await post("/api/code", { code: code() }), null);
-            session = data.session;
-        }
-        return finishCode(await post("/api/code", { code: code(), access_token: session.access_token }), sb);
+        // Guests need no account, the server checks the code and sets the gate cookie
+        return finishCode(await post("/api/code", { code: code() }));
     } catch (error) {
         console.error(error);
         setBusy(false);
@@ -154,11 +140,8 @@ async function submitCode() {
     }
 }
 
-async function finishCode(res, sb) {
-    if (res.ok) {
-        if (sb) await sb.auth.refreshSession(); // JWT now carries role, animal and colour
-        return go();
-    }
+async function finishCode(res) {
+    if (res.ok) return go();
     const { error } = await res.json().catch(() => ({}));
     setBusy(false);
     wrong(error === "wrong_code" ? "wrong" : error === "rate_limited" ? "rate" : "failed");

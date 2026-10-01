@@ -1,10 +1,10 @@
-// POST { code, access_token }: guest entry with the access code.
-// Checks the code in constant time, rate limits per hashed IP, gives the anonymous user an animal and sets the gate cookie.
+// POST { code }: guest entry with the access code. Guests need no account.
+// Checks the code in constant time, rate limits per hashed IP, gives the guest an animal and sets the gate cookie.
 import { createHash, timingSafeEqual } from "node:crypto";
 import { gateCookieHeader, signGate } from "../lib/gate-cookie.js";
 import { clientIp, json, readJson } from "../lib/http.js";
 import { identityFromHash } from "../lib/identity.js";
-import { count, getUser, insert, isConfigured, select, updateAppMetadata } from "../lib/supabase-admin.js";
+import { count, insert, isConfigured, select } from "../lib/supabase-admin.js";
 
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_ATTEMPTS = 10;
@@ -45,7 +45,7 @@ export async function POST(request) {
     const { ACCESS_CODE, GATE_COOKIE_SECRET, IP_HASH_SALT } = process.env;
     if (!ACCESS_CODE || !GATE_COOKIE_SECRET || !IP_HASH_SALT) return json({ error: "config" }, 500);
 
-    const { code, access_token: accessToken } = await readJson(request);
+    const { code } = await readJson(request);
     const ipHash = sha256(IP_HASH_SALT + clientIp(request)).toString("hex"); // the raw IP is never stored
 
     if (await tooManyAttempts(ipHash)) return json({ error: "rate_limited" }, 429);
@@ -53,23 +53,16 @@ export async function POST(request) {
         return json({ error: "wrong_code" }, 401);
     }
 
-    // Without Supabase, or without a guest session (anonymous sign-ins off): guests still get in,
-    // with an animal from the IP hash and no stored session
-    if (!isConfigured() || !accessToken) {
-        const identity = identityFromHash(ipHash);
-        const cookie = await signGate({ role: "guest", uid: `guest-${ipHash.slice(0, 16)}` }, GATE_COOKIE_SECRET);
-        return json({ role: "guest", ...identity, supabase: false }, 200, { "Set-Cookie": gateCookieHeader(cookie) });
+    // Guests have no Supabase account: the code alone lets them in. Their animal is stored per salted IP hash,
+    // so the same connection keeps the same animal.
+    let identity = identityFromHash(ipHash);
+    if (isConfigured()) {
+        try {
+            identity = await guestIdentity(ipHash);
+        } catch (error) {
+            console.error("guest_identities unavailable, using the hash alone", error.message);
+        }
     }
-
-    const user = await getUser(accessToken);
-    if (!user) return json({ error: "session" }, 401);
-
-    // A returning browser keeps its animal even from another connection
-    const meta = user.app_metadata || {};
-    const identity = meta.animal ? { animal: meta.animal, emoji: meta.emoji, color: meta.color } : await guestIdentity(ipHash);
-    if (user.is_anonymous) await updateAppMetadata(user.id, { role: "guest", ...identity });
-
-    const role = meta.role === "editor" ? "editor" : "guest";
-    const cookie = await signGate({ role, uid: user.id }, GATE_COOKIE_SECRET);
-    return json({ role, ...identity }, 200, { "Set-Cookie": gateCookieHeader(cookie) });
+    const cookie = await signGate({ role: "guest", uid: `guest-${ipHash.slice(0, 16)}` }, GATE_COOKIE_SECRET);
+    return json({ role: "guest", ...identity }, 200, { "Set-Cookie": gateCookieHeader(cookie) });
 }

@@ -98,6 +98,17 @@ function applyLogo(variant) {
     }
 }
 
+// The big moving bar in the home hero: a variant with its own logo shows the logo there instead, same parallax
+function applyHeroMark(variant) {
+    document.querySelectorAll(".block").forEach((block) => {
+        const node = variant?.logo_svg ? logoNode(variant.logo_svg) : null;
+        block.classList.toggle("is-logo", !!node);
+        block.replaceChildren(...(node ? [node] : []));
+    });
+}
+// Barba brings a fresh hero on every page change
+export const refreshHeroMark = () => applyHeroMark(getActive());
+
 //=================================== Apply ===================================//
 export function applyVariant(variant, { remember = false, preview = false } = {}) {
     if (!variant) return;
@@ -117,6 +128,7 @@ export function applyVariant(variant, { remember = false, preview = false } = {}
     // A main font of its own also sets the wordmark (header, hero); the default keeps the outlined Clash logo
     root.classList.toggle("has-font-wordmark", !!fontStack(variant.fonts?.heading));
     applyLogo(variant);
+    applyHeroMark(variant);
 
     // Images and the hero video: the variant's replacement, otherwise the page's own
     const images = { ...(variant.images || {}) };

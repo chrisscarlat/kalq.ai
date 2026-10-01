@@ -1560,6 +1560,25 @@ footer #container .footer_bottom a {
   mix-blend-mode: difference;
 }
 
+.block.is-logo {
+  background: none;
+}
+.block.is-logo svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 62vh;
+  width: auto;
+  max-width: 80vw;
+  transform: translate(-50%, -50%) rotate(45deg);
+  filter: brightness(0) invert(1);
+}
+
+@media (max-width: 540px) {
+  .block.is-logo svg {
+    height: 40vh;
+  }
+}
 /* Animated Numbering */
 .numbering {
   display: flex;

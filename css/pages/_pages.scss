@@ -15,6 +15,28 @@
     mix-blend-mode: difference;
 }
 
+// A style variant's own logo in place of the bar (js/variants.js): white silhouette, upright, same inverting blend
+.block.is-logo {
+    background: none;
+
+    svg {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        height: 62vh;
+        width: auto;
+        max-width: 80vw;
+        transform: translate(-50%, -50%) rotate(45deg); // the bar is turned -45deg; the logo stands upright
+        filter: brightness(0) invert(1);
+    }
+}
+
+@media (max-width: 540px) {
+    .block.is-logo svg {
+        height: 40vh;
+    }
+}
+
 /* Animated Numbering */
 .numbering {
     display: flex;

@@ -5,7 +5,7 @@ import { logoAnimation } from "./logoAnimation.js";
 import { applyLanguage } from "./i18n.js";
 import { loadPageContent } from "./content.js";
 import { animateLines } from "./blocks.js";
-import { initVariants } from "./variants.js";
+import { initVariants, refreshHeroMark } from "./variants.js";
 import { initHeroTone } from "./heroTone.js";
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -95,6 +95,7 @@ function barbaPageTransition() {
             animateNumbering,
             expertiseHover,
             heroVideo,
+            refreshHeroMark,
             initHeroTone,
             parallaxImg,
             animateLines].forEach(func => func());

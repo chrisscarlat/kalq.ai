@@ -3,19 +3,20 @@
 // Then the mark turns in 3D (perspective projection, depth shading) and the loop restarts.
 
 const CENTER = 87;
-const STROKE = 7.38;
+const STROKE = 11;
 const DEPTH = 420; // perspective distance in viewBox units
 
-// Mark rays as drawn in the SVG: inner point, outer point
+// Mark rays as drawn in the SVG: inner point, outer point. The centre stays open (24 units); the down right ray,
+// the Q tail, starts closer (10) and so stands out.
 const RAYS = {
-    e: [101.81, 86.99, 173.98, 86.99],
-    w: [72.16, 87.01, 0, 87.01],
-    s: [87.01, 101.84, 87.01, 174],
-    n: [87.01, 72.16, 87.01, 0],
-    se: [84.26, 84.26, 135.29, 135.29],
-    ne: [99.04, 75.62, 132.83, 41.82],
-    sw: [74.64, 99.70, 40.85, 133.49],
-    nw: [74.62, 74.31, 40.83, 40.51],
+    e: [111, 86.99, 173.98, 86.99],
+    w: [63, 87.01, 0, 87.01],
+    s: [87.01, 111, 87.01, 174],
+    n: [87.01, 63, 87.01, 0],
+    se: [94.07, 94.07, 135.29, 135.29],
+    ne: [104.3, 70.36, 132.83, 41.82],
+    sw: [70.2, 104.14, 40.85, 133.49],
+    nw: [70.19, 69.87, 40.83, 40.51],
 };
 
 // Each ray as an axis: foot point nearest the centre, unit direction, and the mark's [tIn, tOut] along it

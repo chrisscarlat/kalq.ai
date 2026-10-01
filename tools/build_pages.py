@@ -8,7 +8,7 @@ wm = open(f"{ROOT}/assets/kalq-wordmark.svg").read().strip()
 wm_paths = re.search(r'aria-label="KALQ">(.*)</svg>', wm).group(1)
 wm_vb = re.search(r'viewBox="([^"]+)"', wm).group(1)
 
-MARK = '<svg class="site-logo__mark" viewBox="0 0 174 174" fill="none" stroke="currentColor" stroke-width="7.38" aria-hidden="true"><line data-ray="e" x1="101.81" y1="86.99" x2="173.98" y2="86.99"/><line data-ray="w" x1="72.16" y1="87.01" x2="0" y2="87.01"/><line data-ray="s" x1="87.01" y1="101.84" x2="87.01" y2="174"/><line data-ray="n" x1="87.01" y1="72.16" x2="87.01" y2="0"/><line data-ray="se" x1="84.26" y1="84.26" x2="135.29" y2="135.29"/><line data-ray="ne" x1="99.04" y1="75.62" x2="132.83" y2="41.82"/><line data-ray="sw" x1="74.64" y1="99.7" x2="40.85" y2="133.49"/><line data-ray="nw" x1="74.62" y1="74.31" x2="40.83" y2="40.51"/></svg>'
+MARK = '<svg class="site-logo__mark" viewBox="0 0 174 174" fill="none" stroke="currentColor" stroke-width="11" aria-hidden="true"><line data-ray="e" x1="111" y1="86.99" x2="173.98" y2="86.99"/><line data-ray="w" x1="63" y1="87.01" x2="0" y2="87.01"/><line data-ray="s" x1="87.01" y1="111" x2="87.01" y2="174"/><line data-ray="n" x1="87.01" y1="63" x2="87.01" y2="0"/><line data-ray="se" x1="94.07" y1="94.07" x2="135.29" y2="135.29"/><line data-ray="ne" x1="104.3" y1="70.36" x2="132.83" y2="41.82"/><line data-ray="sw" x1="70.2" y1="104.14" x2="40.85" y2="133.49"/><line data-ray="nw" x1="70.19" y1="69.87" x2="40.83" y2="40.51"/></svg>'
 WORD = f'<svg viewBox="{wm_vb}" fill="currentColor" aria-hidden="true">{wm_paths}</svg>'
 HERO_WORD = f'<svg viewBox="{wm_vb}" fill="currentColor" role="img" aria-label="KALQ">{wm_paths}</svg>'
 

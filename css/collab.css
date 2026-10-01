@@ -1640,15 +1640,21 @@
   bottom: 0;
   height: 2px;
   background: rgba(255, 255, 255, 0.2);
-  z-index: 3;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+  z-index: 7;
+  pointer-events: none;
   overflow: hidden;
+  transition: opacity 0.3s ease;
+}
+.kalq-progress.is-done {
+  opacity: 0;
 }
 .kalq-progress span {
   display: block;
   width: 0;
   height: 100%;
   background: #fff;
-  transition: width 0.15s linear;
+  transition: width 0.25s ease-out;
 }
 
 .kalq-btn {
@@ -1670,7 +1676,7 @@
   grid-column: 1/-1;
 }
 
-.kalq-map__done {
+.kalq-done {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -1723,7 +1729,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .kalq-map__done {
+  .kalq-done {
     animation: none;
   }
 }

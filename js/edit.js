@@ -5,6 +5,7 @@
 import { applyDirect, setLocalContent } from "./content.js";
 import { editableHtml, renderBlock, serializeBlock } from "./blocks.js";
 import { applyLanguage, currentLang } from "./i18n.js";
+import { progressLine, showDone, uploadMedia } from "./upload.js";
 
 const MAX_BYTES = 50 * 1024 * 1024;
 // Every slot takes an image or a video
@@ -209,19 +210,25 @@ function pickFile(key, btn) {
         btn.disabled = true;
         btn.textContent = t("uploading");
         collab.setLock(key);
+        // The thin line along the bottom of the image while it uploads, a tick when done
+        const host = btn.closest(".kalq-media-tools")?.parentElement || slot(key);
+        const progress = progressLine(host);
         try {
             if (!(await editorSession())) throw new Error("relogin");
             const safe = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").slice(-60);
             const path = `${pageOf(key)}/${key}/${Date.now()}-${safe}`;
-            const { error } = await collab.sb.storage.from("site-media").upload(path, file, { contentType: file.type, upsert: false });
-            if (error) throw error;
-            const { data } = collab.sb.storage.from("site-media").getPublicUrl(path);
-            await save(key, typeOf(slot(key)), [null], data.publicUrl);
+            const url = await uploadMedia(collab.sb, path, file, (p) => {
+                progress.set(p);
+                btn.textContent = `${t("uploading")} ${Math.round(p * 100)} %`;
+            });
+            await save(key, typeOf(slot(key)), [null], url);
             applyDirect(document);
+            showDone(host);
             collab.toast(t("saved"));
         } catch (error) {
             fail(error);
         } finally {
+            progress.done();
             collab.setLock(null);
             replaceButtons();
         }

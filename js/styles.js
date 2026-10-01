@@ -4,6 +4,7 @@
 // is a version that can be restored.
 import { sanitizeSvg } from "../lib/svg-sanitize.js";
 import { currentLang } from "./i18n.js";
+import { progressLine, showDone, uploadMedia } from "./upload.js";
 import { applyVariant, endPreview, getActive, loadVariants, logoNode } from "./variants.js";
 
 const TEXT = {
@@ -88,41 +89,10 @@ async function api(body) {
 }
 const errorText = (error) => t("errors")[error.message] || (error.info?.field ? `${t("failed")}: ${error.info.field}` : t("failed"));
 
-// Upload straight to Supabase Storage with the admin's login. XMLHttpRequest instead of supabase-js, because only
-// it reports progress (onProgress gets 0 to 1).
-let storageConfig = null;
-async function upload(file, kind, onProgress = () => { }) {
-    const { data: auth } = await collab.sb.auth.getSession();
-    if (!auth?.session) throw new Error("relogin");
-    storageConfig ||= await fetch("/api/config").then((r) => r.json());
+// Into this variant's folder in Storage, with progress (js/upload.js)
+function upload(file, kind, onProgress) {
     const safe = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").slice(-60);
-    const path = `variants/${selectedId}/${kind}/${Date.now()}-${safe}`;
-    const type = file.type || (safe.endsWith(".woff2") ? "font/woff2" : "application/octet-stream");
-    const base = storageConfig.supabaseUrl.replace(/\/$/, "");
-    await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", `${base}/storage/v1/object/site-media/${path.split("/").map(encodeURIComponent).join("/")}`);
-        xhr.setRequestHeader("Authorization", `Bearer ${auth.session.access_token}`);
-        xhr.setRequestHeader("apikey", storageConfig.supabaseAnonKey);
-        xhr.setRequestHeader("Content-Type", type);
-        xhr.setRequestHeader("x-upsert", "false");
-        xhr.upload.onprogress = (e) => { if (e.lengthComputable) onProgress(e.loaded / e.total); };
-        xhr.onload = () => (xhr.status < 300 ? resolve() : reject(new Error(`upload ${xhr.status}`)));
-        xhr.onerror = () => reject(new Error("upload"));
-        xhr.send(file);
-    });
-    onProgress(1);
-    return `${base}/storage/v1/object/public/site-media/${path}`;
-}
-
-// Thin white line at the bottom of a slot or button while a file uploads
-function progressLine(host) {
-    host.querySelector(".kalq-progress")?.remove();
-    const line = el("span", { className: "kalq-progress" });
-    const bar = el("span", { style: "width: 3%" });
-    line.append(bar);
-    host.append(line);
-    return { set: (p) => { bar.style.width = `${Math.round(p * 100)}%`; }, done: () => line.remove() };
+    return uploadMedia(collab.sb, `variants/${selectedId}/${kind}/${Date.now()}-${safe}`, file, onProgress);
 }
 
 async function refresh() {
@@ -309,13 +279,6 @@ const imageKeys = () => [...new Set([...SITEMAP.flatMap((p) => p.items.flatMap((
 let dirty = false;
 let lastUpload = null; // { key, url }: offers to copy the newest upload to every slot of its kind
 
-// Green tick on a slot once its upload is done
-function showDone(node) {
-    node.querySelector(".kalq-map__done")?.remove();
-    const tick = el("span", { className: "kalq-map__done", textContent: "✓" });
-    node.append(tick);
-    setTimeout(() => tick.remove(), 2600);
-}
 
 // After an upload: copy the same file to every hero (hero slot) or every image slot (any other slot)
 function spreadChip(key, url) {

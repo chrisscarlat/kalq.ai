@@ -5,6 +5,7 @@ import { createHmac } from "node:crypto";
 import { readCookie, verifyGate } from "../lib/gate-cookie.js";
 import { json } from "../lib/http.js";
 import { colorFromUid, identityFromHash } from "../lib/identity.js";
+import { isAdmin } from "../lib/admin.js";
 import { getUserById, isConfigured, upsert } from "../lib/supabase-admin.js";
 
 export async function GET(request) {
@@ -37,5 +38,5 @@ export async function GET(request) {
             .catch((error) => console.error("profiles", error.message));
     }
 
-    return json({ ...me, channelKey });
+    return json({ ...me, channelKey, is_admin: isConfigured() ? await isAdmin(session) : false });
 }

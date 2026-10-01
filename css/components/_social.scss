@@ -1,5 +1,5 @@
 .social {
-    background: $light;
+    background: var(--kalq-bg, #{$light});
     @include verticalGap;
 
     /* Marquee */
@@ -60,13 +60,13 @@
                 position: absolute;
                 top: 0;
                 left: 0;
-                background: $dark;
+                background: var(--kalq-dark, #{$dark});
                 transform: scaleY(0);
                 transition: transform 0.3s ease-in-out;
             }
 
             &:hover {
-                color: $light;
+                color: var(--kalq-light, #{$light});
 
                 #container {
                     padding: 0 7rem;

@@ -1,6 +1,6 @@
 /* Impressum and Datenschutz */
 .legal {
-    background: $light;
+    background: var(--kalq-bg, #{$light});
     min-height: 100vh;
     padding: 12rem 0 8rem;
 

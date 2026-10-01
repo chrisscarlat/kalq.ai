@@ -7,6 +7,8 @@
     <title>Kalq | Datenschutz</title>
     <!-- Pages are German; hide translatable text until js/i18n.js has applied another stored language -->
     <script>try { var l = localStorage.getItem("kalq-lang"); if (l && l !== "de") document.documentElement.classList.add("i18n-pending"); } catch (e) { }</script>
+    <!-- Style variant: start in the last applied look (colours, fonts) before the first paint; js/variants.js takes over -->
+    <script>try { var v = JSON.parse(localStorage.getItem("kalq-variant-look") || "null"); if (v && v.look) for (var k in v.look) if (/^--kalq-[a-z-]+$/.test(k)) document.documentElement.style.setProperty(k, String(v.look[k]).replace(/[;{}<>]/g, "")); } catch (e) { }</script>
     <!-- Edited content: keyed blocks stay hidden until js/content.js applied it (1.5 s max, 3 s if scripts fail) -->
     <script>document.documentElement.classList.add("kalq-loading"); setTimeout(function () { document.documentElement.classList.remove("kalq-loading"); }, 3000);</script>
     <meta name="description" content="Kalq macht aus der Geometrie eines Teils eine technische Wahrheit und zwei getrennte kommerzielle Engines, für Einkäufer und Lieferanten von Fertigungsteilen.">

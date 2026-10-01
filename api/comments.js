@@ -7,7 +7,7 @@ import { readCookie, verifyGate } from "../lib/gate-cookie.js";
 import { json, readJson } from "../lib/http.js";
 import { count, insertReturning, isConfigured, patch, select } from "../lib/supabase-admin.js";
 
-const PAGES = ["home", "platform", "company", "impressum", "datenschutz"];
+const PAGES = ["home", "platform", "company", "impressum", "datenschutz", "variants"]; // variants: one thread per style variant
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const KEY = /^[a-z0-9-]+(\.[a-z0-9-]+){1,5}$/;
 const MAX_PER_10_MIN = 30;
@@ -63,9 +63,11 @@ export async function POST(request) {
     } else {
         const blockKey = typeof input.block_key === "string" && KEY.test(input.block_key) ? input.block_key : null;
         const selector = !blockKey && typeof input.anchor_selector === "string" ? input.anchor_selector.slice(0, 300) : null;
-        const x = pct(input.x_pct);
-        const y = pct(input.y_pct);
+        // Variant threads have no position on a page
+        const x = input.page === "variants" ? 0 : pct(input.x_pct);
+        const y = input.page === "variants" ? 0 : pct(input.y_pct);
         if (x === null || y === null) return json({ error: "position" }, 400);
+        if (input.page === "variants" && !(blockKey || "").startsWith("variant.")) return json({ error: "variant" }, 400);
         Object.assign(row, { block_key: blockKey, anchor_selector: selector, x_pct: x, y_pct: y });
     }
 

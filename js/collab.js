@@ -147,6 +147,8 @@ async function joinPage() {
         .on("broadcast", { event: "content" }, ({ payload }) => emit("content", payload))
         .on("broadcast", { event: "lock" }, ({ payload }) => receiveLock(payload))
         .on("broadcast", { event: "comments" }, ({ payload }) => emit("comments", payload))
+        // Style variants changed or someone voted: js/variants.js and the viewer reload
+        .on("broadcast", { event: "variants" }, ({ payload }) => { emit("variants", payload); document.dispatchEvent(new CustomEvent("kalq:variants", { detail: payload })); })
         .subscribe(async (status) => {
             if (status === "SUBSCRIBED") {
                 state.joinedAt = state.joinedAt || Date.now();

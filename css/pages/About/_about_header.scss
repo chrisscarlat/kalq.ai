@@ -1,6 +1,6 @@
 .about_header {
     height: 100vh;
-    background: $light;
+    background: var(--kalq-bg, #{$light});
     position: relative;
 
     #container {

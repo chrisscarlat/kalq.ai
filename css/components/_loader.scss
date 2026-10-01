@@ -3,7 +3,7 @@
     width: 100vw;
     height: 200vh;
     pointer-events: none;
-    background-color: $dark;
+    background-color: var(--kalq-dark, #{$dark});
     z-index: 1;
     visibility: hidden;
     opacity: 0;

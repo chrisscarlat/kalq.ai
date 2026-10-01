@@ -12,9 +12,9 @@ html {
 }
 
 body {
-  background: #fff;
-  color: #101010;
-  font-family: "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+  background: var(--kalq-bg, #fff);
+  color: var(--kalq-text, #101010);
+  font-family: var(--kalq-font-body, "Clash Grotesk", "Helvetica Neue", Arial, sans-serif);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -135,6 +135,15 @@ p {
     font-size: clamp(1.2rem, 3.5cqi, 2.2rem);
   }
 }
+/* Style variants can swap the heading font */
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: var(--kalq-font-heading, inherit);
+}
+
 /* Long German compounds would overflow large headings on phones */
 h1,
 h2,
@@ -176,7 +185,7 @@ section {
 
 a {
   text-decoration: none;
-  color: #101010;
+  color: var(--kalq-text, #101010);
 }
 
 /* Break Points */
@@ -241,8 +250,8 @@ a {
 }
 
 section.has-media {
-  background: #101010;
-  color: #fff;
+  background: var(--kalq-dark, #101010);
+  color: var(--kalq-light, #fff);
 }
 section.has-media .hero_media::after {
   content: "";
@@ -353,7 +362,7 @@ section.has-media #container {
   width: 100vw;
   height: 200vh;
   pointer-events: none;
-  background-color: #101010;
+  background-color: var(--kalq-dark, #101010);
   z-index: 1;
   visibility: hidden;
   opacity: 0;
@@ -553,6 +562,66 @@ section.has-media #container {
     transition: none !important;
   }
 }
+/* Style variant logo: a white silhouette, so the blended header inverts it like the built-in mark */
+.site-logo.has-custom-logo .site-logo__mark {
+  display: none;
+}
+
+.site-logo__custom {
+  display: flex;
+  align-items: center;
+  height: 36px;
+}
+.site-logo__custom svg {
+  height: 100%;
+  width: auto;
+  max-width: 120px;
+  filter: brightness(0) invert(1);
+}
+
+/* Style switcher next to the logo, outside the blended header so the dots show their real accent colours */
+.kalq-switcher {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 31;
+}
+.kalq-switcher[hidden] {
+  display: none;
+}
+
+.kalq-switcher__dot {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  background: var(--dot);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+  color: transparent;
+  font: 600 0px/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+  cursor: pointer;
+  transition: width 0.25s ease, height 0.25s ease, font-size 0.25s ease, color 0.2s ease;
+}
+.kalq-switcher__dot[aria-pressed=true], .kalq-switcher__dot:hover, .kalq-switcher__dot:focus-visible {
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+  color: #fff;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kalq-switcher__dot {
+    transition: none;
+  }
+}
 /* Glass dropdown. Lives outside the blended header and is not a <nav>, the global nav rules would break it. */
 .site-menu {
   position: fixed;
@@ -617,7 +686,7 @@ section.has-media #container {
   }
 }
 .social {
-  background: #fff;
+  background: var(--kalq-bg, #fff);
   padding: 8rem 0;
   /* Marquee */
   /* Items */
@@ -677,12 +746,12 @@ section.has-media #container {
   position: absolute;
   top: 0;
   left: 0;
-  background: #101010;
+  background: var(--kalq-dark, #101010);
   transform: scaleY(0);
   transition: transform 0.3s ease-in-out;
 }
 .social .social_wrapper .item:hover {
-  color: #fff;
+  color: var(--kalq-light, #fff);
 }
 .social .social_wrapper .item:hover #container {
   padding: 0 7rem;
@@ -730,8 +799,8 @@ section.has-media #container {
   }
 }
 footer {
-  background: #101010;
-  color: #fff;
+  background: var(--kalq-dark, #101010);
+  color: var(--kalq-light, #fff);
   padding: 10rem 0 0 0;
 }
 footer #container {
@@ -776,7 +845,7 @@ footer #container .footer_bottom p {
   gap: 0.75rem;
 }
 footer #container .footer_bottom a {
-  color: #fff;
+  color: var(--kalq-light, #fff);
 }
 
 /* breakPoints */
@@ -828,8 +897,8 @@ footer #container .footer_bottom a {
   align-items: center;
   text-align: center;
   position: relative;
-  background: #101010;
-  color: #fff;
+  background: var(--kalq-dark, #101010);
+  color: var(--kalq-light, #fff);
   overflow: hidden;
 }
 .header .hero_video {
@@ -877,8 +946,8 @@ footer #container .footer_bottom a {
   }
 }
 .about {
-  background: #101010;
-  color: #fff;
+  background: var(--kalq-dark, #101010);
+  color: var(--kalq-light, #fff);
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -898,7 +967,7 @@ footer #container .footer_bottom a {
 }
 
 .expertise {
-  background: #fff;
+  background: var(--kalq-bg, #fff);
   padding: 8rem 0;
 }
 @media (max-width: 540px) {
@@ -929,14 +998,14 @@ footer #container .footer_bottom a {
 .expertise .expertise_wrapper .elem .overlay {
   width: 100%;
   height: 100%;
-  background: #101010;
+  background: var(--kalq-dark, #101010);
   position: absolute;
   left: 0;
   top: -100%;
   transition: all 0.3s ease;
 }
 .expertise .expertise_wrapper .elem:hover {
-  color: #fff;
+  color: var(--kalq-light, #fff);
 }
 .expertise .expertise_wrapper .elem:hover .overlay {
   top: 0;
@@ -980,7 +1049,7 @@ footer #container .footer_bottom a {
   }
 }
 .Belief {
-  background: #fff;
+  background: var(--kalq-bg, #fff);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1007,7 +1076,7 @@ footer #container .footer_bottom a {
 
 .about_header {
   height: 100vh;
-  background: #fff;
+  background: var(--kalq-bg, #fff);
   position: relative;
 }
 .about_header #container {
@@ -1091,16 +1160,16 @@ footer #container .footer_bottom a {
   }
 }
 .about_weDo {
-  background: #101010;
-  color: #fff;
+  background: var(--kalq-dark, #101010);
+  color: var(--kalq-light, #fff);
 }
 .about_weDo #container .borderSeprator {
   background: #333333;
 }
 
 .about_awwards {
-  background: #fff;
-  color: #101010;
+  background: var(--kalq-bg, #fff);
+  color: var(--kalq-text, #101010);
 }
 .about_awwards #container .borderSeprator {
   background: #d9d9d9;
@@ -1165,7 +1234,7 @@ footer #container .footer_bottom a {
 }
 .expertise_header {
   height: 100vh;
-  background: #fff;
+  background: var(--kalq-bg, #fff);
   position: relative;
 }
 .expertise_header #container {
@@ -1293,7 +1362,7 @@ footer #container .footer_bottom a {
 }
 /* Impressum and Datenschutz */
 .legal {
-  background: #fff;
+  background: var(--kalq-bg, #fff);
   min-height: 100vh;
   padding: 12rem 0 8rem;
 }

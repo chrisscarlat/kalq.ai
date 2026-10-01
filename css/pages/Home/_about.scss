@@ -1,6 +1,6 @@
 .about {
-    background: $dark;
-    color: $light;
+    background: var(--kalq-dark, #{$dark});
+    color: var(--kalq-light, #{$light});
     min-height: 100vh;
     display: flex;
     justify-content: center;

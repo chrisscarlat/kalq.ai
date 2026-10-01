@@ -1,6 +1,6 @@
 footer {
-    background: $dark;
-    color: $light;
+    background: var(--kalq-dark, #{$dark});
+    color: var(--kalq-light, #{$light});
     padding: 10rem 0 0 0;
 
     #container {
@@ -52,7 +52,7 @@ footer {
             }
 
             a {
-                color: $light;
+                color: var(--kalq-light, #{$light});
             }
         }
     }

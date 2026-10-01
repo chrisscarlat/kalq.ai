@@ -1,7 +1,7 @@
 // Section We Do
 .about_weDo {
-    background: $dark;
-    color: $light;
+    background: var(--kalq-dark, #{$dark});
+    color: var(--kalq-light, #{$light});
 
     #container {
         .borderSeprator {
@@ -12,8 +12,8 @@
 
 // Section Awwards
 .about_awwards {
-    background: $light;
-    color: $dark;
+    background: var(--kalq-bg, #{$light});
+    color: var(--kalq-text, #{$dark});
 
     #container {
         .borderSeprator {

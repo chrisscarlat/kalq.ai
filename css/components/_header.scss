@@ -219,3 +219,70 @@
         transition: none !important;
     }
 }
+
+/* Style variant logo: a white silhouette, so the blended header inverts it like the built-in mark */
+.site-logo.has-custom-logo .site-logo__mark {
+    display: none;
+}
+
+.site-logo__custom {
+    display: flex;
+    align-items: center;
+    height: 36px;
+
+    svg {
+        height: 100%;
+        width: auto;
+        max-width: 120px;
+        filter: brightness(0) invert(1);
+    }
+}
+
+/* Style switcher next to the logo, outside the blended header so the dots show their real accent colours */
+.kalq-switcher {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 31;
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+.kalq-switcher__dot {
+    width: 10px;
+    height: 10px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border: 1.5px solid rgba(255, 255, 255, 0.85);
+    border-radius: 50%;
+    background: var(--dot);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+    color: transparent;
+    font: 600 0px/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+    cursor: pointer;
+    transition: width 0.25s ease, height 0.25s ease, font-size 0.25s ease, color 0.2s ease;
+
+    // Active dot shows its letter, the others on hover or keyboard focus
+    &[aria-pressed="true"],
+    &:hover,
+    &:focus-visible {
+        width: 22px;
+        height: 22px;
+        font-size: 11px;
+        color: #fff;
+        text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+        outline: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .kalq-switcher__dot {
+        transition: none;
+    }
+}

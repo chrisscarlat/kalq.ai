@@ -7,8 +7,8 @@
     align-items: center;
     text-align: center;
     position: relative;
-    background: $dark;
-    color: $light;
+    background: var(--kalq-dark, #{$dark});
+    color: var(--kalq-light, #{$light});
     overflow: hidden;
 
     .hero_video {

@@ -1,5 +1,5 @@
 .Belief {
-    background: $light;
+    background: var(--kalq-bg, #{$light});
     display: flex;
     align-items: center;
     justify-content: center;

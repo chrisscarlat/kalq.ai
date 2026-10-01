@@ -69,15 +69,26 @@ export function setMedia(el, url) {
     }
 }
 
+// A style variant can replace any image or the hero video (js/variants.js); null keeps the page's own
+let mediaOverride = () => null;
+export const setMediaOverride = (fn) => { mediaOverride = fn; };
+
+// What a media slot showed in the HTML, so switching back to a variant without a replacement restores it
+const defaultUrl = (el) => (el.classList.contains("hero_media") ? "" : el.getAttribute("data-image") ?? currentUrl(el) ?? "");
+
 // Blocks that are not translated: media, counter numbers, email addresses
 export function applyDirect(root) {
     root.querySelectorAll("[data-kalq-key]").forEach((el) => {
-        const entry = store.get(el.dataset.kalqKey);
-        if (!entry) return;
+        const key = el.dataset.kalqKey;
+        const entry = store.get(key);
         const type = el.dataset.kalqType || "text";
 
-        if ((type === "image" || type === "video") && "media" in entry) {
-            setMedia(el, entry.media);
+        if (type === "image" || type === "video") {
+            if (el.dataset.kalqDefault === undefined) el.dataset.kalqDefault = defaultUrl(el);
+            const url = mediaOverride(key) || (entry && "media" in entry ? entry.media : el.dataset.kalqDefault);
+            setMedia(el, url || "");
+        } else if (!entry) {
+            return;
         } else if (type === "text" && !el.hasAttribute("data-i18n") && !el.hasAttribute("data-i18n-marquee")) {
             const html = textFor(el.dataset.kalqKey, currentLang()) ?? entry.de ?? entry.en;
             if (html == null) return;

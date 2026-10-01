@@ -23,7 +23,7 @@ section {
 
 a {
     text-decoration: none;
-    color: $dark;
+    color: var(--kalq-text, #{$dark});
 }
 
 @mixin verticalGap {
@@ -102,8 +102,8 @@ a {
 }
 
 section.has-media { // section + class: beats the page header's own light background
-    background: $dark;
-    color: $light;
+    background: var(--kalq-dark, #{$dark});
+    color: var(--kalq-light, #{$light});
 
     .hero_media::after {
         content: "";

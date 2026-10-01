@@ -5,12 +5,14 @@ import { logoAnimation } from "./logoAnimation.js";
 import { applyLanguage } from "./i18n.js";
 import { loadPageContent } from "./content.js";
 import { animateLines } from "./blocks.js";
+import { initVariants } from "./variants.js";
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 document.addEventListener("DOMContentLoaded", async () => {
     gsap.registerPlugin(ScrollTrigger);
     [barbaPageTransition, smoothScroller, initHeader, logoAnimation, mouseMoveParallaxLine].forEach(func => func());
+    initVariants(); // style variant: colours, fonts, logo, images; switcher next to the logo
     // Counters, hover images and the video read their content, so they start after edited content is applied
     await loadPageContent();
     [animateNumbering, expertiseHover, heroVideo, parallaxImg, animateLines].forEach(func => func());

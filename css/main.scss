@@ -17,9 +17,9 @@ html {
 }
 
 body {
-    background: $light;
-    color: $dark;
-    font-family: "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+    background: var(--kalq-bg, #{$light});
+    color: var(--kalq-text, #{$dark});
+    font-family: var(--kalq-font-body, "Clash Grotesk", "Helvetica Neue", Arial, sans-serif); // style variants can swap the font
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
 }

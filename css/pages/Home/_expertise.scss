@@ -1,5 +1,5 @@
 .expertise {
-    background: $light;
+    background: var(--kalq-bg, #{$light});
     @include verticalGap;
 
     .expertise_wrapper {
@@ -26,7 +26,7 @@
             .overlay {
                 width: 100%;
                 height: 100%;
-                background: $dark;
+                background: var(--kalq-dark, #{$dark});
                 position: absolute;
                 left: 0;
                 top: -100%;
@@ -38,7 +38,7 @@
                     top: 0;
                 }
 
-                color: $light;
+                color: var(--kalq-light, #{$light});
             }
 
             &:last-child {

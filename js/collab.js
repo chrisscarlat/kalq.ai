@@ -391,6 +391,7 @@ async function init() {
     if (state.me.kind === "editor") {
         import("./edit.js").then((m) => m.initEditing(collab)).catch((e) => console.error("edit", e));
         import("./invite.js").then((m) => m.initInvite(collab)).catch((e) => console.error("invite", e));
+        if (state.me.is_admin) import("./styles.js").then((m) => m.initStyles(collab)).catch((e) => console.error("styles", e));
     }
 
     // Touch devices only show the stack, they do not send cursors

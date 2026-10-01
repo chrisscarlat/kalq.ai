@@ -70,7 +70,9 @@ export async function GET(request) {
     const votes = await select("variant_votes", `select=variant_key,voter_id,created_at&order=created_at.asc`).catch(() => []);
     const byVariant = {};
     votes.forEach((v) => { (byVariant[v.variant_key.slice(8)] ||= []).push(v.voter_id); });
-    return json({ variants, votes: byVariant, people: await people([...new Set(votes.map((v) => v.voter_id))]), admin, me: session.uid });
+    // Admins: every image and video slot of the site, for the per-image replacements in the Styles panel
+    const slots = admin ? await select("blocks", `type=in.(image,video)&select=key,page,type&order=key.asc`).catch(() => []) : undefined;
+    return json({ variants, votes: byVariant, people: await people([...new Set(votes.map((v) => v.voter_id))]), admin, me: session.uid, slots });
 }
 
 export async function POST(request) {

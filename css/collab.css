@@ -1246,7 +1246,7 @@
   flex-wrap: wrap;
   margin: 1rem -1rem 0;
   padding: 0.7rem 1rem;
-  background: rgba(16, 16, 16, 0.95);
+  background: #141414;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -1801,4 +1801,117 @@
 
 .kalq-styles__field .kalq-seg {
   align-self: flex-start;
+}
+
+/* Styles panel: name across two columns, switches below */
+.kalq-styles__row > .kalq-styles__field:nth-child(2) {
+  grid-column: span 2;
+}
+
+.kalq-styles__switches {
+  grid-column: 1/-1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.4rem;
+  margin-top: 0.4rem;
+}
+
+.kalq-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.kalq-switch__input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.kalq-switch__track {
+  position: relative;
+  width: 34px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  transition: background-color 0.2s ease;
+}
+.kalq-switch__track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.kalq-switch__input:checked + .kalq-switch__track {
+  background: #10B981;
+}
+.kalq-switch__input:checked + .kalq-switch__track::after {
+  transform: translateX(14px);
+}
+
+.kalq-switch__input:focus-visible + .kalq-switch__track {
+  outline: 1px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Action bar: delete on the left, Save larger on the right */
+.kalq-btn--quiet {
+  border-color: transparent;
+  color: rgba(255, 255, 255, 0.6);
+}
+.kalq-btn--quiet:hover, .kalq-btn--quiet:focus-visible {
+  color: #ff8080;
+  border-color: rgba(255, 128, 128, 0.4);
+}
+
+.kalq-styles__actions {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.6rem;
+}
+
+.kalq-styles__actions-view,
+.kalq-styles__actions-main {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.kalq-styles__actions-view {
+  flex-wrap: wrap;
+}
+.kalq-styles__actions-view .kalq-btn {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.76rem;
+}
+
+.kalq-styles__actions-main .kalq-btn--quiet {
+  margin-right: auto;
+  margin-left: -0.6rem;
+}
+.kalq-styles__actions-main .kalq-styles__dirty {
+  margin: 0 0.4rem 0 0;
+}
+
+.kalq-btn--save {
+  padding: 0.7rem 1.6rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kalq-switch__track,
+  .kalq-switch__track::after {
+    transition: none;
+  }
 }

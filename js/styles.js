@@ -150,12 +150,17 @@ function headerSection() {
     letter.addEventListener("change", () => { draft.letter = letter.value; });
     const name = el("input", { type: "text", value: draft.name || "", maxLength: 40 });
     name.addEventListener("input", () => { draft.name = name.value; });
-    const status = el("select", {}, el("option", { value: "draft", textContent: t("draft"), selected: draft.status !== "published" }), el("option", { value: "published", textContent: t("published"), selected: draft.status === "published" }));
-    status.addEventListener("change", () => { draft.status = status.value; });
-    const def = el("input", { type: "checkbox", checked: !!draft.is_default });
-    def.addEventListener("change", () => { draft.is_default = def.checked; });
-    return el("div", { className: "kalq-styles__row" }, field(t("letter"), letter), field(t("name"), name), field(t("status"), status),
-        el("label", { className: "kalq-styles__check" }, def, el("span", { textContent: t("isDefault") })));
+    // Switches: published (Save then puts it live) and default
+    const toggle = (label, on, onChange) => {
+        const input = el("input", { type: "checkbox", className: "kalq-switch__input", checked: on });
+        input.setAttribute("role", "switch");
+        input.addEventListener("change", () => { onChange(input.checked); changed(); });
+        return el("label", { className: "kalq-switch" }, input, el("span", { className: "kalq-switch__track", ariaHidden: "true" }), el("span", { textContent: label }));
+    };
+    return el("div", { className: "kalq-styles__row" }, field(t("letter"), letter), field(t("name"), name),
+        el("div", { className: "kalq-styles__switches" },
+            toggle(t("published"), draft.status === "published", (on) => { draft.status = on ? "published" : "draft"; }),
+            toggle(t("isDefault"), !!draft.is_default, (on) => { draft.is_default = on; })));
 }
 
 function logoSection() {
@@ -482,7 +487,7 @@ function renderPanel() {
     if (!draft) { settings.replaceChildren(); map.replaceChildren(); return; }
 
     const history = el("section", { className: "kalq-styles__history" });
-    const save = el("button", { type: "button", className: "kalq-btn kalq-btn--primary", textContent: t("save") });
+    const save = el("button", { type: "button", className: "kalq-btn kalq-btn--primary kalq-btn--save", textContent: t("save") });
     save.addEventListener("click", async () => {
         save.disabled = true;
         try { await api({ action: "save", id: draft.id, data: draft }); dirty = false; if (previewOn) togglePreview(false); await after(); }
@@ -495,7 +500,7 @@ function renderPanel() {
     peek.addEventListener("click", () => { if (!previewOn) togglePreview(true); minimize(); });
     const dup = el("button", { type: "button", className: "kalq-btn", textContent: t("duplicate") });
     dup.addEventListener("click", () => createFrom(draft, t("copyOf")(draft.name)));
-    const del = el("button", { type: "button", className: "kalq-btn", textContent: t("remove") });
+    const del = el("button", { type: "button", className: "kalq-btn kalq-btn--quiet", textContent: t("remove") });
     del.addEventListener("click", async () => {
         if (!window.confirm(t("confirmDelete"))) return;
         try { await api({ action: "delete", id: draft.id }); selectedId = null; await after(); } catch (error) { collab.toast(errorText(error), "error"); }
@@ -505,7 +510,9 @@ function renderPanel() {
 
     settings.replaceChildren(headerSection(), logoSection(), heroMarkSection(), colorSection(), el("section", {}, el("h4", { textContent: t("fonts") }), fontRow("heading"), fontRow("body")),
         fillAllSection(), history,
-        el("div", { className: "kalq-styles__actions" }, unsaved, preview, peek, dup, del, save),
+        el("div", { className: "kalq-styles__actions" },
+            el("div", { className: "kalq-styles__actions-view" }, preview, peek, dup),
+            el("div", { className: "kalq-styles__actions-main" }, del, unsaved, save)),
         el("datalist", { id: "kalq-google-fonts" }, ...GOOGLE_SUGGESTIONS.map((f) => el("option", { value: f }))));
     map.replaceChildren(el("h4", { textContent: t("sitemap") }), sitemapNode());
     historySection(history);
@@ -520,6 +527,8 @@ async function createFrom(source, name) {
         const { variant } = await api({ action: "save", data: { ...data, letter: free, name: name || `Variant ${free}`, status: "draft", is_default: false, sort: Math.max(0, ...variants.map((v) => v.sort || 0)) + 1 } });
         selectedId = variant.id;
         await after();
+        // Stored as a draft until saved; the switch starts on, so Save puts it live
+        if (draft?.id === variant.id) { draft.status = "published"; dirty = true; render(); }
     } catch (error) { collab.toast(errorText(error), "error"); }
 }
 

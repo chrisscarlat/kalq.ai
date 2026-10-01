@@ -50,6 +50,8 @@ function barbaPageTransition() {
     loader.init();
 
     barba.init({
+        // Barba loads the page in full when the next page takes longer than this (default 2 s)
+        timeout: 10000,
         transitions: [{
             async leave(data) {
                 const done = this.async();
@@ -65,7 +67,16 @@ function barbaPageTransition() {
         }]
     });
 
-    barba.hooks.before(() => document.querySelector('html').classList.add('is-transitioning'));
+    barba.hooks.before(() => {
+        document.querySelector('html').classList.add('is-transitioning');
+        // The page being left is discarded: stop its video downloads so the next page arrives quickly
+        document.querySelectorAll('[data-barba="container"] video').forEach(video => {
+            video.pause();
+            video.removeAttribute('src');
+            video.querySelectorAll('source').forEach(source => source.removeAttribute('src'));
+            video.load();
+        });
+    });
     barba.hooks.after(() => {
         document.querySelector('html').classList.remove('is-transitioning');
         applyLanguage(); // Barba resets the title from the fetched page

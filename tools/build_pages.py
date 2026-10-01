@@ -30,6 +30,8 @@ def head(title):
     <title>{title}</title>
     <!-- Pages are German; hide translatable text until js/i18n.js has applied another stored language -->
     <script>try {{ var l = localStorage.getItem("kalq-lang"); if (l && l !== "de") document.documentElement.classList.add("i18n-pending"); }} catch (e) {{ }}</script>
+    <!-- Edited content: keyed blocks stay hidden until js/content.js applied it (1.5 s max, 3 s if scripts fail) -->
+    <script>document.documentElement.classList.add("kalq-loading"); setTimeout(function () {{ document.documentElement.classList.remove("kalq-loading"); }}, 3000);</script>
     <meta name="description" content="{DESC}">
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="./assets/favicon.png" type="image/png">
@@ -120,7 +122,7 @@ FOOTER = '''
                             </p>
                             <div class="footer_btns_wrapper">
                                 <a href="mailto:office@kalq.ai" class="btn">
-                                    <span>office@kalq.ai</span>
+                                    <span data-kalq-key="site.footer.email">office@kalq.ai</span>
                                 </a>
                                 <a href="mailto:office@kalq.ai?subject=Kalq%20pilot" class="btn">
                                     <span>Apply for the pilot</span>
@@ -170,6 +172,8 @@ IMGS = [
     "https://images.unsplash.com/photo-1526413232644-8a40f03cc03b?q=80&w=1887&auto=format&fit=crop",
 ]
 
+SLUGS = ["should-cost", "supplier-fit", "rfq-award", "machine-intelligence", "manufacturing-cost", "price-quote"]
+
 MODULES = [
     ("Should Cost", "Buyer", "What the part should cost, built bottom up.",
      "Cost from geometry, material, process route and machine economics, so negotiations start from a number you can explain."),
@@ -212,14 +216,61 @@ def tag(html):
         html = pattern.sub(lambda m: f'<{m.group(1)}{m.group(2)} data-i18n="{key}">{m.group(3)}</{m.group(1)}>', html)
     return html
 
+# data-kalq-key for every translated element: page.section.item. Keys must never change once shipped.
+# Header, menu, social and footer are shared on every page ("site.*"), so one edit changes them everywhere.
+MODULE_SLUGS = {"shouldCost": "should-cost", "supplierFit": "supplier-fit", "rfq": "rfq-award",
+                "machine": "machine-intelligence", "mfgCost": "manufacturing-cost", "quote": "price-quote"}
+FIXED_KEYS = {
+    "nav.home": "site.menu.home", "nav.company": "site.menu.company",
+    "social.label": "site.social.label",
+    "footer.heading1": "site.footer.heading1", "footer.heading2": "site.footer.heading2", "footer.sub": "site.footer.sub",
+    "footer.pilot": "site.footer.pilot", "footer.impressum": "site.footer.impressum", "footer.privacy": "site.footer.privacy",
+    "hero.line1": "home.hero.line1", "hero.line2": "home.hero.line2", "hero.line3": "home.hero.line3",
+    "home.about": "home.about.text", "home.count1": "home.about.count1.label", "home.count2": "home.about.count2.label",
+    "home.count3": "home.about.count3.label", "home.platformCta": "home.platform.cta", "home.approach": "home.approach.title",
+    "home.approach1": "home.approach.p1", "home.approach2": "home.approach.p2",
+    "platform.header": "platform.header.title", "platform.introTitle": "platform.intro.title", "platform.intro": "platform.intro.text",
+    "company.header": "company.header.title", "company.why": "company.why.title", "company.whyText": "company.why.text",
+    "company.shared": "company.shared.title", "company.shared1": "company.shared.p1", "company.shared2": "company.shared.p2",
+    "company.prices": "company.prices.title", "company.pricesText": "company.prices.text",
+}
+
+def assign_keys(html, page):
+    side_count = {"platform.buyer": 0, "platform.supplier": 0}
+
+    def key_for(tag_name, i18n):
+        if i18n in FIXED_KEYS:
+            return FIXED_KEYS[i18n]
+        if i18n == "nav.platform":  # menu link, or the Platform heading on Home
+            return "site.menu.platform" if tag_name == "a" else "home.platform.title"
+        if i18n.startswith("module."):
+            slug = MODULE_SLUGS[i18n.split(".")[1]]
+            return f"home.platform.{slug}.title" if page == "home" else f"platform.cards.{slug}.title"
+        if i18n in side_count:  # three buyer cards, then three supplier cards
+            n = side_count[i18n]
+            side_count[i18n] += 1
+            return f"platform.cards.{SLUGS[n + (3 if i18n == 'platform.supplier' else 0)]}.side"
+        if i18n.startswith("platform.") and i18n.count(".") == 2:
+            _, mod, part = i18n.split(".")
+            return f"platform.cards.{MODULE_SLUGS[mod]}.{'body' if part == 'text' else part}"
+        raise KeyError(f"no data-kalq-key rule for {i18n} on {page}")
+
+    def add(m):
+        if "data-kalq-key" in m.group(0):
+            return m.group(0)
+        return m.group(0)[:-1] + f' data-kalq-key="{key_for(m.group(1), m.group(2))}">'
+
+    html = re.sub(r'<(\w+)[^>]*\sdata-i18n="([^"]+)"[^>]*>', add, html)
+    return html.replace('data-i18n-marquee="social.marquee">', 'data-i18n-marquee="social.marquee" data-kalq-key="site.social.marquee">')
+
 def write(name, html):
     page = name[:-5] if name != "index.html" else "home"
-    html = tag(html).replace('data-barba="container">', f'data-barba="container" data-page="{page}">', 1)
+    html = assign_keys(tag(html), page).replace('data-barba="container">', f'data-barba="container" data-page="{page}">', 1)
     html = localize(html, page)
     open(f"{ROOT}/{name}", "w", encoding="utf-8").write(html)
 
 # ---------------- Home ----------------
-rows = "\n".join(f'''                        <div class="elem" data-image="{IMGS[i]}">
+rows = "\n".join(f'''                        <div class="elem" data-image="{IMGS[i]}" data-kalq-key="home.platform.{SLUGS[i]}.image" data-kalq-type="image">
                             <div class="overlay"></div>
                             <div class="title">
                                 <p>{i + 1:02d}</p>
@@ -229,7 +280,7 @@ rows = "\n".join(f'''                        <div class="elem" data-image="{IMGS
 
 home = head("Kalq | The decision layer for manufactured parts") + f'''                <!-- Hero -->
                 <section class="header">
-                    <video class="hero_video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+                    <video class="hero_video" data-kalq-key="home.hero.video" data-kalq-type="video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
                         <source src="assets/video-hero-6mb-low.mp4" type="video/mp4">
                     </video>
                     <div class="hero_overlay"></div>
@@ -253,15 +304,15 @@ home = head("Kalq | The decision layer for manufactured parts") + f'''          
                         </h5>
                         <div class="numbering">
                             <div>
-                                <h2>2</h2>
+                                <h2 data-kalq-key="home.about.count1.value">2</h2>
                                 <p>Commercial engines</p>
                             </div>
                             <div>
-                                <h2>3</h2>
+                                <h2 data-kalq-key="home.about.count2.value">3</h2>
                                 <p>Price truths, never mixed</p>
                             </div>
                             <div>
-                                <h2>8</h2>
+                                <h2 data-kalq-key="home.about.count3.value">8</h2>
                                 <p>Platform modules</p>
                             </div>
                         </div>
@@ -312,7 +363,7 @@ write("index.html", home)
 def card(i, m):
     return f'''                                <div class="card">
                                     <div class="parallax_img">
-                                        <img src="{IMGS[i]}" alt="" loading="lazy" width="auto" height="auto">
+                                        <img src="{IMGS[i]}" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="platform.cards.{SLUGS[i]}.image" data-kalq-type="image">
                                     </div>
                                     <p class="tag"><span>{m[0]}</span> <span class="card_side">· {m[1]}</span></p>
                                     <h5>
@@ -336,7 +387,7 @@ platform = head("Kalq | Platform") + f'''                <!-- Header -->
                 <!-- Header img. TODO: replace placeholder image -->
                 <section class="expertise_header_img">
                     <div class="parallax_img">
-                        <img src="{IMGS[3]}" alt="" loading="lazy" width="auto" height="auto">
+                        <img src="{IMGS[3]}" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="platform.header.image" data-kalq-type="image">
                     </div>
                 </section>
 
@@ -386,7 +437,7 @@ company = head("Kalq | Company") + '''                <!-- Header -->
                 <!-- Header img. TODO: replace placeholder image -->
                 <section class="about_header_img">
                     <div class="parallax_img">
-                        <img src="assets/about/about_header.webp" alt="" loading="lazy" width="auto" height="auto">
+                        <img src="assets/about/about_header.webp" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="company.header.image" data-kalq-type="image">
                     </div>
                 </section>
 
@@ -405,10 +456,10 @@ company = head("Kalq | Company") + '''                <!-- Header -->
                         <!-- TODO: replace placeholder images -->
                         <div class="img_wrapper">
                             <div class="parallax_img">
-                                <img src="assets/about/goals1.avif" alt="" loading="lazy" width="auto" height="auto">
+                                <img src="assets/about/goals1.avif" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="company.why.image1" data-kalq-type="image">
                             </div>
                             <div class="parallax_img">
-                                <img src="assets/about/goals2.jpg" alt="" loading="lazy" width="auto" height="auto">
+                                <img src="assets/about/goals2.jpg" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="company.why.image2" data-kalq-type="image">
                             </div>
                         </div>
                     </div>
@@ -438,7 +489,7 @@ company = head("Kalq | Company") + '''                <!-- Header -->
 
                         <!-- TODO: replace placeholder image -->
                         <div class="parallax_img">
-                            <img src="assets/about/weDo.avif" alt="" loading="lazy" width="auto" height="auto">
+                            <img src="assets/about/weDo.avif" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="company.shared.image" data-kalq-type="image">
                         </div>
                     </div>
                 </section>
@@ -463,7 +514,7 @@ company = head("Kalq | Company") + '''                <!-- Header -->
 
                         <!-- TODO: replace placeholder image -->
                         <div class="parallax_img">
-                            <img src="https://images.unsplash.com/photo-1483058712412-4245e9b90334?q=80&w=2070&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto">
+                            <img src="https://images.unsplash.com/photo-1483058712412-4245e9b90334?q=80&w=2070&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="company.prices.image" data-kalq-type="image">
                         </div>
                     </div>
                 </section>
@@ -587,6 +638,15 @@ gate_html = f"""<!DOCTYPE html>
 </html>
 """
 open(f"{ROOT}/gate.html", "w", encoding="utf-8").write(gate_html)
+
+# Block keys: unique per page, page.* keys only on their own page
+for n in ["index.html", "platform.html", "company.html", "impressum.html", "datenschutz.html"]:
+    keys = re.findall(r'data-kalq-key="([^"]+)"', open(f"{ROOT}/{n}", encoding="utf-8").read())
+    dupes = {k for k in keys if keys.count(k) > 1}
+    assert not dupes, f"duplicate keys on {n}: {dupes}"
+    page = n[:-5] if n != "index.html" else "home"
+    foreign = [k for k in keys if k.split(".")[0] not in (page, "site")]
+    assert not foreign, f"keys of another page on {n}: {foreign}"
 
 # Every translatable key must appear in some page
 pages = "".join(open(f"{ROOT}/{n}", encoding="utf-8").read() for n in ["index.html", "platform.html", "company.html", "impressum.html", "datenschutz.html"])

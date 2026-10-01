@@ -52,3 +52,8 @@ a {
 .i18n-pending [data-i18n-marquee] {
     visibility: hidden;
 }
+
+/* Set in <head> until js/content.js has applied edited content */
+.kalq-loading [data-kalq-key] {
+    visibility: hidden;
+}

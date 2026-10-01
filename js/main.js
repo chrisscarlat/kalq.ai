@@ -3,12 +3,16 @@ import { mouseMoveParallaxLine } from "./verticleLine.js";
 import { initHeader, refreshHeader } from "./header.js";
 import { logoAnimation } from "./logoAnimation.js";
 import { applyLanguage } from "./i18n.js";
+import { loadPageContent } from "./content.js";
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     gsap.registerPlugin(ScrollTrigger);
-    [barbaPageTransition, smoothScroller, initHeader, logoAnimation, mouseMoveParallaxLine, animateNumbering, expertiseHover, heroVideo, parallaxImg].forEach(func => func());
+    [barbaPageTransition, smoothScroller, initHeader, logoAnimation, mouseMoveParallaxLine].forEach(func => func());
+    // Counters, hover images and the video read their content, so they start after edited content is applied
+    await loadPageContent();
+    [animateNumbering, expertiseHover, heroVideo, parallaxImg].forEach(func => func());
 });
 
 let bodyScrollBar;
@@ -50,7 +54,8 @@ function barbaPageTransition() {
                 await new Promise(r => setTimeout(r, 1500));
                 done();
             },
-            enter(data) {
+            async enter(data) {
+                await loadPageContent(data.next.container); // still behind the loader, so no flash
                 loader.away();
                 reinitializeFunctions();
             },

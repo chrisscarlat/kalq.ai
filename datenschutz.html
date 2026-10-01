@@ -7,6 +7,8 @@
     <title>Kalq | Datenschutz</title>
     <!-- Pages are German; hide translatable text until js/i18n.js has applied another stored language -->
     <script>try { var l = localStorage.getItem("kalq-lang"); if (l && l !== "de") document.documentElement.classList.add("i18n-pending"); } catch (e) { }</script>
+    <!-- Edited content: keyed blocks stay hidden until js/content.js applied it (1.5 s max, 3 s if scripts fail) -->
+    <script>document.documentElement.classList.add("kalq-loading"); setTimeout(function () { document.documentElement.classList.remove("kalq-loading"); }, 3000);</script>
     <meta name="description" content="Kalq macht aus der Geometrie eines Teils eine technische Wahrheit und zwei getrennte kommerzielle Engines, für Einkäufer und Lieferanten von Fertigungsteilen.">
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="./assets/favicon.png" type="image/png">
@@ -48,9 +50,9 @@
 
     <!-- Menu dropdown (not a nav, not inside the blended header) -->
     <div class="site-menu" id="site-menu" aria-label="Hauptmenü" data-i18n-aria="aria.menu">
-        <a href="index.html" data-i18n="nav.home">Start</a>
-        <a href="platform.html" data-i18n="nav.platform">Plattform</a>
-        <a href="company.html" data-i18n="nav.company">Unternehmen</a>
+        <a href="index.html" data-i18n="nav.home" data-kalq-key="site.menu.home">Start</a>
+        <a href="platform.html" data-i18n="nav.platform" data-kalq-key="site.menu.platform">Plattform</a>
+        <a href="company.html" data-i18n="nav.company" data-kalq-key="site.menu.company">Unternehmen</a>
     </div>
 
     <!-- Image for platform hover list -->
@@ -75,16 +77,16 @@
                     <div id="container">
                         <div class="footer_header">
                             <div class="footer_heading">
-                                <h2 data-i18n="footer.heading1">Der Beweis</h2>
-                                <h2 data-i18n="footer.heading2">am echten Teil</h2>
+                                <h2 data-i18n="footer.heading1" data-kalq-key="site.footer.heading1">Der Beweis</h2>
+                                <h2 data-i18n="footer.heading2" data-kalq-key="site.footer.heading2">am echten Teil</h2>
                             </div>
-                            <p class="footer_sub" data-i18n="footer.sub">Wir starten mit CNC-Drehteilen in Deutschland. Wenn Sie solche Teile einkaufen oder fertigen, bewerben Sie sich für das Pilotprojekt.</p>
+                            <p class="footer_sub" data-i18n="footer.sub" data-kalq-key="site.footer.sub">Wir starten mit CNC-Drehteilen in Deutschland. Wenn Sie solche Teile einkaufen oder fertigen, bewerben Sie sich für das Pilotprojekt.</p>
                             <div class="footer_btns_wrapper">
                                 <a href="mailto:office@kalq.ai" class="btn">
-                                    <span>office@kalq.ai</span>
+                                    <span data-kalq-key="site.footer.email">office@kalq.ai</span>
                                 </a>
                                 <a href="mailto:office@kalq.ai?subject=Kalq%20pilot" class="btn">
-                                    <span data-i18n="footer.pilot">Für das Pilotprojekt bewerben</span>
+                                    <span data-i18n="footer.pilot" data-kalq-key="site.footer.pilot">Für das Pilotprojekt bewerben</span>
                                 </a>
                             </div>
                         </div>
@@ -92,9 +94,9 @@
                             <p>
                                 <span>© 2026 Kalq</span>
                                 <span aria-hidden="true">·</span>
-                                <a href="impressum.html" class="underLine_Link" data-i18n="footer.impressum">Impressum</a>
+                                <a href="impressum.html" class="underLine_Link" data-i18n="footer.impressum" data-kalq-key="site.footer.impressum">Impressum</a>
                                 <span aria-hidden="true">·</span>
-                                <a href="datenschutz.html" class="underLine_Link" data-i18n="footer.privacy">Datenschutz</a>
+                                <a href="datenschutz.html" class="underLine_Link" data-i18n="footer.privacy" data-kalq-key="site.footer.privacy">Datenschutz</a>
                             </p>
                         </div>
                     </div>

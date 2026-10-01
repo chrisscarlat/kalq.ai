@@ -196,6 +196,11 @@ a {
   visibility: hidden;
 }
 
+/* Set in <head> until js/content.js has applied edited content */
+.kalq-loading [data-kalq-key] {
+  visibility: hidden;
+}
+
 /* Smooth Scroller */
 .site-main.no_scroll {
   height: 100vh;

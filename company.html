@@ -7,6 +7,8 @@
     <title>Kalq | Unternehmen</title>
     <!-- Pages are German; hide translatable text until js/i18n.js has applied another stored language -->
     <script>try { var l = localStorage.getItem("kalq-lang"); if (l && l !== "de") document.documentElement.classList.add("i18n-pending"); } catch (e) { }</script>
+    <!-- Edited content: keyed blocks stay hidden until js/content.js applied it (1.5 s max, 3 s if scripts fail) -->
+    <script>document.documentElement.classList.add("kalq-loading"); setTimeout(function () { document.documentElement.classList.remove("kalq-loading"); }, 3000);</script>
     <meta name="description" content="Kalq macht aus der Geometrie eines Teils eine technische Wahrheit und zwei getrennte kommerzielle Engines, für Einkäufer und Lieferanten von Fertigungsteilen.">
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="./assets/favicon.png" type="image/png">
@@ -48,9 +50,9 @@
 
     <!-- Menu dropdown (not a nav, not inside the blended header) -->
     <div class="site-menu" id="site-menu" aria-label="Hauptmenü" data-i18n-aria="aria.menu">
-        <a href="index.html" data-i18n="nav.home">Start</a>
-        <a href="platform.html" data-i18n="nav.platform">Plattform</a>
-        <a href="company.html" data-i18n="nav.company">Unternehmen</a>
+        <a href="index.html" data-i18n="nav.home" data-kalq-key="site.menu.home">Start</a>
+        <a href="platform.html" data-i18n="nav.platform" data-kalq-key="site.menu.platform">Plattform</a>
+        <a href="company.html" data-i18n="nav.company" data-kalq-key="site.menu.company">Unternehmen</a>
     </div>
 
     <!-- Image for platform hover list -->
@@ -63,7 +65,7 @@
                 <!-- Header -->
                 <section class="about_header">
                     <div id="container">
-                        <h2 data-i18n="company.header">Eine Wahrheit zum Teil. Zwei kommerzielle Engines. Bessere industrielle Entscheidungen.</h2>
+                        <h2 data-i18n="company.header" data-kalq-key="company.header.title">Eine Wahrheit zum Teil. Zwei kommerzielle Engines. Bessere industrielle Entscheidungen.</h2>
                         <div class="block"></div>
                     </div>
                 </section>
@@ -71,24 +73,24 @@
                 <!-- Header img. TODO: replace placeholder image -->
                 <section class="about_header_img">
                     <div class="parallax_img">
-                        <img src="assets/about/about_header.webp" alt="" loading="lazy" width="auto" height="auto">
+                        <img src="assets/about/about_header.webp" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="company.header.image" data-kalq-type="image">
                     </div>
                 </section>
 
                 <!-- Why Kalq exists -->
                 <section class="about_goals">
                     <div id="container">
-                        <h3 data-i18n="company.why">Warum es Kalq gibt</h3>
+                        <h3 data-i18n="company.why" data-kalq-key="company.why.title">Warum es Kalq gibt</h3>
                         <div class="borderSeprator"></div>
-                        <h5 data-i18n="company.whyText">Einkäufer verhandeln mit einem unvollständigen Bild der Kosten. Lieferanten kalkulieren unter Druck, mit Wissen, das in wenigen Köpfen steckt. Beide verlieren Zeit, Marge und Vertrauen bei Arbeit, die die andere Seite schon erledigt hat. Kalq gibt beiden Seiten dieselbe technische Grundlage und hält ihre Geschäfte dennoch getrennt.</h5>
+                        <h5 data-i18n="company.whyText" data-kalq-key="company.why.text">Einkäufer verhandeln mit einem unvollständigen Bild der Kosten. Lieferanten kalkulieren unter Druck, mit Wissen, das in wenigen Köpfen steckt. Beide verlieren Zeit, Marge und Vertrauen bei Arbeit, die die andere Seite schon erledigt hat. Kalq gibt beiden Seiten dieselbe technische Grundlage und hält ihre Geschäfte dennoch getrennt.</h5>
 
                         <!-- TODO: replace placeholder images -->
                         <div class="img_wrapper">
                             <div class="parallax_img">
-                                <img src="assets/about/goals1.avif" alt="" loading="lazy" width="auto" height="auto">
+                                <img src="assets/about/goals1.avif" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="company.why.image1" data-kalq-type="image">
                             </div>
                             <div class="parallax_img">
-                                <img src="assets/about/goals2.jpg" alt="" loading="lazy" width="auto" height="auto">
+                                <img src="assets/about/goals2.jpg" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="company.why.image2" data-kalq-type="image">
                             </div>
                         </div>
                     </div>
@@ -97,18 +99,18 @@
                 <!-- Shared semantics, isolated economics -->
                 <section class="about_weDo">
                     <div id="container">
-                        <h3 data-i18n="company.shared">Gemeinsame Semantik, getrennte Ökonomie</h3>
+                        <h3 data-i18n="company.shared" data-kalq-key="company.shared.title">Gemeinsame Semantik, getrennte Ökonomie</h3>
                         <div class="borderSeprator"></div>
                         <div class="para">
                             <div>
-                                <h5 data-i18n="company.shared1">Einkäufer und Lieferanten nutzen dasselbe Verständnis eines Teils. Sonst wird nichts geteilt. Preise, Margen und Maschinendaten jedes Mandanten bleiben in seinem eigenen Bereich und werden nur für den Zweck genutzt, für den sie bereitgestellt wurden.</h5>
-                                <h5 data-i18n="company.shared2">Die Daten werden in der EU gehostet. Jedes automatisierte Ergebnis kann von einem Menschen geprüft und übersteuert werden. Und Kalq bleibt neutral: Kalq verkauft keine Teile und ergreift im Geschäft keine Partei.</h5>
+                                <h5 data-i18n="company.shared1" data-kalq-key="company.shared.p1">Einkäufer und Lieferanten nutzen dasselbe Verständnis eines Teils. Sonst wird nichts geteilt. Preise, Margen und Maschinendaten jedes Mandanten bleiben in seinem eigenen Bereich und werden nur für den Zweck genutzt, für den sie bereitgestellt wurden.</h5>
+                                <h5 data-i18n="company.shared2" data-kalq-key="company.shared.p2">Die Daten werden in der EU gehostet. Jedes automatisierte Ergebnis kann von einem Menschen geprüft und übersteuert werden. Und Kalq bleibt neutral: Kalq verkauft keine Teile und ergreift im Geschäft keine Partei.</h5>
                             </div>
                         </div>
 
                         <!-- TODO: replace placeholder image -->
                         <div class="parallax_img">
-                            <img src="assets/about/weDo.avif" alt="" loading="lazy" width="auto" height="auto">
+                            <img src="assets/about/weDo.avif" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="company.shared.image" data-kalq-type="image">
                         </div>
                     </div>
                 </section>
@@ -116,17 +118,17 @@
                 <!-- Three prices, kept apart -->
                 <section class="about_awwards">
                     <div id="container">
-                        <h3 data-i18n="company.prices">Drei Preise, klar getrennt</h3>
+                        <h3 data-i18n="company.prices" data-kalq-key="company.prices.title">Drei Preise, klar getrennt</h3>
                         <div class="borderSeprator"></div>
                         <div class="para">
                             <div>
-                                <h5 data-i18n="company.pricesText">Soll-Kosten sind, was ein Teil kosten sollte. Angebotskosten sind, was die Fertigung einen bestimmten Lieferanten kostet. Der Marktpreis ist, was der Markt tatsächlich zahlt. Kalq zeigt alle drei nebeneinander und verschmilzt sie nie zu einer Zahl, denn jeder beantwortet eine andere Frage.</h5>
+                                <h5 data-i18n="company.pricesText" data-kalq-key="company.prices.text">Soll-Kosten sind, was ein Teil kosten sollte. Angebotskosten sind, was die Fertigung einen bestimmten Lieferanten kostet. Der Marktpreis ist, was der Markt tatsächlich zahlt. Kalq zeigt alle drei nebeneinander und verschmilzt sie nie zu einer Zahl, denn jeder beantwortet eine andere Frage.</h5>
                             </div>
                         </div>
 
                         <!-- TODO: replace placeholder image -->
                         <div class="parallax_img">
-                            <img src="https://images.unsplash.com/photo-1483058712412-4245e9b90334?q=80&w=2070&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto">
+                            <img src="https://images.unsplash.com/photo-1483058712412-4245e9b90334?q=80&w=2070&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="company.prices.image" data-kalq-type="image">
                         </div>
                     </div>
                 </section>
@@ -136,11 +138,11 @@
                     <!-- marquee -->
                     <div class="marquee" aria-hidden="true">
                         <div class="track">
-                            <h2 class="content fontLarge" data-i18n-marquee="social.marquee">&nbsp;Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen ·&nbsp;</h2>
+                            <h2 class="content fontLarge" data-i18n-marquee="social.marquee" data-kalq-key="site.social.marquee">&nbsp;Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq ·&nbsp;</h2>
                         </div>
                     </div>
                     <div id="container">
-                        <p data-i18n="social.label">Social Media und Kontakt</p>
+                        <p data-i18n="social.label" data-kalq-key="site.social.label">Social Media und Kontakt</p>
                     </div>
                     <div class="social_wrapper">
                         <a class="item" href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener">
@@ -158,16 +160,16 @@
                     <div id="container">
                         <div class="footer_header">
                             <div class="footer_heading">
-                                <h2 data-i18n="footer.heading1">Der Beweis</h2>
-                                <h2 data-i18n="footer.heading2">am echten Teil</h2>
+                                <h2 data-i18n="footer.heading1" data-kalq-key="site.footer.heading1">Der Beweis</h2>
+                                <h2 data-i18n="footer.heading2" data-kalq-key="site.footer.heading2">am echten Teil</h2>
                             </div>
-                            <p class="footer_sub" data-i18n="footer.sub">Wir starten mit CNC-Drehteilen in Deutschland. Wenn Sie solche Teile einkaufen oder fertigen, bewerben Sie sich für das Pilotprojekt.</p>
+                            <p class="footer_sub" data-i18n="footer.sub" data-kalq-key="site.footer.sub">Wir starten mit CNC-Drehteilen in Deutschland. Wenn Sie solche Teile einkaufen oder fertigen, bewerben Sie sich für das Pilotprojekt.</p>
                             <div class="footer_btns_wrapper">
                                 <a href="mailto:office@kalq.ai" class="btn">
-                                    <span>office@kalq.ai</span>
+                                    <span data-kalq-key="site.footer.email">office@kalq.ai</span>
                                 </a>
                                 <a href="mailto:office@kalq.ai?subject=Kalq%20pilot" class="btn">
-                                    <span data-i18n="footer.pilot">Für das Pilotprojekt bewerben</span>
+                                    <span data-i18n="footer.pilot" data-kalq-key="site.footer.pilot">Für das Pilotprojekt bewerben</span>
                                 </a>
                             </div>
                         </div>
@@ -175,9 +177,9 @@
                             <p>
                                 <span>© 2026 Kalq</span>
                                 <span aria-hidden="true">·</span>
-                                <a href="impressum.html" class="underLine_Link" data-i18n="footer.impressum">Impressum</a>
+                                <a href="impressum.html" class="underLine_Link" data-i18n="footer.impressum" data-kalq-key="site.footer.impressum">Impressum</a>
                                 <span aria-hidden="true">·</span>
-                                <a href="datenschutz.html" class="underLine_Link" data-i18n="footer.privacy">Datenschutz</a>
+                                <a href="datenschutz.html" class="underLine_Link" data-i18n="footer.privacy" data-kalq-key="site.footer.privacy">Datenschutz</a>
                             </p>
                         </div>
                     </div>

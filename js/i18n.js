@@ -21,15 +21,27 @@ export function t(key) {
     return entry ? (entry[current] ?? entry.en) : key;
 }
 
+// Edited content from the database, per block key and language. Set by js/content.js, wins over the built-in copy.
+// lookup(key, lang) returns a fresh sanitised DocumentFragment, or null when nothing was edited
+let editedContent = () => null;
+export const setEditedContent = (lookup) => { editedContent = lookup; };
+export const currentLang = () => current;
+
 export function applyLanguage(code = current) {
     current = contentLang(code);
     document.documentElement.lang = current;
 
-    // Keys not loaded yet keep their HTML text
-    document.querySelectorAll("[data-i18n]").forEach(el => { if (STRINGS[el.dataset.i18n]) el.textContent = t(el.dataset.i18n); });
+    // Edited content first, then the built-in copy. Keys not loaded yet keep their HTML text.
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+        const edited = el.dataset.kalqKey && editedContent(el.dataset.kalqKey, current);
+        if (edited) el.replaceChildren(edited);
+        else if (STRINGS[el.dataset.i18n]) el.textContent = t(el.dataset.i18n);
+    });
     document.querySelectorAll("[data-i18n-aria]").forEach(el => el.setAttribute("aria-label", t(el.dataset.i18nAria)));
     document.querySelectorAll("[data-i18n-marquee]").forEach(el => {
-        el.textContent = " " + `${t(el.dataset.i18nMarquee)} `.repeat(MARQUEE_REPEAT);
+        const edited = el.dataset.kalqKey && editedContent(el.dataset.kalqKey, current);
+        const phrase = edited ? edited.textContent : t(el.dataset.i18nMarquee);
+        el.textContent = "\u00a0" + `${phrase} `.repeat(MARQUEE_REPEAT);
     });
 
     // During a Barba transition the new container is the last one

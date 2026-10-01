@@ -38,3 +38,11 @@ Every page needs the signed `kalq_gate` cookie, otherwise `middleware.js` shows 
 - Gate styles: `npx sass --no-source-map css/gate.scss css/gate.css`
 - Database: `supabase/migrations/`, apply with `supabase db push` or the SQL editor.
 - Env vars (Vercel, Production and Preview): `ACCESS_CODE`, `GATE_COOKIE_SECRET`, `IP_HASH_SALT`, plus `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` from the Supabase integration.
+
+## Editable content (Phase 2)
+
+Every editable element has a stable `data-kalq-key` (`page.section.item`, shared header and footer use `site.*`), set by `tools/build_pages.py`. Media also have `data-kalq-type="image"` or `"video"`. Keys must never change once shipped.
+
+- `supabase/migrations/20261001090000_content.sql`: `profiles`, `blocks`, append-only `revisions` (one per language for text), `comments` (resolve only), `latest_content(page)`, the `site-media` bucket.
+- `/api/content?page=`: newest content for a page; needs the gate cookie except for the legal pages. `js/content.js` applies it (sanitised: only br, em, strong, a href) and keeps keyed blocks hidden until then, 1.5 s at most.
+- Seed once after the migration: `node scripts/seed-blocks.mjs --dry-run`, then without the flag. It needs `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env` (`npx vercel env pull .env`). Never commit `.env`.

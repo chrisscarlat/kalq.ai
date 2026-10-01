@@ -7,6 +7,8 @@
     <title>Kalq | Plattform</title>
     <!-- Pages are German; hide translatable text until js/i18n.js has applied another stored language -->
     <script>try { var l = localStorage.getItem("kalq-lang"); if (l && l !== "de") document.documentElement.classList.add("i18n-pending"); } catch (e) { }</script>
+    <!-- Edited content: keyed blocks stay hidden until js/content.js applied it (1.5 s max, 3 s if scripts fail) -->
+    <script>document.documentElement.classList.add("kalq-loading"); setTimeout(function () { document.documentElement.classList.remove("kalq-loading"); }, 3000);</script>
     <meta name="description" content="Kalq macht aus der Geometrie eines Teils eine technische Wahrheit und zwei getrennte kommerzielle Engines, für Einkäufer und Lieferanten von Fertigungsteilen.">
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="./assets/favicon.png" type="image/png">
@@ -48,9 +50,9 @@
 
     <!-- Menu dropdown (not a nav, not inside the blended header) -->
     <div class="site-menu" id="site-menu" aria-label="Hauptmenü" data-i18n-aria="aria.menu">
-        <a href="index.html" data-i18n="nav.home">Start</a>
-        <a href="platform.html" data-i18n="nav.platform">Plattform</a>
-        <a href="company.html" data-i18n="nav.company">Unternehmen</a>
+        <a href="index.html" data-i18n="nav.home" data-kalq-key="site.menu.home">Start</a>
+        <a href="platform.html" data-i18n="nav.platform" data-kalq-key="site.menu.platform">Plattform</a>
+        <a href="company.html" data-i18n="nav.company" data-kalq-key="site.menu.company">Unternehmen</a>
     </div>
 
     <!-- Image for platform hover list -->
@@ -63,7 +65,7 @@
                 <!-- Header -->
                 <section class="expertise_header">
                     <div id="container">
-                        <h2 data-i18n="platform.header">Ein technischer Kern. Zwei kommerzielle Engines.</h2>
+                        <h2 data-i18n="platform.header" data-kalq-key="platform.header.title">Ein technischer Kern. Zwei kommerzielle Engines.</h2>
                         <div class="block"></div>
                     </div>
                 </section>
@@ -71,7 +73,7 @@
                 <!-- Header img. TODO: replace placeholder image -->
                 <section class="expertise_header_img">
                     <div class="parallax_img">
-                        <img src="https://images.unsplash.com/photo-1641862039942-5815d8f74938?q=80&w=2070&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto">
+                        <img src="https://images.unsplash.com/photo-1641862039942-5815d8f74938?q=80&w=2070&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="platform.header.image" data-kalq-type="image">
                     </div>
                 </section>
 
@@ -80,10 +82,10 @@
                     <div id="container">
                         <!-- Text -->
                         <div class="txt">
-                            <h3 data-i18n="platform.introTitle">Von der Geometrie zu einer Entscheidung, die Sie vertreten können.</h3>
+                            <h3 data-i18n="platform.introTitle" data-kalq-key="platform.intro.title">Von der Geometrie zu einer Entscheidung, die Sie vertreten können.</h3>
                             <div class="borderSeprator"></div>
                             <div class="para">
-                                <h5 data-i18n="platform.intro">Ein Teil kommt als STEP-Datei und Zeichnung herein. Kalq macht daraus Features, Prozessalternativen und eine Route auf realen Maschinen. Ab dort übernehmen zwei Engines. Die eine beantwortet die Fragen des Einkäufers. Die andere die des Lieferanten.</h5>
+                                <h5 data-i18n="platform.intro" data-kalq-key="platform.intro.text">Ein Teil kommt als STEP-Datei und Zeichnung herein. Kalq macht daraus Features, Prozessalternativen und eine Route auf realen Maschinen. Ab dort übernehmen zwei Engines. Die eine beantwortet die Fragen des Einkäufers. Die andere die des Lieferanten.</h5>
                             </div>
                         </div>
 
@@ -92,53 +94,53 @@
                             <div class="col">
                                 <div class="card">
                                     <div class="parallax_img">
-                                        <img src="https://images.unsplash.com/photo-1483058712412-4245e9b90334?q=80&w=2070&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto">
+                                        <img src="https://images.unsplash.com/photo-1483058712412-4245e9b90334?q=80&w=2070&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="platform.cards.should-cost.image" data-kalq-type="image">
                                     </div>
-                                    <p class="tag"><span data-i18n="module.shouldCost">Soll-Kosten</span> <span class="card_side" data-i18n="platform.buyer">· Einkauf</span></p>
-                                    <h5 data-i18n="platform.shouldCost.lead">Was das Teil kosten sollte, von Grund auf kalkuliert.</h5>
-                                    <p data-i18n="platform.shouldCost.text">Kosten aus Geometrie, Werkstoff, Prozessroute und Maschinenwirtschaftlichkeit, damit Verhandlungen mit einer Zahl beginnen, die Sie erklären können.</p>
+                                    <p class="tag"><span data-i18n="module.shouldCost" data-kalq-key="platform.cards.should-cost.title">Soll-Kosten</span> <span class="card_side" data-i18n="platform.buyer" data-kalq-key="platform.cards.should-cost.side">· Einkauf</span></p>
+                                    <h5 data-i18n="platform.shouldCost.lead" data-kalq-key="platform.cards.should-cost.lead">Was das Teil kosten sollte, von Grund auf kalkuliert.</h5>
+                                    <p data-i18n="platform.shouldCost.text" data-kalq-key="platform.cards.should-cost.body">Kosten aus Geometrie, Werkstoff, Prozessroute und Maschinenwirtschaftlichkeit, damit Verhandlungen mit einer Zahl beginnen, die Sie erklären können.</p>
                                 </div>
                                 <div class="card">
                                     <div class="parallax_img">
-                                        <img src="https://plus.unsplash.com/premium_photo-1661914978519-52a11fe159a7?q=80&w=1935&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto">
+                                        <img src="https://plus.unsplash.com/premium_photo-1661914978519-52a11fe159a7?q=80&w=1935&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="platform.cards.supplier-fit.image" data-kalq-type="image">
                                     </div>
-                                    <p class="tag"><span data-i18n="module.supplierFit">Lieferanten-Fit</span> <span class="card_side" data-i18n="platform.buyer">· Einkauf</span></p>
-                                    <h5 data-i18n="platform.supplierFit.lead">Welche Lieferanten es tatsächlich fertigen können.</h5>
-                                    <p data-i18n="platform.supplierFit.text">Abgleich nach realen Fähigkeiten, Maschinenparks und Leistung, nicht nach Katalogkategorien.</p>
+                                    <p class="tag"><span data-i18n="module.supplierFit" data-kalq-key="platform.cards.supplier-fit.title">Lieferanten-Fit</span> <span class="card_side" data-i18n="platform.buyer" data-kalq-key="platform.cards.supplier-fit.side">· Einkauf</span></p>
+                                    <h5 data-i18n="platform.supplierFit.lead" data-kalq-key="platform.cards.supplier-fit.lead">Welche Lieferanten es tatsächlich fertigen können.</h5>
+                                    <p data-i18n="platform.supplierFit.text" data-kalq-key="platform.cards.supplier-fit.body">Abgleich nach realen Fähigkeiten, Maschinenparks und Leistung, nicht nach Katalogkategorien.</p>
                                 </div>
                                 <div class="card">
                                     <div class="parallax_img">
-                                        <img src="https://images.unsplash.com/photo-1579412690850-bd41cd0af397?q=80&w=1965&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto">
+                                        <img src="https://images.unsplash.com/photo-1579412690850-bd41cd0af397?q=80&w=1965&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="platform.cards.rfq-award.image" data-kalq-type="image">
                                     </div>
-                                    <p class="tag"><span data-i18n="module.rfq">Anfrage &amp; Vergabe</span> <span class="card_side" data-i18n="platform.buyer">· Einkauf</span></p>
-                                    <h5 data-i18n="platform.rfq.lead">Anfragen, vergleichen und vergeben in einem Ablauf.</h5>
-                                    <p data-i18n="platform.rfq.text">Strukturierte Anfragen, vergleichbare Angebote und eine dokumentierte Entscheidung, gefolgt von realisierten Einsparungen.</p>
+                                    <p class="tag"><span data-i18n="module.rfq" data-kalq-key="platform.cards.rfq-award.title">Anfrage &amp; Vergabe</span> <span class="card_side" data-i18n="platform.buyer" data-kalq-key="platform.cards.rfq-award.side">· Einkauf</span></p>
+                                    <h5 data-i18n="platform.rfq.lead" data-kalq-key="platform.cards.rfq-award.lead">Anfragen, vergleichen und vergeben in einem Ablauf.</h5>
+                                    <p data-i18n="platform.rfq.text" data-kalq-key="platform.cards.rfq-award.body">Strukturierte Anfragen, vergleichbare Angebote und eine dokumentierte Entscheidung, gefolgt von realisierten Einsparungen.</p>
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="card">
                                     <div class="parallax_img">
-                                        <img src="https://images.unsplash.com/photo-1641862039942-5815d8f74938?q=80&w=2070&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto">
+                                        <img src="https://images.unsplash.com/photo-1641862039942-5815d8f74938?q=80&w=2070&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="platform.cards.machine-intelligence.image" data-kalq-type="image">
                                     </div>
-                                    <p class="tag"><span data-i18n="module.machine">Maschinenintelligenz</span> <span class="card_side" data-i18n="platform.supplier">· Lieferant</span></p>
-                                    <h5 data-i18n="platform.machine.lead">Ihr Maschinenpark als Fähigkeits- und Kostengraph.</h5>
-                                    <p data-i18n="platform.machine.text">Fähigkeit, Leistung, Wirtschaftlichkeit, Betrieb und Nachweise je Maschine, aktuell gehalten, während Sie arbeiten.</p>
+                                    <p class="tag"><span data-i18n="module.machine" data-kalq-key="platform.cards.machine-intelligence.title">Maschinenintelligenz</span> <span class="card_side" data-i18n="platform.supplier" data-kalq-key="platform.cards.machine-intelligence.side">· Lieferant</span></p>
+                                    <h5 data-i18n="platform.machine.lead" data-kalq-key="platform.cards.machine-intelligence.lead">Ihr Maschinenpark als Fähigkeits- und Kostengraph.</h5>
+                                    <p data-i18n="platform.machine.text" data-kalq-key="platform.cards.machine-intelligence.body">Fähigkeit, Leistung, Wirtschaftlichkeit, Betrieb und Nachweise je Maschine, aktuell gehalten, während Sie arbeiten.</p>
                                 </div>
                                 <div class="card">
                                     <div class="parallax_img">
-                                        <img src="https://images.unsplash.com/photo-1476365518243-f738bf58443d?q=80&w=1887&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto">
+                                        <img src="https://images.unsplash.com/photo-1476365518243-f738bf58443d?q=80&w=1887&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="platform.cards.manufacturing-cost.image" data-kalq-type="image">
                                     </div>
-                                    <p class="tag"><span data-i18n="module.mfgCost">Fertigungskosten</span> <span class="card_side" data-i18n="platform.supplier">· Lieferant</span></p>
-                                    <h5 data-i18n="platform.mfgCost.lead">Was die Fertigung Sie kostet, auf Ihren Maschinen.</h5>
-                                    <p data-i18n="platform.mfgCost.text">Arbeitsplan und Kosten in Ihrer eigenen Fertigung, in Minuten statt Stunden.</p>
+                                    <p class="tag"><span data-i18n="module.mfgCost" data-kalq-key="platform.cards.manufacturing-cost.title">Fertigungskosten</span> <span class="card_side" data-i18n="platform.supplier" data-kalq-key="platform.cards.manufacturing-cost.side">· Lieferant</span></p>
+                                    <h5 data-i18n="platform.mfgCost.lead" data-kalq-key="platform.cards.manufacturing-cost.lead">Was die Fertigung Sie kostet, auf Ihren Maschinen.</h5>
+                                    <p data-i18n="platform.mfgCost.text" data-kalq-key="platform.cards.manufacturing-cost.body">Arbeitsplan und Kosten in Ihrer eigenen Fertigung, in Minuten statt Stunden.</p>
                                 </div>
                                 <div class="card">
                                     <div class="parallax_img">
-                                        <img src="https://images.unsplash.com/photo-1526413232644-8a40f03cc03b?q=80&w=1887&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto">
+                                        <img src="https://images.unsplash.com/photo-1526413232644-8a40f03cc03b?q=80&w=1887&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="platform.cards.price-quote.image" data-kalq-type="image">
                                     </div>
-                                    <p class="tag"><span data-i18n="module.quote">Preis &amp; Angebot</span> <span class="card_side" data-i18n="platform.supplier">· Lieferant</span></p>
-                                    <h5 data-i18n="platform.quote.lead">Von den Kosten zu einem Angebot, mit dem Sie gewinnen und trotzdem verdienen.</h5>
-                                    <p data-i18n="platform.quote.text">Margenlogik, Preisfindung und Angebotserstellung, wobei jedes Ergebnis in bessere Kalkulationen zurückfließt.</p>
+                                    <p class="tag"><span data-i18n="module.quote" data-kalq-key="platform.cards.price-quote.title">Preis &amp; Angebot</span> <span class="card_side" data-i18n="platform.supplier" data-kalq-key="platform.cards.price-quote.side">· Lieferant</span></p>
+                                    <h5 data-i18n="platform.quote.lead" data-kalq-key="platform.cards.price-quote.lead">Von den Kosten zu einem Angebot, mit dem Sie gewinnen und trotzdem verdienen.</h5>
+                                    <p data-i18n="platform.quote.text" data-kalq-key="platform.cards.price-quote.body">Margenlogik, Preisfindung und Angebotserstellung, wobei jedes Ergebnis in bessere Kalkulationen zurückfließt.</p>
                                 </div>
                             </div>
                         </div>
@@ -150,11 +152,11 @@
                     <!-- marquee -->
                     <div class="marquee" aria-hidden="true">
                         <div class="track">
-                            <h2 class="content fontLarge" data-i18n-marquee="social.marquee">&nbsp;Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen · Kalq folgen ·&nbsp;</h2>
+                            <h2 class="content fontLarge" data-i18n-marquee="social.marquee" data-kalq-key="site.social.marquee">&nbsp;Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq · Follow Kalq ·&nbsp;</h2>
                         </div>
                     </div>
                     <div id="container">
-                        <p data-i18n="social.label">Social Media und Kontakt</p>
+                        <p data-i18n="social.label" data-kalq-key="site.social.label">Social Media und Kontakt</p>
                     </div>
                     <div class="social_wrapper">
                         <a class="item" href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener">
@@ -172,16 +174,16 @@
                     <div id="container">
                         <div class="footer_header">
                             <div class="footer_heading">
-                                <h2 data-i18n="footer.heading1">Der Beweis</h2>
-                                <h2 data-i18n="footer.heading2">am echten Teil</h2>
+                                <h2 data-i18n="footer.heading1" data-kalq-key="site.footer.heading1">Der Beweis</h2>
+                                <h2 data-i18n="footer.heading2" data-kalq-key="site.footer.heading2">am echten Teil</h2>
                             </div>
-                            <p class="footer_sub" data-i18n="footer.sub">Wir starten mit CNC-Drehteilen in Deutschland. Wenn Sie solche Teile einkaufen oder fertigen, bewerben Sie sich für das Pilotprojekt.</p>
+                            <p class="footer_sub" data-i18n="footer.sub" data-kalq-key="site.footer.sub">Wir starten mit CNC-Drehteilen in Deutschland. Wenn Sie solche Teile einkaufen oder fertigen, bewerben Sie sich für das Pilotprojekt.</p>
                             <div class="footer_btns_wrapper">
                                 <a href="mailto:office@kalq.ai" class="btn">
-                                    <span>office@kalq.ai</span>
+                                    <span data-kalq-key="site.footer.email">office@kalq.ai</span>
                                 </a>
                                 <a href="mailto:office@kalq.ai?subject=Kalq%20pilot" class="btn">
-                                    <span data-i18n="footer.pilot">Für das Pilotprojekt bewerben</span>
+                                    <span data-i18n="footer.pilot" data-kalq-key="site.footer.pilot">Für das Pilotprojekt bewerben</span>
                                 </a>
                             </div>
                         </div>
@@ -189,9 +191,9 @@
                             <p>
                                 <span>© 2026 Kalq</span>
                                 <span aria-hidden="true">·</span>
-                                <a href="impressum.html" class="underLine_Link" data-i18n="footer.impressum">Impressum</a>
+                                <a href="impressum.html" class="underLine_Link" data-i18n="footer.impressum" data-kalq-key="site.footer.impressum">Impressum</a>
                                 <span aria-hidden="true">·</span>
-                                <a href="datenschutz.html" class="underLine_Link" data-i18n="footer.privacy">Datenschutz</a>
+                                <a href="datenschutz.html" class="underLine_Link" data-i18n="footer.privacy" data-kalq-key="site.footer.privacy">Datenschutz</a>
                             </p>
                         </div>
                     </div>

@@ -53,8 +53,9 @@ export async function POST(request) {
         return json({ error: "wrong_code" }, 401);
     }
 
-    // Until Supabase is connected: guests still get in, with an animal from the IP hash and no stored session
-    if (!isConfigured()) {
+    // Without Supabase, or without a guest session (anonymous sign-ins off): guests still get in,
+    // with an animal from the IP hash and no stored session
+    if (!isConfigured() || !accessToken) {
         const identity = identityFromHash(ipHash);
         const cookie = await signGate({ role: "guest", uid: `guest-${ipHash.slice(0, 16)}` }, GATE_COOKIE_SECRET);
         return json({ role: "guest", ...identity, supabase: false }, 200, { "Set-Cookie": gateCookieHeader(cookie) });

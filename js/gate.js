@@ -142,7 +142,8 @@ async function submitCode() {
         }
         if (!session) {
             const { data, error } = await sb.auth.signInAnonymously();
-            if (error) throw error;
+            // Anonymous sign-ins off in Supabase: the code alone still lets a guest in
+            if (error) return finishCode(await post("/api/code", { code: code() }), null);
             session = data.session;
         }
         return finishCode(await post("/api/code", { code: code(), access_token: session.access_token }), sb);

@@ -292,6 +292,20 @@ section.has-media #container {
   position: relative;
 }
 
+/* Measured hero (js/heroTone.js): light or dark text, with an overlay just strong enough for it */
+section[data-tone] .hero_overlay,
+section[data-tone] .hero_media::after {
+  background: linear-gradient(180deg, rgba(var(--hero-scrim), var(--hero-scrim-top)) 0%, rgba(var(--hero-scrim), var(--hero-scrim-mid)) 30%, rgba(var(--hero-scrim), var(--hero-scrim-mid)) 75%, rgba(var(--hero-scrim), var(--hero-scrim-mid)) 100%);
+}
+
+section[data-tone=dark] {
+  color: var(--kalq-light, #fff);
+}
+
+section[data-tone=light] {
+  color: var(--kalq-dark, #101010);
+}
+
 /* Smooth Scroller */
 .site-main.no_scroll {
   height: 100vh;
@@ -724,6 +738,43 @@ section.has-media #container {
     transition: none !important;
   }
 }
+/* Over a measured hero the header stops inverting and takes the hero's text colour (js/heroTone.js) */
+.site-header,
+.site-logo,
+.site-menu-toggle .dots span {
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+html[data-hero-tone] .site-header {
+  mix-blend-mode: normal;
+}
+
+html[data-hero-tone=dark] .site-header {
+  color: var(--kalq-light, #fff);
+}
+html[data-hero-tone=dark] .site-header .site-logo {
+  color: inherit;
+}
+html[data-hero-tone=dark] .site-header .site-menu-toggle .dots span {
+  background: currentColor;
+}
+
+html[data-hero-tone=light] .site-header {
+  color: var(--kalq-dark, #101010);
+}
+html[data-hero-tone=light] .site-header .site-logo {
+  color: inherit;
+}
+html[data-hero-tone=light] .site-header .site-menu-toggle .dots span {
+  background: currentColor;
+}
+html[data-hero-tone=light] .site-header .site-logo__custom svg {
+  filter: brightness(0);
+}
+html[data-hero-tone=light] .site-header .site-menu-toggle:focus-visible {
+  outline-color: currentColor;
+}
+
 /* Glass dropdown. Lives outside the blended header and is not a <nav>, the global nav rules would break it. */
 .site-menu {
   position: fixed;

@@ -14,7 +14,7 @@ const PUBLIC = [
     /^\/favicon\.ico$/,
     /^\/robots\.txt$/,
     /^\/css\/(gate|main|collab)\.css$/,
-    /^\/js\/(gate|logoAnimation|main|header|i18n|strings-public|content|blocks|variants|collab|expertiseHoverimg|verticleLine)\.js$/,
+    /^\/js\/(gate|logoAnimation|main|header|i18n|strings-public|content|blocks|variants|collab|expertiseHoverimg|verticleLine|heroTone)\.js$/,
     /^\/(impressum|datenschutz)(\.html)?$/,
     /^\/lib\/svg-sanitize\.js$/, // style variant logos are sanitised in the browser too
 ];

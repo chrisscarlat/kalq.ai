@@ -116,3 +116,23 @@ section.has-media { // section + class: beats the page header's own light backgr
         position: relative;
     }
 }
+
+/* Measured hero (js/heroTone.js): light or dark text, with an overlay just strong enough for it */
+section[data-tone] {
+    .hero_overlay,
+    .hero_media::after {
+        background: linear-gradient(180deg,
+                rgba(var(--hero-scrim), var(--hero-scrim-top)) 0%,
+                rgba(var(--hero-scrim), var(--hero-scrim-mid)) 30%,
+                rgba(var(--hero-scrim), var(--hero-scrim-mid)) 75%,
+                rgba(var(--hero-scrim), var(--hero-scrim-mid)) 100%);
+    }
+}
+
+section[data-tone="dark"] {
+    color: var(--kalq-light, #{$light});
+}
+
+section[data-tone="light"] {
+    color: var(--kalq-dark, #{$dark});
+}

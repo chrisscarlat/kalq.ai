@@ -376,3 +376,46 @@
         transition: none !important;
     }
 }
+
+/* Over a measured hero the header stops inverting and takes the hero's text colour (js/heroTone.js) */
+.site-header,
+.site-logo,
+.site-menu-toggle .dots span {
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+html[data-hero-tone] .site-header {
+    mix-blend-mode: normal;
+}
+
+html[data-hero-tone="dark"] .site-header {
+    color: var(--kalq-light, #fff);
+
+    .site-logo {
+        color: inherit;
+    }
+
+    .site-menu-toggle .dots span {
+        background: currentColor;
+    }
+}
+
+html[data-hero-tone="light"] .site-header {
+    color: var(--kalq-dark, #101010);
+
+    .site-logo {
+        color: inherit;
+    }
+
+    .site-menu-toggle .dots span {
+        background: currentColor;
+    }
+
+    .site-logo__custom svg {
+        filter: brightness(0);
+    }
+
+    .site-menu-toggle:focus-visible {
+        outline-color: currentColor;
+    }
+}

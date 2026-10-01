@@ -6,6 +6,7 @@ import { applyLanguage } from "./i18n.js";
 import { loadPageContent } from "./content.js";
 import { animateLines } from "./blocks.js";
 import { initVariants } from "./variants.js";
+import { initHeroTone } from "./heroTone.js";
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -13,6 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     gsap.registerPlugin(ScrollTrigger);
     [barbaPageTransition, smoothScroller, initHeader, logoAnimation, mouseMoveParallaxLine].forEach(func => func());
     initVariants(); // style variant: colours, fonts, logo, images; switcher next to the logo
+    initHeroTone(); // light or dark text over the hero image, the header follows
     // Counters, hover images and the video read their content, so they start after edited content is applied
     await loadPageContent();
     [animateNumbering, expertiseHover, heroVideo, parallaxImg, animateLines].forEach(func => func());
@@ -93,6 +95,7 @@ function barbaPageTransition() {
             animateNumbering,
             expertiseHover,
             heroVideo,
+            initHeroTone,
             parallaxImg,
             animateLines].forEach(func => func());
     }

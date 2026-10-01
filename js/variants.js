@@ -132,6 +132,7 @@ export function applyVariant(variant, { remember = false, preview = false } = {}
         store.set(CACHE_KEY, JSON.stringify({ id: variant.id, letter: variant.letter, mode, look, fonts: variant.fonts }));
     }
     notify();
+    document.dispatchEvent(new Event("kalq:look"));
 }
 
 // Leave a Styles panel preview

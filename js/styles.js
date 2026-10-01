@@ -15,7 +15,12 @@ const TEXT = {
         fonts: "Schriften", heading: "Überschriften", body: "Fließtext", builtIn: "Clash Grotesk (Standard)", google: "Google Fonts", upload: "Eigene woff2",
         family: "Schriftname", fontFile: "woff2-Datei", hero: "Hero-Video", images: "Bilder", imagesHint: "Leer lassen für das Standardbild.",
         upload: "Hochladen", clear: "Entfernen", duplicate: "Duplizieren", copyOf: (n) => `${n} (Kopie)`, inherited: "Standard",
-        builtInLogo: "Standard: Kalq-Logo", loadFailed: "Die Stile konnten nicht geladen werden.", preview: "Vorschau", endPreview: "Vorschau beenden", save: "Speichern", remove: "Löschen",
+        builtInLogo: "Standard: Kalq-Logo", loadFailed: "Die Stile konnten nicht geladen werden.",
+        sitemap: "Seiten", replaceSlot: "Ersetzen", addMedia: "+ Bild oder Video", resetSlot: "Zurück zum Standard",
+        fillAll: "Alles füllen", fillHint: "Ein Video wird überall zum Hero, ein Bild füllt jeden Bildplatz. Danach einzeln ersetzbar.",
+        filledHero: (n) => `Video ist jetzt Hero auf ${n} Seiten.`, filledImages: (n) => `Bild in ${n} Bildplätzen.`,
+        peek: "Seite ansehen", unsaved: "Nicht gespeichert",
+        pages: { home: "Start", platform: "Plattform", company: "Unternehmen", impressum: "Impressum", datenschutz: "Datenschutz" }, preview: "Vorschau", endPreview: "Vorschau beenden", save: "Speichern", remove: "Löschen",
         history: "Versionen", restore: "Wiederherstellen", saved: "Gespeichert", failed: "Speichern fehlgeschlagen", confirmDelete: "Diese Variante löschen? Sie bleibt in den Versionen.",
         errors: { letter_taken: "Dieser Buchstabe ist vergeben.", default_must_be_published: "Die Standard-Variante muss veröffentlicht sein.", choose_another_default: "Erst eine andere Variante zum Standard machen.", default_cannot_be_deleted: "Die Standard-Variante kann nicht gelöscht werden." },
     },
@@ -27,7 +32,12 @@ const TEXT = {
         fonts: "Fonts", heading: "Headings", body: "Body text", builtIn: "Clash Grotesk (default)", google: "Google Fonts", upload: "Own woff2",
         family: "Font name", fontFile: "woff2 file", hero: "Hero video", images: "Images", imagesHint: "Leave empty for the default image.",
         upload: "Upload", clear: "Remove", duplicate: "Duplicate", copyOf: (n) => `${n} (copy)`, inherited: "Default",
-        builtInLogo: "Default: Kalq logo", loadFailed: "The styles could not be loaded.", preview: "Preview", endPreview: "End preview", save: "Save", remove: "Delete",
+        builtInLogo: "Default: Kalq logo", loadFailed: "The styles could not be loaded.",
+        sitemap: "Pages", replaceSlot: "Replace", addMedia: "+ Image or video", resetSlot: "Back to default",
+        fillAll: "Fill all", fillHint: "A video becomes the hero everywhere, an image fills every image slot. Replace single slots afterwards.",
+        filledHero: (n) => `The video is now the hero on ${n} pages.`, filledImages: (n) => `Image in ${n} image slots.`,
+        peek: "View page", unsaved: "Not saved",
+        pages: { home: "Home", platform: "Platform", company: "Company", impressum: "Legal notice", datenschutz: "Privacy" }, preview: "Preview", endPreview: "End preview", save: "Save", remove: "Delete",
         history: "Versions", restore: "Restore", saved: "Saved", failed: "Could not save", confirmDelete: "Delete this variant? It stays in the versions.",
         errors: { letter_taken: "That letter is taken.", default_must_be_published: "The default variant must be published.", choose_another_default: "Make another variant the default first.", default_cannot_be_deleted: "The default variant cannot be deleted." },
     },
@@ -91,6 +101,7 @@ async function refresh() {
         return showError(error);
     }
     variants = (data.variants || []).map(normalize);
+    dirty = false;
     slots = data.slots || [];
     defaults = data.defaults || {};
     if (!variants.find((v) => v.id === selectedId)) selectedId = (variants.find((v) => v.id === getActive()?.id) || variants[0])?.id || null;
@@ -98,7 +109,7 @@ async function refresh() {
     render();
 }
 
-const changed = () => { if (previewOn) applyVariant(draft, { preview: true }); };
+const changed = () => { if (previewOn) applyVariant(draft, { preview: true }); if (root) { dirty = true; markDirty(); } };
 
 //=================================== Sections ===================================//
 function headerSection() {
@@ -199,34 +210,118 @@ function fontRow(part) {
     return el("div", { className: "kalq-styles__font" }, el("strong", { textContent: t(part) }), source, family, file, sample);
 }
 
-function mediaSlot(label, get, set, accept, fallback = "") {
-    const thumb = el("div", { className: "kalq-styles__thumb" });
-    const media = (url) => (/\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url) ? el("video", { src: url, muted: true, loop: true, autoplay: true, playsInline: true }) : el("img", { src: url, alt: "" }));
-    const draw = () => {
-        const url = get();
-        // Nothing set: show what the site uses now, marked as inherited
-        thumb.classList.toggle("is-inherited", !url && !!fallback);
-        thumb.replaceChildren(url ? media(url) : fallback ? media(fallback) : el("span", { textContent: "—" }));
-        if (!url && fallback) thumb.append(el("span", { className: "kalq-styles__tag", textContent: t("inherited") }));
-    };
-    const file = el("input", { type: "file", accept });
-    file.addEventListener("change", async () => {
-        const f = file.files[0];
-        if (!f) return;
-        try { set(await upload(f, "media")); draw(); changed(); } catch (error) { collab.toast(errorText(error), "error"); }
-    });
-    const clear = el("button", { type: "button", className: "kalq-btn", textContent: t("clear") });
-    clear.addEventListener("click", () => { set(""); draw(); changed(); });
-    draw();
-    return el("div", { className: "kalq-styles__slot" }, thumb, el("span", { className: "kalq-styles__slotname", textContent: label }), file, clear);
+//=================================== Sitemap ===================================//
+// Every page side by side as a schematic in its real arrangement: hero on top, image slots as they sit on the
+// page (one full width, two or three side by side, list rows), text as grey lines. Slots are live thumbnails.
+const HERO_KEYS = ["home.hero.video", "platform.hero.media", "company.hero.media"];
+const CARDS = ["should-cost", "machine-intelligence", "supplier-fit", "manufacturing-cost", "rfq-award", "price-quote"]; // two columns, row by row
+const SITEMAP = [
+    { page: "home", items: [{ hero: "home.hero.video" }, { text: 4 }, { list: CARDS.map((c) => `home.platform.${c}.image`) }, { text: 3 }] },
+    { page: "platform", items: [{ hero: "platform.hero.media" }, { text: 2 }, { full: "platform.header.image" }, { text: 3 }, { grid: CARDS.map((c) => `platform.cards.${c}.image`), cols: 2 }] },
+    { page: "company", items: [{ hero: "company.hero.media" }, { text: 2 }, { full: "company.header.image" }, { text: 3 }, { grid: ["company.why.image1", "company.why.image2"], cols: 2 }, { text: 3 }, { full: "company.shared.image" }, { text: 2 }, { full: "company.prices.image" }] },
+    { page: "impressum", items: [{ text: 9 }] },
+    { page: "datenschutz", items: [{ text: 5 }] },
+];
+const isVideo = (url) => /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url || "");
+const ACCEPT = "image/jpeg,image/png,image/webp,image/avif,image/gif,video/mp4,video/webm";
+
+// The home hero video is its own field, every other slot lives in images
+const slotUrl = (key) => (key === "home.hero.video" ? draft.hero_video : draft.images[key]) || "";
+function setSlot(key, url) {
+    if (key === "home.hero.video") draft.hero_video = url;
+    else if (url) draft.images[key] = url;
+    else delete draft.images[key];
+    dirty = true;
+}
+const inheritedUrl = (key) => defaults[key] || (key === "home.hero.video" ? DEFAULT_HERO : "");
+const imageKeys = () => [...new Set([...SITEMAP.flatMap((p) => p.items.flatMap((i) => i.list || i.grid || (i.full ? [i.full] : []))), ...slots.map((x) => x.key)])]
+    .filter((k) => !HERO_KEYS.includes(k));
+
+let dirty = false;
+
+function pickFile(onFile) {
+    const input = el("input", { type: "file", accept: ACCEPT });
+    input.addEventListener("change", () => input.files[0] && onFile(input.files[0]));
+    input.click();
 }
 
-function mediaSection() {
-    draft.images ||= {};
-    const ACCEPT = "image/jpeg,image/png,image/webp,image/avif,image/gif,video/mp4,video/webm";
-    const hero = mediaSlot(t("hero"), () => draft.hero_video, (url) => { draft.hero_video = url; }, ACCEPT, defaults["home.hero.video"] || DEFAULT_HERO);
-    const list = slots.filter((s) => s.key !== "home.hero.video").map((s) => mediaSlot(s.key, () => draft.images[s.key] || "", (url) => { if (url) draft.images[s.key] = url; else delete draft.images[s.key]; }, ACCEPT, defaults[s.key] || ""));
-    return el("section", {}, el("h4", { textContent: t("hero") }), hero, el("h4", { textContent: t("images") }), el("p", { className: "kalq-styles__note", textContent: t("imagesHint") }), ...list);
+function slotNode(key, shape) {
+    const node = el("button", { type: "button", className: `kalq-map__slot is-${shape}` });
+    node.dataset.key = key;
+    const draw = () => {
+        const own = slotUrl(key);
+        const url = own || inheritedUrl(key);
+        node.classList.toggle("is-inherited", !own);
+        node.classList.toggle("is-empty", !url);
+        const media = !url ? el("span", { className: "kalq-map__add", textContent: t("addMedia") })
+            : isVideo(url) ? el("video", { src: url, muted: true, loop: true, autoplay: true, playsInline: true }) : el("img", { src: url, alt: "", loading: "lazy" });
+        const children = [media, el("span", { className: "kalq-map__hover", textContent: t("replaceSlot") })];
+        if (!own && url) children.push(el("span", { className: "kalq-styles__tag", textContent: t("inherited") }));
+        if (own) {
+            const reset = el("span", { className: "kalq-map__reset", textContent: "×", title: t("resetSlot") });
+            reset.setAttribute("role", "button");
+            reset.addEventListener("click", (e) => { e.stopPropagation(); setSlot(key, ""); draw(); changed(); markDirty(); });
+            children.push(reset);
+        }
+        node.replaceChildren(...children);
+        node.title = `${key}${own ? "" : ` · ${t("inherited")}`}`;
+    };
+    node.addEventListener("click", () => pickFile(async (file) => {
+        node.classList.add("is-busy");
+        try { setSlot(key, await upload(file, "media")); draw(); changed(); markDirty(); }
+        catch (error) { collab.toast(errorText(error), "error"); }
+        finally { node.classList.remove("is-busy"); }
+    }));
+    draw();
+    return node;
+}
+
+const lines = (n) => el("div", { className: "kalq-map__text" }, ...Array.from({ length: n }, (_, i) => {
+    const line = el("span");
+    line.style.width = `${[92, 78, 86, 64, 88, 70, 95, 58, 82][i % 9]}%`;
+    return line;
+}));
+
+function pageNode({ page, items }) {
+    const body = el("div", { className: "kalq-map__page" });
+    items.forEach((item) => {
+        if (item.hero) body.append(slotNode(item.hero, "hero"));
+        else if (item.text) body.append(lines(item.text));
+        else if (item.full) body.append(slotNode(item.full, "full"));
+        else if (item.grid) {
+            const grid = el("div", { className: "kalq-map__grid" }, ...item.grid.map((k) => slotNode(k, "card")));
+            grid.style.gridTemplateColumns = `repeat(${item.cols}, 1fr)`;
+            body.append(grid);
+        } else if (item.list) {
+            body.append(el("div", { className: "kalq-map__list" }, ...item.list.map((k) => el("div", { className: "kalq-map__row" }, lines(1), slotNode(k, "thumb")))));
+        }
+    });
+    return el("section", { className: "kalq-map__col" }, el("h5", { textContent: t("pages")[page] }), body);
+}
+
+function sitemapNode() {
+    return el("div", { className: "kalq-map" }, ...SITEMAP.map(pageNode));
+}
+
+// One upload fills the whole look: a video becomes every hero, an image every image slot
+function fillAllSection() {
+    const btn = el("button", { type: "button", className: "kalq-btn kalq-btn--primary", textContent: t("fillAll") });
+    btn.addEventListener("click", () => pickFile(async (file) => {
+        btn.disabled = true;
+        try {
+            const url = await upload(file, "media");
+            if (isVideo(url)) { HERO_KEYS.forEach((k) => setSlot(k, url)); collab.toast(t("filledHero")(HERO_KEYS.length)); }
+            else { const keys = imageKeys(); keys.forEach((k) => setSlot(k, url)); collab.toast(t("filledImages")(keys.length)); }
+            changed();
+            render();
+        } catch (error) { collab.toast(errorText(error), "error"); }
+        finally { btn.disabled = false; }
+    }));
+    return el("section", {}, el("h4", { textContent: t("fillAll") }), el("p", { className: "kalq-styles__inherited", textContent: t("fillHint") }), btn);
+}
+
+function markDirty() {
+    root.querySelector(".kalq-styles__dirty")?.removeAttribute("hidden");
 }
 
 async function historySection(box) {
@@ -257,7 +352,7 @@ async function after() {
 
 function showError(error) {
     console.error("styles", error);
-    root?.querySelector(".kalq-styles__content").replaceChildren(el("p", { className: "kalq-styles__note", textContent: t("loadFailed") }));
+    root?.querySelector(".kalq-styles__settings")?.replaceChildren(el("p", { className: "kalq-styles__note", textContent: t("loadFailed") }));
 }
 
 function render() {
@@ -271,37 +366,46 @@ function renderPanel() {
             el("small", { textContent: `${v.status === "published" ? t("published") : t("draft")}${v.is_default ? ` · ${t("isDefault")}` : ""}` }));
         b.style.setProperty("--dot", v.colors?.accent || "#3b82f6");
         b.setAttribute("aria-pressed", v.id === selectedId);
-        b.addEventListener("click", () => { selectedId = v.id; draft = clone(v); if (previewOn) applyVariant(draft, { preview: true }); render(); });
+        b.addEventListener("click", () => { selectedId = v.id; draft = clone(v); dirty = false; if (previewOn) applyVariant(draft, { preview: true }); render(); });
         return b;
     }));
-    const create = el("button", { type: "button", className: "kalq-btn", textContent: `+ ${t("create")}` });
     // A new variant starts from the default one (A: today's look)
+    const create = el("button", { type: "button", className: "kalq-btn", textContent: `+ ${t("create")}` });
     create.addEventListener("click", () => { const base = variants.find((v) => v.is_default) || variants[0]; createFrom(base || normalize({ letter: "A" }), null); });
-    const body = el("div", { className: "kalq-styles__body" });
-    if (draft) {
-        const history = el("section", { className: "kalq-styles__history" });
-        const save = el("button", { type: "button", className: "kalq-btn kalq-btn--primary", textContent: t("save") });
-        save.addEventListener("click", async () => {
-            save.disabled = true;
-            try { await api({ action: "save", id: draft.id, data: draft }); if (previewOn) togglePreview(false); await after(); }
-            catch (error) { collab.toast(errorText(error), "error"); }
-            finally { save.disabled = false; }
-        });
-        const preview = el("button", { type: "button", className: "kalq-btn", textContent: previewOn ? t("endPreview") : t("preview") });
-        preview.addEventListener("click", () => { togglePreview(!previewOn); render(); });
-        const dup = el("button", { type: "button", className: "kalq-btn", textContent: t("duplicate") });
-        dup.addEventListener("click", () => createFrom(draft, t("copyOf")(draft.name)));
-        const del = el("button", { type: "button", className: "kalq-btn", textContent: t("remove") });
-        del.addEventListener("click", async () => {
-            if (!window.confirm(t("confirmDelete"))) return;
-            try { await api({ action: "delete", id: draft.id }); selectedId = null; await after(); } catch (error) { collab.toast(errorText(error), "error"); }
-        });
-        body.append(headerSection(), logoSection(), colorSection(), el("section", {}, el("h4", { textContent: t("fonts") }), fontRow("heading"), fontRow("body")), mediaSection(),
-            el("div", { className: "kalq-styles__actions" }, preview, dup, del, save), history);
-        historySection(history);
-    }
-    const datalist = el("datalist", { id: "kalq-google-fonts" }, ...GOOGLE_SUGGESTIONS.map((f) => el("option", { value: f })));
-    root.querySelector(".kalq-styles__content").replaceChildren(el("div", { className: "kalq-styles__top" }, list, create), body, datalist);
+    root.querySelector(".kalq-styles__variants").replaceChildren(list, create);
+
+    const settings = root.querySelector(".kalq-styles__settings");
+    const map = root.querySelector(".kalq-styles__map");
+    if (!draft) { settings.replaceChildren(); map.replaceChildren(); return; }
+
+    const history = el("section", { className: "kalq-styles__history" });
+    const save = el("button", { type: "button", className: "kalq-btn kalq-btn--primary", textContent: t("save") });
+    save.addEventListener("click", async () => {
+        save.disabled = true;
+        try { await api({ action: "save", id: draft.id, data: draft }); dirty = false; if (previewOn) togglePreview(false); await after(); }
+        catch (error) { collab.toast(errorText(error), "error"); }
+        finally { save.disabled = false; }
+    });
+    const preview = el("button", { type: "button", className: "kalq-btn", textContent: previewOn ? t("endPreview") : t("preview") });
+    preview.addEventListener("click", () => { togglePreview(!previewOn); render(); });
+    const peek = el("button", { type: "button", className: "kalq-btn", textContent: t("peek") });
+    peek.addEventListener("click", () => { if (!previewOn) togglePreview(true); minimize(); });
+    const dup = el("button", { type: "button", className: "kalq-btn", textContent: t("duplicate") });
+    dup.addEventListener("click", () => createFrom(draft, t("copyOf")(draft.name)));
+    const del = el("button", { type: "button", className: "kalq-btn", textContent: t("remove") });
+    del.addEventListener("click", async () => {
+        if (!window.confirm(t("confirmDelete"))) return;
+        try { await api({ action: "delete", id: draft.id }); selectedId = null; await after(); } catch (error) { collab.toast(errorText(error), "error"); }
+    });
+    const unsaved = el("span", { className: "kalq-styles__dirty", textContent: t("unsaved") });
+    unsaved.hidden = !dirty;
+
+    settings.replaceChildren(headerSection(), logoSection(), colorSection(), el("section", {}, el("h4", { textContent: t("fonts") }), fontRow("heading"), fontRow("body")),
+        fillAllSection(), history,
+        el("div", { className: "kalq-styles__actions" }, unsaved, preview, peek, dup, del, save),
+        el("datalist", { id: "kalq-google-fonts" }, ...GOOGLE_SUGGESTIONS.map((f) => el("option", { value: f }))));
+    map.replaceChildren(el("h4", { textContent: t("sitemap") }), sitemapNode());
+    historySection(history);
 }
 
 // New draft from an existing variant: same look, next free letter, never the default
@@ -322,12 +426,21 @@ function togglePreview(on) {
     else endPreview();
 }
 
-function setOpen(open) {
+function setOpen(open, { keepPreview = false } = {}) {
+    const wasMinimized = root.classList.contains("is-minimized");
     root.classList.toggle("is-open", open);
+    root.classList.remove("is-minimized");
     root.toggleAttribute("inert", !open);
     button.setAttribute("aria-pressed", open);
-    if (open) refresh();
-    else if (previewOn) togglePreview(false);
+    if (open && !wasMinimized) refresh();
+    else if (open) render();
+    else if (previewOn && !keepPreview) togglePreview(false);
+}
+
+// "View page": the panel steps aside, the preview stays on; S or the palette brings it back as it was
+function minimize() {
+    setOpen(false, { keepPreview: true });
+    root.classList.add("is-minimized");
 }
 
 export function initStyles(api_) {
@@ -337,7 +450,10 @@ export function initStyles(api_) {
     root.setAttribute("aria-label", t("title"));
     const close = el("button", { type: "button", className: "kalq-panel__close", innerHTML: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>' });
     close.addEventListener("click", () => setOpen(false));
-    root.append(el("div", { className: "kalq-panel__head" }, el("strong", { textContent: t("title") }), close), el("div", { className: "kalq-styles__content" }));
+    root.append(
+        el("div", { className: "kalq-styles__head" }, el("strong", { textContent: t("title") }), el("div", { className: "kalq-styles__variants" }), close),
+        el("div", { className: "kalq-styles__content" }, el("div", { className: "kalq-styles__settings" }), el("div", { className: "kalq-styles__map" })),
+    );
     root.addEventListener("keydown", (e) => { if (e.key === "Escape") setOpen(false); });
     document.body.append(root);
 

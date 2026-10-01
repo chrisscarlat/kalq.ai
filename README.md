@@ -85,3 +85,8 @@ A variant is a complete look: letter, name, logo SVG, colours (background, text,
 - Hold the header logo three seconds to open the viewer: cards per variant, votes (one per person, again to take back), voter faces, comments, sort by votes, arrow keys and swipe. Variant changes, votes and variant comments travel on a site-wide realtime channel, so every page sees them live.
 
 Manual step: run `supabase/migrations/20261002090000_variants.sql` (SQL Editor or `supabase db push`). It adds the admins table with chris.scarlat@certil.com, variant A, votes, the RLS and Storage policies, and woff2 uploads. Nothing else needs configuring.
+
+## Light and dark, sitemap Styles panel
+
+- Sun icon before the language switcher, morphing into a thin crescent moon on hover: switches every page between the variant's light set and its dark set (remembered in localStorage, applied before the first paint).
+- The Styles panel is a full-width sitemap: settings on the left, every page side by side as a schematic (hero on top, image slots in their real arrangement, grey lines for text). Every slot is a live thumbnail; click to replace, × to go back to the site's own image. "Alles füllen": one video becomes the hero on every page, one image fills every image slot. "Seite ansehen" hides the panel and keeps the preview on the page; `S` brings it back.

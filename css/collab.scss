@@ -839,9 +839,8 @@ $pin-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
     position: fixed;
     top: 1rem;
     left: 1rem;
+    right: 1rem;
     bottom: 5.5rem;
-    width: 440px;
-    max-width: calc(100vw - 2rem);
     display: flex;
     flex-direction: column;
     background: rgba(16, 16, 16, 0.86);
@@ -906,10 +905,235 @@ $pin-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
     }
 }
 
+// Full width: variants on top, settings on the left, the sitemap of every page on the right
+.kalq-styles__head {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.7rem 0.7rem 0.7rem 1.1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    > strong {
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .kalq-panel__close {
+        margin-left: auto;
+    }
+}
+
+.kalq-styles__variants {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
 .kalq-styles__content {
     flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 360px 1fr;
+}
+
+.kalq-styles__settings {
     overflow-y: auto;
-    padding: 0.8rem 1rem 1rem;
+    padding: 0.2rem 1rem 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.kalq-styles__map {
+    min-width: 0;
+    overflow: auto;
+    padding: 0.2rem 1.2rem 1.2rem;
+}
+
+.kalq-styles__dirty {
+    margin-right: auto;
+    align-self: center;
+    font-size: 0.75rem;
+    color: #FFB400;
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+// Sitemap: one schematic per page, side by side
+.kalq-map {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    min-width: max-content;
+}
+
+.kalq-map__col {
+    width: 250px;
+    flex-shrink: 0;
+
+    h5 {
+        margin: 0 0 0.5rem;
+        font: 500 0.9rem/1.2 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+        letter-spacing: 0;
+    }
+}
+
+.kalq-map__page {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 0.6rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.kalq-map__text {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 0.2rem 0.1rem;
+
+    span {
+        height: 5px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.18);
+    }
+}
+
+.kalq-map__grid {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.kalq-map__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.kalq-map__row {
+    display: grid;
+    grid-template-columns: 1fr 64px;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.kalq-map__slot {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    cursor: pointer;
+
+    &.is-hero { aspect-ratio: 16 / 9; }
+    &.is-full { aspect-ratio: 16 / 7; }
+    &.is-card { aspect-ratio: 3 / 4; }
+    &.is-thumb { aspect-ratio: 4 / 3; }
+
+    img,
+    video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    &.is-inherited img,
+    &.is-inherited video {
+        opacity: 0.55;
+    }
+
+    &.is-empty {
+        border-style: dashed;
+    }
+
+    &.is-busy {
+        cursor: progress;
+        opacity: 0.6;
+    }
+
+    &:hover .kalq-map__hover,
+    &:focus-visible .kalq-map__hover {
+        opacity: 1;
+    }
+
+    &:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: 2px;
+    }
+}
+
+.kalq-map__add {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 0.72rem;
+    opacity: 0.7;
+}
+
+.kalq-map__hover {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(16, 16, 16, 0.55);
+    font-size: 0.72rem;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.kalq-map__reset {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(16, 16, 16, 0.8);
+    font-size: 0.85rem;
+    line-height: 1;
+    z-index: 1;
+
+    &:hover {
+        background: #FF5A5F;
+    }
+}
+
+// "View page": the panel steps aside while the preview stays on
+.kalq-styles.is-minimized {
+    opacity: 0;
+    visibility: hidden;
+}
+
+@media (max-width: 900px) {
+    .kalq-styles__content {
+        grid-template-columns: 1fr;
+        overflow-y: auto;
+    }
+
+    .kalq-styles__settings,
+    .kalq-styles__map {
+        overflow: visible;
+        border-right: 0;
+    }
+
+    .kalq-styles__map {
+        overflow-x: auto;
+    }
 }
 
 .kalq-styles__top {
@@ -1113,10 +1337,11 @@ $pin-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
 
 .kalq-styles__actions {
     position: sticky;
-    bottom: -1rem;
+    bottom: 0;
     display: flex;
     justify-content: flex-end;
     gap: 0.4rem;
+    flex-wrap: wrap;
     margin: 1rem -1rem 0;
     padding: 0.7rem 1rem;
     background: rgba(16, 16, 16, 0.95);

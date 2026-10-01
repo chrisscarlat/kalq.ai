@@ -1560,7 +1560,17 @@ footer #container .footer_bottom a {
   mix-blend-mode: difference;
 }
 
+.block[data-line=circle] {
+  width: 62vh;
+  height: 62vh;
+  background: none;
+  border: 40px solid #fff;
+  border-radius: 50%;
+}
+
 .block.is-logo {
+  width: 0;
+  height: 0;
   background: none;
 }
 .block.is-logo svg {
@@ -1570,13 +1580,18 @@ footer #container .footer_bottom a {
   height: 62vh;
   width: auto;
   max-width: 80vw;
-  transform: translate(-50%, -50%) rotate(45deg);
+  transform: translate(-50%, -50%);
   filter: brightness(0) invert(1);
 }
 
 @media (max-width: 540px) {
   .block.is-logo svg {
     height: 40vh;
+  }
+  .block[data-line=circle] {
+    width: 40vh;
+    height: 40vh;
+    border-width: 25px;
   }
 }
 /* Animated Numbering */

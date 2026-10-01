@@ -101,14 +101,21 @@ function applyLogo(variant) {
 // The built-in mark, still (the header's copy is animated)
 const BUILT_IN_MARK = '<svg viewBox="0 0 174 174" fill="none" stroke="currentColor" stroke-width="7.38"><line x1="101.81" y1="86.99" x2="173.98" y2="86.99"/><line x1="72.16" y1="87.01" x2="0" y2="87.01"/><line x1="87.01" y1="101.84" x2="87.01" y2="174"/><line x1="87.01" y1="72.16" x2="87.01" y2="0"/><line x1="84.26" y1="84.26" x2="135.29" y2="135.29"/><line x1="99.04" y1="75.62" x2="132.83" y2="41.82"/><line x1="74.64" y1="99.7" x2="40.85" y2="133.49"/><line x1="74.62" y1="74.31" x2="40.83" y2="40.51"/></svg>';
 
-// The big moving bar in the home hero, or the variant's logo there instead (its own or the built-in mark), same
-// parallax. Without a choice: the logo when the variant has its own, otherwise the line.
+// The big moving element in the home hero: a line in one of five shapes (default the diagonal \), or the variant's
+// logo (its own or the built-in mark), same parallax. GSAP owns the element's transform for the mouse parallax, so
+// the turn is set through it.
+const LINE_TURN = { back: -45, forward: 45, vertical: 0, horizontal: 90, circle: 0 };
 function applyHeroMark(variant) {
-    const wantLogo = (variant?.hero_mark || (variant?.logo_svg ? "logo" : "line")) === "logo";
+    const wantLogo = variant?.hero_mark === "logo";
+    const shape = LINE_TURN[variant?.hero_line] !== undefined ? variant.hero_line : "back";
     document.querySelectorAll(".block").forEach((block) => {
         const node = wantLogo ? logoNode(variant.logo_svg || BUILT_IN_MARK) : null;
         block.classList.toggle("is-logo", !!node);
+        block.dataset.line = node ? "" : shape;
         block.replaceChildren(...(node ? [node] : []));
+        const rotation = node ? 0 : LINE_TURN[shape];
+        if (window.gsap) gsap.set(block, { xPercent: -50, yPercent: -50, rotation });
+        else block.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
     });
 }
 // Barba brings a fresh hero on every page change

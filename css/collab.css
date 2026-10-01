@@ -1727,3 +1727,78 @@
     animation: none;
   }
 }
+/* Panel scrollbars: a thin line a little lighter than the panel, slightly wider while scrolling or under the pointer */
+:is(.kalq-styles, .kalq-panel, .kalq-viewer, .kalq-thread) ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+:is(.kalq-styles, .kalq-panel, .kalq-viewer, .kalq-thread) ::-webkit-scrollbar-track,
+:is(.kalq-styles, .kalq-panel, .kalq-viewer, .kalq-thread) ::-webkit-scrollbar-corner {
+  background: transparent;
+}
+:is(.kalq-styles, .kalq-panel, .kalq-viewer, .kalq-thread) ::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.16) padding-box;
+  transition: border-width 0.2s ease;
+}
+:is(.kalq-styles, .kalq-panel, .kalq-viewer, .kalq-thread) .is-scrolling::-webkit-scrollbar-thumb,
+:is(.kalq-styles, .kalq-panel, .kalq-viewer, .kalq-thread) ::-webkit-scrollbar-thumb:hover {
+  border-width: 2px;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  :is(.kalq-styles, .kalq-panel, .kalq-viewer, .kalq-thread) * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+  }
+}
+/* Segmented toggle in the Styles panel (hero centre: line or logo, line shapes) */
+.kalq-seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  margin-bottom: 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.kalq-seg__item {
+  min-width: 34px;
+  height: 30px;
+  padding: 0 0.7rem;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: rgba(255, 255, 255, 0.6);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.kalq-seg__item:hover {
+  color: #fff;
+}
+.kalq-seg__item[aria-pressed=true] {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+.kalq-seg__item:focus-visible {
+  outline: 1px solid #fff;
+  outline-offset: 1px;
+}
+
+.kalq-seg.is-icons .kalq-seg__item {
+  padding: 0;
+}
+
+.kalq-styles__field[hidden] {
+  display: none;
+}
+
+.kalq-styles__field .kalq-seg {
+  align-self: flex-start;
+}

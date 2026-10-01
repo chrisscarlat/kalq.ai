@@ -15,7 +15,8 @@ const TEXT = {
         fonts: "Schriften", heading: "Hauptschrift: Logo, H1 bis H3", body: "Zweitschrift: Unterzeilen, H4, H5, Text", builtIn: "Clash Grotesk (Standard)", google: "Google Fonts", upload: "Eigene woff2",
         family: "Schriftname", fontFile: "woff2-Datei", hero: "Hero-Video", images: "Bilder", imagesHint: "Leer lassen für das Standardbild.",
         upload: "Hochladen", clear: "Entfernen", duplicate: "Duplizieren", copyOf: (n) => `${n} (Kopie)`, inherited: "Standard",
-        builtInLogo: "Standard: Kalq-Logo", heroMark: "Mitte im Hero (Start)", heroMarkLogo: "Logo", heroMarkLine: "Linie", loadFailed: "Die Stile konnten nicht geladen werden.",
+        builtInLogo: "Standard: Kalq-Logo", heroMark: "Mitte im Hero (Start)", heroMarkLogo: "Logo", heroMarkLine: "Linie", heroLine: "Form der Linie",
+        lines: { back: "Diagonal \\", forward: "Diagonal /", vertical: "Senkrecht", horizontal: "Waagerecht", circle: "Kreis" }, loadFailed: "Die Stile konnten nicht geladen werden.",
         sitemap: "Seiten", replaceSlot: "Ersetzen", uploading: "Wird hochgeladen", spreadImages: "Auf alle Bildplätze übertragen", spreadHero: "Als Hero auf allen Seiten",
         spreadDone: (n) => `Auf ${n} Plätze übertragen.`, addMedia: "+ Bild oder Video", resetSlot: "Zurück zum Standard",
         fillAll: "Alles füllen", fillHint: "Ein Video wird überall zum Hero, ein Bild füllt jeden Bildplatz. Danach einzeln ersetzbar.",
@@ -33,7 +34,8 @@ const TEXT = {
         fonts: "Fonts", heading: "Main font: logo, H1 to H3", body: "Secondary font: sub-lines, H4, H5, text", builtIn: "Clash Grotesk (default)", google: "Google Fonts", upload: "Own woff2",
         family: "Font name", fontFile: "woff2 file", hero: "Hero video", images: "Images", imagesHint: "Leave empty for the default image.",
         upload: "Upload", clear: "Remove", duplicate: "Duplicate", copyOf: (n) => `${n} (copy)`, inherited: "Default",
-        builtInLogo: "Default: Kalq logo", heroMark: "Centre of the hero (Home)", heroMarkLogo: "Logo", heroMarkLine: "Line", loadFailed: "The styles could not be loaded.",
+        builtInLogo: "Default: Kalq logo", heroMark: "Centre of the hero (Home)", heroMarkLogo: "Logo", heroMarkLine: "Line", heroLine: "Line shape",
+        lines: { back: "Diagonal \\", forward: "Diagonal /", vertical: "Vertical", horizontal: "Horizontal", circle: "Circle" }, loadFailed: "The styles could not be loaded.",
         sitemap: "Pages", replaceSlot: "Replace", uploading: "Uploading", spreadImages: "Copy to all image slots", spreadHero: "Use as hero on every page",
         spreadDone: (n) => `Copied to ${n} slots.`, addMedia: "+ Image or video", resetSlot: "Back to default",
         fillAll: "Fill all", fillHint: "A video becomes the hero everywhere, an image fills every image slot. Replace single slots afterwards.",
@@ -61,7 +63,8 @@ function normalize(v) {
         status: v.status || "published",
         sort: Number.isInteger(v.sort) ? v.sort : 50,
         logo_svg: v.logo_svg || "",
-        hero_mark: ["logo", "line"].includes(v.hero_mark) ? v.hero_mark : (v.logo_svg ? "logo" : "line"),
+        hero_mark: v.hero_mark === "logo" ? "logo" : "line",
+        hero_line: ["back", "forward", "vertical", "horizontal", "circle"].includes(v.hero_line) ? v.hero_line : "back",
         colors: { ...DEFAULT_COLORS, ...(v.colors || {}) },
         fonts: { heading: font(v.fonts?.heading), body: font(v.fonts?.body) },
         hero_video: v.hero_video || "",
@@ -184,10 +187,38 @@ function logoSection() {
     show(draft.logo_svg);
     const inherited = el("p", { className: "kalq-styles__inherited", textContent: draft.logo_svg ? "" : t("builtInLogo") });
     code.addEventListener("input", () => { inherited.textContent = code.value.trim() ? "" : t("builtInLogo"); });
-    // What moves behind the title on Home: this logo (or the built-in mark) or the diagonal line
-    const mark = el("select", {}, ...[["logo", t("heroMarkLogo")], ["line", t("heroMarkLine")]].map(([v, l]) => el("option", { value: v, textContent: l, selected: draft.hero_mark === v })));
-    mark.addEventListener("change", () => { draft.hero_mark = mark.value; changed(); });
-    return el("section", {}, el("h4", { textContent: t("logo") }), field(t("logoFile"), file), field(t("logoCode"), code), note, inherited, previews, field(t("heroMark"), mark));
+    return el("section", {}, el("h4", { textContent: t("logo") }), field(t("logoFile"), file), field(t("logoCode"), code), note, inherited, previews);
+}
+
+// What moves behind the title on Home: a line (toggle Linie) in one of five shapes, or the logo
+function heroMarkSection() {
+    const seg = (items, current, onPick, extra = "") => {
+        const box = el("div", { className: `kalq-seg ${extra}`, role: "group" });
+        const draw = (value) => box.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.value === value));
+        items.forEach(([value, label, icon]) => {
+            const b = el("button", { type: "button", className: "kalq-seg__item", title: label });
+            b.dataset.value = value;
+            if (icon) { b.innerHTML = icon; b.setAttribute("aria-label", label); } else b.textContent = label;
+            b.addEventListener("click", () => { onPick(value); draw(value); });
+            box.append(b);
+        });
+        draw(current);
+        return box;
+    };
+    const icon = (inner) => `<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">${inner}</svg>`;
+    const shapes = seg([
+        ["back", t("lines").back, icon('<line x1="4" y1="4" x2="16" y2="16"/>')],
+        ["forward", t("lines").forward, icon('<line x1="16" y1="4" x2="4" y2="16"/>')],
+        ["vertical", t("lines").vertical, icon('<line x1="10" y1="3" x2="10" y2="17"/>')],
+        ["horizontal", t("lines").horizontal, icon('<line x1="3" y1="10" x2="17" y2="10"/>')],
+        ["circle", t("lines").circle, icon('<circle cx="10" cy="10" r="6.5"/>')],
+    ], draft.hero_line, (v) => { draft.hero_line = v; changed(); }, "is-icons");
+    // A div, not a <label>: a click on the label text would press the first shape
+    const shapeField = el("div", { className: "kalq-styles__field" }, el("span", { textContent: t("heroLine") }), shapes);
+    shapeField.hidden = draft.hero_mark === "logo";
+    const mode = seg([["line", t("heroMarkLine")], ["logo", t("heroMarkLogo")]], draft.hero_mark,
+        (v) => { draft.hero_mark = v; shapeField.hidden = v === "logo"; changed(); });
+    return el("section", {}, el("h4", { textContent: t("heroMark") }), mode, shapeField);
 }
 
 // The site's own Kalq mark, for variants without their own logo
@@ -472,7 +503,7 @@ function renderPanel() {
     const unsaved = el("span", { className: "kalq-styles__dirty", textContent: t("unsaved") });
     unsaved.hidden = !dirty;
 
-    settings.replaceChildren(headerSection(), logoSection(), colorSection(), el("section", {}, el("h4", { textContent: t("fonts") }), fontRow("heading"), fontRow("body")),
+    settings.replaceChildren(headerSection(), logoSection(), heroMarkSection(), colorSection(), el("section", {}, el("h4", { textContent: t("fonts") }), fontRow("heading"), fontRow("body")),
         fillAllSection(), history,
         el("div", { className: "kalq-styles__actions" }, unsaved, preview, peek, dup, del, save),
         el("datalist", { id: "kalq-google-fonts" }, ...GOOGLE_SUGGESTIONS.map((f) => el("option", { value: f }))));
@@ -503,6 +534,7 @@ function setOpen(open, { keepPreview = false } = {}) {
     root.classList.toggle("is-open", open);
     root.classList.remove("is-minimized");
     root.toggleAttribute("inert", !open);
+    document.documentElement.classList.toggle("kalq-scroll-lock", open); // the page stays put underneath
     button.setAttribute("aria-pressed", open);
     if (open && !wasMinimized) refresh();
     else if (open) render();

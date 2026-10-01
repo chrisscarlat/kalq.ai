@@ -360,6 +360,30 @@ document.addEventListener("keydown", (e) => {
 });
 
 //=================================== Start ===================================//
+//=================================== Panel scrolling ===================================//
+// smooth-scrollbar takes every wheel and touch move on the document for the page. Over a panel the event is stopped
+// before it gets there, so the panel scrolls natively under the pointer. While html.kalq-scroll-lock is set (the
+// Styles panel is open) the page underneath does not move at all.
+const PANELS = ".kalq-styles, .kalq-panel, .kalq-viewer, .kalq-thread";
+function initPanelScroll() {
+    const guard = (e) => {
+        const inPanel = e.target instanceof Element && e.target.closest(PANELS);
+        if (inPanel) { e.stopPropagation(); return; }
+        if (document.documentElement.classList.contains("kalq-scroll-lock")) { e.stopPropagation(); e.preventDefault(); }
+    };
+    window.addEventListener("wheel", guard, { capture: true, passive: false });
+    window.addEventListener("touchmove", guard, { capture: true, passive: false });
+    // The panel scrollbars grow a little while they move
+    const timers = new WeakMap();
+    document.addEventListener("scroll", (e) => {
+        const box = e.target instanceof Element && e.target.closest(PANELS) ? e.target : null;
+        if (!box) return;
+        box.classList.add("is-scrolling");
+        clearTimeout(timers.get(box));
+        timers.set(box, setTimeout(() => box.classList.remove("is-scrolling"), 700));
+    }, { capture: true, passive: true });
+}
+
 async function init() {
     if (document.body.dataset.collab) return;
     document.body.dataset.collab = "on";
@@ -373,6 +397,7 @@ async function init() {
     state.me = await meRes.json();
 
     buildToolbar();
+    initPanelScroll();
     state.layer = el("div", "kalq-cursors", { "aria-hidden": "true" });
     if (reducedMotion) state.layer.classList.add("is-still");
     document.body.append(state.layer);

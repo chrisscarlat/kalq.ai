@@ -47,7 +47,7 @@ export function setMode(next) {
     store.set(MODE_KEY, mode);
     const current = getActive();
     if (current) applyVariant(current, { preview: !!previewing });
-    else document.documentElement.dataset.mode = mode;
+    else { document.documentElement.dataset.mode = mode; document.dispatchEvent(new Event("kalq:look")); }
 }
 export const getActive = () => previewing || active;
 export const onVariantsChange = (fn) => listeners.add(fn);

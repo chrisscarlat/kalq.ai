@@ -321,6 +321,8 @@ home = head("Kalq | The decision layer for manufactured parts") + f'''          
                         <source src="assets/video-hero-6mb-low.mp4" type="video/mp4">
                     </video>
                     <div class="hero_overlay"></div>
+                    <!-- Title and moving bar blend only with each other (not with the video), so both stay pure white or black -->
+                    <div class="hero_layer">
                     <div class="hero_content">
                         <!-- The outlined wordmark; with a style variant's own heading font the text version shows instead -->
                         <h1 class="hero_title">{HERO_WORD}<span class="kalq-wordmark">KALQ</span></h1>
@@ -328,6 +330,7 @@ home = head("Kalq | The decision layer for manufactured parts") + f'''          
                         <p class="hero_slogan" data-i18n="hero.slogan" data-kalq-key="home.hero.slogan" data-kalq-format="lines">One technical core. Two commercial engines.<br>Better industrial decisions.</p>
                     </div>
                     <div class="block"></div>
+                    </div>
                 </section>
 
                 <!-- About -->

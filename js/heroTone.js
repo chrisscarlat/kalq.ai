@@ -17,13 +17,6 @@ const luminance = ([r, g, b]) => 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0
 const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 const mixRgb = (a, b, t) => a.map((v, i) => v * (1 - t) + b[i] * t);
 
-function cssRgb(prop, fallback) {
-    const value = getComputedStyle(document.documentElement).getPropertyValue(prop).trim() || fallback;
-    const hex = value.replace("#", "");
-    if (/^[0-9a-f]{6}$/i.test(hex)) return [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
-    return [0, 2, 4].map((i) => parseInt(fallback.slice(1 + i, 3 + i), 16));
-}
-
 //=================================== Sampling ===================================//
 // Pixels of a band of the frame (fractions of the hero), as drawn with object-fit: cover
 function band(el, top, bottom, left = 0, right = 1) {
@@ -54,41 +47,59 @@ function overlayFor(pixels, text, scrim, floor) {
     return 0.9;
 }
 
+// The theme decides the hero: light theme (default) white text over a dark layer, dark theme the opposite, black
+// text over a light layer. The image decides only how strong the layer must be for the contrast.
+const WHITE = [255, 255, 255], BLACK = [0, 0, 0];
+const heroTone = () => (document.documentElement.dataset.mode === "dark" ? "light" : "dark");
+
 function measure() {
     if (!hero || !media) return;
+    const tone = heroTone();
+    const text = tone === "dark" ? WHITE : BLACK, scrim = tone === "dark" ? BLACK : WHITE;
     const content = band(media, 0.3, 0.75, 0.15, 0.85); // title and slogan
     const top = band(media, 0, 0.14); // under the header
-    if (!content || !top) return;
-    const light = cssRgb("--kalq-light", "#ffffff"), dark = cssRgb("--kalq-dark", "#101010");
-    const black = [16, 16, 16], white = [255, 255, 255];
-    // Light text on a dark overlay, or dark text on a light one: whichever needs less overlay
-    const options = [
-        { tone: "dark", text: light, scrim: black, floor: 0.2 },
-        { tone: "light", text: dark, scrim: white, floor: 0.1 },
-    ].map((o) => ({ ...o, mid: overlayFor(content, o.text, o.scrim, o.floor), top: overlayFor(top, o.text, o.scrim, o.floor) }));
-    const current = hero.dataset.tone;
-    // Light text over a darkened image is the designed look; dark text only when it needs clearly less overlay
-    let best = options[1].mid < options[0].mid - 0.15 ? options[1] : options[0];
-    // A playing video: only switch when the other side is clearly better, so the text does not flicker
-    if (current && best.tone !== current) {
-        const keep = options.find((o) => o.tone === current);
-        if (keep.mid - best.mid < 0.15) best = keep;
-    }
-    hero.dataset.tone = best.tone;
-    hero.style.setProperty("--hero-scrim", best.scrim.join(", "));
-    hero.style.setProperty("--hero-scrim-top", best.top.toFixed(3));
-    hero.style.setProperty("--hero-scrim-mid", best.mid.toFixed(3));
+    // Pixels not readable (another origin without CORS): a strong layer to be safe
+    const mid = content ? overlayFor(content, text, scrim, 0.2) : 0.6;
+    const head = top ? overlayFor(top, text, scrim, 0.2) : 0.6;
+    hero.dataset.tone = tone;
+    hero.style.setProperty("--hero-scrim", scrim.join(", "));
+    hero.style.setProperty("--hero-scrim-top", head.toFixed(3));
+    hero.style.setProperty("--hero-scrim-mid", mid.toFixed(3));
     updateHeader();
 }
 
 //=================================== Header ===================================//
+// Logo, menu and language: pure white or pure black. Over the hero the hero's tone; below it, whatever reads best on
+// the section behind the header (no inverting blend, which tints them over coloured backgrounds).
+let headerFrame = 0;
+function backgroundAt(x, y, header) {
+    for (const node of document.elementsFromPoint(x, y)) {
+        if (header.contains(node) || node.closest(".kalq-switcher, .kalq-toolbar, .kalq-cursors, .site-menu")) continue;
+        for (let n = node; n && n !== document.documentElement; n = n.parentElement) {
+            const m = getComputedStyle(n).backgroundColor.match(/rgba?\(([^)]+)\)/);
+            if (!m) continue;
+            const [r, g, b, a = 1] = m[1].split(/[ ,/]+/).filter(Boolean).map(Number);
+            if (a > 0.5) return [r, g, b];
+        }
+        break;
+    }
+    return WHITE;
+}
+
 function updateHeader() {
-    const root = document.documentElement;
-    const tone = hero?.dataset.tone;
-    const header = document.querySelector(".site-header");
-    const over = tone && header && hero.getBoundingClientRect().bottom > header.offsetHeight;
-    if (over) root.dataset.heroTone = tone;
-    else delete root.dataset.heroTone;
+    cancelAnimationFrame(headerFrame);
+    headerFrame = requestAnimationFrame(() => {
+        const root = document.documentElement;
+        const header = document.querySelector(".site-header");
+        if (!header) return;
+        const tone = hero?.dataset.tone;
+        const y = header.offsetHeight / 2;
+        if (tone && hero.getBoundingClientRect().bottom > header.offsetHeight) root.dataset.headerTone = tone;
+        else {
+            const bg = luminance(backgroundAt(innerWidth / 2, y, header));
+            root.dataset.headerTone = contrast(bg, 1) >= contrast(bg, 0) ? "dark" : "light"; // dark: white reads better
+        }
+    });
 }
 
 //=================================== Setup ===================================//
@@ -108,8 +119,7 @@ function watchMedia() {
         if (media.tagName === "VIDEO") media.load();
         else media.src = src;
     }
-    const ready = media.tagName === "VIDEO" ? media.readyState >= 2 : media.complete && media.naturalWidth;
-    if (ready) measure();
+    measure(); // the tone at once; the layer is measured again when the frame is there
     media.addEventListener(media.tagName === "VIDEO" ? "loadeddata" : "load", measure, { once: true });
     if (media.tagName === "VIDEO") timer = setInterval(() => { if (!media.paused && hero.getBoundingClientRect().bottom > 0) measure(); }, RESAMPLE_MS);
 }
@@ -126,7 +136,8 @@ export function initHeroTone() {
     if (!initHeroTone.listening) {
         initHeroTone.listening = true;
         window.addEventListener("resize", () => { measure(); updateHeader(); });
-        document.addEventListener("kalq:look", measure); // variant or light/dark changed the text colours
+        // Variant or light/dark changed; once more after the sections' colour transition
+        document.addEventListener("kalq:look", () => { measure(); updateHeader(); setTimeout(updateHeader, 650); });
     }
     const container = document.querySelector(".scrollbar-container");
     const next = container && window.Scrollbar ? Scrollbar.get(container) : null;

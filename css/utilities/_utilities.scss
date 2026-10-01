@@ -129,10 +129,31 @@ section[data-tone] {
     }
 }
 
+// Pure white or pure black, never the variant's tinted light and dark
 section[data-tone="dark"] {
-    color: var(--kalq-light, #{$light});
+    color: #fff;
 }
 
 section[data-tone="light"] {
-    color: var(--kalq-dark, #{$dark});
+    color: #000;
+}
+
+// The title and the moving bar (difference blend) as their own group: they blend only with each other, not with the
+// image, so the bar is pure white and the letters it crosses pure black. Dark theme: the group inverted.
+.hero_layer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+section[data-tone] :is(.hero_layer, #container):has(> .block) {
+    isolation: isolate;
+    color: #fff;
+}
+
+section[data-tone="light"] :is(.hero_layer, #container):has(> .block) {
+    filter: invert(1);
 }

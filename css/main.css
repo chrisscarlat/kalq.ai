@@ -299,11 +299,29 @@ section[data-tone] .hero_media::after {
 }
 
 section[data-tone=dark] {
-  color: var(--kalq-light, #fff);
+  color: #fff;
 }
 
 section[data-tone=light] {
-  color: var(--kalq-dark, #101010);
+  color: #000;
+}
+
+.hero_layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+section[data-tone] :is(.hero_layer, #container):has(> .block) {
+  isolation: isolate;
+  color: #fff;
+}
+
+section[data-tone=light] :is(.hero_layer, #container):has(> .block) {
+  filter: invert(1);
 }
 
 /* Smooth Scroller */
@@ -738,41 +756,36 @@ section[data-tone=light] {
     transition: none !important;
   }
 }
-/* Over a measured hero the header stops inverting and takes the hero's text colour (js/heroTone.js) */
+/* js/heroTone.js picks pure white or pure black for the header: over the hero by the theme, below it by the section
+   behind. Without that script the header keeps its inverting blend. */
 .site-header,
 .site-logo,
 .site-menu-toggle .dots span {
   transition: color 0.3s ease, background-color 0.3s ease;
 }
 
-html[data-hero-tone] .site-header {
+html[data-header-tone] .site-header {
   mix-blend-mode: normal;
 }
-
-html[data-hero-tone=dark] .site-header {
-  color: var(--kalq-light, #fff);
-}
-html[data-hero-tone=dark] .site-header .site-logo {
+html[data-header-tone] .site-header .site-logo {
   color: inherit;
 }
-html[data-hero-tone=dark] .site-header .site-menu-toggle .dots span {
+html[data-header-tone] .site-header .site-menu-toggle .dots span {
   background: currentColor;
 }
-
-html[data-hero-tone=light] .site-header {
-  color: var(--kalq-dark, #101010);
-}
-html[data-hero-tone=light] .site-header .site-logo {
-  color: inherit;
-}
-html[data-hero-tone=light] .site-header .site-menu-toggle .dots span {
-  background: currentColor;
-}
-html[data-hero-tone=light] .site-header .site-logo__custom svg {
-  filter: brightness(0);
-}
-html[data-hero-tone=light] .site-header .site-menu-toggle:focus-visible {
+html[data-header-tone] .site-header .site-menu-toggle:focus-visible {
   outline-color: currentColor;
+}
+
+html[data-header-tone=dark] .site-header {
+  color: #fff;
+}
+
+html[data-header-tone=light] .site-header {
+  color: #000;
+}
+html[data-header-tone=light] .site-header .site-logo__custom svg {
+  filter: brightness(0);
 }
 
 /* Glass dropdown. Lives outside the blended header and is not a <nav>, the global nav rules would break it. */

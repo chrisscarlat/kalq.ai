@@ -377,19 +377,16 @@
     }
 }
 
-/* Over a measured hero the header stops inverting and takes the hero's text colour (js/heroTone.js) */
+/* js/heroTone.js picks pure white or pure black for the header: over the hero by the theme, below it by the section
+   behind. Without that script the header keeps its inverting blend. */
 .site-header,
 .site-logo,
 .site-menu-toggle .dots span {
     transition: color 0.3s ease, background-color 0.3s ease;
 }
 
-html[data-hero-tone] .site-header {
+html[data-header-tone] .site-header {
     mix-blend-mode: normal;
-}
-
-html[data-hero-tone="dark"] .site-header {
-    color: var(--kalq-light, #fff);
 
     .site-logo {
         color: inherit;
@@ -397,25 +394,21 @@ html[data-hero-tone="dark"] .site-header {
 
     .site-menu-toggle .dots span {
         background: currentColor;
-    }
-}
-
-html[data-hero-tone="light"] .site-header {
-    color: var(--kalq-dark, #101010);
-
-    .site-logo {
-        color: inherit;
-    }
-
-    .site-menu-toggle .dots span {
-        background: currentColor;
-    }
-
-    .site-logo__custom svg {
-        filter: brightness(0);
     }
 
     .site-menu-toggle:focus-visible {
         outline-color: currentColor;
+    }
+}
+
+html[data-header-tone="dark"] .site-header {
+    color: #fff;
+}
+
+html[data-header-tone="light"] .site-header {
+    color: #000;
+
+    .site-logo__custom svg {
+        filter: brightness(0);
     }
 }

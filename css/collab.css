@@ -977,7 +977,13 @@
 }
 .kalq-map__slot.is-busy {
   cursor: progress;
-  opacity: 0.6;
+}
+.kalq-map__slot.is-busy img,
+.kalq-map__slot.is-busy video {
+  opacity: 0.45;
+}
+.kalq-map__slot.is-busy .kalq-map__hover {
+  display: none;
 }
 .kalq-map__slot:hover .kalq-map__hover, .kalq-map__slot:focus-visible .kalq-map__hover {
   opacity: 1;
@@ -1625,4 +1631,99 @@
   background: rgba(16, 16, 16, 0.75);
   font-size: 0.55rem;
   letter-spacing: 0.04em;
+}
+
+.kalq-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  z-index: 3;
+  overflow: hidden;
+}
+.kalq-progress span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: #fff;
+  transition: width 0.15s linear;
+}
+
+.kalq-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.kalq-map__cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+.kalq-map__cell.is-thumb {
+  display: contents;
+}
+
+.kalq-map__row .kalq-map__spread {
+  grid-column: 1/-1;
+}
+
+.kalq-map__done {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #10B981;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  z-index: 4;
+  animation: kalq-done 2.6s ease forwards;
+}
+
+@keyframes kalq-done {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  12% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  20% {
+    transform: scale(1);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.kalq-map__spread {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid rgba(16, 185, 129, 0.7);
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #fff;
+  font: 500 0.68rem/1.2 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+.kalq-map__spread:hover, .kalq-map__spread:focus-visible {
+  background: rgba(16, 185, 129, 0.35);
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kalq-map__done {
+    animation: none;
+  }
 }

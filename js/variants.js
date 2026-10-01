@@ -114,6 +114,8 @@ export function applyVariant(variant, { remember = false, preview = false } = {}
         else root.style.removeProperty(prop);
     }
     root.dataset.variant = variant.letter;
+    // A main font of its own also sets the wordmark (header, hero); the default keeps the outlined Clash logo
+    root.classList.toggle("has-font-wordmark", !!fontStack(variant.fonts?.heading));
     applyLogo(variant);
 
     // Images and the hero video: the variant's replacement, otherwise the page's own

@@ -70,7 +70,7 @@ def head(title):
     <header class="site-header">
         <a href="index.html" class="site-logo" aria-label="Kalq home" data-i18n-aria="aria.home">
             {MARK}
-            <span class="site-logo__word"><span>{WORD}</span></span>
+            <span class="site-logo__word"><span>{WORD}<span class="kalq-wordmark" aria-hidden="true">KALQ</span></span></span>
         </a>
         <div class="site-header__right">
             <!-- Light and dark: a sun that morphs into a thin crescent moon (js/variants.js) -->
@@ -321,7 +321,8 @@ home = head("Kalq | The decision layer for manufactured parts") + f'''          
                     </video>
                     <div class="hero_overlay"></div>
                     <div class="hero_content">
-                        <h1 class="hero_title">{HERO_WORD}</h1>
+                        <!-- The outlined wordmark; with a style variant's own heading font the text version shows instead -->
+                        <h1 class="hero_title">{HERO_WORD}<span class="kalq-wordmark">KALQ</span></h1>
                         <!-- One block, one animated line per line break -->
                         <p class="hero_slogan" data-i18n="hero.slogan" data-kalq-key="home.hero.slogan" data-kalq-format="lines">One technical core. Two commercial engines.<br>Better industrial decisions.</p>
                     </div>

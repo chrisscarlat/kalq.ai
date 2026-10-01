@@ -85,13 +85,49 @@ p {
     }
 }
 
-/* Style variants can swap the heading font */
+/* Style variants: the main font sets the wordmark and h1 to h3, the secondary font (body) everything else,
+   so h4, h5 and paragraphs simply inherit it from body */
 h1,
 h2,
-h3,
-h4,
-h5 {
+h3 {
     font-family: var(--kalq-font-heading, inherit);
+}
+
+/* Wordmark: the outlined Clash Grotesk logo by default; with a variant's own main font, "KALQ" set in that font */
+.kalq-wordmark {
+    display: none;
+    font-family: var(--kalq-font-heading, inherit);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+}
+
+html.has-font-wordmark {
+    .site-logo__word svg,
+    .hero_title svg {
+        display: none;
+    }
+
+    .kalq-wordmark {
+        display: block;
+    }
+
+    // Same cap height as the outlined logo (22 px in the header, the hero size below)
+    .site-logo__word .kalq-wordmark {
+        font-size: 31px;
+    }
+
+    .hero_title .kalq-wordmark {
+        font-size: clamp(6.3rem, 18.2vw, 14rem);
+        letter-spacing: -0.02em;
+    }
+}
+
+@media (max-width: 540px) {
+    html.has-font-wordmark .site-logo__word .kalq-wordmark {
+        font-size: 25px;
+    }
 }
 
 /* Long German compounds would overflow large headings on phones */

@@ -12,11 +12,12 @@ const TEXT = {
         draft: "Entwurf", published: "Veröffentlicht", isDefault: "Standard", logo: "Logo", logoFile: "SVG-Datei", logoCode: "oder SVG-Code einfügen",
         logoStripped: "Unsichere Teile wurden entfernt.", logoInvalid: "Kein gültiges SVG.", colors: "Farben",
         c_bg: "Hintergrund", c_text: "Text", c_accent: "Akzent", c_light: "Hell", c_dark: "Dunkel",
-        fonts: "Schriften", heading: "Überschriften", body: "Fließtext", builtIn: "Clash Grotesk (Standard)", google: "Google Fonts", upload: "Eigene woff2",
+        fonts: "Schriften", heading: "Hauptschrift: Logo, H1 bis H3", body: "Zweitschrift: Unterzeilen, H4, H5, Text", builtIn: "Clash Grotesk (Standard)", google: "Google Fonts", upload: "Eigene woff2",
         family: "Schriftname", fontFile: "woff2-Datei", hero: "Hero-Video", images: "Bilder", imagesHint: "Leer lassen für das Standardbild.",
         upload: "Hochladen", clear: "Entfernen", duplicate: "Duplizieren", copyOf: (n) => `${n} (Kopie)`, inherited: "Standard",
         builtInLogo: "Standard: Kalq-Logo", loadFailed: "Die Stile konnten nicht geladen werden.",
-        sitemap: "Seiten", replaceSlot: "Ersetzen", addMedia: "+ Bild oder Video", resetSlot: "Zurück zum Standard",
+        sitemap: "Seiten", replaceSlot: "Ersetzen", uploading: "Wird hochgeladen", spreadImages: "Auf alle Bildplätze übertragen", spreadHero: "Als Hero auf allen Seiten",
+        spreadDone: (n) => `Auf ${n} Plätze übertragen.`, addMedia: "+ Bild oder Video", resetSlot: "Zurück zum Standard",
         fillAll: "Alles füllen", fillHint: "Ein Video wird überall zum Hero, ein Bild füllt jeden Bildplatz. Danach einzeln ersetzbar.",
         filledHero: (n) => `Video ist jetzt Hero auf ${n} Seiten.`, filledImages: (n) => `Bild in ${n} Bildplätzen.`,
         peek: "Seite ansehen", unsaved: "Nicht gespeichert",
@@ -29,11 +30,12 @@ const TEXT = {
         draft: "Draft", published: "Published", isDefault: "Default", logo: "Logo", logoFile: "SVG file", logoCode: "or paste SVG code",
         logoStripped: "Unsafe parts were removed.", logoInvalid: "Not a valid SVG.", colors: "Colours",
         c_bg: "Background", c_text: "Text", c_accent: "Accent", c_light: "Light", c_dark: "Dark",
-        fonts: "Fonts", heading: "Headings", body: "Body text", builtIn: "Clash Grotesk (default)", google: "Google Fonts", upload: "Own woff2",
+        fonts: "Fonts", heading: "Main font: logo, H1 to H3", body: "Secondary font: sub-lines, H4, H5, text", builtIn: "Clash Grotesk (default)", google: "Google Fonts", upload: "Own woff2",
         family: "Font name", fontFile: "woff2 file", hero: "Hero video", images: "Images", imagesHint: "Leave empty for the default image.",
         upload: "Upload", clear: "Remove", duplicate: "Duplicate", copyOf: (n) => `${n} (copy)`, inherited: "Default",
         builtInLogo: "Default: Kalq logo", loadFailed: "The styles could not be loaded.",
-        sitemap: "Pages", replaceSlot: "Replace", addMedia: "+ Image or video", resetSlot: "Back to default",
+        sitemap: "Pages", replaceSlot: "Replace", uploading: "Uploading", spreadImages: "Copy to all image slots", spreadHero: "Use as hero on every page",
+        spreadDone: (n) => `Copied to ${n} slots.`, addMedia: "+ Image or video", resetSlot: "Back to default",
         fillAll: "Fill all", fillHint: "A video becomes the hero everywhere, an image fills every image slot. Replace single slots afterwards.",
         filledHero: (n) => `The video is now the hero on ${n} pages.`, filledImages: (n) => `Image in ${n} image slots.`,
         peek: "View page", unsaved: "Not saved",
@@ -82,15 +84,41 @@ async function api(body) {
 }
 const errorText = (error) => t("errors")[error.message] || (error.info?.field ? `${t("failed")}: ${error.info.field}` : t("failed"));
 
-async function upload(file, kind) {
+// Upload straight to Supabase Storage with the admin's login. XMLHttpRequest instead of supabase-js, because only
+// it reports progress (onProgress gets 0 to 1).
+let storageConfig = null;
+async function upload(file, kind, onProgress = () => { }) {
     const { data: auth } = await collab.sb.auth.getSession();
     if (!auth?.session) throw new Error("relogin");
+    storageConfig ||= await fetch("/api/config").then((r) => r.json());
     const safe = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").slice(-60);
     const path = `variants/${selectedId}/${kind}/${Date.now()}-${safe}`;
     const type = file.type || (safe.endsWith(".woff2") ? "font/woff2" : "application/octet-stream");
-    const { error } = await collab.sb.storage.from("site-media").upload(path, file, { contentType: type, upsert: false });
-    if (error) throw error;
-    return collab.sb.storage.from("site-media").getPublicUrl(path).data.publicUrl;
+    const base = storageConfig.supabaseUrl.replace(/\/$/, "");
+    await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `${base}/storage/v1/object/site-media/${path.split("/").map(encodeURIComponent).join("/")}`);
+        xhr.setRequestHeader("Authorization", `Bearer ${auth.session.access_token}`);
+        xhr.setRequestHeader("apikey", storageConfig.supabaseAnonKey);
+        xhr.setRequestHeader("Content-Type", type);
+        xhr.setRequestHeader("x-upsert", "false");
+        xhr.upload.onprogress = (e) => { if (e.lengthComputable) onProgress(e.loaded / e.total); };
+        xhr.onload = () => (xhr.status < 300 ? resolve() : reject(new Error(`upload ${xhr.status}`)));
+        xhr.onerror = () => reject(new Error("upload"));
+        xhr.send(file);
+    });
+    onProgress(1);
+    return `${base}/storage/v1/object/public/site-media/${path}`;
+}
+
+// Thin white line at the bottom of a slot or button while a file uploads
+function progressLine(host) {
+    host.querySelector(".kalq-progress")?.remove();
+    const line = el("span", { className: "kalq-progress" });
+    const bar = el("span", { style: "width: 3%" });
+    line.append(bar);
+    host.append(line);
+    return { set: (p) => { bar.style.width = `${Math.round(p * 100)}%`; }, done: () => line.remove() };
 }
 
 async function refresh() {
@@ -188,7 +216,8 @@ function fontRow(part) {
     const family = el("input", { type: "text", value: font.family || "", maxLength: 40, placeholder: "Space Grotesk" });
     family.setAttribute("list", "kalq-google-fonts");
     const file = el("input", { type: "file", accept: ".woff2,font/woff2" });
-    const sample = el("p", { className: "kalq-styles__sample", textContent: "Kalq · Ein technischer Kern." });
+    // The main font sample includes the wordmark it will set
+    const sample = el("p", { className: "kalq-styles__sample", textContent: part === "heading" ? "KALQ · Ein technischer Kern." : "Bessere industrielle Entscheidungen." });
     const sync = () => {
         family.hidden = font.source === "default";
         file.hidden = font.source !== "upload";
@@ -238,6 +267,32 @@ const imageKeys = () => [...new Set([...SITEMAP.flatMap((p) => p.items.flatMap((
     .filter((k) => !HERO_KEYS.includes(k));
 
 let dirty = false;
+let lastUpload = null; // { key, url }: offers to copy the newest upload to every slot of its kind
+
+// Green tick on a slot once its upload is done
+function showDone(node) {
+    node.querySelector(".kalq-map__done")?.remove();
+    const tick = el("span", { className: "kalq-map__done", textContent: "✓" });
+    node.append(tick);
+    setTimeout(() => tick.remove(), 2600);
+}
+
+// After an upload: copy the same file to every hero (hero slot) or every image slot (any other slot)
+function spreadChip(key, url) {
+    const hero = HERO_KEYS.includes(key);
+    const chip = el("button", { type: "button", className: "kalq-map__spread", textContent: `✓ ${hero ? t("spreadHero") : t("spreadImages")}` });
+    chip.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const keys = hero ? HERO_KEYS : imageKeys();
+        keys.forEach((k) => setSlot(k, url));
+        lastUpload = null;
+        changed();
+        render();
+        collab.toast(t("spreadDone")(keys.length));
+        document.querySelectorAll(".kalq-map__slot").forEach((slot) => { if (keys.includes(slot.dataset.key)) showDone(slot); });
+    });
+    return chip;
+}
 
 function pickFile(onFile) {
     const input = el("input", { type: "file", accept: ACCEPT });
@@ -268,12 +323,24 @@ function slotNode(key, shape) {
     };
     node.addEventListener("click", () => pickFile(async (file) => {
         node.classList.add("is-busy");
-        try { setSlot(key, await upload(file, "media")); draw(); changed(); markDirty(); }
+        const progress = progressLine(node);
+        try {
+            const url = await upload(file, "media", progress.set);
+            setSlot(key, url);
+            lastUpload = { key, url };
+            draw(); changed(); markDirty();
+            showDone(node);
+            document.querySelectorAll(".kalq-map__spread").forEach((chip) => chip.remove());
+            wrap.append(spreadChip(key, url));
+        }
         catch (error) { collab.toast(errorText(error), "error"); }
-        finally { node.classList.remove("is-busy"); }
+        finally { progress.done(); node.classList.remove("is-busy"); }
     }));
     draw();
-    return node;
+    // The slot sits in a wrapper so the "copy to all" chip can follow it
+    const wrap = el("div", { className: `kalq-map__cell is-${shape}` }, node);
+    if (lastUpload?.key === key && slotUrl(key) === lastUpload.url) wrap.append(spreadChip(key, lastUpload.url));
+    return wrap;
 }
 
 const lines = (n) => el("div", { className: "kalq-map__text" }, ...Array.from({ length: n }, (_, i) => {
@@ -308,14 +375,15 @@ function fillAllSection() {
     const btn = el("button", { type: "button", className: "kalq-btn kalq-btn--primary", textContent: t("fillAll") });
     btn.addEventListener("click", () => pickFile(async (file) => {
         btn.disabled = true;
+        const progress = progressLine(btn);
         try {
-            const url = await upload(file, "media");
+            const url = await upload(file, "media", progress.set);
             if (isVideo(url)) { HERO_KEYS.forEach((k) => setSlot(k, url)); collab.toast(t("filledHero")(HERO_KEYS.length)); }
             else { const keys = imageKeys(); keys.forEach((k) => setSlot(k, url)); collab.toast(t("filledImages")(keys.length)); }
             changed();
             render();
         } catch (error) { collab.toast(errorText(error), "error"); }
-        finally { btn.disabled = false; }
+        finally { progress.done(); btn.disabled = false; }
     }));
     return el("section", {}, el("h4", { textContent: t("fillAll") }), el("p", { className: "kalq-styles__inherited", textContent: t("fillHint") }), btn);
 }

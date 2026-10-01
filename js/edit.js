@@ -194,6 +194,7 @@ function pickFile(node, btn) {
 //=================================== Mode, locks ===================================//
 function setMode(next) {
     on = next;
+    if (on) collab.setActiveMode("edit");
     document.body.classList.toggle("kalq-edit", on);
     button.setAttribute("aria-pressed", on);
     if (!on) stopEditing(true);
@@ -241,13 +242,14 @@ export async function initEditing(api) {
         if (!on && !(await editorSession())) return collab.toast(t("relogin"), "error");
         setMode(!on);
     });
-    collab.addTool(button);
+    collab.addTool(button, 10);
 
     document.addEventListener("click", onClick, true); // capture: before links and Barba
     document.addEventListener("kalq:language", () => { labelButton(); replaceButtons(); });
     collab.on("key:e", () => button.click());
     collab.on("escape", () => { if (on) setMode(false); });
     collab.on("locks", showLocks);
+    collab.on("mode", (mode) => { if (mode !== "edit" && on) setMode(false); });
     collab.on("leave", () => stopEditing(true));
     collab.on("page", () => replaceButtons());
 }

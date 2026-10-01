@@ -301,3 +301,387 @@
         animation-duration: 0.01s;
     }
 }
+
+// Comment pins live inside the page container, so they scroll with the content
+[data-barba="container"] {
+    position: relative;
+}
+
+.kalq-pins {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    z-index: 40;
+}
+
+$pin-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M3 25V12a9 9 0 0 1 9-9h4a9 9 0 0 1 9 9v0a9 9 0 0 1-9 9H8z' fill='%23101010' stroke='%23fff' stroke-width='2'/%3E%3Cpath d='M14 8v8M10 12h8' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") 3 25, crosshair;
+
+.kalq-commenting [data-barba="container"],
+.kalq-commenting [data-barba="container"] * {
+    cursor: $pin-cursor !important;
+}
+
+.kalq-commenting .kalq-pins,
+.kalq-commenting .kalq-pins * {
+    cursor: pointer !important;
+}
+
+.kalq-commenting .kalq-thread textarea {
+    cursor: text !important;
+}
+
+.kalq-pin {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 34px;
+    height: 34px;
+    margin: -34px 0 0 0; // the tail points at the spot
+    padding: 3px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50% 50% 50% 4px;
+    background: var(--c, #3B82F6);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25), 0 0 0 2px #fff;
+    cursor: pointer; // no transform transition: pins are re-drawn on every update and would fly in from the corner
+
+    .kalq-avatar--mini {
+        width: 26px;
+        height: 26px;
+        font-size: 0.65rem;
+        background: transparent;
+        color: var(--fg, #fff);
+    }
+
+    .kalq-avatar--mini.is-emoji {
+        font-size: 1rem;
+    }
+
+    &.is-resolved {
+        opacity: 0.5;
+        filter: grayscale(0.6);
+    }
+
+    &:focus-visible {
+        outline: 2px solid #101010;
+        outline-offset: 3px;
+    }
+}
+
+.kalq-pin__count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: #101010;
+    color: #fff;
+    font: 500 11px/18px "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+}
+
+// Thread card
+.kalq-thread {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 300px;
+    max-width: calc(100vw - 2rem);
+    padding: 0.9rem;
+    background: rgba(16, 16, 16, 0.86);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 18px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    color: #fff;
+    font: 400 0.9rem/1.45 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: 0;
+    text-align: left;
+    z-index: 41;
+}
+
+.kalq-thread__close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 26px;
+    height: 26px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #fff;
+    opacity: 0.6;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1;
+        background: rgba(255, 255, 255, 0.1);
+    }
+}
+
+.kalq-thread__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 1.5rem;
+}
+
+.kalq-thread__head {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.2rem;
+
+    strong {
+        font-weight: 500;
+    }
+
+    time {
+        opacity: 0.5;
+        font-size: 0.78rem;
+    }
+}
+
+.kalq-thread__msg p {
+    margin: 0;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.kalq-thread__resolved {
+    margin-top: 0.7rem;
+    font-size: 0.78rem;
+    opacity: 0.6;
+}
+
+.kalq-thread__form {
+    margin-top: 0.8rem;
+
+    textarea {
+        width: 100%;
+        min-height: 60px;
+        padding: 0.6rem 0.7rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.06);
+        color: #fff;
+        font: inherit;
+        resize: vertical;
+        outline: none;
+
+        &:focus {
+            border-color: rgba(255, 255, 255, 0.55);
+        }
+    }
+}
+
+.kalq-thread__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+}
+
+.kalq-btn {
+    padding: 0.45rem 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    background: transparent;
+    color: #fff;
+    font: 500 0.82rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+        background: rgba(255, 255, 255, 0.1);
+        outline: none;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: progress;
+    }
+}
+
+.kalq-btn--primary {
+    background: #fff;
+    border-color: #fff;
+    color: #101010;
+
+    &:hover,
+    &:focus-visible {
+        background: rgba(255, 255, 255, 0.85);
+    }
+}
+
+// Side panel (comments, later versions)
+.kalq-panel {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    bottom: 5.5rem;
+    width: 360px;
+    max-width: calc(100vw - 2rem);
+    display: flex;
+    flex-direction: column;
+    background: rgba(16, 16, 16, 0.82);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    backdrop-filter: blur(22px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 22px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    color: #fff;
+    font: 400 0.9rem/1.45 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+    z-index: 47;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(16px);
+    transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.65, 0, 0.35, 1), visibility 0s linear 0.3s;
+
+    &.is-open {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+}
+
+.kalq-panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.7rem 0.7rem 0.5rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.kalq-panel__tabs {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.kalq-panel__tab {
+    padding: 0.4rem 0.8rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    font: 500 0.85rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+    cursor: pointer;
+
+    &[aria-selected="true"] {
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+    }
+}
+
+.kalq-panel__close {
+    width: 32px;
+    height: 32px;
+    margin-left: auto;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+}
+
+.kalq-panel__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.6rem;
+}
+
+.kalq-panel__toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.5rem 0.7rem;
+    font-size: 0.82rem;
+    opacity: 0.75;
+    cursor: pointer;
+}
+
+.kalq-panel__empty {
+    padding: 1rem 0.5rem;
+    opacity: 0.6;
+}
+
+.kalq-panel__row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 100%;
+    padding: 0.7rem 0.6rem;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+        background: rgba(255, 255, 255, 0.08);
+        outline: none;
+    }
+
+    &.is-resolved {
+        opacity: 0.55;
+    }
+}
+
+.kalq-panel__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+
+    strong {
+        font-weight: 500;
+    }
+
+    span:last-child {
+        opacity: 0.5;
+    }
+}
+
+.kalq-panel__text {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    white-space: pre-wrap;
+}
+
+.kalq-panel__sub {
+    font-size: 0.78rem;
+    opacity: 0.55;
+}
+
+@media (max-width: 540px) {
+    .kalq-panel {
+        top: auto;
+        left: 0.75rem;
+        right: 0.75rem;
+        bottom: 5rem;
+        height: 60vh;
+        width: auto;
+    }
+}

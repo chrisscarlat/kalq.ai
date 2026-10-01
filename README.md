@@ -56,3 +56,7 @@ Every editable element has a stable `data-kalq-key` (`page.section.item`, shared
 Editors get a pencil in the toolbar (or press `E`). Click a text block to edit it in place: Enter is a line break, `Cmd/Ctrl+Enter` or clicking elsewhere saves, `Esc` cancels; paste is plain text. Images and videos get a "Replace" button (upload to `site-media`, max 50 MB). Saves go to Supabase with the editor's own login (RLS), then the page channel announces the change and every browser, guests included, reloads it from `/api/content` and briefly highlights it.
 
 Supabase allows a client only 5 presence updates per 30 seconds and closes the channel beyond that, so "X is editing" is a broadcast repeated every 4 s (expires after 10 s), not a presence update. Channels that close anyway are rejoined with growing waits.
+
+## Comments (Phase 5)
+
+Everyone through the gate can comment: `C` or the bubble button, then click anywhere on the page. A pin attaches to the nearest `data-kalq-key` block (position in % of the block, so it stays on the spot on any screen width), otherwise to the page. Threads have replies and can be resolved or reopened by editors or the author. `H` or the clock opens the side panel with this page's comments (resolved ones on request). All reads and writes go through `/api/comments` (gate cookie; author always from the cookie; 1 to 2000 characters; 30 per person per 10 minutes); changes are announced on the page channel and reloaded by everyone.

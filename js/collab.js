@@ -146,6 +146,7 @@ async function joinPage() {
         .on("broadcast", { event: "cursor" }, ({ payload }) => moveCursor(payload))
         .on("broadcast", { event: "content" }, ({ payload }) => emit("content", payload))
         .on("broadcast", { event: "lock" }, ({ payload }) => receiveLock(payload))
+        .on("broadcast", { event: "comments" }, ({ payload }) => emit("comments", payload))
         .subscribe(async (status) => {
             if (status === "SUBSCRIBED") {
                 state.joinedAt = state.joinedAt || Date.now();
@@ -270,7 +271,7 @@ function buildToolbar() {
     const bar = el("div", "kalq-toolbar", { role: "toolbar", "aria-label": "Kalq" });
     const stack = el("div", "kalq-stack", { role: "group" });
     const divider = el("span", "kalq-toolbar__divider", { "aria-hidden": "true" });
-    const out = el("button", "kalq-toolbar__btn", { type: "button" });
+    const out = el("button", "kalq-toolbar__btn kalq-toolbar__logout", { type: "button" });
     out.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     const label = () => { out.setAttribute("aria-label", t("logout")); out.title = t("logout"); };
     label();
@@ -312,10 +313,15 @@ export const collab = {
         console.warn(`broadcast ${event} not delivered`);
         return false;
     },
-    addTool(button) {
-        state.toolbar.querySelector(".kalq-tools").append(button);
-        state.toolbar.querySelector(".kalq-toolbar__divider").hidden = false;
+    // Tools keep a fixed order (edit, comment, history) however late their module loads
+    addTool(button, order = 50) {
+        button.dataset.order = order;
+        const tools = state.toolbar.querySelector(".kalq-tools");
+        const after = [...tools.children].find((b) => Number(b.dataset.order) > order);
+        tools.insertBefore(button, after || null);
     },
+    // Edit and comment mode exclude each other
+    setActiveMode(mode) { emit("mode", mode); },
     toast(text, kind = "info") {
         let node = document.querySelector(".kalq-toast");
         if (!node) { node = el("div", "kalq-toast", { role: "status", "aria-live": "polite" }); document.body.append(node); }
@@ -375,7 +381,9 @@ async function init() {
         refreshContent(keys.filter((k) => typeof k === "string"), author?.color);
     });
 
-    // Edit mode only for editors
+    // Comments and the history panel for everyone, edit mode only for editors
+    const [{ initPanel }, { initComments }] = await Promise.all([import("./panel.js"), import("./comments.js")]);
+    initComments(collab, initPanel(collab));
     if (state.me.kind === "editor") import("./edit.js").then((m) => m.initEditing(collab)).catch((e) => console.error("edit", e));
 
     // Touch devices only show the stack, they do not send cursors

@@ -98,10 +98,15 @@ function applyLogo(variant) {
     }
 }
 
-// The big moving bar in the home hero: a variant with its own logo shows the logo there instead, same parallax
+// The built-in mark, still (the header's copy is animated)
+const BUILT_IN_MARK = '<svg viewBox="0 0 174 174" fill="none" stroke="currentColor" stroke-width="7.38"><line x1="101.81" y1="86.99" x2="173.98" y2="86.99"/><line x1="72.16" y1="87.01" x2="0" y2="87.01"/><line x1="87.01" y1="101.84" x2="87.01" y2="174"/><line x1="87.01" y1="72.16" x2="87.01" y2="0"/><line x1="84.26" y1="84.26" x2="135.29" y2="135.29"/><line x1="99.04" y1="75.62" x2="132.83" y2="41.82"/><line x1="74.64" y1="99.7" x2="40.85" y2="133.49"/><line x1="74.62" y1="74.31" x2="40.83" y2="40.51"/></svg>';
+
+// The big moving bar in the home hero, or the variant's logo there instead (its own or the built-in mark), same
+// parallax. Without a choice: the logo when the variant has its own, otherwise the line.
 function applyHeroMark(variant) {
+    const wantLogo = (variant?.hero_mark || (variant?.logo_svg ? "logo" : "line")) === "logo";
     document.querySelectorAll(".block").forEach((block) => {
-        const node = variant?.logo_svg ? logoNode(variant.logo_svg) : null;
+        const node = wantLogo ? logoNode(variant.logo_svg || BUILT_IN_MARK) : null;
         block.classList.toggle("is-logo", !!node);
         block.replaceChildren(...(node ? [node] : []));
     });

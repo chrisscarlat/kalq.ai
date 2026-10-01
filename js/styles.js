@@ -15,7 +15,7 @@ const TEXT = {
         fonts: "Schriften", heading: "Hauptschrift: Logo, H1 bis H3", body: "Zweitschrift: Unterzeilen, H4, H5, Text", builtIn: "Clash Grotesk (Standard)", google: "Google Fonts", upload: "Eigene woff2",
         family: "Schriftname", fontFile: "woff2-Datei", hero: "Hero-Video", images: "Bilder", imagesHint: "Leer lassen für das Standardbild.",
         upload: "Hochladen", clear: "Entfernen", duplicate: "Duplizieren", copyOf: (n) => `${n} (Kopie)`, inherited: "Standard",
-        builtInLogo: "Standard: Kalq-Logo", loadFailed: "Die Stile konnten nicht geladen werden.",
+        builtInLogo: "Standard: Kalq-Logo", heroMark: "Mitte im Hero (Start)", heroMarkLogo: "Logo", heroMarkLine: "Linie", loadFailed: "Die Stile konnten nicht geladen werden.",
         sitemap: "Seiten", replaceSlot: "Ersetzen", uploading: "Wird hochgeladen", spreadImages: "Auf alle Bildplätze übertragen", spreadHero: "Als Hero auf allen Seiten",
         spreadDone: (n) => `Auf ${n} Plätze übertragen.`, addMedia: "+ Bild oder Video", resetSlot: "Zurück zum Standard",
         fillAll: "Alles füllen", fillHint: "Ein Video wird überall zum Hero, ein Bild füllt jeden Bildplatz. Danach einzeln ersetzbar.",
@@ -33,7 +33,7 @@ const TEXT = {
         fonts: "Fonts", heading: "Main font: logo, H1 to H3", body: "Secondary font: sub-lines, H4, H5, text", builtIn: "Clash Grotesk (default)", google: "Google Fonts", upload: "Own woff2",
         family: "Font name", fontFile: "woff2 file", hero: "Hero video", images: "Images", imagesHint: "Leave empty for the default image.",
         upload: "Upload", clear: "Remove", duplicate: "Duplicate", copyOf: (n) => `${n} (copy)`, inherited: "Default",
-        builtInLogo: "Default: Kalq logo", loadFailed: "The styles could not be loaded.",
+        builtInLogo: "Default: Kalq logo", heroMark: "Centre of the hero (Home)", heroMarkLogo: "Logo", heroMarkLine: "Line", loadFailed: "The styles could not be loaded.",
         sitemap: "Pages", replaceSlot: "Replace", uploading: "Uploading", spreadImages: "Copy to all image slots", spreadHero: "Use as hero on every page",
         spreadDone: (n) => `Copied to ${n} slots.`, addMedia: "+ Image or video", resetSlot: "Back to default",
         fillAll: "Fill all", fillHint: "A video becomes the hero everywhere, an image fills every image slot. Replace single slots afterwards.",
@@ -61,6 +61,7 @@ function normalize(v) {
         status: v.status || "published",
         sort: Number.isInteger(v.sort) ? v.sort : 50,
         logo_svg: v.logo_svg || "",
+        hero_mark: ["logo", "line"].includes(v.hero_mark) ? v.hero_mark : (v.logo_svg ? "logo" : "line"),
         colors: { ...DEFAULT_COLORS, ...(v.colors || {}) },
         fonts: { heading: font(v.fonts?.heading), body: font(v.fonts?.body) },
         hero_video: v.hero_video || "",
@@ -183,7 +184,10 @@ function logoSection() {
     show(draft.logo_svg);
     const inherited = el("p", { className: "kalq-styles__inherited", textContent: draft.logo_svg ? "" : t("builtInLogo") });
     code.addEventListener("input", () => { inherited.textContent = code.value.trim() ? "" : t("builtInLogo"); });
-    return el("section", {}, el("h4", { textContent: t("logo") }), field(t("logoFile"), file), field(t("logoCode"), code), note, inherited, previews);
+    // What moves behind the title on Home: this logo (or the built-in mark) or the diagonal line
+    const mark = el("select", {}, ...[["logo", t("heroMarkLogo")], ["line", t("heroMarkLine")]].map(([v, l]) => el("option", { value: v, textContent: l, selected: draft.hero_mark === v })));
+    mark.addEventListener("change", () => { draft.hero_mark = mark.value; changed(); });
+    return el("section", {}, el("h4", { textContent: t("logo") }), field(t("logoFile"), file), field(t("logoCode"), code), note, inherited, previews, field(t("heroMark"), mark));
 }
 
 // The site's own Kalq mark, for variants without their own logo

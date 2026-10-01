@@ -107,13 +107,14 @@ function animateNumbering() {
 // Hero video: paused for reduced motion, restarted after Barba swaps the container
 function heroVideo() {
     const video = document.querySelector(".hero_video");
-    if (!video) return;
+    if (!video || video.tagName !== "VIDEO") return; // a style variant can put an image there
     if (reducedMotion.matches) {
         video.removeAttribute("autoplay");
         video.pause();
         return;
     }
     video.muted = true;
+    video.preload = "auto"; // loaded only now, after the page scripts (see the hero markup)
     const playing = video.play();
     if (playing) playing.catch(() => { });
 }

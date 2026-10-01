@@ -90,8 +90,34 @@ const flash = (keys, color) => keys.forEach((key) => {
     });
 });
 
+//=================================== Preview ===================================//
+// Showing an older version: live updates pause, leaving the preview reloads the current content.
+let previewing = false;
+let saved = null;
+
+export const isPreviewing = () => previewing;
+
+export function enterPreview(blocks) {
+    if (!saved) saved = new Map([...store].map(([key, entry]) => [key, { ...entry }]));
+    previewing = true;
+    // Start from the current state, so blocks that did not exist back then keep their text
+    store.clear();
+    saved.forEach((entry, key) => store.set(key, { ...entry }));
+    blocks.forEach(({ key, lang, content, type }) => setLocalContent(key, lang, content, type));
+    applyLanguage();
+    applyDirect(document);
+}
+
+export async function exitPreview() {
+    if (!previewing) return;
+    previewing = false;
+    if (saved) { store.clear(); saved.forEach((entry, key) => store.set(key, entry)); saved = null; }
+    await refreshContent([]);
+}
+
 // Someone saved: fetch the page's content again (the database is the truth, not the message) and highlight
 export async function refreshContent(keys = [], color) {
+    if (previewing) return; // paused while looking at an older version
     const page = document.querySelectorAll('[data-barba="container"]');
     const name = page.length ? page[page.length - 1].dataset.page : null;
     if (!name) return;
@@ -106,6 +132,8 @@ export async function refreshContent(keys = [], color) {
 
 // container: the Barba container of the page being shown (the new one during a transition)
 export async function loadPageContent(container = document.querySelector('[data-barba="container"]')) {
+    previewing = false; // a new page always shows the current version
+    saved = null;
     const page = container?.dataset.page;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);

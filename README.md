@@ -60,3 +60,7 @@ Supabase allows a client only 5 presence updates per 30 seconds and closes the c
 ## Comments (Phase 5)
 
 Everyone through the gate can comment: `C` or the bubble button, then click anywhere on the page. A pin attaches to the nearest `data-kalq-key` block (position in % of the block, so it stays on the spot on any screen width), otherwise to the page. Threads have replies and can be resolved or reopened by editors or the author. `H` or the clock opens the side panel with this page's comments (resolved ones on request). All reads and writes go through `/api/comments` (gate cookie; author always from the cookie; 1 to 2000 characters; 30 per person per 10 minutes); changes are announced on the page channel and reloaded by everyone.
+
+## History, restore, invites (Phase 6)
+
+The clock opens the side panel on Versions: save batches newest first, for this page or the whole site. A click previews the page as it was right after that batch (live updates pause, `Esc` or "Exit preview" ends it). Editors can restore the block, the page or the whole site; `restore_to` copies the old content as new revisions in one batch that points back at the previewed one, so nothing is lost and a restore can be restored. Order comes from the `seq` column (insert order), never from timestamps. Editors invite colleagues from the toolbar (`/api/invite`: adds the email to `invites` and sends a Supabase invite).

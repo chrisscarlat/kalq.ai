@@ -32,9 +32,11 @@ function show(id) {
 export const panel = {
     get isOpen() { return root.classList.contains("is-open"); },
     get active() { return active; },
+    // Tabs sorted by `order`; the first one is the default
     addTab(tab) {
         tabs.push(tab);
-        if (!active) active = tab.id;
+        tabs.sort((a, b) => (a.order ?? 50) - (b.order ?? 50));
+        active = tabs[0].id;
         renderTabs();
     },
     open(id = active) {

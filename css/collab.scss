@@ -685,3 +685,126 @@ $pin-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
         width: auto;
     }
 }
+
+// Versions tab
+.kalq-segment {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.2rem;
+    margin: 0 0.3rem 0.6rem;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 999px;
+
+    button {
+        flex: 1;
+        padding: 0.45rem 0.6rem;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.65);
+        font: 500 0.8rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+        cursor: pointer;
+
+        &[aria-pressed="true"] {
+            background: rgba(255, 255, 255, 0.14);
+            color: #fff;
+        }
+    }
+}
+
+.kalq-panel__row.is-current {
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: inset 3px 0 0 #fff;
+}
+
+// Preview banner, in the author's colour
+.kalq-preview {
+    position: fixed;
+    top: 5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: calc(100vw - 2rem);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem 1rem;
+    padding: 0.6rem 0.7rem 0.6rem 1rem;
+    background: rgba(16, 16, 16, 0.88);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: 2px solid var(--c);
+    border-radius: 18px;
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.35);
+    color: #fff;
+    font: 400 0.9rem/1.35 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+    z-index: 48;
+}
+
+.kalq-preview__text {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.kalq-preview__actions {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+// Invite form above the toolbar
+.kalq-invite {
+    position: fixed;
+    left: 50%;
+    bottom: 5rem;
+    transform: translateX(-50%);
+    width: min(360px, calc(100vw - 2rem));
+    padding: 0.9rem;
+    background: rgba(16, 16, 16, 0.88);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 18px;
+    color: #fff;
+    font: 400 0.9rem/1.4 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+    z-index: 46;
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+.kalq-invite__label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.kalq-invite__row {
+    display: flex;
+    gap: 0.4rem;
+
+    input {
+        flex: 1;
+        min-width: 0;
+        padding: 0.55rem 0.8rem;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        color: #fff;
+        font: inherit;
+        outline: none;
+
+        &:focus {
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+    }
+}
+
+@media (max-width: 540px) {
+    .kalq-preview {
+        top: 4.25rem;
+    }
+}

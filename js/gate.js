@@ -177,6 +177,11 @@ async function finishLogin() {
 
     try {
         const sb = await client();
+        // Links from invite emails carry the session in the URL hash
+        if (hash.get("access_token") && hash.get("refresh_token")) {
+            await sb.auth.setSession({ access_token: hash.get("access_token"), refresh_token: hash.get("refresh_token") });
+            history.replaceState(null, "", `${location.pathname}?next=${encodeURIComponent(nextPath)}`);
+        }
         const { data: { session } } = await sb.auth.getSession();
         if (!session || session.user.is_anonymous) return;
         loginButtons.forEach((b) => { b.disabled = true; });

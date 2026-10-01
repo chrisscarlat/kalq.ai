@@ -453,7 +453,7 @@ function onClick(e) {
 export function initComments(api, sidePanel) {
     collab = api;
     panel = sidePanel;
-    panel.addTab({ id: "comments", label: () => t("tab"), render: renderTab });
+    panel.addTab({ id: "comments", order: 20, label: () => t("tab"), render: renderTab });
 
     button = document.createElement("button");
     button.type = "button";

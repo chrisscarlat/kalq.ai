@@ -381,10 +381,15 @@ async function init() {
         refreshContent(keys.filter((k) => typeof k === "string"), author?.color);
     });
 
-    // Comments and the history panel for everyone, edit mode only for editors
-    const [{ initPanel }, { initComments }] = await Promise.all([import("./panel.js"), import("./comments.js")]);
-    initComments(collab, initPanel(collab));
-    if (state.me.kind === "editor") import("./edit.js").then((m) => m.initEditing(collab)).catch((e) => console.error("edit", e));
+    // Comments and history for everyone, edit mode and invites only for editors
+    const [{ initPanel }, { initComments }, { initHistory }] = await Promise.all([import("./panel.js"), import("./comments.js"), import("./history.js")]);
+    const sidePanel = initPanel(collab);
+    initHistory(collab, sidePanel);
+    initComments(collab, sidePanel);
+    if (state.me.kind === "editor") {
+        import("./edit.js").then((m) => m.initEditing(collab)).catch((e) => console.error("edit", e));
+        import("./invite.js").then((m) => m.initInvite(collab)).catch((e) => console.error("invite", e));
+    }
 
     // Touch devices only show the stack, they do not send cursors
     if (finePointer) {

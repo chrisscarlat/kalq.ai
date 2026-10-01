@@ -203,6 +203,28 @@ body {
   text-underline-offset: 3px;
 }
 
+.gate_logo__stack {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.gate_logo__layer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.gate_logo__layer.is-active {
+  opacity: 1;
+}
+.gate_logo__layer > svg {
+  max-width: 100%;
+  max-height: 100%;
+}
+
 @keyframes gate-shake {
   0%, 100% {
     transform: translateX(0);

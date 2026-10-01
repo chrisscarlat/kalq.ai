@@ -1,6 +1,7 @@
 // Gate page: access code for guests (no account), Google or LinkedIn for editors.
 // The server decides (see api/code.js, api/session.js); this only drives the UI and the Supabase session.
 import { logoAnimation } from "./logoAnimation.js";
+import { sanitizeSvg } from "../lib/svg-sanitize.js";
 
 const TEXT = {
     de: {
@@ -54,6 +55,42 @@ const go = () => location.replace(nextPath);
 
 const mark = document.querySelector(".gate_mark");
 if (mark && window.gsap) logoAnimation(mark, { delay: 0.8 });
+
+//=================================== Style variants ===================================//
+// Only the logo cycles through the published variants, one per second with a crossfade; the rest stays still.
+// A variant with its own logo shows it (sanitised), one without shows the Kalq mark in its accent colour.
+async function cycleVariantLogos() {
+    const stack = document.querySelector(".gate_logo__stack");
+    if (!stack || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const res = await fetch("/api/variants").catch(() => null);
+    if (!res?.ok) { res?.body?.cancel(); return; }
+    const { variants = [] } = await res.json();
+    if (variants.length < 2) return;
+    const base = stack.querySelector('[data-variant="default"]');
+    const layers = variants.map((v) => {
+        if (v.is_default && !v.logo_svg) return base; // the animated mark
+        const layer = document.createElement("div");
+        layer.className = "gate_logo__layer";
+        layer.dataset.variant = v.letter;
+        const clean = v.logo_svg ? sanitizeSvg(v.logo_svg) : "";
+        const doc = clean ? new DOMParser().parseFromString(clean, "image/svg+xml") : null;
+        if (doc && !doc.querySelector("parsererror")) layer.append(document.importNode(doc.documentElement, true));
+        else {
+            const copy = base.querySelector("svg").cloneNode(true); // keeps the gate_mark size
+            copy.style.color = v.colors?.accent || "#fff";
+            layer.append(copy);
+        }
+        stack.append(layer);
+        return layer;
+    });
+    let i = 0;
+    setInterval(() => {
+        layers[i].classList.remove("is-active");
+        i = (i + 1) % layers.length;
+        layers[i].classList.add("is-active");
+    }, 1000);
+}
+cycleVariantLogos();
 
 //=================================== Supabase ===================================//
 let supabase = null;

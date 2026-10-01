@@ -583,7 +583,8 @@ gate_html = f"""<!DOCTYPE html>
     <main class="gate">
         <div class="gate_card">
             <div class="gate_logo">
-                {GATE_MARK}
+                <!-- One layer per published style variant, crossfading every second (js/gate.js) -->
+                <div class="gate_logo__stack"><div class="gate_logo__layer is-active" data-variant="default">{GATE_MARK}</div></div>
                 <span class="gate_word">{WORD}</span>
             </div>
 

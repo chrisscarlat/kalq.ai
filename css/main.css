@@ -622,6 +622,79 @@ section.has-media #container {
     transition: none;
   }
 }
+/* Light and dark toggle: sun, morphing into a thin crescent moon (the bite circle slides over a larger disc) */
+.mode-toggle {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.mode-toggle svg {
+  width: 22px;
+  height: 22px;
+  overflow: visible;
+}
+.mode-toggle .mode-toggle__core,
+.mode-toggle .mode-toggle__bite {
+  transition: r 0.45s cubic-bezier(0.65, 0, 0.35, 1), cx 0.45s cubic-bezier(0.65, 0, 0.35, 1), cy 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.mode-toggle .mode-toggle__rays {
+  transform-origin: 12px 12px;
+  transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.3s ease;
+}
+.mode-toggle:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+@media (hover: hover) {
+  .mode-toggle:hover .mode-toggle__core {
+    r: 8.2px;
+  }
+  .mode-toggle:hover .mode-toggle__bite {
+    r: 7.9px;
+    cx: 12.75px;
+    cy: 11.35px;
+  }
+  .mode-toggle:hover .mode-toggle__rays {
+    transform: scale(0.3) rotate(-45deg);
+    opacity: 0;
+  }
+}
+[data-mode=dark] .mode-toggle .mode-toggle__core {
+  r: 8.2px;
+}
+[data-mode=dark] .mode-toggle .mode-toggle__bite {
+  r: 7.9px;
+  cx: 12.75px;
+  cy: 11.35px;
+}
+[data-mode=dark] .mode-toggle .mode-toggle__rays {
+  transform: scale(0.3) rotate(-45deg);
+  opacity: 0;
+}
+
+@media (hover: hover) {
+  [data-mode=dark] .mode-toggle:hover .mode-toggle__core {
+    r: 4.4px;
+  }
+  [data-mode=dark] .mode-toggle:hover .mode-toggle__bite {
+    r: 7.4px;
+    cx: 24px;
+    cy: 2px;
+  }
+  [data-mode=dark] .mode-toggle:hover .mode-toggle__rays {
+    transform: none;
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mode-toggle * {
+    transition: none !important;
+  }
+}
 /* Glass dropdown. Lives outside the blended header and is not a <nav>, the global nav rules would break it. */
 .site-menu {
   position: fixed;
@@ -724,7 +797,7 @@ section.has-media #container {
   display: block;
   position: relative;
   padding: 2rem 0;
-  border-bottom: 1px solid #d9d9d9;
+  border-bottom: 1px solid var(--kalq-line, #d9d9d9);
   overflow: hidden;
 }
 .social .social_wrapper .item #container {
@@ -746,12 +819,12 @@ section.has-media #container {
   position: absolute;
   top: 0;
   left: 0;
-  background: var(--kalq-dark, #101010);
+  background: var(--kalq-text, #101010);
   transform: scaleY(0);
   transition: transform 0.3s ease-in-out;
 }
 .social .social_wrapper .item:hover {
-  color: var(--kalq-light, #fff);
+  color: var(--kalq-bg, #fff);
 }
 .social .social_wrapper .item:hover #container {
   padding: 0 7rem;
@@ -985,7 +1058,7 @@ footer #container .footer_bottom a {
   display: flex;
   align-items: center;
   padding: 0 4rem;
-  border-bottom: 1px solid #d9d9d9;
+  border-bottom: 1px solid var(--kalq-line, #d9d9d9);
   overflow: hidden;
   cursor: pointer;
 }
@@ -998,14 +1071,14 @@ footer #container .footer_bottom a {
 .expertise .expertise_wrapper .elem .overlay {
   width: 100%;
   height: 100%;
-  background: var(--kalq-dark, #101010);
+  background: var(--kalq-text, #101010);
   position: absolute;
   left: 0;
   top: -100%;
   transition: all 0.3s ease;
 }
 .expertise .expertise_wrapper .elem:hover {
-  color: var(--kalq-light, #fff);
+  color: var(--kalq-bg, #fff);
 }
 .expertise .expertise_wrapper .elem:hover .overlay {
   top: 0;
@@ -1172,7 +1245,7 @@ footer #container .footer_bottom a {
   color: var(--kalq-text, #101010);
 }
 .about_awwards #container .borderSeprator {
-  background: #d9d9d9;
+  background: var(--kalq-line, #d9d9d9);
 }
 
 .about_weDo,
@@ -1423,7 +1496,7 @@ footer #container .footer_bottom a {
 .borderSeprator {
   height: 1px;
   width: 100%;
-  background: #d9d9d9;
+  background: var(--kalq-line, #d9d9d9);
   margin: 3rem 0;
 }
 

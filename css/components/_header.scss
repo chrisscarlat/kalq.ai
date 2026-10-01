@@ -286,3 +286,93 @@
         transition: none;
     }
 }
+
+/* Light and dark toggle: sun, morphing into a thin crescent moon (the bite circle slides over a larger disc) */
+.mode-toggle {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+
+    svg {
+        width: 22px;
+        height: 22px;
+        overflow: visible;
+    }
+
+    .mode-toggle__core,
+    .mode-toggle__bite {
+        transition: r 0.45s cubic-bezier(0.65, 0, 0.35, 1), cx 0.45s cubic-bezier(0.65, 0, 0.35, 1), cy 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    .mode-toggle__rays {
+        transform-origin: 12px 12px;
+        transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.3s ease;
+    }
+
+    &:focus-visible {
+        outline: 1px solid currentColor;
+        outline-offset: 2px;
+        border-radius: 50%;
+    }
+}
+
+// Moon: in light mode on hover (what a click does), in dark mode at rest
+@mixin moon {
+    .mode-toggle__core {
+        r: 8.2px;
+    }
+
+    // Thin crescent: bite almost as large as the disc, centres about 1 apart (thickest part ~1.3 of 16.4)
+    .mode-toggle__bite {
+        r: 7.9px;
+        cx: 12.75px;
+        cy: 11.35px;
+    }
+
+    .mode-toggle__rays {
+        transform: scale(0.3) rotate(-45deg);
+        opacity: 0;
+    }
+}
+
+// Sun again
+@mixin sun {
+    .mode-toggle__core {
+        r: 4.4px;
+    }
+
+    .mode-toggle__bite {
+        r: 7.4px;
+        cx: 24px;
+        cy: 2px;
+    }
+
+    .mode-toggle__rays {
+        transform: none;
+        opacity: 1;
+    }
+}
+
+@media (hover: hover) {
+    .mode-toggle:hover {
+        @include moon;
+    }
+}
+
+[data-mode="dark"] .mode-toggle {
+    @include moon;
+}
+
+@media (hover: hover) {
+    [data-mode="dark"] .mode-toggle:hover {
+        @include sun;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mode-toggle * {
+        transition: none !important;
+    }
+}

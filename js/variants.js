@@ -5,8 +5,8 @@ import { sanitizeSvg } from "../lib/svg-sanitize.js";
 import { applyDirect, setMediaOverride } from "./content.js";
 
 const CHOICE_KEY = "kalq-variant";
+const MODE_KEY = "kalq-mode"; // "light" | "dark"
 const CACHE_KEY = "kalq-variant-look";
-const COLOR_VARS = { bg: "--kalq-bg", text: "--kalq-text", accent: "--kalq-accent", light: "--kalq-light", dark: "--kalq-dark" };
 const FONT_FALLBACK = '"Clash Grotesk", "Helvetica Neue", Arial, sans-serif';
 
 let variants = [];
@@ -20,6 +20,35 @@ const store = {
 };
 
 export const getVariants = () => variants;
+
+//=================================== Light and dark ===================================//
+// Dark: every section uses the variant's dark set (dark background, light text); the dark sections lift a little
+// so sections stay distinct, dividers follow. Light is the variant as designed.
+let mode = store.get(MODE_KEY) === "dark" ? "dark" : "light";
+export const getMode = () => mode;
+
+const mix = (a, b, amount) => {
+    const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+    const ch = (shift) => Math.round(((pa >> shift) & 255) * (1 - amount) + ((pb >> shift) & 255) * amount);
+    return `#${[16, 8, 0].map((sh) => ch(sh).toString(16).padStart(2, "0")).join("")}`;
+};
+
+function palette(colors) {
+    const c = { bg: "#ffffff", text: "#101010", accent: "#3b82f6", light: "#ffffff", dark: "#101010", ...colors };
+    if (mode !== "dark") return { "--kalq-bg": c.bg, "--kalq-text": c.text, "--kalq-accent": c.accent, "--kalq-light": c.light, "--kalq-dark": c.dark, "--kalq-line": null };
+    return {
+        "--kalq-bg": c.dark, "--kalq-text": c.light, "--kalq-accent": c.accent, "--kalq-light": c.light,
+        "--kalq-dark": mix(c.dark, c.light, 0.07), "--kalq-line": mix(c.dark, c.light, 0.2),
+    };
+}
+
+export function setMode(next) {
+    mode = next === "dark" ? "dark" : "light";
+    store.set(MODE_KEY, mode);
+    const current = getActive();
+    if (current) applyVariant(current, { preview: !!previewing });
+    else document.documentElement.dataset.mode = mode;
+}
 export const getActive = () => previewing || active;
 export const onVariantsChange = (fn) => listeners.add(fn);
 const notify = () => listeners.forEach((fn) => fn(getActive(), variants));
@@ -74,10 +103,11 @@ export function applyVariant(variant, { remember = false, preview = false } = {}
     if (!variant) return;
     const root = document.documentElement;
     const look = {};
-    for (const [name, prop] of Object.entries(COLOR_VARS)) {
-        const value = variant.colors?.[name];
+    for (const [prop, value] of Object.entries(palette(variant.colors))) {
         if (value) { root.style.setProperty(prop, value); look[prop] = value; }
+        else root.style.removeProperty(prop);
     }
+    root.dataset.mode = mode;
     for (const [part, prop] of [["heading", "--kalq-font-heading"], ["body", "--kalq-font-body"]]) {
         const stack = fontStack(variant.fonts?.[part]);
         if (stack) { root.style.setProperty(prop, stack); look[prop] = stack; }
@@ -97,7 +127,7 @@ export function applyVariant(variant, { remember = false, preview = false } = {}
         previewing = null;
         active = variant;
         if (remember) store.set(CHOICE_KEY, variant.id);
-        store.set(CACHE_KEY, JSON.stringify({ id: variant.id, letter: variant.letter, look, fonts: variant.fonts }));
+        store.set(CACHE_KEY, JSON.stringify({ id: variant.id, letter: variant.letter, mode, look, fonts: variant.fonts }));
     }
     notify();
 }
@@ -163,9 +193,27 @@ function renderSwitcher() {
     placeSwitcher();
 }
 
+// Sun in the header that turns into a thin crescent moon on hover (and the other way round when dark)
+function initModeToggle() {
+    const button = document.querySelector(".mode-toggle");
+    if (!button) return;
+    const label = () => {
+        const en = document.documentElement.lang === "en";
+        const text = mode === "dark" ? (en ? "Light design" : "Helles Design") : (en ? "Dark design" : "Dunkles Design");
+        button.setAttribute("aria-label", text);
+        button.title = text;
+        button.setAttribute("aria-pressed", mode === "dark");
+    };
+    button.addEventListener("click", () => { setMode(mode === "dark" ? "light" : "dark"); label(); });
+    document.addEventListener("kalq:language", label);
+    label();
+}
+
 export async function initVariants() {
     if (initVariants.done) return;
     initVariants.done = true;
+    document.documentElement.dataset.mode = mode;
+    initModeToggle();
     onVariantsChange(renderSwitcher);
     await loadVariants();
     renderSwitcher();

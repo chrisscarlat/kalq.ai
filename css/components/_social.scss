@@ -36,7 +36,7 @@
             display: block;
             position: relative;
             padding: 2rem 0;
-            border-bottom: 1px solid $grey2;
+            border-bottom: 1px solid var(--kalq-line, #{$grey2});
             overflow: hidden;
 
             #container {
@@ -60,13 +60,13 @@
                 position: absolute;
                 top: 0;
                 left: 0;
-                background: var(--kalq-dark, #{$dark});
+                background: var(--kalq-text, #{$dark}); // inverse of the section, also in dark mode
                 transform: scaleY(0);
                 transition: transform 0.3s ease-in-out;
             }
 
             &:hover {
-                color: var(--kalq-light, #{$light});
+                color: var(--kalq-bg, #{$light});
 
                 #container {
                     padding: 0 7rem;

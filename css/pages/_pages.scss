@@ -32,7 +32,7 @@
 .borderSeprator {
     height: 1px;
     width: 100%;
-    background: $grey2;
+    background: var(--kalq-line, #{$grey2});
     margin: 3rem 0;
 }
 

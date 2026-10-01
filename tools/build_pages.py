@@ -31,7 +31,7 @@ def head(title):
     <!-- Pages are German; hide translatable text until js/i18n.js has applied another stored language -->
     <script>try {{ var l = localStorage.getItem("kalq-lang"); if (l && l !== "de") document.documentElement.classList.add("i18n-pending"); }} catch (e) {{ }}</script>
     <!-- Style variant: start in the last applied look (colours, fonts) before the first paint; js/variants.js takes over -->
-    <script>try {{ var v = JSON.parse(localStorage.getItem("kalq-variant-look") || "null"); if (v && v.look) for (var k in v.look) if (/^--kalq-[a-z-]+$/.test(k)) document.documentElement.style.setProperty(k, String(v.look[k]).replace(/[;{{}}<>]/g, "")); }} catch (e) {{ }}</script>
+    <script>try {{ document.documentElement.dataset.mode = localStorage.getItem("kalq-mode") === "dark" ? "dark" : "light"; var v = JSON.parse(localStorage.getItem("kalq-variant-look") || "null"); if (v && v.look && (v.mode || "light") === document.documentElement.dataset.mode) for (var k in v.look) if (/^--kalq-[a-z-]+$/.test(k)) document.documentElement.style.setProperty(k, String(v.look[k]).replace(/[;{{}}<>]/g, "")); }} catch (e) {{ }}</script>
     <!-- Edited content: keyed blocks stay hidden until js/content.js applied it (1.5 s max, 3 s if scripts fail) -->
     <script>document.documentElement.classList.add("kalq-loading"); setTimeout(function () {{ document.documentElement.classList.remove("kalq-loading"); }}, 3000);</script>
     <meta name="description" content="{DESC}">
@@ -60,6 +60,16 @@ def head(title):
             <span class="site-logo__word"><span>{WORD}</span></span>
         </a>
         <div class="site-header__right">
+            <!-- Light and dark: a sun that morphs into a thin crescent moon (js/variants.js) -->
+            <button type="button" class="mode-toggle" aria-pressed="false" aria-label="Dunkles Design">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <mask id="kalq-moon-bite"><rect width="24" height="24" fill="#fff"/><circle class="mode-toggle__bite" cx="24" cy="2" r="7.4" fill="#000"/></mask>
+                    <circle class="mode-toggle__core" cx="12" cy="12" r="4.4" fill="currentColor" mask="url(#kalq-moon-bite)"/>
+                    <g class="mode-toggle__rays" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+                        <path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.5 5.5l1.5 1.5M17 17l1.5 1.5M5.5 18.5l1.5-1.5M17 7l1.5-1.5"/>
+                    </g>
+                </svg>
+            </button>
             <div class="lang" data-lang-switcher role="group" aria-label="Language" data-i18n-aria="aria.language">
 {lang_items}
             </div>

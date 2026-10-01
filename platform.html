@@ -8,7 +8,7 @@
     <!-- Pages are German; hide translatable text until js/i18n.js has applied another stored language -->
     <script>try { var l = localStorage.getItem("kalq-lang"); if (l && l !== "de") document.documentElement.classList.add("i18n-pending"); } catch (e) { }</script>
     <!-- Style variant: start in the last applied look (colours, fonts) before the first paint; js/variants.js takes over -->
-    <script>try { var v = JSON.parse(localStorage.getItem("kalq-variant-look") || "null"); if (v && v.look) for (var k in v.look) if (/^--kalq-[a-z-]+$/.test(k)) document.documentElement.style.setProperty(k, String(v.look[k]).replace(/[;{}<>]/g, "")); } catch (e) { }</script>
+    <script>try { document.documentElement.dataset.mode = localStorage.getItem("kalq-mode") === "dark" ? "dark" : "light"; var v = JSON.parse(localStorage.getItem("kalq-variant-look") || "null"); if (v && v.look && (v.mode || "light") === document.documentElement.dataset.mode) for (var k in v.look) if (/^--kalq-[a-z-]+$/.test(k)) document.documentElement.style.setProperty(k, String(v.look[k]).replace(/[;{}<>]/g, "")); } catch (e) { }</script>
     <!-- Edited content: keyed blocks stay hidden until js/content.js applied it (1.5 s max, 3 s if scripts fail) -->
     <script>document.documentElement.classList.add("kalq-loading"); setTimeout(function () { document.documentElement.classList.remove("kalq-loading"); }, 3000);</script>
     <meta name="description" content="Kalq macht aus der Geometrie eines Teils eine technische Wahrheit und zwei getrennte kommerzielle Engines, für Einkäufer und Lieferanten von Fertigungsteilen.">
@@ -37,6 +37,16 @@
             <span class="site-logo__word"><span><svg viewBox="56 0 2490 690" fill="currentColor" aria-hidden="true"><path d="M164 680H56V10H164V296H319L495 10H618L410 342L617 680H493L321 400H164ZM772 680H659L920 10H1075L1336 680H1219L1151 506H840ZM948 232 878 409H1113L1043 232L1000 108H992ZM1897 680H1432V10H1540V583H1897ZM2234 690Q2091 690 2006 596Q1921 502 1921 345Q1921 188 2006 94Q2091 0 2234 0Q2376 0 2461 94Q2546 188 2546 345Q2546 502 2461 596Q2376 690 2234 690ZM2082.5 530.5Q2129 586 2234 586Q2339 586 2385 530.5Q2431 475 2431 345Q2431 215 2385 159.5Q2339 104 2234 104Q2129 104 2082.5 159.5Q2036 215 2036 345Q2036 475 2082.5 530.5Z"/><path d="M2270.3 330.7 L2546.0 606.5 L2546.0 680.0 L2472.5 680.0 L2196.7 404.3Z"/></svg></span></span>
         </a>
         <div class="site-header__right">
+            <!-- Light and dark: a sun that morphs into a thin crescent moon (js/variants.js) -->
+            <button type="button" class="mode-toggle" aria-pressed="false" aria-label="Dunkles Design">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <mask id="kalq-moon-bite"><rect width="24" height="24" fill="#fff"/><circle class="mode-toggle__bite" cx="24" cy="2" r="7.4" fill="#000"/></mask>
+                    <circle class="mode-toggle__core" cx="12" cy="12" r="4.4" fill="currentColor" mask="url(#kalq-moon-bite)"/>
+                    <g class="mode-toggle__rays" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+                        <path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.5 5.5l1.5 1.5M17 17l1.5 1.5M5.5 18.5l1.5-1.5M17 7l1.5-1.5"/>
+                    </g>
+                </svg>
+            </button>
             <div class="lang" data-lang-switcher role="group" aria-label="Sprache" data-i18n-aria="aria.language">
                 <button type="button" class="lang__item" data-lang="en" lang="en" aria-label="English" aria-pressed="false">
                     <span class="lang__inner"><span class="lang__short"><span>E</span></span><span class="lang__full"><span>ENGLISH</span></span></span>

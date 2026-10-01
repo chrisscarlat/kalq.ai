@@ -147,8 +147,6 @@ async function joinPage() {
         .on("broadcast", { event: "content" }, ({ payload }) => emit("content", payload))
         .on("broadcast", { event: "lock" }, ({ payload }) => receiveLock(payload))
         .on("broadcast", { event: "comments" }, ({ payload }) => emit("comments", payload))
-        // Style variants changed or someone voted: js/variants.js and the viewer reload
-        .on("broadcast", { event: "variants" }, ({ payload }) => { emit("variants", payload); document.dispatchEvent(new CustomEvent("kalq:variants", { detail: payload })); })
         .subscribe(async (status) => {
             if (status === "SUBSCRIBED") {
                 state.joinedAt = state.joinedAt || Date.now();
@@ -204,6 +202,20 @@ function emitLocks() {
     emit("locks", list);
 }
 setInterval(emitLocks, 2000);
+
+// One channel for the whole site (no presence): style variants, votes and variant comments reach everyone,
+// whichever page they are on
+function joinSite() {
+    state.site = state.sb.channel(`site:${state.me.channelKey}`, { config: { broadcast: { self: false } } });
+    state.site
+        .on("broadcast", { event: "variants" }, ({ payload }) => {
+            emit("variants", payload);
+            document.dispatchEvent(new CustomEvent("kalq:variants", { detail: payload }));
+        })
+        .subscribe((status) => {
+            if (["CLOSED", "CHANNEL_ERROR", "TIMED_OUT"].includes(status)) setTimeout(() => { state.sb.removeChannel(state.site); joinSite(); }, 5000);
+        });
+}
 
 //=================================== Cursors ===================================//
 let lastSent = 0;
@@ -304,10 +316,12 @@ export const collab = {
         sendLock();
         if (myLock) lockBeat = setInterval(sendLock, LOCK_BEAT_MS);
     },
-    // Important messages (not cursors) are retried until Realtime accepts them
-    async broadcast(event, payload) {
-        for (let attempt = 0; attempt < 4 && state.channel; attempt++) {
-            const result = await state.channel.send({ type: "broadcast", event, payload: { ...payload, uid: state.me.uid } }).catch(() => "error");
+    // Important messages (not cursors) are retried until Realtime accepts them. site: true goes to every page.
+    async broadcast(event, payload, { site = false } = {}) {
+        for (let attempt = 0; attempt < 4; attempt++) {
+            const channel = site ? state.site : state.channel;
+            if (!channel) break;
+            const result = await channel.send({ type: "broadcast", event, payload: { ...payload, uid: state.me.uid } }).catch(() => "error");
             if (result === "ok") return true;
             console.warn(`broadcast ${event}: ${result}, retrying`);
             await new Promise((r) => setTimeout(r, 250 * (attempt + 1)));
@@ -374,6 +388,7 @@ async function init() {
     });
 
     await joinPage();
+    joinSite();
     window.barba?.hooks.before(() => emit("leave"));
     window.barba?.hooks.after(() => joinPage());
 
@@ -388,6 +403,7 @@ async function init() {
     const sidePanel = initPanel(collab);
     initHistory(collab, sidePanel);
     initComments(collab, sidePanel);
+    import("./viewer.js").then((m) => m.initViewer(collab)).catch((e) => console.error("viewer", e));
     if (state.me.kind === "editor") {
         import("./edit.js").then((m) => m.initEditing(collab)).catch((e) => console.error("edit", e));
         import("./invite.js").then((m) => m.initInvite(collab)).catch((e) => console.error("invite", e));

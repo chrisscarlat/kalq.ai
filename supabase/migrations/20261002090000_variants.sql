@@ -75,6 +75,77 @@ create policy site_media_upload on storage.objects for insert to authenticated
         and (name not like 'variants/%' or public.is_admin())
     );
 
+-- Content history and "restore whole site" stay about content: style variants have their own versions in the
+-- Styles panel (a block restore with page 'variants'), so they are left out here.
+create or replace function public.history_batches(page text default null, max_rows integer default 150)
+returns table (
+    batch_id uuid, created_at timestamptz, author_id uuid, batch_scope text, batch_label text,
+    restored_from_batch uuid, pages text[], block_keys text[], row_count integer
+)
+language sql
+stable
+as $$
+    select r.batch_id,
+           max(r.created_at),
+           (array_agg(r.author_id order by r.created_at desc))[1],
+           min(r.batch_scope),
+           min(r.batch_label),
+           (array_agg(r.restored_from_batch order by r.created_at desc))[1],
+           array_agg(distinct r.page),
+           array_agg(distinct r.block_key),
+           count(*)::integer
+    from public.revisions r
+    where r.page <> 'variants' and ($1 is null or r.page = $1 or r.page = 'site')
+    group by r.batch_id
+    order by max(r.seq) desc
+    limit greatest(1, least($2, 500))
+$$;
+
+create or replace function public.restore_to(
+    from_batch uuid,
+    scope text,
+    page text default null,
+    block text default null,
+    author uuid default null,
+    label text default null
+)
+returns table (new_batch_id uuid, added_rows integer) -- not batch_id/row_count: those names would clash inside plpgsql
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    new_batch uuid := gen_random_uuid();
+    upto bigint := public.batch_seq(from_batch);
+    added integer;
+begin
+    if upto is null then raise exception 'unknown batch %', from_batch; end if;
+    if scope not in ('block', 'page', 'site') then raise exception 'unknown scope %', scope; end if;
+    if scope = 'page' and page is null then raise exception 'page restore needs a page'; end if;
+    if scope = 'block' and block is null then raise exception 'block restore needs a block'; end if;
+
+    insert into public.revisions (block_key, page, lang, content, author_id, batch_id, batch_scope, batch_label, restored_from_batch)
+    select old.block_key, old.page, old.lang, old.content, author, new_batch, scope, label, from_batch
+    from (
+        select distinct on (r.block_key, r.lang) r.block_key, r.page, r.lang, r.content
+        from public.revisions r
+        where r.seq <= upto
+          and ((scope = 'site' and r.page <> 'variants') -- styles have their own versions (Styles panel)
+               or (scope = 'page' and r.page = restore_to.page)
+               or (scope = 'block' and r.block_key = restore_to.block))
+        order by r.block_key, r.lang, r.seq desc
+    ) old
+    where old.content is distinct from (
+        select now_r.content from public.revisions now_r
+        where now_r.block_key = old.block_key and now_r.lang is not distinct from old.lang
+        order by now_r.seq desc
+        limit 1
+    );
+    get diagnostics added = row_count;
+    return query select new_batch, added;
+end
+$$;
+
 -- Fonts can be uploaded as woff2
 update storage.buckets
 set allowed_mime_types = array['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif', 'video/mp4', 'video/webm', 'font/woff2']

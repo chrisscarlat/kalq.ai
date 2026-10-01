@@ -208,7 +208,7 @@ async function historySection(box) {
 
 //=================================== Panel ===================================//
 async function after() {
-    collab.broadcast("variants", { at: Date.now() });
+    collab.broadcast("variants", { at: Date.now() }, { site: true });
     await loadVariants();
     await refresh();
     collab.toast(t("saved"));

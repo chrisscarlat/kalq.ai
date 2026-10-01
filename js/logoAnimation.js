@@ -116,4 +116,5 @@ export function logoAnimation(svg = document.querySelector(".site-logo__mark"), 
         .set(view, { rz: 0, ry: 0 });
 
     render();
+    return tl; // the viewer stops its copies when it closes
 }

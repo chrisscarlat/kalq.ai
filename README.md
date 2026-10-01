@@ -72,3 +72,16 @@ The clock opens the side panel on Versions: save batches newest first, for this 
 - In `i18n/strings.json` these use `\n` between lines and a blank line between paragraphs.
 - Media slots take an image or a video, the file decides. Platform and Company have a hero slot (`*.hero.media`), empty until an editor adds something; in edit mode hero controls sit vertically centred on the right.
 - `supabase/migrations/20261001180000_merge_blocks.sql` copies the old split blocks' current content into the new blocks once; the old revisions stay in the history.
+
+## Style variants (Phase 7)
+
+A variant is a complete look: letter, name, logo SVG, colours (background, text, accent, light, dark), heading and body font (Clash Grotesk, Google Fonts or an uploaded woff2), hero video and replacements for any keyed image. Anything left empty falls back to the built-in site. Variant A is today's look and the default.
+
+- Stored as blocks `variant.<id>` (JSON) on the page `variants`, so every change is an append-only revision; versions and restore live in the Styles panel. Content history and "restore whole site" leave variants alone.
+- Admins (`admins` table, `is_admin()` in RLS) create, edit, publish, delete and restore variants in the Styles panel (`S` or the palette button). Uploads go to `site-media/variants/<id>/`, which only admins may write.
+- Logos (uploaded file or pasted code) go through `lib/svg-sanitize.js`, the same allowlist sanitiser in the browser and on the server.
+- `js/variants.js` applies a variant as custom properties on `:root` (`--kalq-bg`, `--kalq-text`, `--kalq-accent`, `--kalq-light`, `--kalq-dark`, `--kalq-font-heading`, `--kalq-font-body`), without reload; the dot switcher next to the logo remembers the choice in localStorage.
+- The gate cycles only its logo through the published variants, once a second with a crossfade.
+- Hold the header logo three seconds to open the viewer: cards per variant, votes (one per person, again to take back), voter faces, comments, sort by votes, arrow keys and swipe. Variant changes, votes and variant comments travel on a site-wide realtime channel, so every page sees them live.
+
+Manual step: run `supabase/migrations/20261002090000_variants.sql` (SQL Editor or `supabase db push`). It adds the admins table with chris.scarlat@certil.com, variant A, votes, the RLS and Storage policies, and woff2 uploads. Nothing else needs configuring.

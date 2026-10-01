@@ -16,7 +16,7 @@ export async function GET(request) {
     let me;
 
     if (session.role === "guest") {
-        // Same derivation as /api/code, so the animal matches guest_identities
+        // The first 16 hex characters come from the connection, as in /api/code, so the animal matches guest_identities
         const { animal, emoji, color } = identityFromHash(session.uid.replace(/^guest-/, ""));
         me = { uid: session.uid, kind: "guest", name: `Guest ${animal}`, animal, emoji, color, avatar_url: null };
     } else {

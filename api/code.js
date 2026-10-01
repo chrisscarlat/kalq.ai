@@ -1,6 +1,6 @@
 // POST { code }: guest entry with the access code. Guests need no account.
 // Checks the code in constant time, rate limits per hashed IP, gives the guest an animal and sets the gate cookie.
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { gateCookieHeader, signGate } from "../lib/gate-cookie.js";
 import { clientIp, json, readJson } from "../lib/http.js";
 import { identityFromHash } from "../lib/identity.js";
@@ -63,6 +63,8 @@ export async function POST(request) {
             console.error("guest_identities unavailable, using the hash alone", error.message);
         }
     }
-    const cookie = await signGate({ role: "guest", uid: `guest-${ipHash.slice(0, 16)}` }, GATE_COOKIE_SECRET);
+    // uid = animal part (from the connection) + a per-browser part, so two people in one office stay two people
+    const uid = `guest-${ipHash.slice(0, 16)}${randomBytes(4).toString("hex")}`;
+    const cookie = await signGate({ role: "guest", uid }, GATE_COOKIE_SECRET);
     return json({ role: "guest", ...identity }, 200, { "Set-Cookie": gateCookieHeader(cookie) });
 }

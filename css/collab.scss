@@ -157,3 +157,147 @@
         bottom: 0.9rem;
     }
 }
+
+// Toolbar tools
+.kalq-tools {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+
+    &:empty {
+        display: none;
+    }
+}
+
+.kalq-toolbar__btn[aria-pressed="true"] {
+    background: #fff;
+    color: #101010;
+}
+
+// Notices above the toolbar
+.kalq-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 5rem;
+    transform: translate(-50%, 8px);
+    max-width: calc(100vw - 2rem);
+    padding: 0.6rem 1rem;
+    background: rgba(16, 16, 16, 0.85);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 14px;
+    color: #fff;
+    font: 400 0.9rem/1.4 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 46;
+
+    &.is-shown {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+
+    &[data-kind="error"] {
+        border-color: rgba(255, 90, 95, 0.7);
+    }
+}
+
+// Edit mode
+.kalq-edit [data-kalq-key]:not([data-kalq-type="image"]):not([data-kalq-type="video"]) {
+    cursor: text;
+
+    &:hover {
+        outline: 1.5px dashed currentColor;
+        outline-offset: 4px;
+    }
+}
+
+.kalq-is-editing {
+    outline: 2px solid #3B82F6 !important;
+    outline-offset: 4px;
+    cursor: text;
+    caret-color: currentColor;
+}
+
+// Someone else is editing this block
+.kalq-locked {
+    position: relative;
+    outline: 2px solid var(--kalq-lock) !important;
+    outline-offset: 4px;
+
+    &::after {
+        content: attr(data-kalq-lock);
+        position: absolute;
+        left: 0;
+        top: -2.1em;
+        padding: 0.15em 0.6em;
+        border-radius: 999px;
+        background: var(--kalq-lock);
+        color: var(--kalq-lock-fg, #fff);
+        font: 500 12px/1.6 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+        letter-spacing: 0;
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 5;
+    }
+}
+
+.kalq-replace {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 6;
+    padding: 0.55rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 999px;
+    background: rgba(16, 16, 16, 0.65);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    color: #fff;
+    font: 500 0.85rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+        background: rgba(16, 16, 16, 0.85);
+        outline: none;
+    }
+
+    &:disabled {
+        cursor: progress;
+        opacity: 0.7;
+    }
+}
+
+// Hover rows on Home: their image is not visible, so the button sits on the row
+.elem .kalq-replace {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+// Live update highlight in the author's colour
+.kalq-flash {
+    animation: kalq-flash 1.6s ease;
+}
+
+@keyframes kalq-flash {
+    0%, 30% {
+        outline: 2px solid var(--kalq-flash);
+        outline-offset: 4px;
+        background-color: color-mix(in srgb, var(--kalq-flash) 18%, transparent);
+    }
+
+    100% {
+        outline: 2px solid transparent;
+        outline-offset: 4px;
+        background-color: transparent;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .kalq-flash {
+        animation-duration: 0.01s;
+    }
+}

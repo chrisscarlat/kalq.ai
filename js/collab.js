@@ -1,4 +1,7 @@
-// Collaboration layer, Phase 3: toolbar, who is online (avatar stack) and live cursors.
+import { refreshContent } from "./content.js";
+
+// Collaboration layer: toolbar, who is online (avatar stack), live cursors, and the hooks the editing,
+// comment and history modules plug into (see `collab` below).
 // One Supabase Realtime channel per page, presence:<page>:<key>. Initialised once, rejoins after each Barba page change.
 // Everything lives outside the blended header and is not a <nav>.
 
@@ -18,6 +21,7 @@ const state = {
     me: null,
     channel: null,
     page: null,
+    locks: new Map(), // uid -> { key, until }: blocks others are editing right now
     peers: [], // decorated presence list, self included
     cursors: new Map(), // uid -> { el, x_pct, y_doc, idle }
     toolbar: null,
@@ -116,10 +120,15 @@ function renderStack() {
 async function joinPage() {
     const page = currentPage();
     if (!page || page === state.page || !state.sb) return;
-    if (state.channel) await state.sb.removeChannel(state.channel);
+    const old = state.channel;
+    state.channel = null; // so its closing does not trigger a rejoin
+    if (old) await state.sb.removeChannel(old);
     state.cursors.forEach((c) => c.el.remove());
     state.cursors.clear();
     state.page = page;
+    state.joinedAt = null;
+    state.locks.clear();
+    emit("locks", []);
     state.peers = [{ ...state.me, at: Date.now() }];
     renderStack();
 
@@ -131,13 +140,67 @@ async function joinPage() {
         .on("presence", { event: "sync" }, () => {
             state.peers = decorate(channel.presenceState());
             renderStack();
+            emit("peers", state.peers);
+            emitLocks(); // someone who left no longer holds a lock
         })
         .on("broadcast", { event: "cursor" }, ({ payload }) => moveCursor(payload))
+        .on("broadcast", { event: "content" }, ({ payload }) => emit("content", payload))
+        .on("broadcast", { event: "lock" }, ({ payload }) => receiveLock(payload))
         .subscribe(async (status) => {
-            if (status === "SUBSCRIBED") await channel.track({ uid, kind, name, avatar_url, color, emoji, animal, at: Date.now() });
+            if (status === "SUBSCRIBED") {
+                state.joinedAt = state.joinedAt || Date.now();
+                state.subscribedAt = Date.now();
+                await channel.track(presenceMeta()); // the only presence update per page visit
+                if (myLock) sendLock();
+            } else if (["CLOSED", "CHANNEL_ERROR", "TIMED_OUT"].includes(status) && state.channel === channel) {
+                // Closed by the server (rate limit, network): join again, waiting longer if it keeps happening
+                const unstable = Date.now() - (state.subscribedAt || 0) < 30000;
+                state.rejoins = unstable ? (state.rejoins || 0) + 1 : 0;
+                const delay = [1500, 5000, 15000, 30000][Math.min(state.rejoins, 3)];
+                setTimeout(() => {
+                    if (state.channel !== channel) return;
+                    state.page = null;
+                    joinPage();
+                }, delay);
+            }
         });
     state.channel = channel;
+    emit("page", page);
 }
+
+const presenceMeta = () => {
+    const { uid, kind, name, avatar_url, color, emoji, animal } = state.me;
+    return { uid, kind, name, avatar_url, color, emoji, animal, at: state.joinedAt || Date.now() };
+};
+
+//=================================== Soft locks ===================================//
+// Presence allows only 5 updates per client in 30 s, so "I am editing X" is a broadcast instead,
+// repeated while editing and expiring when it stops (closed tab, lost connection).
+const LOCK_BEAT_MS = 4000;
+const LOCK_TTL_MS = 10000;
+let myLock = null;
+let lockBeat = null;
+
+const sendLock = () => collab.broadcast("lock", { key: myLock });
+
+function receiveLock({ uid, key }) {
+    if (!uid || uid === state.me.uid) return;
+    if (typeof key === "string") state.locks.set(uid, { key, until: Date.now() + LOCK_TTL_MS });
+    else state.locks.delete(uid);
+    emitLocks();
+}
+
+function emitLocks() {
+    const now = Date.now();
+    const list = [];
+    state.locks.forEach((lock, uid) => {
+        const person = state.peers.find((p) => p.uid === uid);
+        if (lock.until < now || !person) state.locks.delete(uid);
+        else list.push({ key: lock.key, person });
+    });
+    emit("locks", list);
+}
+setInterval(emitLocks, 2000);
 
 //=================================== Cursors ===================================//
 let lastSent = 0;
@@ -213,10 +276,66 @@ function buildToolbar() {
     label();
     document.addEventListener("kalq:language", () => { label(); renderStack(); });
     out.addEventListener("click", logout);
-    bar.append(stack, divider, out);
+    const tools = el("div", "kalq-tools", { role: "group" });
+    bar.append(stack, divider, tools, out);
     document.body.append(bar);
     state.toolbar = bar;
 }
+
+//=================================== API for the other modules ===================================//
+const listeners = {};
+const emit = (event, data) => (listeners[event] || []).forEach((fn) => fn(data));
+
+let toastTimer = null;
+export const collab = {
+    get me() { return state.me; },
+    get sb() { return state.sb; },
+    get page() { return state.page; },
+    get peers() { return state.peers; },
+    on(event, fn) { (listeners[event] ||= []).push(fn); },
+    // Presence fields others can see, e.g. the block someone is editing
+    // Tell the others which block I am editing (null when done)
+    setLock(key) {
+        myLock = key || null;
+        clearInterval(lockBeat);
+        sendLock();
+        if (myLock) lockBeat = setInterval(sendLock, LOCK_BEAT_MS);
+    },
+    // Important messages (not cursors) are retried until Realtime accepts them
+    async broadcast(event, payload) {
+        for (let attempt = 0; attempt < 4 && state.channel; attempt++) {
+            const result = await state.channel.send({ type: "broadcast", event, payload: { ...payload, uid: state.me.uid } }).catch(() => "error");
+            if (result === "ok") return true;
+            console.warn(`broadcast ${event}: ${result}, retrying`);
+            await new Promise((r) => setTimeout(r, 250 * (attempt + 1)));
+        }
+        console.warn(`broadcast ${event} not delivered`);
+        return false;
+    },
+    addTool(button) {
+        state.toolbar.querySelector(".kalq-tools").append(button);
+        state.toolbar.querySelector(".kalq-toolbar__divider").hidden = false;
+    },
+    toast(text, kind = "info") {
+        let node = document.querySelector(".kalq-toast");
+        if (!node) { node = el("div", "kalq-toast", { role: "status", "aria-live": "polite" }); document.body.append(node); }
+        node.textContent = text;
+        node.dataset.kind = kind;
+        node.classList.add("is-shown");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => node.classList.remove("is-shown"), 3200);
+    },
+    textOn,
+};
+
+// Single-letter shortcuts, never while typing
+document.addEventListener("keydown", (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const target = e.target;
+    if (target.closest?.("input, textarea, select, [contenteditable='true']")) return;
+    if (e.key === "Escape") return emit("escape", e);
+    if (/^[a-z]$/i.test(e.key)) emit(`key:${e.key.toLowerCase()}`, e);
+});
 
 //=================================== Start ===================================//
 async function init() {
@@ -242,10 +361,22 @@ async function init() {
     if (!cfg || !window.supabase) return;
     state.sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
         auth: { persistSession: true, detectSessionInUrl: false },
+        // The client drops anything above 10 messages a second by default; cursors alone send up to 20
+        realtime: { params: { eventsPerSecond: 40 } },
     });
 
     await joinPage();
+    window.barba?.hooks.before(() => emit("leave"));
     window.barba?.hooks.after(() => joinPage());
+
+    // Someone saved: everyone, guests included, reloads those blocks from the server and sees a highlight
+    collab.on("content", ({ keys = [], uid }) => {
+        const author = state.peers.find((p) => p.uid === uid);
+        refreshContent(keys.filter((k) => typeof k === "string"), author?.color);
+    });
+
+    // Edit mode only for editors
+    if (state.me.kind === "editor") import("./edit.js").then((m) => m.initEditing(collab)).catch((e) => console.error("edit", e));
 
     // Touch devices only show the stack, they do not send cursors
     if (finePointer) {

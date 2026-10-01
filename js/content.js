@@ -43,7 +43,7 @@ setEditedContent((key, lang) => {
 });
 
 // Blocks that are not translated: media, counter numbers, email addresses
-function applyDirect(root) {
+export function applyDirect(root) {
     root.querySelectorAll("[data-kalq-key]").forEach((el) => {
         const entry = store.get(el.dataset.kalqKey);
         if (!entry) return;
@@ -72,6 +72,38 @@ function applyDirect(root) {
     });
 }
 
+// Keep a saved edit locally, so switching language or re-applying keeps it
+export function setLocalContent(key, lang, content, type = "text") {
+    const entry = store.get(key) || { type };
+    if (type === "text") entry[lang || "de"] = content;
+    else entry.media = content;
+    store.set(key, entry);
+}
+
+const flash = (keys, color) => keys.forEach((key) => {
+    document.querySelectorAll(`[data-kalq-key="${CSS.escape(key)}"]`).forEach((node) => {
+        node.style.setProperty("--kalq-flash", color || "#3B82F6");
+        node.classList.remove("kalq-flash");
+        void node.offsetWidth;
+        node.classList.add("kalq-flash");
+        setTimeout(() => node.classList.remove("kalq-flash"), 1600);
+    });
+});
+
+// Someone saved: fetch the page's content again (the database is the truth, not the message) and highlight
+export async function refreshContent(keys = [], color) {
+    const page = document.querySelectorAll('[data-barba="container"]');
+    const name = page.length ? page[page.length - 1].dataset.page : null;
+    if (!name) return;
+    const res = await fetch(`/api/content?page=${encodeURIComponent(name)}`, { credentials: "same-origin" }).catch(() => null);
+    if (!res?.ok) { res?.body?.cancel(); return; }
+    const { blocks = [] } = await res.json();
+    blocks.forEach(({ key, lang, content, type }) => setLocalContent(key, lang, content, type));
+    applyLanguage();
+    applyDirect(document);
+    flash(keys, color);
+}
+
 // container: the Barba container of the page being shown (the new one during a transition)
 export async function loadPageContent(container = document.querySelector('[data-barba="container"]')) {
     const page = container?.dataset.page;
@@ -85,12 +117,7 @@ export async function loadPageContent(container = document.querySelector('[data-
             return;
         }
         const { blocks = [] } = await res.json();
-        blocks.forEach(({ key, lang, content, type }) => {
-            const entry = store.get(key) || { type };
-            if (type === "text") entry[lang || "de"] = content;
-            else entry.media = content;
-            store.set(key, entry);
-        });
+        blocks.forEach(({ key, lang, content, type }) => setLocalContent(key, lang, content, type));
         applyLanguage();
         applyDirect(document);
     } catch (error) {

@@ -50,3 +50,9 @@ Every editable element has a stable `data-kalq-key` (`page.section.item`, shared
 ## Presence and cursors (Phase 3)
 
 `js/collab.js` and `css/collab.css` (compile: `npx sass --no-source-map css/collab.scss css/collab.css`) add the toolbar at the bottom: who is online on this page and logout. One Supabase Realtime channel per page, `presence:<page>:<key>`; the key comes from `/api/me` (gate cookie needed), so only people through the gate can find the channel. Cursors are sent about 20 times a second from mouse devices only, as `x_pct` and document `y`, so they land right after scrolling.
+
+## Edit mode (Phase 4)
+
+Editors get a pencil in the toolbar (or press `E`). Click a text block to edit it in place: Enter is a line break, `Cmd/Ctrl+Enter` or clicking elsewhere saves, `Esc` cancels; paste is plain text. Images and videos get a "Replace" button (upload to `site-media`, max 50 MB). Saves go to Supabase with the editor's own login (RLS), then the page channel announces the change and every browser, guests included, reloads it from `/api/content` and briefly highlights it.
+
+Supabase allows a client only 5 presence updates per 30 seconds and closes the channel beyond that, so "X is editing" is a broadcast repeated every 4 s (expires after 10 s), not a presence update. Channels that close anyway are rejoined with growing waits.

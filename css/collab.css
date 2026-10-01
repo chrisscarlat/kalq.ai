@@ -1382,3 +1382,35 @@
     transition: none;
   }
 }
+.kalq-styles__inherited {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+.kalq-styles__inherited:empty {
+  display: none;
+}
+
+.kalq-styles__mark {
+  width: 56px;
+  height: 56px;
+  overflow: visible;
+}
+
+.kalq-styles__thumb {
+  position: relative;
+}
+.kalq-styles__thumb.is-inherited img, .kalq-styles__thumb.is-inherited video {
+  opacity: 0.55;
+}
+
+.kalq-styles__tag {
+  position: absolute;
+  left: 3px;
+  bottom: 3px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: rgba(16, 16, 16, 0.75);
+  font-size: 0.55rem;
+  letter-spacing: 0.04em;
+}

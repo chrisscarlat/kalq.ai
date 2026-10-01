@@ -64,15 +64,24 @@ export async function GET(request) {
 
     const variants = (await allVariants()).filter((v) => admin || v.status === "published");
     if (!session) {
-        // The gate page: only what its logo cycle needs
-        return json({ variants: variants.map(({ id, letter, logo_svg, colors, is_default }) => ({ id, letter, logo_svg, colors, is_default })) }, 200, { "Cache-Control": "public, max-age=30" });
+        // The gate page: only what its logo cycle needs. Never cached by the CDN: a shared cache served this reduced
+        // answer to signed-in visitors too (json() sends Cache-Control: no-store).
+        return json({ variants: variants.map(({ id, letter, logo_svg, colors, is_default }) => ({ id, letter, logo_svg, colors, is_default })) });
     }
     const votes = await select("variant_votes", `select=variant_key,voter_id,created_at&order=created_at.asc`).catch(() => []);
     const byVariant = {};
     votes.forEach((v) => { (byVariant[v.variant_key.slice(8)] ||= []).push(v.voter_id); });
     // Admins: every image and video slot of the site, for the per-image replacements in the Styles panel
     const slots = admin ? await select("blocks", `type=in.(image,video)&select=key,page,type&order=key.asc`).catch(() => []) : undefined;
-    return json({ variants, votes: byVariant, people: await people([...new Set(votes.map((v) => v.voter_id))]), admin, me: session.uid, slots });
+    // What each slot shows on the site right now: the look variant A (and anything left empty) inherits
+    const defaults = {};
+    if (admin) {
+        for (const page of ["home", "platform", "company"]) {
+            const rows = await rpc("latest_content", { page }).catch(() => []);
+            rows.filter((r) => r.type === "image" || r.type === "video").forEach((r) => { defaults[r.block_key] = r.content; });
+        }
+    }
+    return json({ variants, votes: byVariant, people: await people([...new Set(votes.map((v) => v.voter_id))]), admin, me: session.uid, slots, defaults: admin ? defaults : undefined });
 }
 
 export async function POST(request) {

@@ -46,3 +46,7 @@ Every editable element has a stable `data-kalq-key` (`page.section.item`, shared
 - `supabase/migrations/20261001090000_content.sql`: `profiles`, `blocks`, append-only `revisions` (one per language for text), `comments` (resolve only), `latest_content(page)`, the `site-media` bucket.
 - `/api/content?page=`: newest content for a page; needs the gate cookie except for the legal pages. `js/content.js` applies it (sanitised: only br, em, strong, a href) and keeps keyed blocks hidden until then, 1.5 s at most.
 - Seed once after the migration: `node scripts/seed-blocks.mjs --dry-run`, then without the flag. It needs `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env` (`npx vercel env pull .env`). Never commit `.env`.
+
+## Presence and cursors (Phase 3)
+
+`js/collab.js` and `css/collab.css` (compile: `npx sass --no-source-map css/collab.scss css/collab.css`) add the toolbar at the bottom: who is online on this page and logout. One Supabase Realtime channel per page, `presence:<page>:<key>`; the key comes from `/api/me` (gate cookie needed), so only people through the gate can find the channel. Cursors are sent about 20 times a second from mouse devices only, as `x_pct` and document `y`, so they land right after scrolling.

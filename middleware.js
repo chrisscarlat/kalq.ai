@@ -13,8 +13,8 @@ const PUBLIC = [
     /^\/assets\/apple-touch-icon\.png$/,
     /^\/favicon\.ico$/,
     /^\/robots\.txt$/,
-    /^\/css\/(gate|main)\.css$/,
-    /^\/js\/(gate|logoAnimation|main|header|i18n|strings-public|content|expertiseHoverimg|verticleLine)\.js$/,
+    /^\/css\/(gate|main|collab)\.css$/,
+    /^\/js\/(gate|logoAnimation|main|header|i18n|strings-public|content|collab|expertiseHoverimg|verticleLine)\.js$/,
     /^\/(impressum|datenschutz)(\.html)?$/,
 ];
 

@@ -80,7 +80,10 @@ export async function loadPageContent(container = document.querySelector('[data-
     try {
         if (!page) return;
         const res = await fetch(`/api/content?page=${encodeURIComponent(page)}`, { signal: controller.signal, credentials: "same-origin" });
-        if (!res.ok) return;
+        if (!res.ok) {
+            res.body?.cancel(); // close the unread response
+            return;
+        }
         const { blocks = [] } = await res.json();
         blocks.forEach(({ key, lang, content, type }) => {
             const entry = store.get(key) || { type };

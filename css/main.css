@@ -404,12 +404,13 @@ section[data-tone=light] :is(.hero_layer, #container):has(> .block) {
   border-radius: 0;
 }
 
-/* Parallax Image */
+/* Parallax Image (a slot can hold an image or a video; both fill it the same way) */
 .parallax_img {
   overflow: hidden;
   position: relative;
 }
-.parallax_img img {
+.parallax_img img,
+.parallax_img video {
   position: absolute;
   top: -2%;
   left: 0;
@@ -1378,7 +1379,9 @@ footer #container .footer_bottom a {
   border-radius: 50px;
 }
 .about_weDo .parallax_img img,
-.about_awwards .parallax_img img {
+.about_weDo .parallax_img video,
+.about_awwards .parallax_img img,
+.about_awwards .parallax_img video {
   filter: brightness(80%);
 }
 

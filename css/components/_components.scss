@@ -87,12 +87,13 @@
     }
 }
 
-/* Parallax Image */
+/* Parallax Image (a slot can hold an image or a video; both fill it the same way) */
 .parallax_img {
     overflow: hidden;
     position: relative;
 
-    img {
+    img,
+    video {
         position: absolute;
         top: -2%;
         left: 0;

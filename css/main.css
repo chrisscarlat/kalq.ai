@@ -729,9 +729,9 @@ section[data-tone=light] :is(.hero_layer, #container):has(> .block) {
     r: 8.2px;
   }
   .mode-toggle:hover .mode-toggle__bite {
-    r: 7.9px;
-    cx: 12.75px;
-    cy: 11.35px;
+    r: 7.5px;
+    cx: 13.2px;
+    cy: 10.9px;
   }
   .mode-toggle:hover .mode-toggle__rays {
     transform: scale(0.3) rotate(-45deg);
@@ -742,9 +742,9 @@ section[data-tone=light] :is(.hero_layer, #container):has(> .block) {
   r: 8.2px;
 }
 [data-mode=dark] .mode-toggle .mode-toggle__bite {
-  r: 7.9px;
-  cx: 12.75px;
-  cy: 11.35px;
+  r: 7.5px;
+  cx: 13.2px;
+  cy: 10.9px;
 }
 [data-mode=dark] .mode-toggle .mode-toggle__rays {
   transform: scale(0.3) rotate(-45deg);

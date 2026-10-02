@@ -140,17 +140,20 @@ section[data-tone="light"] {
 
 // The title and the moving bar (difference blend) as their own group: they blend only with each other, not with the
 // image, so the bar is pure white and the letters it crosses pure black. Dark theme: the group inverted.
-// The liquid reveal canvas (js/heroReveal.js): over the darkening layer, under the title
-.hero_reveal {
+// The liquid reveal canvas (js/heroReveal.js): in the hero over the darkening layer and under the title, in an image
+// box on top of the picture
+.kalq-reveal {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     pointer-events: none;
+    z-index: 1;
 }
 
-// With the reveal the hero video is grey, so the liquid shape shows it in colour
-html.has-hero-reveal .header .hero_video {
+// With the reveal the pictures are grey, so the liquid shape shows them in colour
+html:is(.reveal-hero, .reveal-all) [data-barba="container"] > .header .hero_video,
+html.reveal-all [data-barba="container"] .parallax_img :is(img, video) {
     filter: grayscale(1);
 }
 

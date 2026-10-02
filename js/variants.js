@@ -14,6 +14,12 @@ let active = null;
 let previewing = null; // a variant shown from the Styles panel without saving
 const listeners = new Set();
 
+const PREVIEW_KEY = "kalq-variant-preview";
+const session = {
+    get(key) { try { return sessionStorage.getItem(key); } catch (e) { return null; } },
+    set(key, value) { try { sessionStorage.setItem(key, value); } catch (e) { } },
+    remove(key) { try { sessionStorage.removeItem(key); } catch (e) { } },
+};
 const store = {
     get(key) { try { return localStorage.getItem(key); } catch (e) { return null; } },
     set(key, value) { try { localStorage.setItem(key, value); } catch (e) { } },
@@ -143,7 +149,9 @@ export function applyVariant(variant, { remember = false, preview = false } = {}
     applyHeroMark(variant);
     // Options: the panel menu and the liquid reveal over the hero (js/heroReveal.js reacts to kalq:look)
     root.classList.toggle("menu-panels", variant.menu_style === "panels");
-    root.classList.toggle("has-hero-reveal", variant.hero_reveal === true);
+    const reveal = ["hero", "all"].includes(variant.reveal) ? variant.reveal : variant.hero_reveal === true ? "hero" : "off";
+    root.classList.toggle("reveal-hero", reveal === "hero");
+    root.classList.toggle("reveal-all", reveal === "all");
 
     // Images and the hero video: the variant's replacement, otherwise the page's own
     const images = { ...(variant.images || {}) };
@@ -151,9 +159,12 @@ export function applyVariant(variant, { remember = false, preview = false } = {}
     setMediaOverride((key) => images[key] || null);
     applyDirect(document);
 
-    if (preview) previewing = variant;
-    else {
+    if (preview) {
+        previewing = variant;
+        session.set(PREVIEW_KEY, JSON.stringify(variant)); // a reload in this tab keeps the preview
+    } else {
         previewing = null;
+        session.remove(PREVIEW_KEY);
         active = variant;
         if (remember) store.set(CHOICE_KEY, variant.id);
         store.set(CACHE_KEY, JSON.stringify({ id: variant.id, letter: variant.letter, mode, look, fonts: variant.fonts }));
@@ -164,6 +175,7 @@ export function applyVariant(variant, { remember = false, preview = false } = {}
 
 // Leave a Styles panel preview
 export function endPreview() {
+    session.remove(PREVIEW_KEY);
     if (!previewing) return;
     previewing = null;
     applyVariant(active);
@@ -177,8 +189,12 @@ export async function loadVariants() {
     const chosen = store.get(CHOICE_KEY);
     const next = variants.find((v) => v.id === chosen && v.status === "published")
         || variants.find((v) => v.is_default) || variants[0];
+    // A Styles panel preview from before a reload in this tab (read first: applying `next` clears it)
+    let kept = null;
+    try { kept = JSON.parse(session.get(PREVIEW_KEY) || "null"); } catch (e) { }
     if (next) applyVariant(next);
     else notify();
+    if (kept && variants.some((v) => v.id === kept.id)) applyVariant(kept, { preview: true });
     return data;
 }
 

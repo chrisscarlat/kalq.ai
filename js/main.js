@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initVariants(); // style variant: colours, fonts, logo, images; switcher next to the logo
     initHeroTone(); // light or dark text over the hero image, the header follows
     initHeroReveal(); // style variant option: liquid reveal that follows the pointer over the hero video
+    stayOnSamePage();
     // Counters, hover images and the video read their content, so they start after edited content is applied
     await loadPageContent();
     [animateNumbering, expertiseHover, heroVideo, parallaxImg, animateLines].forEach(func => func());
@@ -42,6 +43,21 @@ function smoothScroller() {
     bodyScrollBar.addListener(updateProgressBar);
     window.addEventListener("resize", updateProgressBar);
     updateProgressBar();
+}
+
+// A link to the page you are on (the logo on Home, the current menu entry): Barba skips it and the browser would
+// reload, which loses a style variant preview. Scroll back to the top instead.
+function stayOnSamePage() {
+    document.addEventListener("click", (e) => {
+        const link = e.target.closest?.("a[href]");
+        if (!link || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || link.target === "_blank") return;
+        const url = new URL(link.href, location.href);
+        const page = (p) => p.replace(/\/(index\.html)?$/, "/");
+        if (url.origin !== location.origin || page(url.pathname) !== page(location.pathname) || url.hash) return;
+        e.preventDefault();
+        if (bodyScrollBar) bodyScrollBar.scrollTo(0, 0, 900);
+        else window.scrollTo({ top: 0, behavior: "smooth" });
+    });
 }
 
 // BarbaJs page Setup

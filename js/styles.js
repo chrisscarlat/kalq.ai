@@ -16,7 +16,7 @@ const TEXT = {
         fonts: "Schriften", heading: "Hauptschrift: Logo, H1 bis H3", body: "Zweitschrift: Unterzeilen, H4, H5, Text", builtIn: "Clash Grotesk (Standard)", google: "Google Fonts", upload: "Eigene woff2",
         family: "Schriftname", fontFile: "woff2-Datei", hero: "Hero-Video", images: "Bilder", imagesHint: "Leer lassen für das Standardbild.",
         upload: "Hochladen", clear: "Entfernen", duplicate: "Duplizieren", copyOf: (n) => `${n} (Kopie)`, inherited: "Standard",
-        builtInLogo: "Standard: Kalq-Logo", heroReveal: "Flüssige Enthüllung über dem Video", menu: "Menü", menuDropdown: "Dropdown", menuPanels: "Panels",
+        builtInLogo: "Standard: Kalq-Logo", effects: "Effekte", reveal: "Flüssige Enthüllung (folgt der Maus)", revealOff: "Aus", revealHero: "Nur Hero", revealAll: "Hero und Bilder", menu: "Menü", menuDropdown: "Dropdown", menuPanels: "Panels",
         heroMark: "Mitte im Hero (Start)", heroMarkLogo: "Logo", heroMarkLine: "Linie", heroLine: "Form der Linie",
         lines: { back: "Diagonal \\", forward: "Diagonal /", vertical: "Senkrecht", horizontal: "Waagerecht", circle: "Kreis" }, loadFailed: "Die Stile konnten nicht geladen werden.",
         sitemap: "Seiten", replaceSlot: "Ersetzen", uploading: "Wird hochgeladen", spreadImages: "Auf alle Bildplätze übertragen", spreadHero: "Als Hero auf allen Seiten",
@@ -36,7 +36,7 @@ const TEXT = {
         fonts: "Fonts", heading: "Main font: logo, H1 to H3", body: "Secondary font: sub-lines, H4, H5, text", builtIn: "Clash Grotesk (default)", google: "Google Fonts", upload: "Own woff2",
         family: "Font name", fontFile: "woff2 file", hero: "Hero video", images: "Images", imagesHint: "Leave empty for the default image.",
         upload: "Upload", clear: "Remove", duplicate: "Duplicate", copyOf: (n) => `${n} (copy)`, inherited: "Default",
-        builtInLogo: "Default: Kalq logo", heroReveal: "Liquid reveal over the video", menu: "Menu", menuDropdown: "Dropdown", menuPanels: "Panels",
+        builtInLogo: "Default: Kalq logo", effects: "Effects", reveal: "Liquid reveal (follows the pointer)", revealOff: "Off", revealHero: "Hero only", revealAll: "Hero and images", menu: "Menu", menuDropdown: "Dropdown", menuPanels: "Panels",
         heroMark: "Centre of the hero (Home)", heroMarkLogo: "Logo", heroMarkLine: "Line", heroLine: "Line shape",
         lines: { back: "Diagonal \\", forward: "Diagonal /", vertical: "Vertical", horizontal: "Horizontal", circle: "Circle" }, loadFailed: "The styles could not be loaded.",
         sitemap: "Pages", replaceSlot: "Replace", uploading: "Uploading", spreadImages: "Copy to all image slots", spreadHero: "Use as hero on every page",
@@ -68,7 +68,7 @@ function normalize(v) {
         logo_svg: v.logo_svg || "",
         hero_mark: v.hero_mark === "logo" ? "logo" : "line",
         hero_line: ["back", "forward", "vertical", "horizontal", "circle"].includes(v.hero_line) ? v.hero_line : "back",
-        hero_reveal: v.hero_reveal === true,
+        reveal: ["off", "hero", "all"].includes(v.reveal) ? v.reveal : v.hero_reveal === true ? "hero" : "off",
         menu_style: v.menu_style === "panels" ? "panels" : "dropdown",
         colors: { ...DEFAULT_COLORS, ...(v.colors || {}) },
         fonts: { heading: font(v.fonts?.heading), body: font(v.fonts?.body) },
@@ -197,12 +197,26 @@ function heroMarkSection() {
     shapeField.hidden = draft.hero_mark === "logo";
     const mode = seg([["line", t("heroMarkLine")], ["logo", t("heroMarkLogo")]], draft.hero_mark,
         (v) => { draft.hero_mark = v; shapeField.hidden = v === "logo"; changed(); });
-    const reveal = el("input", { type: "checkbox", className: "kalq-switch__input", checked: draft.hero_reveal === true });
-    reveal.setAttribute("role", "switch");
-    reveal.addEventListener("change", () => { draft.hero_reveal = reveal.checked; changed(); });
-    const revealField = el("label", { className: "kalq-switch kalq-styles__option" }, reveal, el("span", { className: "kalq-switch__track", ariaHidden: "true" }), el("span", { textContent: t("heroReveal") }));
+    return el("section", {}, el("h4", { textContent: t("heroMark") }), mode, shapeField);
+}
+
+// Effects: the liquid reveal (off, hero, hero and images) and the menu style
+function effectsSection() {
+    const seg = (items, current, onPick) => {
+        const box = el("div", { className: "kalq-seg", role: "group" });
+        items.forEach(([value, label]) => {
+            const b = el("button", { type: "button", className: "kalq-seg__item", textContent: label });
+            b.dataset.value = value;
+            b.setAttribute("aria-pressed", value === current);
+            b.addEventListener("click", () => { onPick(value); box.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); });
+            box.append(b);
+        });
+        return box;
+    };
+    const reveal = seg([["off", t("revealOff")], ["hero", t("revealHero")], ["all", t("revealAll")]], draft.reveal, (v) => { draft.reveal = v; delete draft.hero_reveal; changed(); });
     const menu = seg([["dropdown", t("menuDropdown")], ["panels", t("menuPanels")]], draft.menu_style, (v) => { draft.menu_style = v; changed(); });
-    return el("section", {}, el("h4", { textContent: t("heroMark") }), mode, shapeField, revealField,
+    return el("section", {}, el("h4", { textContent: t("effects") }),
+        el("div", { className: "kalq-styles__field" }, el("span", { textContent: t("reveal") }), reveal),
         el("div", { className: "kalq-styles__field" }, el("span", { textContent: t("menu") }), menu));
 }
 
@@ -481,7 +495,7 @@ function renderPanel() {
     const unsaved = el("span", { className: "kalq-styles__dirty", textContent: t("unsaved") });
     unsaved.hidden = !dirty;
 
-    settings.replaceChildren(headerSection(), logoSection(), heroMarkSection(), colorSection(), el("section", {}, el("h4", { textContent: t("fonts") }), fontRow("heading"), fontRow("body")),
+    settings.replaceChildren(headerSection(), effectsSection(), logoSection(), heroMarkSection(), colorSection(), el("section", {}, el("h4", { textContent: t("fonts") }), fontRow("heading"), fontRow("body")),
         fillAllSection(), history,
         el("div", { className: "kalq-styles__actions" },
             el("div", { className: "kalq-styles__actions-view" }, preview, peek, dup),

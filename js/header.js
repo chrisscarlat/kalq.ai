@@ -118,6 +118,7 @@ function initMenu(toggle, menu) {
         toggle.setAttribute("aria-expanded", isOpen);
         toggle.setAttribute("aria-label", t(isOpen ? "aria.menuClose" : "aria.menuOpen"));
         menu.classList.toggle("is-open", isOpen);
+        document.documentElement.classList.toggle("menu-is-open", isOpen); // the panel menu recolours the header
     };
 
     toggle.addEventListener("click", () => setOpen(toggle.getAttribute("aria-expanded") !== "true"));

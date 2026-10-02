@@ -1921,3 +1921,6 @@
     transition: none;
   }
 }
+.kalq-styles__option {
+  margin: 0.4rem 0 0.6rem;
+}

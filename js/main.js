@@ -7,6 +7,7 @@ import { loadPageContent } from "./content.js";
 import { animateLines } from "./blocks.js";
 import { initVariants, refreshHeroMark } from "./variants.js";
 import { initHeroTone } from "./heroTone.js";
+import { initHeroReveal } from "./heroReveal.js";
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -15,6 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     [barbaPageTransition, smoothScroller, initHeader, logoAnimation, mouseMoveParallaxLine].forEach(func => func());
     initVariants(); // style variant: colours, fonts, logo, images; switcher next to the logo
     initHeroTone(); // light or dark text over the hero image, the header follows
+    initHeroReveal(); // style variant option: liquid reveal that follows the pointer over the hero video
     // Counters, hover images and the video read their content, so they start after edited content is applied
     await loadPageContent();
     [animateNumbering, expertiseHover, heroVideo, parallaxImg, animateLines].forEach(func => func());
@@ -97,6 +99,7 @@ function barbaPageTransition() {
             heroVideo,
             refreshHeroMark,
             initHeroTone,
+            initHeroReveal,
             parallaxImg,
             animateLines].forEach(func => func());
     }

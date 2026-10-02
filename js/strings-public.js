@@ -32,6 +32,14 @@ export const STRINGS = {
         "en": "Close menu",
         "de": "Menü schließen"
     },
+    "menu.label": {
+        "en": "Menu",
+        "de": "Menü"
+    },
+    "menu.close": {
+        "en": "Close",
+        "de": "Schließen"
+    },
     "nav.home": {
         "en": "Home",
         "de": "Start"

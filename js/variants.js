@@ -141,6 +141,9 @@ export function applyVariant(variant, { remember = false, preview = false } = {}
     root.classList.toggle("has-font-wordmark", !!fontStack(variant.fonts?.heading));
     applyLogo(variant);
     applyHeroMark(variant);
+    // Options: the panel menu and the liquid reveal over the hero (js/heroReveal.js reacts to kalq:look)
+    root.classList.toggle("menu-panels", variant.menu_style === "panels");
+    root.classList.toggle("has-hero-reveal", variant.hero_reveal === true);
 
     // Images and the hero video: the variant's replacement, otherwise the page's own
     const images = { ...(variant.images || {}) };

@@ -1,3 +1,4 @@
+@charset "UTF-8";
 * {
   margin: 0;
   padding: 0;
@@ -304,6 +305,18 @@ section[data-tone=dark] {
 
 section[data-tone=light] {
   color: #000;
+}
+
+.hero_reveal {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+html.has-hero-reveal .header .hero_video {
+  filter: grayscale(1);
 }
 
 .hero_layer {
@@ -850,6 +863,192 @@ html[data-header-tone=light] .site-header .site-logo__custom svg {
     right: 1rem;
     left: 1rem;
     min-width: 0;
+  }
+}
+/* Panel menu (style variant option, html.menu-panels): three panels drop from the top right in a staircase, the
+   rightmost first; a number at the top, the page at the bottom. The four dots become a "Menü" / "Schließen" pill. */
+.site-menu-toggle__pill {
+  display: none;
+}
+
+html.menu-panels .site-menu-toggle {
+  width: auto;
+  height: auto;
+  position: relative;
+  z-index: 2;
+}
+html.menu-panels .site-menu-toggle .dots {
+  display: none;
+}
+html.menu-panels .site-menu-toggle:focus-visible {
+  border-radius: 999px;
+}
+html.menu-panels .site-menu-toggle__pill {
+  display: grid;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: currentColor;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
+}
+html.menu-panels .site-menu-toggle__pill > span {
+  grid-area: 1/1;
+  color: #000;
+  text-align: center;
+  transition: opacity 0.2s ease;
+}
+html.menu-panels .site-menu-toggle__pill .is-close-label {
+  opacity: 0;
+}
+html.menu-panels[data-header-tone=light] .site-menu-toggle__pill > span {
+  color: #fff;
+}
+html.menu-panels .site-menu-toggle[aria-expanded=true] .site-menu-toggle__pill .is-open-label {
+  opacity: 0;
+}
+html.menu-panels .site-menu-toggle[aria-expanded=true] .site-menu-toggle__pill .is-close-label {
+  opacity: 1;
+}
+html.menu-panels.menu-is-open .site-header__right {
+  color: #000;
+}
+html.menu-panels.menu-is-open .site-header__right .site-menu-toggle__pill > span {
+  color: #fff;
+}
+html.menu-panels .site-menu {
+  top: 0;
+  right: 0;
+  left: auto;
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  transform: none;
+  opacity: 1;
+  z-index: 29;
+  counter-reset: kalq-menu;
+  transition: visibility 0s linear 0.8s;
+}
+html.menu-panels .site-menu.is-open {
+  transition: none;
+}
+html.menu-panels .site-menu a {
+  --h: 360px;
+  position: relative;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 240px;
+  height: var(--h);
+  padding: 0.75rem;
+  border-radius: 0;
+  background: #c9c9c9;
+  color: #000;
+  font-size: 1.35rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  counter-increment: kalq-menu;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 0.55s cubic-bezier(0.76, 0, 0.24, 1), background-color 0.25s ease, color 0.25s ease;
+}
+html.menu-panels .site-menu a::before {
+  content: counter(kalq-menu);
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1;
+}
+html.menu-panels .site-menu a::after {
+  display: none;
+}
+html.menu-panels .site-menu a:nth-child(1) {
+  --h: 360px;
+  background: #c9c9c9;
+  transition-delay: 0.16s, 0s, 0s;
+}
+html.menu-panels .site-menu a:nth-child(2) {
+  --h: 280px;
+  background: #d8d8d8;
+  transition-delay: 0.08s, 0s, 0s;
+}
+html.menu-panels .site-menu a:nth-child(3) {
+  --h: 216px;
+  background: #e6e6e6;
+  transition-delay: 0s, 0s, 0s;
+}
+html.menu-panels .site-menu a[aria-current=page]::before {
+  background: #000;
+  border-color: #000;
+  color: #fff;
+}
+html.menu-panels .site-menu a[aria-current=page]:hover::before, html.menu-panels .site-menu a[aria-current=page]:focus-visible::before {
+  background: #fff;
+  border-color: #fff;
+  color: #000;
+}
+html.menu-panels .site-menu a:hover, html.menu-panels .site-menu a:focus-visible {
+  background: #101010;
+  color: #fff;
+  outline: none;
+}
+html.menu-panels .site-menu.is-open a {
+  clip-path: inset(0 0 0 0);
+}
+html.menu-panels .site-menu.is-open a:nth-child(1) {
+  transition-delay: 0.16s, 0s, 0s;
+}
+html.menu-panels .site-menu.is-open a:nth-child(2) {
+  transition-delay: 0.08s, 0s, 0s;
+}
+html.menu-panels .site-menu.is-open a:nth-child(3) {
+  transition-delay: 0s, 0s, 0s;
+}
+html.menu-panels .site-menu:not(.is-open) a:nth-child(1) {
+  transition-delay: 0s, 0s, 0s;
+}
+html.menu-panels .site-menu:not(.is-open) a:nth-child(2) {
+  transition-delay: 0.08s, 0s, 0s;
+}
+html.menu-panels .site-menu:not(.is-open) a:nth-child(3) {
+  transition-delay: 0.16s, 0s, 0s;
+}
+
+@media (max-width: 720px) {
+  html.menu-panels .site-menu {
+    left: 0;
+  }
+  html.menu-panels .site-menu a {
+    flex: 1;
+    width: auto;
+    font-size: 1.05rem;
+  }
+  html.menu-panels .site-menu a:nth-child(1) {
+    --h: 62vh;
+  }
+  html.menu-panels .site-menu a:nth-child(2) {
+    --h: 50vh;
+  }
+  html.menu-panels .site-menu a:nth-child(3) {
+    --h: 40vh;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.menu-panels .site-menu a {
+    transition: background-color 0.2s ease, color 0.2s ease;
+    transition-delay: 0s !important;
   }
 }
 .social {

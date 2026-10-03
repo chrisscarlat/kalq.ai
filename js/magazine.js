@@ -17,7 +17,7 @@ import { renderBlock, textToHtml } from "./blocks.js";
 import { MODULES } from "./modules/registry.js";
 import { setLanguage, bindLangSwitcher } from "./header.js";
 import { getMode, setMode } from "./variants.js";
-import { HAND, HAND_TIP, TURN } from "./book/drawings.js";
+import { handSvg, HAND_BOX, HAND_TIP, TURN } from "./book/drawings.js";
 import { LAYOUTS, page as newPage, textOf, parasOf, mediaUrl, mediaBox, actionOf, fit } from "./book/layouts.js";
 import { CHAPTERS, SECTIONS, footerOf } from "./book/kalq.js";
 
@@ -31,13 +31,13 @@ const TEXT = {
         open: "Als Magazin lesen", close: "Als normale Webseite lesen", next: "Nächste Seite", drag: "Seite ziehen zum Umblättern", book: "Magazin",
         page: (n, of) => `Seite ${n} von ${of}`, welcome: "Willkommen", contents: "Inhalt", index: "Index", toContents: "Index: zum Inhaltsverzeichnis", appendix: "Rechtliches",
         detected: "Gerät mit zwei Bildschirmen erkannt.", intro: "Sie können diese Website als Magazin lesen. Ziehen Sie eine Seite mit dem Finger, um umzublättern.",
-        cover: "Zum Titel", controls: "Magazin-Steuerung",
+        cover: "Zum Titel", controls: "Magazin-Steuerung", back: "Zurück zur vorigen Seite",
     },
     en: {
         open: "Read as a magazine", close: "Read as a normal website", next: "Next page", drag: "Drag a page to turn it", book: "Magazine",
         page: (n, of) => `Page ${n} of ${of}`, welcome: "Welcome", contents: "Contents", index: "Index", toContents: "Index: back to the contents", appendix: "Legal",
         detected: "Two-screen device detected.", intro: "You can read this website as a magazine. Drag a page with your finger to turn it.",
-        cover: "Back to the cover", controls: "Magazine controls",
+        cover: "Back to the cover", controls: "Magazine controls", back: "Back to where you were",
     },
 };
 const t = (k) => TEXT[currentLang() === "en" ? "en" : "de"][k];
@@ -105,6 +105,22 @@ function sourceOf(ch) {
         })().catch((e) => { sourceCache.delete(key); console.warn("magazine", e.message); return null; }));
     }
     return sourceCache.get(key).then((root) => root?.cloneNode(true) || null);
+}
+
+// One of the biggest pictures on the site (by its own pixels): the About spread's picture while the About section
+// has none of its own. Pictures that do not load in time are left out.
+async function biggestPicture(roots) {
+    const urls = [...new Set(roots.filter(Boolean).flatMap((r) => [...r.querySelectorAll("img[src], [data-image]")])
+        .map((n) => n.getAttribute("src") || n.dataset.image).filter((u) => u && !/\.svg(\?|$)/i.test(u) && !/^data:/.test(u)))].slice(0, 24);
+    const size = (url) => new Promise((done) => {
+        const img = new Image();
+        const timer = setTimeout(() => done(null), 2500);
+        img.onload = () => { clearTimeout(timer); done({ url, area: img.naturalWidth * img.naturalHeight }); };
+        img.onerror = () => { clearTimeout(timer); done(null); };
+        img.src = url;
+    });
+    const all = (await Promise.all(urls.map(size))).filter(Boolean).sort((a, b) => b.area - a.area);
+    return all[0]?.url || urls[0] || null;
 }
 
 //=================================== Units ===================================//
@@ -186,10 +202,9 @@ function frontCover(cover, lines, { exit = false } = {}) {
         list.append(li);
     });
     const cue = el("div", "kalq-mag-cue");
-    cue.innerHTML = '<span class="kalq-mag-cue__ripple" aria-hidden="true"></span><span class="kalq-mag-cue__ripple" aria-hidden="true"></span>'
-        + `<button type="button" class="kalq-mag-cue__btn" aria-label="${t("next")}" title="${t("next")}">`
+    cue.innerHTML = `<button type="button" class="kalq-mag-cue__btn" aria-label="${t("next")}" title="${t("next")}">`
         + '<svg class="kalq-mag-cue__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h13M13 6.5l5.5 5.5-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
-        + `<span class="kalq-mag-cue__hand" aria-hidden="true">${HAND}</span>`;
+        + `<span class="kalq-mag-cue__hand" aria-hidden="true">${handSvg({ trail: false })}</span>`; // a tap: no trail
     foot.append(list, cue);
     p.inner.append(title, foot);
     if (exit) {
@@ -220,6 +235,9 @@ function masthead(chapter, sub) {
 // The controls, bottom left of a right page, in the header's own design: back to the cover, Index (the contents),
 // light or dark, the language (the header's own E / D switch). Each right page carries a copy that turns with it (a
 // picture, not reachable); one live set lies exactly over the copy of the settled page, so a tap always lands.
+// Cover and Index, once used, turn into a back arrow in the same place (back to the exact spread); on the cover the
+// live set then shows only that arrow and the way out of the book, at the spot where the reader tapped.
+const BACK_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
 let controlId = 0;
 function controls({ live = false, signal } = {}) {
     const nav = el(live ? "nav" : "div", `bk-controls${live ? " is-live" : ""}`);
@@ -253,15 +271,16 @@ function controls({ live = false, signal } = {}) {
         nav.append(lang);
         if (live) bindLangSwitcher(lang, { pick: (code) => { if (code !== currentLang()) setLanguage(code); }, signal });
     }
+    if (live) button("web", t("close"), '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="14" rx="1.5"/><path d="M3.5 9h17M6.4 7h.01M8.6 7h.01"/></svg>', "is-exit");
     if (!live) nav.querySelectorAll("button").forEach((b) => (b.tabIndex = -1));
     return nav;
 }
 
 // About: the About section's picture over the whole left page (the placeholder glyph until one is set) with the
 // project's statement over it; facing it, the figures, each with what it counts, and the description, at the foot
-function aboutSpread(cover, about) {
+function aboutSpread(cover, about, fallback) {
     const left = newPage("is-media bk-about bk-about__media");
-    left.inner.append(mediaBox(about?.media || null));
+    left.inner.append(mediaBox(about?.media || fallback || null));
     const statement = textOf(cover?.statement, "p", "bk-statement");
     if (statement) { const o = el("div", "bk-over bk-over--centre"); o.append(statement); left.inner.append(o); }
     const right = newPage("bk-about");
@@ -367,31 +386,86 @@ function dragHint(overlay, pages, pageW, tip) {
     requestAnimationFrame(() => requestAnimationFrame(() => { if (overlay.isConnected) dragHand(overlay, pages, pageW); }));
 }
 
-function dragHand(overlay, pages, pageW) {
+function dragHand(overlay, pages, pageW, { dir = "rtl" } = {}) {
     const box = shownBox(pages);
     if (!box) return;
+    const ltr = dir === "ltr"; // a turn back, from left to right: the drawing mirrored, the trail on the other side
     const hint = el("div", "kalq-mag-drag");
     hint.setAttribute("aria-hidden", "true");
-    hint.style.left = `${box.right}px`;
+    hint.style.left = `${ltr ? box.left : box.right}px`;
     hint.style.top = `${box.bottom}px`;
-    hint.innerHTML = `<span class="kalq-mag-drag__fold"></span><span class="kalq-mag-drag__hand">${HAND}</span>`;
+    if (ltr) hint.classList.add("is-ltr");
+    // the fold: what the lifted corner reveals and the corner's back, drawn from where the corner has been pulled
+    hint.innerHTML = '<svg class="kalq-mag-drag__fold" aria-hidden="true"><polygon class="is-under"/><polygon class="is-flap"/></svg>'
+        + `<span class="kalq-mag-drag__hand">${handSvg({ mirror: ltr })}</span>`;
     overlay.append(hint);
-    const fold = hint.firstElementChild, hand = hint.lastElementChild;
+    const [under, flap] = hint.querySelectorAll("polygon"), hand = hint.lastElementChild;
     const size = Math.round(Math.min(pageW * 0.42, 220));
-    const hw = 46, hh = hw * 60 / 48;
-    const at = (s) => `translate(${-s - hw * HAND_TIP.x}px, ${-s - hh * HAND_TIP.y}px)`; // fingertip on the folded corner
-    const timing = { duration: 3000, delay: 350, easing: "cubic-bezier(.45,0,.25,1)", fill: "both" };
-    fold.animate([
-        { width: "0px", height: "0px", offset: 0 }, { width: "0px", height: "0px", offset: 0.18 },
-        { width: `${size}px`, height: `${size}px`, offset: 0.58 }, { width: `${size}px`, height: `${size}px`, offset: 0.72 },
-        { width: "0px", height: "0px", offset: 0.9 }, { width: "0px", height: "0px", offset: 1 },
+    const hw = 84, hh = hw * HAND_BOX.h / HAND_BOX.w;
+    const tipX = ltr ? hw * (1 - HAND_TIP.x) : hw * HAND_TIP.x, tipY = hh * HAND_TIP.y;
+    const sx = ltr ? 1 : -1; // inwards from the corner, along the bottom edge
+    const DURATION = 3800, DELAY = 300;
+    const timing = { duration: DURATION, delay: DELAY, easing: "linear", fill: "both" };
+    // Times, as shares of the hint: arrives (0–.16), the finger straightens and taps just inside the corner (.24),
+    // slides onto the corner and takes it (.30–.36), drags it across (.36–.62), holds (.74), lets go (.84); the corner
+    // falls back (.74–.9)
+    const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+    const k = (t, a, b) => ease(Math.min(1, Math.max(0, (t - a) / (b - a))));
+    const pulled = (t) => (t < 0.36 ? 0 : t < 0.62 ? size * k(t, 0.36, 0.62) : t < 0.74 ? size : size * (1 - k(t, 0.74, 0.9)));
+    // The corner C (0,0) pulled to P: the page folds along the line halfway between them, at right angles to CP,
+    // which meets the bottom edge at A and the outer edge at B; C A B shows the page beneath, the flap P A B lies over
+    // the page. The fingertip holds the flap a little in from its tip.
+    const fold = (d) => {
+        const P = { x: sx * d, y: -d * 0.35 };
+        if (d < 0.5) return { P, A: null, B: null, grip: { x: sx * 24, y: -24 } };
+        const A = { x: P.x / 2 + (P.y / 2) * (P.y / P.x), y: 0 }, B = { x: 0, y: P.y / 2 + (P.x / 2) * (P.x / P.y) };
+        const mid = { x: (A.x + B.x) / 2 - P.x, y: (A.y + B.y) / 2 - P.y }, len = Math.hypot(mid.x, mid.y) || 1;
+        const reach = Math.min(34, len * 0.45);
+        return { P, A, B, grip: { x: P.x + (mid.x / len) * reach, y: P.y + (mid.y / len) * reach } };
+    };
+    const tap = { x: sx * 58, y: -64 }; // the tap: inside the corner, so the hand stays on the page
+    const lerp = (a, b, f) => ({ x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f });
+    const where = (t) => { // the fingertip and how visible the hand is
+        const f = fold(pulled(t));
+        if (t < 0.16) return { at: lerp({ x: tap.x - sx * 40, y: tap.y + 52 }, tap, k(t, 0, 0.16)), o: k(t, 0, 0.12) };
+        if (t < 0.3) return { at: tap, o: 1 };
+        if (t < 0.36) return { at: lerp(tap, fold(0).grip, k(t, 0.3, 0.36)), o: 1 };
+        if (t < 0.74) return { at: f.grip, o: 1 };
+        const g = fold(size).grip;
+        return { at: { x: g.x, y: g.y - 12 * k(t, 0.74, 0.84) }, o: 1 - k(t, 0.74, 0.84) };
+    };
+    const started = performance.now();
+    const frame = (now) => {
+        if (!hint.isConnected) return;
+        const t = hint.dataset.at ? +hint.dataset.at : Math.min(1, Math.max(0, (now - started - DELAY) / DURATION)); // data-at holds a moment (tests)
+        const { at, o } = where(t);
+        hand.style.transform = `translate(${at.x - tipX}px, ${at.y - tipY}px)`;
+        hand.style.opacity = o;
+        const { P, A, B } = fold(pulled(t));
+        under.setAttribute("points", A ? `0,0 ${A.x},0 0,${B.y}` : "");
+        flap.setAttribute("points", A ? `${P.x},${P.y} ${A.x},0 0,${B.y}` : "");
+        if (t < 1 || hint.dataset.at) requestAnimationFrame(frame); else hint.remove();
+    };
+    hand.style.opacity = 0;
+    requestAnimationFrame(frame);
+    const part = (sel) => hand.querySelector(sel);
+    // the finger bent a little on the way in (the hand tipped back at the wrist), then straight for the tap
+    part(".bk-hand__hand").animate([
+        { transform: "rotate(9deg)", offset: 0 }, { transform: "rotate(9deg)", offset: 0.14 },
+        { transform: "rotate(0deg)", offset: 0.22 }, { transform: "rotate(0deg)", offset: 1 },
     ], timing);
-    hand.animate([
-        { transform: `${at(-40)}`, opacity: 0, offset: 0 }, { transform: at(0), opacity: 1, offset: 0.18 },
-        { transform: at(size), opacity: 1, offset: 0.58 }, { transform: at(size), opacity: 1, offset: 0.72 },
-        { transform: `${at(size)} translate(5px, -9px)`, opacity: 0, offset: 0.8 }, // lets go: lifts off where it is
-        { transform: `${at(size)} translate(5px, -9px)`, opacity: 0, offset: 1 },
-    ], timing).finished.then(() => hint.remove(), () => hint.remove());
+    // the two circles at the tap
+    hand.querySelectorAll(".bk-hand__ring").forEach((r, n) => r.animate([
+        { opacity: 0, transform: "scale(.4)", offset: 0 }, { opacity: 0, transform: "scale(.4)", offset: 0.22 + n * 0.03 },
+        { opacity: 1, transform: "scale(.85)", offset: 0.26 + n * 0.03 }, { opacity: 0, transform: "scale(1.3)", offset: 0.4 + n * 0.03 },
+        { opacity: 0, transform: "scale(1.3)", offset: 1 },
+    ], timing));
+    // the trail grows behind the finger while it drags, then fades
+    part(".bk-hand__trail").animate([
+        { opacity: 1, transform: "scaleX(0)", offset: 0 }, { opacity: 1, transform: "scaleX(0)", offset: 0.36 },
+        { opacity: 1, transform: "scaleX(1)", offset: 0.62 }, { opacity: 1, transform: "scaleX(1)", offset: 0.74 },
+        { opacity: 0, transform: "scaleX(1)", offset: 0.84 }, { opacity: 0, transform: "scaleX(1)", offset: 1 },
+    ], timing);
 }
 
 //=================================== Turning ===================================//
@@ -463,6 +537,7 @@ async function build({ auto = false, at = null } = {}) {
     if (auto && (closedByUser || chosenWeb())) return;
     const [St, sources] = await Promise.all([loadEngine().catch(() => null), Promise.all(CHAPTERS.map(sourceOf))]);
     if (!St?.PageFlip || book) return;
+    const picture = biggestPicture(sources); // measured while the book lays out
     const { pageW, pageH, portrait, hinge } = geometry();
     const listeners = new AbortController(); // the controls' document listeners, detached when the book closes
 
@@ -527,7 +602,7 @@ async function build({ auto = false, at = null } = {}) {
     spreads.forEach((s) => s.pages.forEach((p) => { p.mast = s.unit.tech ? [t("appendix"), tr(s.ch.label)] : [tr(s.ch.label), s.unit.layout === "opener" ? "" : s.label]; }));
     // cover lines: each chapter of the site with its first real heading
     const lines = groups.filter((g) => g.title !== t("appendix")).map((g) => ({ chapter: g.title, text: g.entries[0]?.label || "", at: g.at }));
-    const pages = [frontCover(shared.cover, lines, { exit: portrait }), ...aboutSpread(shared.cover, shared.about), ...contents,
+    const pages = [frontCover(shared.cover, lines, { exit: portrait }), ...aboutSpread(shared.cover, shared.about, shared.about?.media ? null : await picture), ...contents,
         ...spreads.flatMap((s) => s.pages), backCover(shared.cover, shared.footer, shared.social)];
     measure.remove();
     pages.forEach((p, i) => {
@@ -538,6 +613,7 @@ async function build({ auto = false, at = null } = {}) {
         p.setAttribute("role", "group");
         p.setAttribute("aria-roledescription", "page");
         p.setAttribute("aria-label", t("page")(i + 1, pages.length));
+        p.querySelectorAll("a[href]").forEach((a) => { a.tabIndex = -1; a.setAttribute("aria-hidden", "true"); }); // their live twins are the links
         if (i > 0 && i < pages.length - 1) {
             p.append(el("span", "bk-folio", String(i + 1)));
             const left = portrait || i % 2 === 1, right = portrait || i % 2 === 0;
@@ -557,8 +633,10 @@ async function build({ auto = false, at = null } = {}) {
     flip.loadFromHTML(pages);
     holdWhereGrabbed(flip, pageW);
     stage.kalqFlip = flip; // the engine, for tests and the console
+    let navigating = false; // a turn the book makes for the reader (Index, Cover, a link), not one they make themselves
     const goTo = (i) => {
         if (i === flip.getCurrentPageIndex()) return;
+        navigating = true;
         if (reducedMotion.matches) { flip.turnToPage(i); update(); requestAnimationFrame(() => requestAnimationFrame(update)); } else flip.flip(i);
     };
 
@@ -567,14 +645,26 @@ async function build({ auto = false, at = null } = {}) {
         const b = e.target.closest("[data-bk-action]");
         if (!b) return;
         const act = b.dataset.bkAction;
-        if (act === "index") goTo(CONTENTS_AT);
-        else if (act === "cover") goTo(0);
-        else if (act === "web") leaveForWeb();
+        if ((act === "index" || act === "cover") && back?.via === act && atTarget()) { const to = back.from; back = null; goTo(to); return; }
+        if (act === "index" || act === "cover") {
+            const r = live.getBoundingClientRect();
+            back = { via: act, from: flip.getCurrentPageIndex(), left: Math.round(r.left), top: Math.round(r.top) };
+            goTo(act === "index" ? CONTENTS_AT : 0);
+        } else if (act === "web") leaveForWeb();
         else if (act === "mode") { setMode(getMode() === "dark" ? "light" : "dark"); setTimeout(onLook, 0); }
     });
     const live = controls({ live: true, signal: listeners.signal });
     live.hidden = true;
     overlay.append(live);
+    // the way back after Cover or Index: { via, from, left, top }; forgotten as soon as the reader turns elsewhere
+    let back = null;
+    const spreadOf = (i) => (portrait ? i : i === 0 ? 0 : Math.floor((i + 1) / 2));
+    const atTarget = () => back && spreadOf(flip.getCurrentPageIndex()) === spreadOf(back.via === "cover" ? 0 : CONTENTS_AT);
+    const icons = Object.fromEntries(["cover", "index"].map((a) => { const b = live.querySelector(`[data-bk-action="${a}"]`); return [a, { html: b.innerHTML, label: b.getAttribute("aria-label") }]; }));
+    // Links on the pages get a live twin over them too (the pages turn; a tap on a link's words must never be taken
+    // for the start of a turn): the twins are the links one reaches; the copies on the pages are pictures
+    const linkLayer = el("div", "bk-live-links");
+    overlay.append(linkLayer);
     const status = el("p", "kalq-magazine__status kalq-sr"); // the page number, announced (the folios are what one sees)
     status.setAttribute("aria-live", "polite");
     const tip = el("p", "kalq-magazine__tip"); // the drag hint as words
@@ -649,16 +739,47 @@ async function build({ auto = false, at = null } = {}) {
     const settle = () => {
         const read = flip.getState() === "read";
         const shown = pages.filter((p) => !p.inert && p.offsetWidth);
-        const copy = read && shown.map((p) => p.querySelector(":scope > .bk-controls")).find(Boolean);
+        ["cover", "index"].forEach((a) => {
+            const b = live.querySelector(`[data-bk-action="${a}"]`);
+            const arrow = back?.via === a && atTarget();
+            b.innerHTML = arrow ? BACK_ICON : icons[a].html;
+            b.setAttribute("aria-label", arrow ? t("back") : icons[a].label);
+            b.title = b.getAttribute("aria-label");
+            b.classList.toggle("is-back", arrow);
+        });
+        const onCover = read && flip.getCurrentPageIndex() === 0;
+        const copy = read && !onCover && shown.map((p) => p.querySelector(":scope > .bk-controls")).find(Boolean);
         overlay.querySelectorAll(".kalq-mag-page > .bk-controls").forEach((c) => { c.style.visibility = c === copy ? "hidden" : ""; });
-        if (!copy) { if (live.contains(document.activeElement)) live.dataset.refocus = "1"; live.hidden = true; }
-        else {
+        live.classList.toggle("is-cover", onCover);
+        if (copy) {
             const r = copy.getBoundingClientRect();
             Object.assign(live.style, { left: `${Math.round(r.left)}px`, top: `${Math.round(r.top)}px` });
             live.classList.toggle("is-light", copy.closest(".is-media") !== null || !!copy.closest(".kalq-mag-page")?.querySelector(".bk-over"));
             live.hidden = false;
-            if (live.dataset.refocus) { delete live.dataset.refocus; live.querySelector("button")?.focus({ preventScroll: true }); }
-        }
+        } else if (onCover && back?.via === "cover") { // back on the cover from inside: the arrow where the reader tapped, and the way out
+            Object.assign(live.style, { left: `${back.left}px`, top: `${back.top}px` });
+            live.classList.add("is-light");
+            live.hidden = false;
+        } else live.hidden = true;
+        if (live.hidden) { if (live.contains(document.activeElement)) live.dataset.refocus = "1"; }
+        else if (live.dataset.refocus) { delete live.dataset.refocus; live.querySelector("button:not([hidden])")?.focus({ preventScroll: true }); }
+        // live twins of the links on the pages in view
+        linkLayer.replaceChildren();
+        if (read) shown.forEach((p) => p.querySelectorAll("a[href]").forEach((a) => {
+            const r = a.getBoundingClientRect();
+            if (!r.width || a.closest("[hidden]")) return;
+            const twin = el("a", "bk-live-link");
+            twin.href = a.getAttribute("href");
+            if (a.dataset.to != null) twin.dataset.to = a.dataset.to;
+            if (a.target) { twin.target = a.target; twin.rel = "noopener"; }
+            twin.setAttribute("aria-label", a.textContent.replace(/\s+/g, " ").trim());
+            Object.assign(twin.style, { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });
+            twin.addEventListener("pointerenter", () => a.classList.add("is-hover"));
+            twin.addEventListener("pointerleave", () => a.classList.remove("is-hover"));
+            twin.addEventListener("focus", () => a.classList.add("is-focus"));
+            twin.addEventListener("blur", () => a.classList.remove("is-focus"));
+            linkLayer.append(twin);
+        }));
         pages.forEach((p) => {
             const m = p.querySelector(":scope > .bk-mast");
             if (!m) return;
@@ -667,6 +788,9 @@ async function build({ auto = false, at = null } = {}) {
         });
     };
     flip.on("flip", () => {
+        // the reader turned elsewhere themselves: Cover and Index are themselves again
+        if (navigating) navigating = false;
+        else if (back && !atTarget()) back = null;
         update();
         requestAnimationFrame(() => requestAnimationFrame(update)); // again once the engine has drawn the new pages (an instant turn reports first)
         if (flip.getCurrentPageIndex() === 1) dragHint(overlay, pages, pageW, tip);
@@ -705,12 +829,12 @@ async function build({ auto = false, at = null } = {}) {
     // Links: the contents and the site's own pages turn the book; mail and other sites open as usual; any other link
     // on the site leaves the book for it
     overlay.addEventListener("click", (e) => {
-        const a = e.target.closest(".kalq-mag-page a[href]");
+        const a = e.target.closest(".bk-live-link, .kalq-mag-page a[href]");
         if (!a) return;
         const href = a.getAttribute("href");
         const file = href.replace(/^\.?\//, "").split(/[?#]/)[0] || "index.html";
         const to = a.dataset.to != null ? +a.dataset.to : chapterAt[file];
-        if (to != null) { e.preventDefault(); goTo(to); return; }
+        if (to != null) { e.preventDefault(); back = null; goTo(to); return; }
         if (/^(mailto:|tel:|https?:)/.test(href) || a.target === "_blank") return;
         closeMagazine(false);
     });

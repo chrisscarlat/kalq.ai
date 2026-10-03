@@ -268,22 +268,20 @@
 
 .bk-entry__folio { flex-shrink: 0; font-size: 0.8rem; opacity: 0.6; font-variant-numeric: tabular-nums; }
 
-// G: the legal appendix, a technical section: grey, a fine grid, monospaced and dense
+// G: the legal appendix: the site's own typography, set a little denser, on a very light warm grey with generous
+// margins: a quiet shift from the editorial pages
 .kalq-mag-page.is-tech {
-    --grid: rgba(128, 128, 128, 0.09);
-    background: color-mix(in srgb, var(--kalq-bg, #fff) 95.5%, var(--kalq-text, #101010) 4.5%);
-    background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-    background-size: 24px 24px;
-    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    background: color-mix(in srgb, var(--kalq-bg, #fff) 96%, #8a7a62 4%);
 
-    .bk-flow { margin-top: 0; gap: 0.55rem; font-size: 0.78rem; line-height: 1.5; }
-    .bk-flow.is-cols { column-gap: 1.4rem; }
-    .bk-title { font-size: 1.1rem; letter-spacing: 0.02em; text-transform: uppercase; font-weight: 500; }
-    .bk-subtitle { margin-top: 0.7rem; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
-    .bk-lead, .bk-body { font-size: 0.78rem; line-height: 1.5; font-weight: 400; }
+    .bk-in { padding-left: calc(var(--side) + 1.25rem); padding-right: calc(var(--side) + 1.25rem); }
+    .bk-flow { margin-top: 0; gap: 0.6rem; }
+    .bk-flow.is-cols { column-gap: 2rem; }
+    .bk-title { font-size: clamp(1.4rem, 3vmin, 1.9rem); }
+    .bk-subtitle { margin-top: 0.9rem; font-size: 0.72rem; line-height: 1.3; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500; opacity: 0.7; }
+    .bk-lead, .bk-body { font-size: 0.92rem; line-height: 1.6; font-weight: 400; }
 }
 
-.bk-code { padding-bottom: 0.45rem; border-bottom: 1px solid currentColor; font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.7; }
+.bk-code { margin-bottom: 0.4rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--line); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.6; }
 
 // The page number: small, in the outer corner at the foot
 .bk-folio {
@@ -387,6 +385,30 @@
 
 .kalq-mag-page > .bk-controls { pointer-events: none; }
 
+// Cover and Index as a back arrow; on the cover only the arrow and the way out
+.bk-controls.is-live {
+    .is-exit { display: none; }
+    &.is-cover > :not([data-bk-action="cover"]):not(.is-exit) { display: none; }
+    &.is-cover .is-exit { display: grid; }
+}
+
+// A tap on a link's or a button's words is a tap on the link or button, never the start of a turn
+.kalq-mag-page a *, .kalq-mag-page button * { pointer-events: none; }
+
+// Live twins of the links on the pages in view (js/magazine.js settle()): what one taps and tabs to
+.bk-live-links { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
+.bk-live-link {
+    position: fixed;
+    pointer-events: auto;
+    border-radius: 3px;
+
+    &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 2px; }
+}
+
+.bk-entries a.is-hover .bk-entry__label, .bk-cover__lines a.is-hover .bk-cover__line, .bk-chapter h3 a.is-hover,
+.bk-back__plain a.is-hover { text-decoration: underline; text-underline-offset: 3px; }
+.bk-btn.is-hover { opacity: 0.85; }
+
 .kalq-mag-page.is-media, .kalq-mag-page:has(.bk-over) {
     .bk-mast, .bk-controls { color: #fff; opacity: 1; }
     .bk-mast { opacity: 0.9; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35); }
@@ -410,7 +432,7 @@
 .bk-cover__title { position: relative; margin: 0; }
 .kalq-mag-page.is-cover .bk-cover__title svg { display: block; width: 100%; height: auto; fill: currentColor; }
 
-.bk-cover__foot { position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; }
+.bk-cover__foot { position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; margin-bottom: 2.6rem; } // room below for the controls when the reader comes back
 
 .bk-cover__lines {
     display: flex;
@@ -498,31 +520,34 @@
     pointer-events: none; // a tap lands on the button itself
 }
 
-.kalq-mag-cue__ripple {
-    position: absolute;
-    inset: 0;
-    border: 1.5px solid #fff;
-    border-radius: 50%;
-    opacity: 0;
-    pointer-events: none;
-}
+// The hand (js/book/drawings.js handSvg): its parts move on their own. The hand tips back at the wrist (the finger
+// bent) and straightens to tap; the circles ripple from the fingertip; the trail grows from the finger.
+.bk-hand { display: block; overflow: visible; }
+.bk-hand__hand { transform-box: fill-box; transform-origin: 85% 100%; }
+.bk-hand__ring { transform-box: fill-box; transform-origin: 50% 50%; }
+.bk-hand__trail { transform-box: fill-box; transform-origin: 0% 50%; }
 
 .kalq-mag-page.is-cover .kalq-mag-cue__hand {
     position: absolute;
-    left: calc(50% - 17px); // the fingertip (20,3 of 48×60) a little below the circle's middle
-    top: calc(50% + 3px);
-    width: 40px;
+    left: calc(50% - 16.5px); // the fingertip (the circles' centre, 31.4,31.3 of 148×162) on the button's middle
+    top: calc(50% - 16.5px);
+    width: 78px;
+    color: #fff;
     opacity: 0;
     pointer-events: none;
 
-    svg { width: 40px; height: auto; fill: #fff; }
+    svg { width: 78px; height: auto; }
+    .bk-hand__ring { opacity: 0; }
 }
 
+// On arrival: the button trembles twice; then the hand comes in, the finger bent, straightens and taps once (the two
+// circles ripple, the button gives); then it goes. Once, then everything rests.
 .kalq-mag-cue.is-play {
-    .kalq-mag-cue__btn { animation: kalq-cue-tremble 1.1s ease-in-out 0.5s, kalq-cue-press 0.32s ease-out 2.42s; }
-    .kalq-mag-cue__ripple { animation: kalq-cue-ripple 1.15s ease-out 0.5s; }
-    .kalq-mag-cue__ripple + .kalq-mag-cue__ripple { animation-delay: 1.05s; }
-    .kalq-mag-cue__hand { animation: kalq-cue-hand 1.7s ease-in-out 1.75s; }
+    .kalq-mag-cue__btn { animation: kalq-cue-tremble 1.1s ease-in-out 0.3s, kalq-cue-press 0.32s ease-out 2.05s; }
+    .kalq-mag-cue__hand { animation: kalq-cue-hand 2s ease-in-out 1.25s; }
+    .kalq-mag-cue__hand .bk-hand__hand { animation: kalq-cue-bend 2s ease-in-out 1.25s both; }
+    .kalq-mag-cue__hand .bk-hand__ring { animation: kalq-cue-ring 0.9s ease-out 2.05s both; }
+    .kalq-mag-cue__hand .bk-hand__ring.is-outer { animation-delay: 2.17s; }
 }
 
 @keyframes kalq-cue-tremble { // twice
@@ -533,22 +558,28 @@
     36%, 81% { transform: scale(1); }
 }
 
-@keyframes kalq-cue-ripple {
-    from { opacity: 0.55; transform: scale(1); }
-    to { opacity: 0; transform: scale(1.9); }
-}
-
 @keyframes kalq-cue-press {
     40% { transform: scale(0.9); }
 }
 
-@keyframes kalq-cue-hand { // in from below, one tap, away
-    0% { opacity: 0; transform: translate(26px, 34px); }
-    30% { opacity: 1; transform: translate(3px, 9px); }
-    40% { opacity: 1; transform: translate(0, 0); }
-    50% { opacity: 1; transform: translate(2px, 7px); }
-    75% { opacity: 1; transform: translate(12px, 22px); }
-    100% { opacity: 0; transform: translate(22px, 34px); }
+@keyframes kalq-cue-hand { // in from the lower right, one tap, away
+    0% { opacity: 0; transform: translate(40px, 44px); }
+    28% { opacity: 1; transform: translate(6px, 7px); }
+    40% { opacity: 1; transform: translate(0, 0); } // the tap
+    55% { opacity: 1; transform: translate(0, 0); }
+    80% { opacity: 1; transform: translate(18px, 22px); }
+    100% { opacity: 0; transform: translate(34px, 40px); }
+}
+
+@keyframes kalq-cue-bend { // the finger bent on the way in, straight for the tap
+    0%, 26% { transform: rotate(9deg); }
+    40%, 100% { transform: rotate(0deg); }
+}
+
+@keyframes kalq-cue-ring {
+    0% { opacity: 0; transform: scale(0.4); }
+    25% { opacity: 1; transform: scale(0.85); }
+    100% { opacity: 0; transform: scale(1.35); }
 }
 
 // The drag hint on the second spread: the lower outer corner folds over under the hand, then falls back
@@ -560,27 +591,29 @@
     pointer-events: none;
 }
 
-.kalq-mag-drag__fold { // the turned-over corner: its back (white, outlined) and the page beneath
+.kalq-mag-drag__fold { // the lifted corner, drawn from the corner (js/magazine.js dragHand)
     position: absolute;
-    right: 0;
-    bottom: 0;
-    box-sizing: border-box;
-    width: 0;
-    height: 0;
-    border-top: 1px solid #111;
-    border-left: 1px solid #111;
-    background: linear-gradient(135deg, #fff calc(50% - 0.6px), #111 calc(50% - 0.6px) calc(50% + 0.6px), #d9d7d2 calc(50% + 0.6px));
-    box-shadow: -3px -3px 12px rgba(0, 0, 0, 0.16);
+    left: 0;
+    top: 0;
+    width: 1px;
+    height: 1px;
+    overflow: visible;
+
+    .is-under { fill: color-mix(in srgb, var(--kalq-bg, #fff) 82%, var(--kalq-text, #101010) 18%); }
+    .is-flap { fill: var(--kalq-bg, #fff); stroke: var(--kalq-text, #111); stroke-width: 1; stroke-linejoin: round; filter: drop-shadow(-3px -2px 6px rgba(0, 0, 0, 0.18)); }
 }
 
 .kalq-mag-drag__hand {
     position: absolute;
     left: 0;
     top: 0;
-    width: 46px;
+    width: 84px;
+    color: var(--kalq-text, #111); // ink on the page
 
-    svg { display: block; width: 46px; height: auto; }
+    svg { width: 84px; height: auto; }
 }
+
+
 
 .kalq-magazine__tip { // the drag hint's words, under the left page (the page numbers sit in the outer corners)
     position: fixed;

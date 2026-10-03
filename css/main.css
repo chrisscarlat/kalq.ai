@@ -365,6 +365,23 @@ section[data-tone=light] :is(.hero_layer, #container):has(> .block) {
   color: var(--kalq-text);
 }
 
+.kalq-media-slot {
+  display: block;
+  margin-top: 3rem;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.kalq-media-slot > img, .kalq-media-slot > video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.kalq-media-slot:not(:has(> img, > video)) {
+  display: none;
+}
+
 /* Smooth Scroller */
 .site-main.no_scroll {
   height: 100vh;
@@ -542,7 +559,8 @@ section[data-tone=light] :is(.hero_layer, #container):has(> .block) {
   gap: 1.25rem;
 }
 
-/* Language switcher: only the active language at rest, the others appear as letters on hover */
+/* Language switcher: at rest only the active language's letter ("D"); on hover it expands to its name ("DEUTSCH")
+   with the others beside it as letters ("E"), which expand when pointed at */
 .lang {
   display: flex;
   align-items: center;
@@ -589,12 +607,12 @@ section[data-tone=light] :is(.hero_layer, #container):has(> .block) {
   grid-template-columns: 0fr;
   opacity: 0;
 }
-.lang .lang__item.is-active:not(.is-dimmed) .lang__short,
+.lang.is-open .lang__item.is-active:not(.is-dimmed) .lang__short,
 .lang .lang__item.is-preview .lang__short {
   grid-template-columns: 0fr;
   opacity: 0;
 }
-.lang .lang__item.is-active:not(.is-dimmed) .lang__full,
+.lang.is-open .lang__item.is-active:not(.is-dimmed) .lang__full,
 .lang .lang__item.is-preview .lang__full {
   grid-template-columns: 1fr;
   opacity: 1;
@@ -2066,13 +2084,30 @@ footer #container .footer_bottom a {
   display: none;
 }
 
+.bk-over--centre {
+  top: 0;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: var(--kalq-mag-top, 3.8rem) var(--side) var(--foot);
+  background: rgba(0, 0, 0, 0.32);
+}
+
 .bk-figures {
   display: flex;
-  gap: 2.2rem;
-  margin: 0 0 0.6rem;
+  flex-direction: column;
+  margin: 0 0 0.8rem;
+}
+.bk-figures > div {
+  display: grid;
+  grid-template-columns: minmax(4.5rem, auto) 1fr;
+  align-items: baseline;
+  gap: 1.2rem;
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--line);
 }
 .bk-figures dd {
-  margin: 0.45rem 0 0;
+  margin: 0;
 }
 
 .bk-centre .bk-in {
@@ -2090,12 +2125,38 @@ footer #container .footer_bottom a {
   letter-spacing: -0.01em;
 }
 
-.bk-contents .bk-in {
+.kalq-mag-page.bk-contents {
+  background: color-mix(in srgb, var(--kalq-bg, #fff) 97%, var(--kalq-text, #101010) 3%);
+}
+.kalq-mag-page.bk-contents .bk-in {
   gap: 1.8rem;
 }
-.bk-contents .bk-flow {
+.kalq-mag-page.bk-contents .bk-flow {
   margin-top: 0;
   gap: 1.6rem;
+}
+
+.bk-contents__title {
+  text-align: center;
+}
+
+.bk-contents__title.is-spacer {
+  visibility: hidden;
+}
+
+.bk-chapter h3 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.bk-chapter h3 a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.bk-chapter h3 a:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 2px;
 }
 
 .bk-chapter .bk-eyebrow {
@@ -2134,8 +2195,8 @@ footer #container .footer_bottom a {
 }
 
 .kalq-mag-page.is-tech {
-  --grid: rgba(128, 128, 128, 0.12);
-  background: color-mix(in srgb, var(--kalq-bg, #fff) 88%, var(--kalq-text, #101010) 12%);
+  --grid: rgba(128, 128, 128, 0.09);
+  background: color-mix(in srgb, var(--kalq-bg, #fff) 95.5%, var(--kalq-text, #101010) 4.5%);
   background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
   background-size: 24px 24px;
   font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
@@ -2204,7 +2265,7 @@ footer #container .footer_bottom a {
 .bk-mast {
   position: absolute;
   top: 1.35rem;
-  left: var(--side);
+  left: var(--outer);
   right: var(--side);
   z-index: 3;
   display: flex;
@@ -2224,12 +2285,56 @@ footer #container .footer_bottom a {
   stroke: currentColor;
 }
 
-.bk-mast__label {
+.bk-mast__chapter {
+  flex-shrink: 0;
+}
+
+.bk-mast__sub {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  opacity: 0.75;
 }
 
+.bk-mast__sub::before {
+  content: "/";
+  margin-right: 0.55rem;
+  opacity: 0.6;
+}
+
+.bk-mast.is-drawing svg * {
+  stroke-dasharray: 1;
+  animation: bk-mast-draw 0.9s cubic-bezier(0.45, 0, 0.25, 1) both;
+}
+.bk-mast.is-drawing svg *:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.bk-mast.is-drawing svg *:nth-child(3) {
+  animation-delay: 0.12s;
+}
+.bk-mast.is-drawing svg *:nth-child(4) {
+  animation-delay: 0.18s;
+}
+.bk-mast.is-drawing svg *:nth-child(n+5) {
+  animation-delay: 0.24s;
+}
+.bk-mast.is-drawing .bk-mast__chapter, .bk-mast.is-drawing .bk-mast__sub {
+  animation: bk-mast-fade 0.6s ease 0.35s both;
+}
+
+@keyframes bk-mast-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes bk-mast-fade {
+  from {
+    opacity: 0;
+  }
+}
 .bk-controls {
   position: absolute;
   left: var(--side);
@@ -2286,6 +2391,24 @@ footer #container .footer_bottom a {
   outline: 1px solid currentColor;
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+.bk-controls.is-live {
+  position: fixed;
+  bottom: auto;
+  z-index: 6;
+  color: var(--kalq-text, #101010);
+  font-family: "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+}
+.bk-controls.is-live.is-light {
+  color: #fff;
+}
+.bk-controls.is-live[hidden] {
+  display: none;
+}
+
+.kalq-mag-page > .bk-controls {
+  pointer-events: none;
 }
 
 .kalq-mag-page.is-media .bk-mast, .kalq-mag-page.is-media .bk-controls, .kalq-mag-page:has(.bk-over) .bk-mast, .kalq-mag-page:has(.bk-over) .bk-controls {
@@ -2377,6 +2500,22 @@ footer #container .footer_bottom a {
 }
 .bk-cover__lines .bk-eyebrow {
   opacity: 0.8;
+}
+
+.bk-cover__exit {
+  position: absolute;
+  top: 1.1rem;
+  right: var(--outer);
+  padding: 0.4rem 0;
+  border: 0;
+  background: none;
+  color: #fff;
+  font: inherit;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
 }
 
 .bk-cover__line {

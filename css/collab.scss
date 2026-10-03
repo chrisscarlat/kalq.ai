@@ -3053,3 +3053,10 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
         max-width: calc(var(--seg-l, 50vw) - 1rem);
     }
 }
+
+// An empty media holder while editing: the placeholder glyph, with its add button
+body.kalq-edit .kalq-media-slot:not(:has(> img, > video)) {
+    display: block;
+    position: relative;
+    background: #1D4ED8 $kalq-image-glyph center 45% / auto 32% no-repeat;
+}

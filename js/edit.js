@@ -158,7 +158,8 @@ async function stopEditing(keep) {
 //=================================== Media ===================================//
 // The slot element can be swapped (image <-> video), so always look it up by key
 const slot = (key) => document.querySelector(`[data-kalq-key="${CSS.escape(key)}"]`);
-const isEmptySlot = (node) => node.classList.contains("hero_media") && !node.firstElementChild;
+const isHolderNode = (node) => node.classList.contains("hero_media") || node.classList.contains("kalq-media-slot");
+const isEmptySlot = (node) => isHolderNode(node) && !node.querySelector(":scope > img, :scope > video");
 
 function replaceButtons() {
     document.querySelectorAll(".kalq-media-tools").forEach((b) => b.remove());
@@ -180,7 +181,7 @@ function replaceButtons() {
             tools.append(btn);
         };
         add(isEmptySlot(node) ? t("add") : t("replace"), "kalq-replace", (btn) => pickFile(key, btn));
-        if (node.classList.contains("hero_media") && !isEmptySlot(node)) add(t("remove"), "kalq-replace kalq-remove", () => setSlot(key, ""));
+        if (isHolderNode(node) && !isEmptySlot(node)) add(t("remove"), "kalq-replace kalq-remove", () => setSlot(key, ""));
         host.append(tools);
     });
 }

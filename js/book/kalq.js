@@ -26,7 +26,7 @@ export const SECTIONS = {
         mark: $(s, ".hero_title"), statement: $(s, ".hero_slogan"),
     }),
     about: (s) => ({
-        role: "about", lead: $(s, "h5"),
+        role: "about", lead: $(s, "h5"), media: mediaUrl($(s, ".kalq-media-slot")),
         figures: $$(s, ".numbering > div").map((d) => ({ value: $(d, "h2"), label: $(d, "p") })),
     }),
     expertise: (s) => ({

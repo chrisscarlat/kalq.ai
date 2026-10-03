@@ -373,6 +373,8 @@ home = head("Kalq | The decision layer for manufactured parts") + f'''          
                                 <p>Platform modules</p>
                             </div>
                         </div>
+                        <!-- A picture for the section (the magazine's About spread shows it too); nothing until one is set -->
+                        <div class="kalq-media-slot about_media" data-kalq-key="home.about.media" data-kalq-type="image"></div>
                     </div>
                 </section>
 

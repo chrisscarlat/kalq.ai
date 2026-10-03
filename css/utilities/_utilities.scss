@@ -200,3 +200,15 @@ section[data-tone="light"] :is(.hero_layer, #container):has(> .block) {
     background-color: var(--kalq-bg);
     color: var(--kalq-text);
 }
+
+// A media holder (.kalq-media-slot, js/content.js): shows its picture or video; nothing at all while it is empty
+.kalq-media-slot {
+    display: block;
+    margin-top: 3rem;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 12px;
+
+    > img, > video { display: block; width: 100%; height: 100%; object-fit: cover; }
+    &:not(:has(> img, > video)) { display: none; }
+}

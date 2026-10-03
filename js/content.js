@@ -48,15 +48,18 @@ function mediaNode(url, like) {
 
 const currentUrl = (node) => (node.tagName === "VIDEO" ? node.querySelector("source")?.getAttribute("src") || node.getAttribute("src") : node.getAttribute("src"));
 
+// A media holder: the hero's, or any .kalq-media-slot (empty until a picture is set)
+export const isHolder = (el) => el.classList.contains("hero_media") || el.classList.contains("kalq-media-slot");
+
 export function setMedia(el, url) {
     // Hover rows on Home keep their image in data-image
     if (el.hasAttribute("data-image")) { el.dataset.image = url; return; }
-    // Hero slots: a wrapper that holds the image or video, or nothing
-    if (el.classList.contains("hero_media")) {
+    // Hero slots and other media holders: a wrapper that holds the image or video, or nothing
+    if (isHolder(el)) {
         const section = el.closest("section");
         if (!url) { el.replaceChildren(); section?.classList.remove("has-media"); return; }
-        const old = el.firstElementChild;
-        if (!old || currentUrl(old) !== url) el.replaceChildren(mediaNode(url, old || Object.assign(document.createElement("i"), { className: "hero_media__el" })));
+        const old = el.querySelector(":scope > img, :scope > video");
+        if (!old || currentUrl(old) !== url) el.replaceChildren(mediaNode(url, old || Object.assign(document.createElement("i"), { className: el.classList.contains("hero_media") ? "hero_media__el" : "kalq-media-slot__el" })));
         section?.classList.add("has-media");
         return;
     }
@@ -77,7 +80,7 @@ let mediaOverride = () => null;
 export const setMediaOverride = (fn) => { mediaOverride = fn; };
 
 // What a media slot showed in the HTML, so switching back to a variant without a replacement restores it
-const defaultUrl = (el) => (el.classList.contains("hero_media") ? "" : el.getAttribute("data-image") ?? currentUrl(el) ?? "");
+const defaultUrl = (el) => (isHolder(el) ? "" : el.getAttribute("data-image") ?? currentUrl(el) ?? "");
 
 // Blocks that are not translated: media, counter numbers, email addresses
 export function applyDirect(root) {

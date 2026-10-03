@@ -166,7 +166,7 @@ function markOf(selector) {
 
 // Front cover, like a magazine's: the brand title along the top, the hero's video behind, cover lines along the foot
 // (each chapter with one of its real headings, a link to it) and the way in at the bottom right
-function frontCover(cover, lines) {
+function frontCover(cover, lines, { exit = false } = {}) {
     const p = newPage("is-cover is-front-cover");
     p.setAttribute("data-density", "hard");
     p.inner.append(mediaBox(cover?.media?.[0] || null, { cls: "bk-cover__media" }), el("div", "bk-cover__shade"));
@@ -192,24 +192,39 @@ function frontCover(cover, lines) {
         + `<span class="kalq-mag-cue__hand" aria-hidden="true">${HAND}</span>`;
     foot.append(list, cue);
     p.inner.append(title, foot);
+    if (exit) {
+        const b = el("button", "bk-cover__exit", t("close"));
+        b.type = "button";
+        b.dataset.bkAction = "web";
+        p.inner.append(b);
+    }
     return p;
 }
 
 // Masthead, top left of a left page: the logo symbol and the name of the section the page belongs to
-function masthead(label) {
+function masthead(chapter, sub) {
     const m = el("p", "bk-mast");
     const mark = markOf(".site-logo__custom svg") || markOf("svg.site-logo__mark");
-    if (mark) m.append(mark);
-    m.append(el("span", "bk-mast__label", label));
+    if (mark) {
+        mark.setAttribute("role", "img"); // the logo, also for machines
+        mark.setAttribute("aria-label", "Kalq");
+        mark.removeAttribute("aria-hidden");
+        mark.querySelectorAll("line, path, circle, rect, polyline").forEach((n) => n.setAttribute("pathLength", "1")); // for the draw
+        m.append(mark);
+    }
+    m.append(el("span", "bk-mast__chapter", chapter));
+    if (sub) m.append(el("span", "bk-mast__sub", sub));
     return m;
 }
 
-// The controls, bottom left of a right page, in the header's own design: Index (the contents), light or dark,
-// the language (the header's E / D switch), the web page, the cover
+// The controls, bottom left of a right page, in the header's own design: back to the cover, Index (the contents),
+// light or dark, the language (the header's own E / D switch). Each right page carries a copy that turns with it (a
+// picture, not reachable); one live set lies exactly over the copy of the settled page, so a tap always lands.
 let controlId = 0;
-function controls(signal) {
-    const nav = el("nav", "bk-controls");
-    nav.setAttribute("aria-label", t("controls"));
+function controls({ live = false, signal } = {}) {
+    const nav = el(live ? "nav" : "div", `bk-controls${live ? " is-live" : ""}`);
+    if (live) nav.setAttribute("aria-label", t("controls"));
+    else { nav.setAttribute("aria-hidden", "true"); nav.inert = true; }
     const button = (action, label, html, cls = "") => {
         const b = el("button", `bk-control ${cls}`.trim());
         b.type = "button";
@@ -220,7 +235,8 @@ function controls(signal) {
         nav.append(b);
         return b;
     };
-    button("index", t("toContents"), `<span>${t("index")}</span>`, "is-text");
+    button("cover", t("cover"), '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"><rect x="5" y="3.5" width="14" height="17" rx="1.5"/><path d="M8.5 3.5v17"/></svg>');
+    button("index", t("toContents"), '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"><rect x="5" y="3.5" width="14" height="17" rx="1.5"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4.5"/></svg>');
     const mode = document.querySelector(".site-header .mode-toggle")?.cloneNode(true);
     if (mode) {
         const id = `kalq-moon-bite-bk${controlId++}`; // the copy's own mask
@@ -232,38 +248,43 @@ function controls(signal) {
     const lang = document.querySelector(".site-header [data-lang-switcher]")?.cloneNode(true);
     if (lang) {
         lang.removeAttribute("data-lang-switcher");
-        lang.querySelectorAll(".is-open, .is-preview, .is-dimmed").forEach((n) => n.classList.remove("is-open", "is-preview", "is-dimmed"));
+        lang.classList.remove("is-open");
+        lang.querySelectorAll(".is-preview, .is-dimmed").forEach((n) => n.classList.remove("is-preview", "is-dimmed"));
         nav.append(lang);
-        bindLangSwitcher(lang, { pick: (code) => { if (code !== currentLang()) setLanguage(code); }, signal });
+        if (live) bindLangSwitcher(lang, { pick: (code) => { if (code !== currentLang()) setLanguage(code); }, signal });
     }
-    button("web", t("close"), '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="14" rx="1.5"/><path d="M3.5 9h17M6.4 7h.01M8.6 7h.01"/></svg>');
-    button("cover", t("cover"), '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"><rect x="5" y="3.5" width="14" height="17" rx="1.5"/><path d="M8.5 3.5v17M11.5 8h4.5"/></svg>');
+    if (!live) nav.querySelectorAll("button").forEach((b) => (b.tabIndex = -1));
     return nav;
 }
 
-// About: the left page nearly empty, the counters and the short description low down; the statement centred right
+// About: the About section's picture over the whole left page (the placeholder glyph until one is set) with the
+// project's statement over it; facing it, the figures, each with what it counts, and the description, at the foot
 function aboutSpread(cover, about) {
-    const left = newPage("bk-about");
+    const left = newPage("is-media bk-about bk-about__media");
+    left.inner.append(mediaBox(about?.media || null));
+    const statement = textOf(cover?.statement, "p", "bk-statement");
+    if (statement) { const o = el("div", "bk-over bk-over--centre"); o.append(statement); left.inner.append(o); }
+    const right = newPage("bk-about");
     const flow = el("div", "bk-flow");
     if (about?.figures?.length) {
-        const row = el("dl", "bk-figures");
-        about.figures.forEach((f) => { const d = el("div"); d.append(textOf(f.value, "dt", "bk-figure"), textOf(f.label, "dd", "bk-eyebrow")); row.append(d); });
-        flow.append(row);
+        const list = el("dl", "bk-figures");
+        about.figures.forEach((f) => { const d = el("div"); d.append(textOf(f.value, "dt", "bk-figure"), textOf(f.label, "dd", "bk-body")); list.append(d); });
+        flow.append(list);
     }
     if (about?.lead) flow.append(textOf(about.lead, "p", "bk-small"));
-    left.inner.append(flow);
-    const right = newPage("bk-about bk-centre");
-    const statement = textOf(cover?.statement, "p", "bk-statement");
-    if (statement) right.inner.append(statement);
+    right.inner.append(flow);
     return [left, right];
 }
 
 // Contents: one block per chapter, every spread a line that turns to it
 function contentsSpread(groups) {
     const [left, right] = [newPage("bk-contents"), newPage("bk-contents")];
-    const head = el("h2", "bk-title", t("contents"));
+    const head = el("h2", "bk-title bk-contents__title", t("contents"));
     head.id = "kalq-book-contents";
     left.inner.append(head);
+    const spacer = el("p", "bk-title bk-contents__title is-spacer", t("contents")); // the same height, so both columns start together
+    spacer.setAttribute("aria-hidden", "true");
+    right.inner.append(spacer);
     const lists = [el("div", "bk-flow"), el("div", "bk-flow")];
     groups.forEach((g) => {
         const block = el("section", "bk-chapter");
@@ -373,6 +394,32 @@ function dragHand(overlay, pages, pageW) {
     ], timing).finished.then(() => hint.remove(), () => hint.remove());
 }
 
+//=================================== Turning ===================================//
+// StPageFlip folds a page from one of its corners, and on a grab puts that corner where the finger is: grabbed at the
+// middle of an edge, the corner jumped there and lifted. True folds from any point are not something it can do. The
+// closest natural feel: the nearest corner starts from where it lies and moves by exactly as much as the finger does,
+// so the page lifts gradually from the side that was taken hold of. A tap (no movement) stays a tap.
+function holdWhereGrabbed(flip, pageW) {
+    const start = flip.startUserTouch.bind(flip), move = flip.userMove.bind(flip), stop = flip.userStop.bind(flip);
+    let hold = null;
+    const corner = (p) => {
+        const r = flip.getRender().getRect(); // the book within the engine's frame, in the engine's coordinates
+        const right = r.width <= r.pageWidth + 1 ? true : p.x > r.left + r.width / 2;
+        const c = { x: right ? r.left + r.width - 2 : r.left + 2, y: p.y < r.top + r.height / 2 ? r.top + 2 : r.top + r.height - 2 }; // just inside, as a hand would take it
+        const near = Math.hypot(r.pageWidth, r.height) / 5; // the engine's own corner size
+        return Math.hypot(p.x - c.x, p.y - c.y) < near ? null : c;
+    };
+    const shifted = (p) => (hold?.c ? { x: hold.c.x + p.x - hold.p.x, y: hold.c.y + p.y - hold.p.y } : p);
+    flip.startUserTouch = (p) => { hold = { p, c: corner(p) }; start(hold.c || p); };
+    flip.userMove = (p, touch) => move(flip.isUserTouch === false || !hold ? p : shifted(p), touch);
+    flip.userStop = (p, swipe) => {
+        const moved = hold && Math.hypot(p.x - hold.p.x, p.y - hold.p.y) > 5;
+        const at = moved ? shifted(p) : p;
+        hold = null;
+        stop(at, swipe);
+    };
+}
+
 //=================================== Geometry ===================================//
 // The gap between the two screens in pixels: none on a continuous fold, a real hinge on a Surface Duo. --seg-hinge is a
 // calc() of env() values, so it is measured rather than parsed.
@@ -477,10 +524,10 @@ async function build({ auto = false, at = null } = {}) {
     const contents = contentsSpread(groups);
     contents.forEach((p) => measure.append(sized(p)));
     balance(contents);
-    spreads.forEach((s) => s.pages.forEach((p) => { p.mast = s.unit.tech ? `${t("appendix")} · ${tr(s.ch.label)}` : `${tr(s.ch.label)} · ${s.label}`; }));
+    spreads.forEach((s) => s.pages.forEach((p) => { p.mast = s.unit.tech ? [t("appendix"), tr(s.ch.label)] : [tr(s.ch.label), s.unit.layout === "opener" ? "" : s.label]; }));
     // cover lines: each chapter of the site with its first real heading
     const lines = groups.filter((g) => g.title !== t("appendix")).map((g) => ({ chapter: g.title, text: g.entries[0]?.label || "", at: g.at }));
-    const pages = [frontCover(shared.cover, lines), ...aboutSpread(shared.cover, shared.about), ...contents,
+    const pages = [frontCover(shared.cover, lines, { exit: portrait }), ...aboutSpread(shared.cover, shared.about), ...contents,
         ...spreads.flatMap((s) => s.pages), backCover(shared.cover, shared.footer, shared.social)];
     measure.remove();
     pages.forEach((p, i) => {
@@ -494,8 +541,8 @@ async function build({ auto = false, at = null } = {}) {
         if (i > 0 && i < pages.length - 1) {
             p.append(el("span", "bk-folio", String(i + 1)));
             const left = portrait || i % 2 === 1, right = portrait || i % 2 === 0;
-            if (left && p.mast && !p.matches(".bk-opener, .bk-about, .bk-contents")) p.append(masthead(p.mast));
-            if (right) p.append(controls(listeners.signal));
+            if (left && p.mast && !p.matches(".bk-opener, .bk-about, .bk-contents")) p.append(masthead(...p.mast));
+            if (right) p.append(controls());
         }
         stage.append(p);
     });
@@ -508,6 +555,8 @@ async function build({ auto = false, at = null } = {}) {
         startPage: Math.min(start, pages.length - 1), startZIndex: 2,
     });
     flip.loadFromHTML(pages);
+    holdWhereGrabbed(flip, pageW);
+    stage.kalqFlip = flip; // the engine, for tests and the console
     const goTo = (i) => {
         if (i === flip.getCurrentPageIndex()) return;
         if (reducedMotion.matches) { flip.turnToPage(i); update(); requestAnimationFrame(() => requestAnimationFrame(update)); } else flip.flip(i);
@@ -523,6 +572,9 @@ async function build({ auto = false, at = null } = {}) {
         else if (act === "web") leaveForWeb();
         else if (act === "mode") { setMode(getMode() === "dark" ? "light" : "dark"); setTimeout(onLook, 0); }
     });
+    const live = controls({ live: true, signal: listeners.signal });
+    live.hidden = true;
+    overlay.append(live);
     const status = el("p", "kalq-magazine__status kalq-sr"); // the page number, announced (the folios are what one sees)
     status.setAttribute("aria-live", "polite");
     const tip = el("p", "kalq-magazine__tip"); // the drag hint as words
@@ -590,6 +642,29 @@ async function build({ auto = false, at = null } = {}) {
         // the drag hint's words sit under the left page (on two screens: the left screen)
         const box = shownBox(pages);
         if (box) tip.style.left = `${Math.round(portrait ? (box.left + box.right) / 2 : box.left + pageW / 2)}px`;
+        settle();
+    };
+    // Settled: the live controls over the copy on the page in view, the masthead's logo drawn once; turning: the
+    // copies turn with their pages and the live set steps aside
+    const settle = () => {
+        const read = flip.getState() === "read";
+        const shown = pages.filter((p) => !p.inert && p.offsetWidth);
+        const copy = read && shown.map((p) => p.querySelector(":scope > .bk-controls")).find(Boolean);
+        overlay.querySelectorAll(".kalq-mag-page > .bk-controls").forEach((c) => { c.style.visibility = c === copy ? "hidden" : ""; });
+        if (!copy) { if (live.contains(document.activeElement)) live.dataset.refocus = "1"; live.hidden = true; }
+        else {
+            const r = copy.getBoundingClientRect();
+            Object.assign(live.style, { left: `${Math.round(r.left)}px`, top: `${Math.round(r.top)}px` });
+            live.classList.toggle("is-light", copy.closest(".is-media") !== null || !!copy.closest(".kalq-mag-page")?.querySelector(".bk-over"));
+            live.hidden = false;
+            if (live.dataset.refocus) { delete live.dataset.refocus; live.querySelector("button")?.focus({ preventScroll: true }); }
+        }
+        pages.forEach((p) => {
+            const m = p.querySelector(":scope > .bk-mast");
+            if (!m) return;
+            if (!shown.includes(p)) m.classList.remove("is-drawn", "is-drawing");
+            else if (read && !m.classList.contains("is-drawn") && !reducedMotion.matches) { m.classList.add("is-drawn", "is-drawing"); }
+        });
     };
     flip.on("flip", () => {
         update();
@@ -616,6 +691,7 @@ async function build({ auto = false, at = null } = {}) {
         act();
     };
     window.addEventListener("keydown", onKey, true);
+    window.addEventListener("resize", settle, { signal: listeners.signal });
     // The engine follows the finger through touchmove and touchend on the window, which the site's smooth scroller
     // stops at the document on the way up. Hand them to the engine first while the book is open.
     const ui = flip.getUI?.();
@@ -663,7 +739,7 @@ async function build({ auto = false, at = null } = {}) {
     book = { overlay, flip, pages, onKey, onTouch, onLanguage, onContent, onLook, listeners, returnFocus: book?.returnFocus || document.activeElement };
     // focus without scrolling: the button sits inside the engine's page, whose clipped ancestors a scroll would shift
     if (start === 0) cue.querySelector("button").focus({ preventScroll: true });
-    else setTimeout(() => overlay.querySelector(".kalq-mag-page:not([inert]) .bk-control")?.focus({ preventScroll: true }), 80);
+    else setTimeout(() => live.querySelector("button")?.focus({ preventScroll: true }), 120);
 }
 
 // The reader's way back: the web page for the rest of the visit (the header's book icon still opens the book)

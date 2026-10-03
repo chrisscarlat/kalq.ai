@@ -70,7 +70,8 @@
     gap: 1.25rem;
 }
 
-/* Language switcher: only the active language at rest, the others appear as letters on hover */
+/* Language switcher: at rest only the active language's letter ("D"); on hover it expands to its name ("DEUTSCH")
+   with the others beside it as letters ("E"), which expand when pointed at */
 .lang {
     display: flex;
     align-items: center;
@@ -125,7 +126,7 @@
         opacity: 0;
     }
 
-    .lang__item.is-active:not(.is-dimmed),
+    &.is-open .lang__item.is-active:not(.is-dimmed),
     .lang__item.is-preview {
         .lang__short {
             grid-template-columns: 0fr;

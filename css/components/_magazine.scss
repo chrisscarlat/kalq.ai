@@ -207,13 +207,23 @@
 .bk-answers .bk-answer { gap: 1rem; }
 .bk-answer[hidden] { display: none; }
 
-// About: the left page nearly empty, figures and the description low down; the statement centred
+// About: the picture with the statement over it; facing it the figures, each with what it counts, and the description
+.bk-over--centre {
+    top: 0;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: var(--kalq-mag-top, 3.8rem) var(--side) var(--foot);
+    background: rgba(0, 0, 0, 0.32);
+}
+
 .bk-figures {
     display: flex;
-    gap: 2.2rem;
-    margin: 0 0 0.6rem;
+    flex-direction: column;
+    margin: 0 0 0.8rem;
 
-    dd { margin: 0.45rem 0 0; }
+    > div { display: grid; grid-template-columns: minmax(4.5rem, auto) 1fr; align-items: baseline; gap: 1.2rem; padding: 0.9rem 0; border-top: 1px solid var(--line); }
+    dd { margin: 0; }
 }
 
 .bk-centre .bk-in { align-items: center; justify-content: center; text-align: center; }
@@ -221,10 +231,18 @@
 .bk-statement { margin: 0; max-width: 20ch; font-size: clamp(1.6rem, 4.2vmin, 2.7rem); line-height: 1.2; font-weight: 300; letter-spacing: -0.01em; }
 
 // Contents: the hub; every line a link to its spread
-.bk-contents {
+.kalq-mag-page.bk-contents {
+    background: color-mix(in srgb, var(--kalq-bg, #fff) 97%, var(--kalq-text, #101010) 3%);
+
     .bk-in { gap: 1.8rem; }
     .bk-flow { margin-top: 0; gap: 1.6rem; }
 }
+
+.bk-contents__title { text-align: center; }
+.bk-contents__title.is-spacer { visibility: hidden; }
+.bk-chapter h3 a { color: inherit; text-decoration: none; }
+.bk-chapter h3 a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.bk-chapter h3 a:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 2px; }
 
 .bk-chapter .bk-eyebrow { margin-bottom: 0.5rem; }
 
@@ -252,8 +270,8 @@
 
 // G: the legal appendix, a technical section: grey, a fine grid, monospaced and dense
 .kalq-mag-page.is-tech {
-    --grid: rgba(128, 128, 128, 0.12);
-    background: color-mix(in srgb, var(--kalq-bg, #fff) 88%, var(--kalq-text, #101010) 12%);
+    --grid: rgba(128, 128, 128, 0.09);
+    background: color-mix(in srgb, var(--kalq-bg, #fff) 95.5%, var(--kalq-text, #101010) 4.5%);
     background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
     background-size: 24px 24px;
     font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
@@ -288,7 +306,7 @@
 .bk-mast {
     position: absolute;
     top: 1.35rem;
-    left: var(--side);
+    left: var(--outer); // lined up with the page number below
     right: var(--side);
     z-index: 3;
     display: flex;
@@ -304,7 +322,22 @@
     svg { flex-shrink: 0; width: 14px; height: 14px; stroke: currentColor; }
 }
 
-.bk-mast__label { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.bk-mast__chapter { flex-shrink: 0; }
+.bk-mast__sub { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; opacity: 0.75; }
+.bk-mast__sub::before { content: "/"; margin-right: 0.55rem; opacity: 0.6; }
+
+// The logo draws itself once, quietly, when its page has settled (none under reduced motion: it is simply there)
+.bk-mast.is-drawing {
+    svg * { stroke-dasharray: 1; animation: bk-mast-draw 0.9s cubic-bezier(0.45, 0, 0.25, 1) both; }
+    svg *:nth-child(2) { animation-delay: 0.06s; }
+    svg *:nth-child(3) { animation-delay: 0.12s; }
+    svg *:nth-child(4) { animation-delay: 0.18s; }
+    svg *:nth-child(n + 5) { animation-delay: 0.24s; }
+    .bk-mast__chapter, .bk-mast__sub { animation: bk-mast-fade 0.6s ease 0.35s both; }
+}
+
+@keyframes bk-mast-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes bk-mast-fade { from { opacity: 0; } }
 
 // The controls: bottom left of a right page, in the header's own design (its light/dark switch and language
 // switch are copies of the header's); discreet. Part of the page, so they turn with it.
@@ -339,6 +372,20 @@
     &.is-text { padding: 0.35rem 0; font-family: inherit; font-size: 0.78rem; font-weight: 500; line-height: 1; letter-spacing: 0.06em; text-transform: uppercase; }
     &:focus-visible { outline: 1px solid currentColor; outline-offset: 2px; border-radius: 4px; }
 }
+
+// The live set: one, over the copy on the settled page (js/magazine.js settle()); the copies are pictures only
+.bk-controls.is-live {
+    position: fixed;
+    bottom: auto;
+    z-index: 6;
+    color: var(--kalq-text, #101010);
+    font-family: "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+
+    &.is-light { color: #fff; }
+    &[hidden] { display: none; }
+}
+
+.kalq-mag-page > .bk-controls { pointer-events: none; }
 
 .kalq-mag-page.is-media, .kalq-mag-page:has(.bk-over) {
     .bk-mast, .bk-controls { color: #fff; opacity: 1; }
@@ -377,6 +424,22 @@
     a:hover .bk-cover__line { text-decoration: underline; text-underline-offset: 3px; }
     a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
     .bk-eyebrow { opacity: 0.8; }
+}
+
+.bk-cover__exit {
+    position: absolute;
+    top: 1.1rem;
+    right: var(--outer);
+    padding: 0.4rem 0;
+    border: 0;
+    background: none;
+    color: #fff;
+    font: inherit;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
 }
 
 .bk-cover__line { max-width: 24ch; font-size: clamp(1rem, 2.2vmin, 1.25rem); line-height: 1.3; }

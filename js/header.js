@@ -1,7 +1,7 @@
 // Global header: logo collapse on scroll, language switcher, four dot menu.
 // The header lives outside the Barba container, so it is initialised once and refreshed after each page transition.
 
-import { applyLanguage, t } from "./i18n.js";
+import { applyLanguage, currentLang, t } from "./i18n.js";
 
 const LANG_KEY = "kalq-lang";
 let header, updateCompact = () => { }, setCurrentPage = () => { };
@@ -51,7 +51,11 @@ let chooseLanguage = null;
 // Switch language from elsewhere (the magazine's own control): the same as picking it here, remembered
 export const setLanguage = (code) => chooseLanguage?.(code);
 
-function initLangSwitcher(root) {
+// Another copy of the switcher (the magazine draws its own): the same look and behaviour; picking calls pick(code).
+// signal: an AbortSignal that detaches its listeners when the copy goes away.
+export const bindLangSwitcher = (root, { pick, signal } = {}) => initLangSwitcher(root, { pick, signal });
+
+function initLangSwitcher(root, { pick = null, signal } = {}) {
     if (!root) return;
     const items = [...root.querySelectorAll("[data-lang]")];
     let lastPointer = "mouse";
@@ -68,23 +72,27 @@ function initLangSwitcher(root) {
         item.classList.toggle("is-dimmed", item.classList.contains("is-active") && !!target && target !== item);
     });
 
+    const mark = (code) => items.forEach(item => {
+        const active = item.dataset.lang === code;
+        item.classList.toggle("is-active", active);
+        item.setAttribute("aria-pressed", active);
+    });
     const setActive = (code, persist) => {
-        items.forEach(item => {
-            const active = item.dataset.lang === code;
-            item.classList.toggle("is-active", active);
-            item.setAttribute("aria-pressed", active);
-        });
+        mark(code);
+        if (pick) return pick(code);
         applyLanguage(code);
         if (persist) {
             try { localStorage.setItem(LANG_KEY, code); } catch (e) { }
         }
     };
 
-    chooseLanguage = (code) => setActive(code, true);
-
-    let stored = null;
-    try { stored = localStorage.getItem(LANG_KEY); } catch (e) { }
-    setActive(items.some(i => i.dataset.lang === stored) ? stored : "de", false); // German by default
+    if (pick) mark(currentLang()); // a copy shows the language in use and applies nothing by itself
+    else {
+        chooseLanguage = (code) => setActive(code, true);
+        let stored = null;
+        try { stored = localStorage.getItem(LANG_KEY); } catch (e) { }
+        setActive(items.some(i => i.dataset.lang === stored) ? stored : "de", false); // German by default
+    }
 
     root.addEventListener("pointerdown", e => { lastPointer = e.pointerType; });
     root.addEventListener("pointerenter", e => { if (e.pointerType === "mouse") open(); });
@@ -112,8 +120,8 @@ function initLangSwitcher(root) {
     });
 
     root.addEventListener("focusout", e => { if (!root.contains(e.relatedTarget)) close(); });
-    document.addEventListener("pointerdown", e => { if (!root.contains(e.target)) close(); });
-    document.addEventListener("keydown", e => { if (e.key === "Escape") close(); });
+    document.addEventListener("pointerdown", e => { if (!root.contains(e.target)) close(); }, { signal });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") close(); }, { signal });
 }
 
 //=================================== Menu ===================================//

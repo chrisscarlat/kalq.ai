@@ -61,7 +61,7 @@
     inset: 0;
     display: flex;
     flex-direction: column;
-    padding: var(--kalq-mag-top, 3rem) var(--side) var(--foot);
+    padding: var(--kalq-mag-top, 3.8rem) var(--side) var(--foot); // the masthead above, the page number and controls below
 }
 
 // Text sits at the foot of its page; longer text sets in two columns, then carries on over the next spread
@@ -178,7 +178,10 @@
 
 // E: a card, its picture above and its text at the foot
 .bk-card .bk-in { gap: 1.2rem; }
-.bk-card__media { flex: 1 1 auto; min-height: 38%; border-radius: 6px; } // the picture takes the room the text leaves
+// the card's picture bleeds to the page's top and sides; its text sits below it, at the foot
+.bk-card .bk-card__media { position: absolute; inset: 0 0 auto; height: 54%; }
+.bk-card .bk-in { padding-top: calc(var(--bk-h, 700px) * 0.54 + 1.4rem); }
+.kalq-mag-page.bk-card .bk-mast { color: #fff; }
 .bk-card .bk-flow { gap: 0.7rem; }
 
 // F: questions as tabs, the answer facing them
@@ -280,6 +283,70 @@
 .kalq-mag-page[data-side="right"] .bk-folio { right: var(--outer); }
 .kalq-mag-page.is-media .bk-folio, .kalq-mag-page:has(.bk-over) .bk-folio { color: #fff; opacity: 0.85; }
 
+// Masthead: top left of a left page, the logo symbol and the section's name; small and quiet. Part of the page, so
+// it turns with it.
+.bk-mast {
+    position: absolute;
+    top: 1.35rem;
+    left: var(--side);
+    right: var(--side);
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    pointer-events: none;
+
+    svg { flex-shrink: 0; width: 14px; height: 14px; stroke: currentColor; }
+}
+
+.bk-mast__label { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+// The controls: bottom left of a right page, in the header's own design (its light/dark switch and language
+// switch are copies of the header's); discreet. Part of the page, so they turn with it.
+.bk-controls {
+    position: absolute;
+    left: var(--side);
+    bottom: 0.55rem;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: currentColor;
+
+    // the same plain buttons as in the header
+    button { appearance: none; margin: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
+    .lang { font-size: 0.78rem; letter-spacing: 0.06em; }
+    .mode-toggle svg { width: 18px; height: 18px; }
+}
+
+.bk-control {
+    display: grid;
+    place-items: center;
+    min-width: 30px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+
+    svg { width: 19px; height: 19px; }
+    &.is-text { padding: 0.35rem 0; font-family: inherit; font-size: 0.78rem; font-weight: 500; line-height: 1; letter-spacing: 0.06em; text-transform: uppercase; }
+    &:focus-visible { outline: 1px solid currentColor; outline-offset: 2px; border-radius: 4px; }
+}
+
+.kalq-mag-page.is-media, .kalq-mag-page:has(.bk-over) {
+    .bk-mast, .bk-controls { color: #fff; opacity: 1; }
+    .bk-mast { opacity: 0.9; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35); }
+    .bk-mast svg { filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35)); }
+}
+.kalq-mag-page.bk-card .bk-mast { text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35); }
+
 // Covers: hard pages on the hero's video. Front: the brand mark and the way in. Back: brand, contacts, closing line.
 .kalq-mag-page.is-cover {
     background: var(--kalq-dark, #101010);
@@ -291,9 +358,29 @@
 
 .bk-cover__shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.55)); }
 
-.bk-cover__mark { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3rem; width: 100%; }
-.bk-cover__title { margin: 0; width: min(78%, 24rem); }
+// Front cover: the title along the top, cover lines along the foot, the way in at the bottom right
+.kalq-mag-page.is-front-cover .bk-in { justify-content: space-between; align-items: stretch; text-align: left; padding-top: 2.2rem; }
+.bk-cover__title { position: relative; margin: 0; }
 .kalq-mag-page.is-cover .bk-cover__title svg { display: block; width: 100%; height: auto; fill: currentColor; }
+
+.bk-cover__foot { position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; }
+
+.bk-cover__lines {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    a { display: flex; flex-direction: column; gap: 0.25rem; color: inherit; text-decoration: none; }
+    a:hover .bk-cover__line { text-decoration: underline; text-underline-offset: 3px; }
+    a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+    .bk-eyebrow { opacity: 0.8; }
+}
+
+.bk-cover__line { max-width: 24ch; font-size: clamp(1rem, 2.2vmin, 1.25rem); line-height: 1.3; }
+.bk-cover__foot .kalq-mag-cue { flex-shrink: 0; }
 
 .kalq-mag-page.is-back-cover .bk-in { justify-content: space-between; }
 .bk-back__name { position: relative; margin: 0; }
@@ -508,38 +595,6 @@
 
     &:hover { background: var(--kalq-text, #101010); color: var(--kalq-bg, #fff); }
     &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 3px; }
-}
-
-// The controls at the top left: Index (back to the contents), the way back to the web page, light or dark, the other
-// language. The header is under the book, so the book draws its own.
-.kalq-magazine__tools {
-    position: fixed;
-    top: 14px;
-    left: 14px;
-    z-index: 5;
-    display: flex;
-    gap: 6px;
-}
-
-.kalq-magazine__tool {
-    display: grid;
-    place-items: center;
-    min-width: 34px;
-    height: 34px;
-    padding: 0 0.8rem;
-    border: 0;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.86);
-    color: #101010;
-    box-shadow: 0 0 0 1px rgba(16, 16, 16, 0.12);
-    font: 500 0.78rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
-    cursor: pointer;
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
-
-    &.is-exit, &.is-theme { width: 34px; padding: 0; }
-    &:hover { background: #fff; }
-    &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 2px; }
 }
 
 // The header button that opens the book (tablets; two screens to reopen)

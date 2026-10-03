@@ -4,6 +4,7 @@
     "type": "module",
     "description": "Kalq website. Static pages plus Vercel middleware and functions, no build step.",
     "dependencies": {
-        "@vercel/functions": "3.9.9"
+        "@vercel/functions": "3.9.9",
+        "linkedom": "0.18.13"
     }
 }

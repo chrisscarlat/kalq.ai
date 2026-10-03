@@ -431,6 +431,7 @@ async function init() {
     import("./viewer.js").then((m) => m.initViewer(collab)).catch((e) => console.error("viewer", e));
     if (state.me.kind === "editor") {
         import("./edit.js").then((m) => m.initEditing(collab)).catch((e) => console.error("edit", e));
+        import("./sections.js").then((m) => m.initSections(collab)).catch((e) => console.error("sections", e));
         import("./invite.js").then((m) => m.initInvite(collab)).catch((e) => console.error("invite", e));
         if (state.me.is_admin) import("./styles.js").then((m) => m.initStyles(collab)).catch((e) => console.error("styles", e));
     }

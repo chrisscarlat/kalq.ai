@@ -3,8 +3,16 @@
         {
             "source": "/(.*)",
             "headers": [
-                { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+                {
+                    "key": "X-Robots-Tag",
+                    "value": "noindex, nofollow"
+                }
             ]
         }
-    ]
+    ],
+    "functions": {
+        "api/page.js": {
+            "includeFiles": "{index,platform,company,impressum,datenschutz}.html"
+        }
+    }
 }

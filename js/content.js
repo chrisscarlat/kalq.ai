@@ -3,6 +3,7 @@
 // Keyed blocks stay hidden (html.kalq-loading) until this ran, at most TIMEOUT_MS.
 import { applyLanguage, currentLang, setEditedContent } from "./i18n.js";
 import { renderBlock, sanitize } from "./blocks.js";
+import { applyLayout, layoutKey, parseLayout } from "./layout.js";
 
 const TIMEOUT_MS = 1500;
 const store = new Map(); // key -> { type, de, en, media }
@@ -102,6 +103,32 @@ export function applyDirect(root) {
     });
 }
 
+// The current page's container (during a Barba transition the new one is the last)
+const currentContainer = () => { const all = document.querySelectorAll('[data-barba="container"]'); return all[all.length - 1] || null; };
+
+// Arrange the page's sections by the stored layout (the server already did for the first view; this follows edits,
+// restores, previews and other people's changes). Editors' pages carry the built-in section store.
+export function applyStoredLayout(container = currentContainer()) {
+    const page = container?.dataset.page;
+    if (!page) return null;
+    const before = [...container.querySelectorAll(":scope > section[data-section]")].map((s) => s.dataset.section + (s.dataset.sectionState || "")).join();
+    const layout = applyLayout({ doc: document, container, page, stored: parseLayout(store.get(layoutKey(page))?.media),
+        editor: !!container.querySelector(":scope > template.kalq-sections") });
+    const after = [...container.querySelectorAll(":scope > section[data-section]")].map((s) => s.dataset.section + (s.dataset.sectionState || "")).join();
+    if (before !== after) document.dispatchEvent(new CustomEvent("kalq:layout", { detail: { page, layout } }));
+    return layout;
+}
+
+// Content and layout of the page, as stored (for the page builder)
+export const storedEntry = (key) => store.get(key) || null;
+export const storedKeys = () => [...store.keys()];
+
+const applyAll = () => {
+    applyStoredLayout();
+    applyLanguage();
+    applyDirect(document);
+};
+
 // Keep a saved edit locally, so switching language or re-applying keeps it
 export function setLocalContent(key, lang, content, type = "text") {
     const entry = store.get(key) || { type };
@@ -134,8 +161,7 @@ export function enterPreview(blocks) {
     store.clear();
     saved.forEach((entry, key) => store.set(key, { ...entry }));
     blocks.forEach(({ key, lang, content, type }) => setLocalContent(key, lang, content, type));
-    applyLanguage();
-    applyDirect(document);
+    applyAll();
 }
 
 export async function exitPreview() {
@@ -155,8 +181,7 @@ export async function refreshContent(keys = [], color) {
     if (!res?.ok) { res?.body?.cancel(); return; }
     const { blocks = [] } = await res.json();
     blocks.forEach(({ key, lang, content, type }) => setLocalContent(key, lang, content, type));
-    applyLanguage();
-    applyDirect(document);
+    applyAll();
     flash(keys, color);
 }
 
@@ -176,6 +201,7 @@ export async function loadPageContent(container = document.querySelector('[data-
         }
         const { blocks = [] } = await res.json();
         blocks.forEach(({ key, lang, content, type }) => setLocalContent(key, lang, content, type));
+        applyStoredLayout(container);
         applyLanguage();
         applyDirect(document);
     } catch (error) {

@@ -302,9 +302,20 @@ def assign_keys(html, page):
     html = re.sub(r'<(\w+)[^>]*\sdata-i18n="([^"]+)"[^>]*>', add, html)
     return html.replace('data-i18n-marquee="social.marquee">', 'data-i18n-marquee="social.marquee" data-kalq-key="site.social.marquee">')
 
+def section_ids(html):
+    """Every top-level section gets a stable id (its first class), the unit the page builder moves, copies and removes"""
+    seen = set()
+    def add(m):
+        sid = re.sub(r"[^a-z0-9]+", "-", m.group(2).split()[0].lower()).strip("-")
+        assert sid not in seen, f"two sections called {sid}"
+        seen.add(sid)
+        return f'{m.group(1)} data-section="{sid}" data-section-builtin'
+    return re.sub(r'(<section class="([^"]+)")', add, html)
+
+
 def write(name, html):
     page = name[:-5] if name != "index.html" else "home"
-    html = assign_keys(tag(html), page).replace('data-barba="container">', f'data-barba="container" data-page="{page}">', 1)
+    html = section_ids(assign_keys(tag(html), page)).replace('data-barba="container">', f'data-barba="container" data-page="{page}">', 1)
     html = localize(html, page)
     open(f"{ROOT}/{name}", "w", encoding="utf-8").write(html)
 

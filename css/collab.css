@@ -1924,3 +1924,86 @@
 .kalq-styles__option {
   margin: 0.4rem 0 0.6rem;
 }
+
+/* Page builder: section controls in edit mode (js/sections.js), drafts marked for editors */
+body.kalq-edit section[data-section] {
+  position: relative;
+}
+
+.kalq-section-tools {
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(16, 16, 16, 0.88);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font: 500 0.75rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  opacity: 0.35;
+  transition: opacity 0.2s ease;
+}
+
+section[data-section]:hover > .kalq-section-tools,
+.kalq-section-tools:focus-within {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .kalq-section-tools {
+    opacity: 1;
+  }
+}
+.kalq-section-tools__name {
+  padding: 0 0.6rem 0 0.5rem;
+  white-space: nowrap;
+}
+
+.kalq-section-tools__btn {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 0.55rem;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.kalq-section-tools__btn:hover:not(:disabled), .kalq-section-tools__btn:focus-visible {
+  background: rgba(255, 255, 255, 0.14);
+  outline: none;
+}
+.kalq-section-tools__btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.kalq-section-tools__btn.is-remove:hover {
+  color: #ff8080;
+}
+.kalq-section-tools__btn.is-publish {
+  background: #10B981;
+  color: #fff;
+  font-weight: 600;
+}
+
+.kalq-section-tools__draft {
+  padding: 0 0.5rem;
+  color: #FFB400;
+  font-weight: 600;
+}
+
+section[data-section-state=draft] {
+  outline: 2px dashed #FFB400;
+  outline-offset: -2px;
+}

@@ -4,20 +4,23 @@
 //   no format:                     plain inline text (br, em, strong, a)
 
 // Only <br>, <em>, <strong>, <a href> (and <p> in paragraph blocks) survive, everything else is unwrapped.
-// A <template> parses inertly, so nothing in the input runs or loads.
+// A <template> parses inertly, so nothing in the input runs or loads. Works on any document: the browser's, or the
+// server's when api/page.js renders the page (no global document there).
 const ALLOWED = new Set(["BR", "EM", "STRONG", "A", "P"]);
 const SAFE_HREF = /^(https?:|mailto:|\/|#|[\w-]+\.html(#.*)?$)/i;
 
-export function sanitize(html) {
-    const template = document.createElement("template");
+const TEXT_NODE = 3, ELEMENT_NODE = 1;
+
+export function sanitize(html, doc = document) {
+    const template = doc.createElement("template");
     template.innerHTML = html;
-    const out = document.createDocumentFragment();
-    const walk = (node, parent) => node.childNodes.forEach((child) => {
-        if (child.nodeType === Node.TEXT_NODE) return parent.append(child.textContent);
-        if (child.nodeType !== Node.ELEMENT_NODE) return;
-        if (!ALLOWED.has(child.tagName)) return walk(child, parent);
-        const el = document.createElement(child.tagName.toLowerCase());
-        if (child.tagName === "A") {
+    const out = doc.createDocumentFragment();
+    const walk = (node, parent) => [...node.childNodes].forEach((child) => {
+        if (child.nodeType === TEXT_NODE) return parent.append(child.textContent);
+        if (child.nodeType !== ELEMENT_NODE) return;
+        if (!ALLOWED.has(child.tagName.toUpperCase())) return walk(child, parent);
+        const el = doc.createElement(child.tagName.toLowerCase());
+        if (child.tagName.toUpperCase() === "A") {
             const href = (child.getAttribute("href") || "").trim();
             if (SAFE_HREF.test(href)) el.setAttribute("href", href);
         }
@@ -38,8 +41,8 @@ export function textToHtml(text, format) {
     return text.split("\n").map(escapeHtml).join("<br>");
 }
 
-const toString = (fragment) => {
-    const box = document.createElement("div");
+const toString = (fragment, doc = document) => {
+    const box = doc.createElement("div");
     box.append(fragment);
     return box.innerHTML;
 };
@@ -50,32 +53,33 @@ function splitLines(html) {
 }
 
 // Paragraphs: <p> elements; text without <p> becomes paragraphs at blank lines (two <br>)
-function paragraphs(html) {
-    const box = document.createElement("div");
-    box.append(sanitize(html));
-    const ps = [...box.children].filter((c) => c.tagName === "P");
+function paragraphs(html, doc = document) {
+    const box = doc.createElement("div");
+    box.append(sanitize(html, doc));
+    const ps = [...box.children].filter((c) => c.tagName.toUpperCase() === "P");
     if (ps.length) return ps.map((p) => p.innerHTML.trim()).filter(Boolean);
     return box.innerHTML.split(/(?:<br\s*\/?>\s*){2,}/i).map((p) => p.trim()).filter(Boolean);
 }
 
 export function renderBlock(el, html) {
-    const format = el.dataset.kalqFormat;
+    const doc = el.ownerDocument;
+    const format = el.getAttribute("data-kalq-format");
     if (format === "lines") {
-        const lines = splitLines(toString(sanitize(html.replace(/<\/?p>/gi, (t) => (t[1] === "/" ? "<br>" : "")))));
+        const lines = splitLines(toString(sanitize(html.replace(/<\/?p>/gi, (t) => (t[1] === "/" ? "<br>" : "")), doc), doc));
         el.replaceChildren(...lines.map((line) => {
-            const span = document.createElement("span");
+            const span = doc.createElement("span");
             span.className = "kalq-line";
-            span.append(sanitize(line));
+            span.append(sanitize(line, doc));
             return span;
         }));
     } else if (format === "paragraphs") {
-        el.replaceChildren(...paragraphs(html).map((p) => {
-            const node = document.createElement("p");
-            node.append(sanitize(p));
+        el.replaceChildren(...paragraphs(html, doc).map((p) => {
+            const node = doc.createElement("p");
+            node.append(sanitize(p, doc));
             return node;
         }));
     } else {
-        el.replaceChildren(sanitize(html.replace(/<\/?p>/gi, "")));
+        el.replaceChildren(sanitize(html.replace(/<\/?p>/gi, ""), doc));
     }
 }
 

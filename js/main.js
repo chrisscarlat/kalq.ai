@@ -9,6 +9,7 @@ import { initVariants, refreshHeroMark } from "./variants.js";
 import { initHeroTone } from "./heroTone.js";
 import { initHeroReveal } from "./heroReveal.js";
 import { initModules } from "./moduleBehaviour.js";
+import { initMagazine } from "./magazine.js";
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -21,7 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     stayOnSamePage();
     // Counters, hover images and the video read their content, so they start after edited content is applied
     await loadPageContent();
-    [animateNumbering, expertiseHover, heroVideo, parallaxImg, animateLines, initModules].forEach(func => func());
+    [animateNumbering, expertiseHover, heroVideo, parallaxImg, animateLines, initModules, initMagazine].forEach(func => func());
     // The page builder changed the sections (an insert, a move, someone else's change): new modules start working,
     // the scroller and the scroll animations measure the page again
     document.addEventListener("kalq:layout", () => {
@@ -126,6 +127,7 @@ function barbaPageTransition() {
             initHeroTone,
             initHeroReveal,
             initModules,
+            initMagazine,
             parallaxImg,
             animateLines].forEach(func => func());
     }

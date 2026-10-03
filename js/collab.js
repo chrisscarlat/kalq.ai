@@ -367,6 +367,8 @@ document.addEventListener("keydown", (e) => {
 const PANELS = ".kalq-styles, .kalq-panel, .kalq-viewer, .kalq-thread, .kalq-picker";
 function initPanelScroll() {
     const guard = (e) => {
+        // The magazine handles its own pointer and touch input (pages follow the finger): leave it alone
+        if (e.target instanceof Element && e.target.closest(".kalq-magazine")) return;
         const inPanel = e.target instanceof Element && e.target.closest(PANELS);
         if (inPanel) { e.stopPropagation(); return; }
         if (document.documentElement.classList.contains("kalq-scroll-lock")) { e.stopPropagation(); e.preventDefault(); }

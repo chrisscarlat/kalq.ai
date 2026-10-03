@@ -1689,6 +1689,272 @@ footer #container .footer_bottom a {
     transition: none;
   }
 }
+/* Magazine mode (js/magazine.js, prototype). The book sits on the site's own background, in its type and colours:
+   no table, no paper texture. */
+.stf__parent {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  transform: translateZ(0);
+  touch-action: pan-y;
+}
+
+.sft__wrapper {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.stf__parent canvas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+}
+
+.stf__block {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  perspective: 2000px;
+}
+
+.stf__item {
+  display: none;
+  position: absolute;
+  transform-style: preserve-3d;
+}
+
+.stf__outerShadow, .stf__innerShadow, .stf__hardShadow, .stf__hardInnerShadow {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.kalq-magazine {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  background: var(--kalq-bg, #fff);
+  color: var(--kalq-text, #101010);
+}
+
+.kalq-magazine__measure {
+  position: absolute;
+  left: -10000px;
+  top: 0;
+  visibility: hidden;
+}
+
+.kalq-magazine__book {
+  position: relative;
+}
+
+.kalq-mag-page {
+  --spine: calc(var(--kalq-mag-hinge, 0px) / 2 + 1.75rem);
+  position: relative;
+  overflow: hidden;
+  background: var(--kalq-bg, #fff);
+  color: var(--kalq-text, #101010);
+  box-shadow: inset 0 0 0 1px var(--kalq-line, rgba(0, 0, 0, 0.08));
+}
+.kalq-mag-page:focus {
+  outline: none;
+}
+.kalq-mag-page:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: -2px;
+}
+
+.kalq-mag-page__body {
+  height: 100%;
+  overflow: hidden;
+  padding: 3rem var(--spine) 6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.kalq-mag-page__body > * {
+  flex-shrink: 0;
+  max-width: 100%;
+  margin: 0;
+}
+.kalq-mag-page__body h1, .kalq-mag-page__body h2 {
+  font-size: clamp(1.9rem, 4.2vmin, 2.8rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+}
+.kalq-mag-page__body h3, .kalq-mag-page__body h4 {
+  font-size: clamp(1.3rem, 2.6vmin, 1.7rem);
+  line-height: 1.2;
+  font-weight: 400;
+}
+.kalq-mag-page__body h5 {
+  font-size: clamp(1.1rem, 2.2vmin, 1.4rem);
+  line-height: 1.35;
+  font-weight: 300;
+}
+.kalq-mag-page__body p, .kalq-mag-page__body li {
+  font-size: 1rem;
+  line-height: 1.55;
+}
+.kalq-mag-page__body ul, .kalq-mag-page__body ol {
+  padding-left: 1.2rem;
+}
+.kalq-mag-page__body img, .kalq-mag-page__body video {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 46vh;
+  object-fit: cover;
+  border-radius: 14px;
+}
+.kalq-mag-page__body a {
+  color: inherit;
+}
+.kalq-mag-page__body .kalq-line {
+  display: block;
+}
+.kalq-mag-page__body .kalq-m-button, .kalq-mag-page__body a.btn {
+  align-self: flex-start;
+  padding: 0.8rem 1.3rem;
+  border-radius: 999px;
+  background: var(--kalq-text, #101010);
+  color: var(--kalq-bg, #fff);
+  mix-blend-mode: normal;
+  text-decoration: none;
+}
+.kalq-mag-page__body .kalq-m-faq__item {
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--kalq-line, #d9d9d9);
+}
+.kalq-mag-page__body .kalq-m-faq__title {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.kalq-mag-page.is-scroll .kalq-mag-page__body {
+  overflow-y: auto;
+}
+
+.kalq-mag-page.is-cover {
+  display: grid;
+  place-items: center;
+  background: var(--kalq-dark, #101010);
+  color: var(--kalq-light, #fff);
+}
+.kalq-mag-page.is-cover > video, .kalq-mag-page.is-cover > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.kalq-mag-page.is-cover svg {
+  width: 60%;
+  height: auto;
+  fill: currentColor;
+}
+
+.kalq-mag-cover__shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.55));
+}
+
+.kalq-mag-cover__text {
+  position: relative;
+  padding: 0 var(--spine);
+  text-align: center;
+}
+.kalq-mag-cover__text svg {
+  width: min(100%, 26rem);
+}
+.kalq-mag-cover__text p {
+  margin-top: 1.25rem;
+  font-size: 1.15rem;
+  line-height: 1.45;
+}
+.kalq-mag-cover__text .kalq-line {
+  display: block;
+}
+
+.kalq-magazine__bar {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem;
+  border-radius: 999px;
+  background: rgba(16, 16, 16, 0.82);
+  color: #fff;
+  font: 500 0.8rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.kalq-magazine.is-spanned .kalq-magazine__bar {
+  left: calc(var(--seg-l, 50vw) / 2);
+}
+
+.kalq-magazine__btn {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 0.9rem;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.kalq-magazine__btn span {
+  font-size: 0.8rem;
+}
+.kalq-magazine__btn:hover:not(:disabled), .kalq-magazine__btn:focus-visible {
+  background: rgba(255, 255, 255, 0.16);
+  outline: none;
+}
+.kalq-magazine__btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.kalq-magazine__status {
+  min-width: 7.5rem;
+  text-align: center;
+  opacity: 0.75;
+}
+
+.kalq-magazine-toggle {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.kalq-magazine-toggle:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kalq-magazine * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
 .title_heading {
   display: flex;
   justify-content: space-between;

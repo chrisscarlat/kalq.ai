@@ -204,7 +204,7 @@ function frontCover(cover, lines, { exit = false } = {}) {
     const cue = el("div", "kalq-mag-cue");
     cue.innerHTML = `<button type="button" class="kalq-mag-cue__btn" aria-label="${t("next")}" title="${t("next")}">`
         + '<svg class="kalq-mag-cue__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h13M13 6.5l5.5 5.5-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
-        + `<span class="kalq-mag-cue__hand" aria-hidden="true">${handSvg({ trail: false })}</span>`; // a tap: no trail
+        ;
     foot.append(list, cue);
     p.inner.append(title, foot);
     if (exit) {
@@ -237,7 +237,7 @@ function masthead(chapter, sub) {
 // picture, not reachable); one live set lies exactly over the copy of the settled page, so a tap always lands.
 // Cover and Index, once used, turn into a back arrow in the same place (back to the exact spread); on the cover the
 // live set then shows only that arrow and the way out of the book, at the spot where the reader tapped.
-const BACK_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
+const BACK_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"><path d="M9.5 14.5L5 10l4.5-4.5"/><path d="M5 10h9.5a4.5 4.5 0 0 1 0 9H11"/></svg>'; // return
 let controlId = 0;
 function controls({ live = false, signal } = {}) {
     const nav = el(live ? "nav" : "div", `bk-controls${live ? " is-live" : ""}`);
@@ -376,95 +376,105 @@ function shownBox(pages) {
     return { left: Math.min(...rects.map((r) => r.left)), right: Math.max(...rects.map((r) => r.right)), top: Math.min(...rects.map((r) => r.top)), bottom: Math.max(...rects.map((r) => r.bottom)) };
 }
 
-// The first time the second spread opens: the hand takes the lower outer corner, drags it across and lets it fall
-// back, once; then it is gone. The same hint stays as a line of text while the spread is open.
-function dragHint(overlay, pages, pageW, tip) {
+// The first time the second spread opens: the hand shows the turn on the real page (see demoTurn). The same hint
+// stays as a line of text while the spread is open.
+function dragHint(book, tip) {
     try { if (localStorage.getItem(DRAG_SEEN)) return; localStorage.setItem(DRAG_SEEN, "1"); } catch { /* no storage: show it this time */ }
     tip.textContent = t("drag");
     tip.hidden = false;
     if (reducedMotion.matches) return;
-    requestAnimationFrame(() => requestAnimationFrame(() => { if (overlay.isConnected) dragHand(overlay, pages, pageW); }));
+    requestAnimationFrame(() => requestAnimationFrame(() => demoTurn(book)));
 }
 
-function dragHand(overlay, pages, pageW, { dir = "rtl" } = {}) {
-    const box = shownBox(pages);
-    if (!box) return;
-    const ltr = dir === "ltr"; // a turn back, from left to right: the drawing mirrored, the trail on the other side
+// The hand turns the real page a little, then lets it fall back: it comes in with the finger bent, straightens and
+// taps just inside the lower outer corner (two circles), takes the corner and drags it to the left (the trail behind
+// it), lets go, and the page settles. On the cover the board bends like paper for the show (soft), and is a hard
+// cover again afterwards. A touch from the reader ends it at once. dir "ltr": a turn back, the drawing mirrored.
+let demo = null;
+function demoTurn({ flip, overlay, stage }, { soft = false, dir = "rtl" } = {}) {
+    if (reducedMotion.matches || !overlay.isConnected || flip.getState() !== "read") return;
+    demo?.stop();
+    const ltr = dir === "ltr", sx = ltr ? 1 : -1;
+    const r = flip.getRender().getRect(); // the book, in the engine's coordinates
+    const blockEl = stage.querySelector(".stf__block");
+    if (!blockEl) return;
+    const block = blockEl.getBoundingClientRect();
+    const corner = { x: ltr ? r.left + 3 : r.left + r.width - 3, y: r.top + r.height - 3 };
+    const client = (p) => ({ x: block.left + p.x, y: block.top + p.y });
+    const reach = r.pageWidth * 0.5; // not past the spine: the page falls back
     const hint = el("div", "kalq-mag-drag");
     hint.setAttribute("aria-hidden", "true");
-    hint.style.left = `${ltr ? box.left : box.right}px`;
-    hint.style.top = `${box.bottom}px`;
-    if (ltr) hint.classList.add("is-ltr");
-    // the fold: what the lifted corner reveals and the corner's back, drawn from where the corner has been pulled
-    hint.innerHTML = '<svg class="kalq-mag-drag__fold" aria-hidden="true"><polygon class="is-under"/><polygon class="is-flap"/></svg>'
-        + `<span class="kalq-mag-drag__hand">${handSvg({ mirror: ltr })}</span>`;
+    hint.innerHTML = `<span class="kalq-mag-drag__hand">${handSvg({ mirror: ltr })}</span>`;
+    Object.assign(hint.style, { left: "0px", top: "0px", zIndex: 8 }); // the hand works in screen coordinates, above the pages
     overlay.append(hint);
-    const [under, flap] = hint.querySelectorAll("polygon"), hand = hint.lastElementChild;
-    const size = Math.round(Math.min(pageW * 0.42, 220));
+    const hand = hint.firstElementChild;
     const hw = 84, hh = hw * HAND_BOX.h / HAND_BOX.w;
     const tipX = ltr ? hw * (1 - HAND_TIP.x) : hw * HAND_TIP.x, tipY = hh * HAND_TIP.y;
-    const sx = ltr ? 1 : -1; // inwards from the corner, along the bottom edge
-    const DURATION = 3800, DELAY = 300;
-    const timing = { duration: DURATION, delay: DELAY, easing: "linear", fill: "both" };
-    // Times, as shares of the hint: arrives (0–.16), the finger straightens and taps just inside the corner (.24),
-    // slides onto the corner and takes it (.30–.36), drags it across (.36–.62), holds (.74), lets go (.84); the corner
-    // falls back (.74–.9)
+    const page = flip.getPage?.(flip.getCurrentPageIndex());
+    if (page?.getElement?.()?.matches?.(".is-cover, .is-media")) hint.classList.add("is-light"); // white on a picture
+    const density = page?.getDensity?.();
+    if (soft && page && density !== "soft") { page.setDensity("soft"); page.setDrawingDensity("soft"); }
+    // times in ms: in (0–700), tap (900), onto the corner (900–1150), drag (1150–2350), hold, let go (2700), out
+    const T = { tap: 900, take: 1150, drag: 2350, go: 2700, out: 3100, end: 4200 };
     const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
     const k = (t, a, b) => ease(Math.min(1, Math.max(0, (t - a) / (b - a))));
-    const pulled = (t) => (t < 0.36 ? 0 : t < 0.62 ? size * k(t, 0.36, 0.62) : t < 0.74 ? size : size * (1 - k(t, 0.74, 0.9)));
-    // The corner C (0,0) pulled to P: the page folds along the line halfway between them, at right angles to CP,
-    // which meets the bottom edge at A and the outer edge at B; C A B shows the page beneath, the flap P A B lies over
-    // the page. The fingertip holds the flap a little in from its tip.
-    const fold = (d) => {
-        const P = { x: sx * d, y: -d * 0.35 };
-        if (d < 0.5) return { P, A: null, B: null, grip: { x: sx * 24, y: -24 } };
-        const A = { x: P.x / 2 + (P.y / 2) * (P.y / P.x), y: 0 }, B = { x: 0, y: P.y / 2 + (P.x / 2) * (P.x / P.y) };
-        const mid = { x: (A.x + B.x) / 2 - P.x, y: (A.y + B.y) / 2 - P.y }, len = Math.hypot(mid.x, mid.y) || 1;
-        const reach = Math.min(34, len * 0.45);
-        return { P, A, B, grip: { x: P.x + (mid.x / len) * reach, y: P.y + (mid.y / len) * reach } };
-    };
-    const tap = { x: sx * 58, y: -64 }; // the tap: inside the corner, so the hand stays on the page
     const lerp = (a, b, f) => ({ x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f });
-    const where = (t) => { // the fingertip and how visible the hand is
-        const f = fold(pulled(t));
-        if (t < 0.16) return { at: lerp({ x: tap.x - sx * 40, y: tap.y + 52 }, tap, k(t, 0, 0.16)), o: k(t, 0, 0.12) };
-        if (t < 0.3) return { at: tap, o: 1 };
-        if (t < 0.36) return { at: lerp(tap, fold(0).grip, k(t, 0.3, 0.36)), o: 1 };
-        if (t < 0.74) return { at: f.grip, o: 1 };
-        const g = fold(size).grip;
-        return { at: { x: g.x, y: g.y - 12 * k(t, 0.74, 0.84) }, o: 1 - k(t, 0.74, 0.84) };
-    };
+    const tap = { x: corner.x + sx * 58, y: corner.y - 64 }; // inside the corner: the hand stays on the page
+    const pull = (t) => { const f = k(t, T.take, T.drag); return { x: corner.x + sx * reach * f, y: corner.y - reach * 0.22 * f }; };
+    const grip = (p) => ({ x: p.x + sx * 26, y: p.y - 22 }); // the fingertip on the lifted corner, a little in from its tip
+    let held = false, last = corner;
     const started = performance.now();
+    const stop = () => {
+        if (!demo || demo.stop !== stop) return;
+        demo = null;
+        if (held) { held = false; flip.userStop(last); }
+        hint.remove();
+        const restore = () => { if (flip.getState() === "read") { if (soft && page && density) { page.setDensity(density); page.setDrawingDensity(density); } } else setTimeout(restore, 120); };
+        restore();
+    };
+    demo = { stop };
+    overlay.addEventListener("pointerdown", stop, { once: true, capture: true });
     const frame = (now) => {
-        if (!hint.isConnected) return;
-        const t = hint.dataset.at ? +hint.dataset.at : Math.min(1, Math.max(0, (now - started - DELAY) / DURATION)); // data-at holds a moment (tests)
-        const { at, o } = where(t);
-        hand.style.transform = `translate(${at.x - tipX}px, ${at.y - tipY}px)`;
+        if (!demo || demo.stop !== stop) return;
+        const t = now - started;
+        let at, o = 1;
+        if (t < 700) { at = lerp({ x: tap.x - sx * 40, y: tap.y + 52 }, tap, k(t, 0, 700)); o = k(t, 0, 500); }
+        else if (t < T.tap) at = tap;
+        else if (t < T.take) at = lerp(tap, grip(corner), k(t, T.tap, T.take));
+        else if (t < T.go) {
+            const p = pull(Math.min(t, T.drag));
+            if (!held) { held = true; flip.startUserTouch(corner); }
+            flip.userMove(p, true);
+            last = p;
+            at = grip(p);
+        } else {
+            if (held) { held = false; flip.userStop(last); } // lets go: the page falls back
+            const g = grip(last);
+            at = { x: g.x, y: g.y - 12 * k(t, T.go, T.out) };
+            o = 1 - k(t, T.go, T.out);
+        }
+        const c = client(at);
+        hand.style.transform = `translate(${c.x - tipX}px, ${c.y - tipY}px)`;
         hand.style.opacity = o;
-        const { P, A, B } = fold(pulled(t));
-        under.setAttribute("points", A ? `0,0 ${A.x},0 0,${B.y}` : "");
-        flap.setAttribute("points", A ? `${P.x},${P.y} ${A.x},0 0,${B.y}` : "");
-        if (t < 1 || hint.dataset.at) requestAnimationFrame(frame); else hint.remove();
+        if (t < T.end) requestAnimationFrame(frame); else stop();
     };
     hand.style.opacity = 0;
     requestAnimationFrame(frame);
-    const part = (sel) => hand.querySelector(sel);
-    // the finger bent a little on the way in (the hand tipped back at the wrist), then straight for the tap
-    part(".bk-hand__hand").animate([
-        { transform: "rotate(9deg)", offset: 0 }, { transform: "rotate(9deg)", offset: 0.14 },
-        { transform: "rotate(0deg)", offset: 0.22 }, { transform: "rotate(0deg)", offset: 1 },
+    const timing = { duration: T.end, fill: "both" };
+    const at = (ms) => ms / T.end;
+    hand.querySelector(".bk-hand__hand").animate([
+        { transform: "rotate(9deg)", offset: 0 }, { transform: "rotate(9deg)", offset: at(600) },
+        { transform: "rotate(0deg)", offset: at(850) }, { transform: "rotate(0deg)", offset: 1 },
     ], timing);
-    // the two circles at the tap
-    hand.querySelectorAll(".bk-hand__ring").forEach((r, n) => r.animate([
-        { opacity: 0, transform: "scale(.4)", offset: 0 }, { opacity: 0, transform: "scale(.4)", offset: 0.22 + n * 0.03 },
-        { opacity: 1, transform: "scale(.85)", offset: 0.26 + n * 0.03 }, { opacity: 0, transform: "scale(1.3)", offset: 0.4 + n * 0.03 },
+    hand.querySelectorAll(".bk-hand__ring").forEach((ring, n) => ring.animate([
+        { opacity: 0, transform: "scale(.4)", offset: 0 }, { opacity: 0, transform: "scale(.4)", offset: at(880 + n * 110) },
+        { opacity: 1, transform: "scale(.85)", offset: at(1020 + n * 110) }, { opacity: 0, transform: "scale(1.3)", offset: at(1500 + n * 110) },
         { opacity: 0, transform: "scale(1.3)", offset: 1 },
     ], timing));
-    // the trail grows behind the finger while it drags, then fades
-    part(".bk-hand__trail").animate([
-        { opacity: 1, transform: "scaleX(0)", offset: 0 }, { opacity: 1, transform: "scaleX(0)", offset: 0.36 },
-        { opacity: 1, transform: "scaleX(1)", offset: 0.62 }, { opacity: 1, transform: "scaleX(1)", offset: 0.74 },
-        { opacity: 0, transform: "scaleX(1)", offset: 0.84 }, { opacity: 0, transform: "scaleX(1)", offset: 1 },
+    hand.querySelector(".bk-hand__trail").animate([
+        { opacity: 1, transform: "scaleX(0)", offset: 0 }, { opacity: 1, transform: "scaleX(0)", offset: at(T.take) },
+        { opacity: 1, transform: "scaleX(1)", offset: at(T.drag) }, { opacity: 1, transform: "scaleX(1)", offset: at(T.go) },
+        { opacity: 0, transform: "scaleX(1)", offset: at(T.out) }, { opacity: 0, transform: "scaleX(1)", offset: 1 },
     ], timing);
 }
 
@@ -633,6 +643,7 @@ async function build({ auto = false, at = null } = {}) {
     flip.loadFromHTML(pages);
     holdWhereGrabbed(flip, pageW);
     stage.kalqFlip = flip; // the engine, for tests and the console
+    stage.kalqDemo = (options) => demoTurn({ flip, overlay, stage }, options); // the hand's demonstration, likewise
     let navigating = false; // a turn the book makes for the reader (Index, Cover, a link), not one they make themselves
     const goTo = (i) => {
         if (i === flip.getCurrentPageIndex()) return;
@@ -686,7 +697,8 @@ async function build({ auto = false, at = null } = {}) {
     }
     const cue = pages[0].querySelector(".kalq-mag-cue");
     cue.querySelector("button").addEventListener("click", () => flip.flipNext());
-    cue.classList.add("is-play"); // the tap hint, once on arrival (CSS; none under reduced motion)
+    cue.classList.add("is-play"); // the button trembles once on arrival (CSS; none under reduced motion)
+    if (start === 0) setTimeout(() => { if (flip.getCurrentPageIndex() === 0) demoTurn({ flip, overlay, stage }, { soft: true }); }, 1600);
 
     // Past the back cover: the book closes to the normal background
     const finish = () => {
@@ -793,7 +805,7 @@ async function build({ auto = false, at = null } = {}) {
         else if (back && !atTarget()) back = null;
         update();
         requestAnimationFrame(() => requestAnimationFrame(update)); // again once the engine has drawn the new pages (an instant turn reports first)
-        if (flip.getCurrentPageIndex() === 1) dragHint(overlay, pages, pageW, tip);
+        if (flip.getCurrentPageIndex() === 1) dragHint({ flip, overlay, stage }, tip);
         overlay.querySelector(".kalq-mag-page:not([inert]) :is(h1, h2, h3, p)")?.closest(".kalq-mag-page")?.focus?.({ preventScroll: true });
     });
     flip.on("changeState", update);
@@ -875,6 +887,7 @@ function leaveForWeb() {
 export function closeMagazine(byUser = false, { keepFocus = false } = {}) {
     if (!book) return;
     if (byUser) closedByUser = true;
+    demo?.stop();
     window.removeEventListener("keydown", book.onKey, true);
     window.removeEventListener("touchmove", book.onTouch, { capture: true });
     window.removeEventListener("touchend", book.onTouch, { capture: true });

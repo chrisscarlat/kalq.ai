@@ -2126,7 +2126,7 @@ footer #container .footer_bottom a {
 }
 
 .kalq-mag-page.bk-contents {
-  background: color-mix(in srgb, var(--kalq-bg, #fff) 97%, var(--kalq-text, #101010) 3%);
+  background: color-mix(in srgb, var(--kalq-bg, #fff) 94%, var(--kalq-text, #101010) 6%);
 }
 .kalq-mag-page.bk-contents .bk-in {
   gap: 1.8rem;
@@ -2840,6 +2840,11 @@ footer #container .footer_bottom a {
 .kalq-mag-drag__hand svg {
   width: 84px;
   height: auto;
+}
+
+.kalq-mag-drag.is-light .kalq-mag-drag__hand {
+  color: #fff;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.45));
 }
 
 .kalq-magazine__tip {

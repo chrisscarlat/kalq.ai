@@ -4,6 +4,7 @@
 import { applyLanguage, currentLang, setEditedContent } from "./i18n.js";
 import { renderBlock, sanitize } from "./blocks.js";
 import { applyLayout, layoutKey, parseLayout } from "./layout.js";
+import { renderModule } from "./modules/registry.js";
 
 const TIMEOUT_MS = 1500;
 const store = new Map(); // key -> { type, de, en, media }
@@ -27,7 +28,8 @@ const SKIP_ATTRS = new Set(["src", "autoplay", "muted", "loop", "playsinline", "
 function mediaNode(url, like) {
     const video = isVideoUrl(url);
     const node = document.createElement(video ? "video" : "img");
-    if (like) [...like.attributes].forEach((a) => { if (!SKIP_ATTRS.has(a.name)) node.setAttribute(a.name, a.value); });
+    if (like) [...like.attributes].forEach((a) => { if (!SKIP_ATTRS.has(a.name) && !a.name.startsWith("data-ph-")) node.setAttribute(a.name, a.value); });
+    node.classList.remove("kalq-ph", "kalq-ph-media"); // a filled placeholder is no longer one
     if (video) {
         node.muted = true;
         node.loop = true;
@@ -112,8 +114,10 @@ export function applyStoredLayout(container = currentContainer()) {
     const page = container?.dataset.page;
     if (!page) return null;
     const before = [...container.querySelectorAll(":scope > section[data-section]")].map((s) => s.dataset.section + (s.dataset.sectionState || "")).join();
-    const layout = applyLayout({ doc: document, container, page, stored: parseLayout(store.get(layoutKey(page))?.media),
-        editor: !!container.querySelector(":scope > template.kalq-sections") });
+    const editor = !!container.querySelector(":scope > template.kalq-sections");
+    const modules = (entry, doc) => renderModule(entry, { doc, page, store, lang: currentLang(), editor });
+    const layout = applyLayout({ doc: document, container, page, stored: parseLayout(store.get(layoutKey(page))?.media), editor,
+        renderModule: modules, fresh: !editor });
     const after = [...container.querySelectorAll(":scope > section[data-section]")].map((s) => s.dataset.section + (s.dataset.sectionState || "")).join();
     if (before !== after) document.dispatchEvent(new CustomEvent("kalq:layout", { detail: { page, layout } }));
     return layout;

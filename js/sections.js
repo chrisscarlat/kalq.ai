@@ -5,12 +5,14 @@
 import { applyStoredLayout, setLocalContent, storedEntry, storedKeys } from "./content.js";
 import { currentLang } from "./i18n.js";
 import { collectTemplates, copyKey, layoutKey, newSectionId, parseLayout, resolveLayout, sectionPrefix } from "./layout.js";
+import { MODULES, missingRequired } from "./modules/registry.js";
 
 const TEXT = {
     de: {
         up: "Nach oben", down: "Nach unten", duplicate: "Duplizieren", remove: "Entfernen", draft: "Entwurf",
         publish: "Veröffentlichen", toDraft: "Zum Entwurf", confirmRemove: "Diesen Abschnitt von der Seite nehmen? Er bleibt in den Versionen und lässt sich wiederherstellen.",
         failed: "Das hat nicht geklappt.", relogin: "Bitte melden Sie sich erneut an.", copy: "Kopie", section: "Abschnitt",
+        insert: "Modul hier einfügen", missing: (list) => `Erst ausfüllen: ${list}`,
         names: { header: "Hero", about: "Über Kalq", expertise: "Plattform-Liste", belief: "Haltung", social: "Social", "expertise-header": "Kopf",
             "expertise-header-img": "Bild", "expertise-container": "Karten", "about-header": "Kopf", "about-header-img": "Bild", "about-goals": "Ziele",
             "about-wedo": "Was wir tun", "about-awwards": "Logos", legal: "Text" },
@@ -19,6 +21,7 @@ const TEXT = {
         up: "Move up", down: "Move down", duplicate: "Duplicate", remove: "Remove", draft: "Draft",
         publish: "Publish", toDraft: "Back to draft", confirmRemove: "Take this section off the page? It stays in Versions and can be restored.",
         failed: "That did not work.", relogin: "Please log in again.", copy: "copy", section: "Section",
+        insert: "Insert a module here", missing: (list) => `Fill in first: ${list}`,
         names: { header: "Hero", about: "About Kalq", expertise: "Platform list", belief: "Belief", social: "Social", "expertise-header": "Header",
             "expertise-header-img": "Image", "expertise-container": "Cards", "about-header": "Header", "about-header-img": "Image", "about-goals": "Goals",
             "about-wedo": "What we do", "about-awwards": "Logos", legal: "Text" },
@@ -42,7 +45,10 @@ function sectionName(entry) {
     const names = t("names");
     if (entry.module === "legacy" && !entry.source) return names[entry.id] || entry.id;
     if (entry.module === "legacy") return `${names[entry.source] || entry.source} (${t("copy")})`;
-    return entry.module;
+    const def = MODULES[entry.module];
+    if (!def) return entry.module;
+    const lang = currentLang() === "en" ? "en" : "de";
+    return `${def.name[lang]} · ${def.versions[entry.version]?.name[lang] || entry.version}`;
 }
 
 async function editorSession() {
@@ -108,6 +114,14 @@ const setState = (id, state) => run(async () => {
     const layout = currentLayout();
     const entry = layout.sections.find((s) => s.id === id);
     if (!entry || entry.state === state) return;
+    // A section with required placeholders still empty cannot go live
+    if (state === "live") {
+        const missing = missingRequired(entry, pageName(), storedEntry);
+        if (missing.length) {
+            const lang = currentLang() === "en" ? "en" : "de";
+            return collab.toast(t("missing")(missing.map((l) => l[lang]).join(", ")), "error");
+        }
+    }
     entry.state = state;
     await write(layout, `Section ${state === "live" ? "published" : "to draft"}: ${sectionName(entry)}`);
 });
@@ -140,6 +154,28 @@ const duplicate = (id) => run(async () => {
     layout.sections.splice(i + 1, 0, copy);
     await write(layout, `Section duplicated: ${sectionName(entry)}`, extra);
 });
+
+// A new module from the picker, as a draft at that position, all slots placeholders
+export const insertModule = (index, module, version) => run(async () => {
+    if (!MODULES[module]?.versions[version]) return;
+    const layout = currentLayout();
+    const entry = { id: newSectionId(), module, version, state: "draft" };
+    layout.sections.splice(Math.max(0, Math.min(index, layout.sections.length)), 0, entry);
+    await write(layout, `Section inserted: ${sectionName(entry)}`);
+    // Show it: scroll the new section into view
+    const node = container().querySelector(`:scope > section[data-section="${entry.id}"]`);
+    if (node) {
+        const scroller = document.querySelector(".scrollbar-container");
+        const bar = scroller && window.Scrollbar ? Scrollbar.get(scroller) : null;
+        if (bar) bar.scrollIntoView(node, { offsetTop: 80 });
+        else node.scrollIntoView({ block: "start" });
+    }
+});
+
+async function openPicker(index) {
+    const { openPicker: open } = await import("./picker.js");
+    open({ onInsert: (module, version) => insertModule(index, module, version) });
+}
 
 //=================================== Controls ===================================//
 const icon = (d) => `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -188,15 +224,29 @@ function tools(entry, index, count) {
     return box;
 }
 
+// The plus button at the top edge of a section inserts before it; the last section also gets one at its bottom
+function plus(index, where) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = `kalq-insert is-${where}`;
+    b.title = t("insert");
+    b.setAttribute("aria-label", t("insert"));
+    b.innerHTML = '<span aria-hidden="true">+</span>';
+    b.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); openPicker(index); });
+    return b;
+}
+
 export function render() {
-    document.querySelectorAll(".kalq-section-tools").forEach((n) => n.remove());
+    document.querySelectorAll(".kalq-section-tools, .kalq-insert").forEach((n) => n.remove());
     if (!document.body.classList.contains("kalq-edit") || !container()) return;
     const layout = currentLayout();
     const sections = [...container().querySelectorAll(":scope > section[data-section]")];
-    sections.forEach((node) => {
+    sections.forEach((node, i) => {
         const index = layout.sections.findIndex((s) => s.id === node.dataset.section);
         if (index < 0) return;
         node.prepend(tools(layout.sections[index], index, layout.sections.length));
+        node.prepend(plus(index, "top"));
+        if (i === sections.length - 1) node.append(plus(index + 1, "bottom"));
     });
 }
 

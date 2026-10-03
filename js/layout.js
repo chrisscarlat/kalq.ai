@@ -68,7 +68,8 @@ export function resolveLayout(stored, templates) {
 
 // Arrange the container: sections in layout order, drafts only for editors, copies cloned from their source.
 // renderModule(entry, doc) returns an element for registry modules (or null). Returns the layout it applied.
-export function applyLayout({ doc, container, page, stored, editor = false, renderModule = () => null }) {
+// fresh: render registry modules again even if already on the page (visitors: a slot filled later must appear)
+export function applyLayout({ doc, container, page, stored, editor = false, renderModule = () => null, fresh = false }) {
     const templates = collectTemplates(container);
     const layout = resolveLayout(stored, templates);
     const current = new Map();
@@ -79,7 +80,7 @@ export function applyLayout({ doc, container, page, stored, editor = false, rend
         if (entry.state === "draft" && !editor) continue;
         let node = current.get(entry.id);
         // A section already on the page is reused unless it has to change kind (a module whose version changed)
-        if (node && entry.module !== "legacy" && node.getAttribute("data-module") !== `${entry.module}:${entry.version || ""}`) node = null;
+        if (node && entry.module !== "legacy" && (fresh || node.getAttribute("data-module") !== `${entry.module}:${entry.version || ""}`)) node = null;
         if (!node) {
             if (entry.module === "legacy" && !entry.source) node = templates.get(entry.id)?.cloneNode(true);
             else if (entry.module === "legacy") node = copySection(templates.get(entry.source), page, entry.id);

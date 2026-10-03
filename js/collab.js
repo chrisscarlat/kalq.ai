@@ -364,7 +364,7 @@ document.addEventListener("keydown", (e) => {
 // smooth-scrollbar takes every wheel and touch move on the document for the page. Over a panel the event is stopped
 // before it gets there, so the panel scrolls natively under the pointer. While html.kalq-scroll-lock is set (the
 // Styles panel is open) the page underneath does not move at all.
-const PANELS = ".kalq-styles, .kalq-panel, .kalq-viewer, .kalq-thread";
+const PANELS = ".kalq-styles, .kalq-panel, .kalq-viewer, .kalq-thread, .kalq-picker";
 function initPanelScroll() {
     const guard = (e) => {
         const inPanel = e.target instanceof Element && e.target.closest(PANELS);

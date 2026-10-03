@@ -1,0 +1,331 @@
+/* Page builder modules (js/modules/registry.js). Each module is a size container, so its layout follows the width it
+   actually has (the page, or a device frame in the picker preview), not the window. */
+.kalq-m {
+    container-type: inline-size;
+    padding: clamp(4.5rem, 9vw, 9rem) 0;
+    background: var(--kalq-bg, #{$light});
+    color: var(--kalq-text, #{$dark});
+}
+
+.kalq-m-inner {
+    width: 100%;
+    max-width: 1680px; // very large screens: content keeps a readable width
+    margin: 0 auto;
+    padding: 0 4rem;
+}
+
+.kalq-m-eyebrow {
+    margin-bottom: 1.1rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+
+.kalq-m .kalq-m-heading {
+    font-size: clamp(2.2rem, 5.2cqi, 4.4rem);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+}
+
+.kalq-m-text {
+    margin-top: 1.4rem;
+    max-width: 36rem;
+
+    p {
+        font-size: clamp(1.05rem, 1.4cqi, 1.25rem);
+        line-height: 1.6;
+        opacity: 0.85;
+
+        + p {
+            margin-top: 0.9rem;
+        }
+    }
+}
+
+.kalq-m-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.8rem;
+    margin-top: 2rem;
+}
+
+.kalq-m-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.95rem 1.6rem;
+    border-radius: 999px;
+    background: var(--kalq-text, #{$dark});
+    color: var(--kalq-bg, #{$light});
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+
+    &::after {
+        content: "→";
+        transition: transform 0.25s ease;
+    }
+
+    &:hover::after,
+    &:focus-visible::after {
+        transform: translateX(4px);
+    }
+
+    &:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 3px;
+    }
+
+    &.is-light {
+        background: var(--kalq-light, #{$light});
+        color: var(--kalq-dark, #{$dark});
+    }
+}
+
+.kalq-m-media {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    background: rgba(127, 127, 127, 0.12);
+
+    img,
+    video {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+/* Image and text side by side */
+.kalq-m-split .kalq-m-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: clamp(2.5rem, 6cqi, 7rem);
+}
+
+.kalq-m-split__media {
+    aspect-ratio: 4 / 5;
+}
+
+.kalq-m-split.is-text-left .kalq-m-split__media {
+    order: 2;
+}
+
+/* Central image or video */
+.kalq-m-center {
+    .kalq-m-heading {
+        max-width: 18ch;
+        margin: 0 auto 3rem;
+        text-align: center;
+    }
+
+    &.is-image .kalq-m-center__figure {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .kalq-m-center__media {
+        aspect-ratio: 16 / 9;
+    }
+
+    &.is-video .kalq-m-center__media {
+        aspect-ratio: 21 / 9;
+    }
+}
+
+.kalq-m-caption {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.95rem;
+    opacity: 0.6;
+}
+
+/* Call to action band */
+.kalq-m-cta {
+    background: var(--kalq-dark, #{$dark});
+    color: var(--kalq-light, #{$light});
+
+    &.is-centered .kalq-m-inner {
+        text-align: center;
+
+        .kalq-m-heading {
+            max-width: 20ch;
+            margin: 0 auto;
+            font-size: clamp(2.6rem, 7cqi, 6rem);
+        }
+
+        .kalq-m-text {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .kalq-m-actions {
+            justify-content: center;
+        }
+    }
+
+    &.is-split .kalq-m-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 3rem;
+
+        .kalq-m-actions {
+            margin-top: 0;
+            flex-shrink: 0;
+        }
+    }
+}
+
+/* Questions and answers */
+.kalq-m-faq {
+    .kalq-m-faq__list {
+        border-top: 1px solid var(--kalq-line, #{$grey2});
+    }
+
+    &.is-single {
+        .kalq-m-inner {
+            max-width: 980px;
+        }
+
+        .kalq-m-faq__head {
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+    }
+
+    &.is-split .kalq-m-inner {
+        display: grid;
+        grid-template-columns: 1fr 1.6fr;
+        gap: clamp(2.5rem, 6cqi, 6rem);
+        align-items: start;
+    }
+}
+
+.kalq-m-faq__item {
+    border-bottom: 1px solid var(--kalq-line, #{$grey2});
+}
+
+.kalq-m .kalq-m-faq__title {
+    margin: 0;
+    font-size: clamp(1.15rem, 1.8cqi, 1.45rem);
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: 0;
+}
+
+.kalq-m-faq__toggle,
+.kalq-m-faq__title > .kalq-m-faq__q {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
+    padding: 1.4rem 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+}
+
+.kalq-m-faq__toggle {
+    cursor: pointer;
+
+    &::after {
+        content: "";
+        flex-shrink: 0;
+        width: 14px;
+        height: 14px;
+        background:
+            linear-gradient(currentColor, currentColor) center / 100% 1.5px no-repeat,
+            linear-gradient(currentColor, currentColor) center / 1.5px 100% no-repeat;
+        transition: transform 0.3s ease;
+    }
+
+    &[aria-expanded="true"]::after {
+        transform: rotate(45deg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 4px;
+    }
+}
+
+.kalq-m-faq__a {
+    padding: 0 0 1.6rem;
+    max-width: 52rem;
+
+    p {
+        font-size: 1.05rem;
+        line-height: 1.6;
+        opacity: 0.8;
+
+        + p {
+            margin-top: 0.8rem;
+        }
+    }
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+/* Narrow containers: phones, folded foldables, small tablet columns */
+@container (max-width: 760px) {
+    .kalq-m-inner {
+        padding: 0 1.25rem;
+    }
+
+    .kalq-m-split .kalq-m-inner,
+    .kalq-m-faq.is-split .kalq-m-inner {
+        grid-template-columns: 1fr;
+    }
+
+    .kalq-m-split.is-text-left .kalq-m-split__media {
+        order: 0; // the picture first on narrow screens, whichever side it has on wide ones
+    }
+
+    .kalq-m-split__media {
+        aspect-ratio: 4 / 3;
+    }
+
+    .kalq-m-center.is-video .kalq-m-center__media {
+        aspect-ratio: 16 / 9;
+    }
+
+    .kalq-m-cta.is-split .kalq-m-inner {
+        flex-direction: column;
+        align-items: flex-start;
+
+        .kalq-m-actions {
+            margin-top: 0.5rem;
+        }
+    }
+
+    .kalq-m-media {
+        border-radius: 18px;
+    }
+}
+
+@container (min-width: 761px) and (max-width: 1100px) {
+    .kalq-m-inner {
+        padding: 0 2rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .kalq-m-button,
+    .kalq-m-button::after,
+    .kalq-m-faq__toggle::after {
+        transition: none;
+    }
+}

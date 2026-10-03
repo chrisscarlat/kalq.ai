@@ -15,8 +15,9 @@ const PUBLIC = [
     /^\/favicon\.ico$/,
     /^\/robots\.txt$/,
     /^\/css\/(gate|main|collab)\.css$/,
-    /^\/js\/(gate|logoAnimation|main|header|i18n|strings-public|content|blocks|layout|variants|collab|expertiseHoverimg|verticleLine|heroTone|heroReveal)\.js$/,
+    /^\/js\/(gate|logoAnimation|main|header|i18n|strings-public|content|blocks|layout|moduleBehaviour|variants|collab|expertiseHoverimg|verticleLine|heroTone|heroReveal)\.js$/,
     /^\/lib\/svg-sanitize\.js$/, // style variant logos are sanitised in the browser too
+    /^\/js\/modules\/registry\.js$/, // modules on the legal pages render in the browser too
 ];
 
 // Pages are rendered on the server (api/page.js) from the built HTML, the layout and the newest content

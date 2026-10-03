@@ -297,4 +297,5 @@ export async function initEditing(api) {
     collab.on("mode", (mode) => { if (mode !== "edit" && on) setMode(false); });
     collab.on("leave", () => stopEditing(true));
     collab.on("page", () => replaceButtons());
+    document.addEventListener("kalq:layout", () => replaceButtons()); // inserted or copied sections get their media buttons
 }

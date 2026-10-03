@@ -144,6 +144,23 @@
     bottom: 0.9rem;
   }
 }
+@media (horizontal-viewport-segments: 2) {
+  .kalq-toolbar {
+    left: calc(var(--seg-l, 50vw) / 2);
+    max-width: calc(var(--seg-l, 50vw) - 1rem);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .kalq-toast {
+    left: calc(var(--seg-l, 50vw) / 2);
+    max-width: calc(var(--seg-l, 50vw) - 2rem);
+  }
+}
+html.kalq-magazine-open .kalq-toolbar,
+html.kalq-magazine-open .kalq-switcher {
+  display: none;
+}
+
 .kalq-tools {
   display: flex;
   align-items: center;
@@ -2581,9 +2598,10 @@ body:not(.kalq-edit) .kalq-undo-btn {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: calc(50% - 14px);
-  width: 28px;
-  background: #0a0a0a;
+  left: var(--seg-l);
+  width: var(--seg-hinge);
+  background: repeating-linear-gradient(135deg, rgba(128, 128, 128, 0.42) 0 1px, transparent 1px 5px);
+  box-shadow: inset 1px 0 rgba(128, 128, 128, 0.5), inset -1px 0 rgba(128, 128, 128, 0.5);
   z-index: 2;
 }
 .kalq-device .kalq-ph:empty:not(.kalq-ph-media) {
@@ -2824,4 +2842,14 @@ body:not(.kalq-edit) .kalq-undo-btn {
 .kalq-picker__device.is-phone {
   border: 2px solid #2b2b2b;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+@media (horizontal-viewport-segments: 2) {
+  .kalq-section-tools,
+  .kalq-insert-zone {
+    left: calc(var(--seg-l, 50vw) / 2);
+  }
+  .kalq-section-tools {
+    max-width: calc(var(--seg-l, 50vw) - 1rem);
+  }
 }

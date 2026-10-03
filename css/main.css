@@ -1786,7 +1786,7 @@ footer #container .footer_bottom a {
 .kalq-mag-page__body {
   height: 100%;
   overflow: hidden;
-  padding: 3rem var(--spine) 6rem;
+  padding: var(--kalq-mag-top, 3rem) var(--spine) 6rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -1882,7 +1882,7 @@ footer #container .footer_bottom a {
 
 .kalq-mag-cover__text {
   position: relative;
-  padding: 0 var(--spine);
+  padding: var(--kalq-mag-top, 0px) var(--spine) 0;
   text-align: center;
 }
 .kalq-mag-cover__text svg {
@@ -2069,6 +2069,109 @@ footer #container .footer_bottom a {
   white-space: nowrap;
 }
 
+.kalq-mag-welcome {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  background: var(--kalq-bg, #fff);
+  color: var(--kalq-text, #101010);
+  box-shadow: inset 0 0 0 1px var(--kalq-line, rgba(0, 0, 0, 0.08));
+}
+.kalq-mag-welcome.is-front {
+  z-index: 40;
+}
+
+.kalq-mag-welcome__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.4rem;
+  width: 100%;
+  padding: 0 var(--spine-welcome, 2.5rem);
+  padding-right: calc(var(--kalq-mag-hinge, 0px) / 2 + 2.5rem);
+}
+
+.kalq-mag-welcome__drawing {
+  width: min(100%, 300px);
+  height: auto;
+  overflow: visible;
+}
+
+.kalq-mag-welcome__leaf {
+  transform-box: view-box;
+  transform-origin: 130px 91px;
+  animation: kalq-mag-leaf 4.8s ease-in-out infinite alternate;
+}
+
+@keyframes kalq-mag-leaf {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0.86);
+  }
+}
+.kalq-mag-welcome__text {
+  max-width: 30ch;
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+.kalq-mag-welcome__text strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 500;
+}
+
+.kalq-mag-welcome__web {
+  padding: 0.75rem 1.2rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.kalq-mag-welcome__web:hover {
+  background: var(--kalq-text, #101010);
+  color: var(--kalq-bg, #fff);
+}
+.kalq-mag-welcome__web:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 3px;
+}
+
+.kalq-magazine__exit {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.86);
+  color: #101010;
+  box-shadow: 0 0 0 1px rgba(16, 16, 16, 0.12);
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.kalq-magazine__exit:hover {
+  background: #fff;
+}
+.kalq-magazine__exit:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 2px;
+}
+
 .kalq-magazine__bar {
   position: fixed;
   left: 50%;
@@ -2078,7 +2181,8 @@ footer #container .footer_bottom a {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  min-height: 40px;
   border-radius: 999px;
   background: rgba(16, 16, 16, 0.82);
   color: #fff;
@@ -2091,33 +2195,8 @@ footer #container .footer_bottom a {
   left: calc(var(--seg-l, 50vw) / 2);
 }
 
-.kalq-magazine__btn {
-  min-width: 40px;
-  height: 40px;
-  padding: 0 0.9rem;
-  border: 0;
-  border-radius: 999px;
-  background: none;
-  color: inherit;
-  font: inherit;
-  font-size: 1.1rem;
-  cursor: pointer;
-}
-.kalq-magazine__btn span {
-  font-size: 0.8rem;
-  white-space: nowrap;
-}
-.kalq-magazine__btn:hover:not(:disabled), .kalq-magazine__btn:focus-visible {
-  background: rgba(255, 255, 255, 0.16);
-  outline: none;
-}
-.kalq-magazine__btn:disabled {
-  opacity: 0.3;
-  cursor: default;
-}
-
 .kalq-magazine__status {
-  min-width: 7.5rem;
+  min-width: 6.5rem;
   text-align: center;
   opacity: 0.75;
 }
@@ -3089,6 +3168,18 @@ footer #container .footer_bottom a {
   footer #container .footer_bottom {
     grid-column: 2;
     padding: 0 2rem;
+  }
+  html::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: var(--seg-l);
+    width: var(--seg-hinge);
+    z-index: 71;
+    pointer-events: none;
+    background: repeating-linear-gradient(135deg, rgba(128, 128, 128, 0.42) 0 1px, transparent 1px 5px);
+    box-shadow: inset 1px 0 rgba(128, 128, 128, 0.5), inset -1px 0 rgba(128, 128, 128, 0.5);
   }
 }
 .kalq-device.is-span-h .kalq-m {

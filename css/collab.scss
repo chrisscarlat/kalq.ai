@@ -158,6 +158,28 @@
     }
 }
 
+// Two screens: the toolbar keeps to the left screen, never across the hinge (scrolls sideways if it ever had to)
+@media (horizontal-viewport-segments: 2) {
+    .kalq-toolbar {
+        left: calc(var(--seg-l, 50vw) / 2);
+        max-width: calc(var(--seg-l, 50vw) - 1rem);
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .kalq-toast {
+        left: calc(var(--seg-l, 50vw) / 2);
+        max-width: calc(var(--seg-l, 50vw) - 2rem);
+    }
+
+}
+
+// The magazine is read-only: no editing tools while it is open
+html.kalq-magazine-open .kalq-toolbar,
+html.kalq-magazine-open .kalq-switcher {
+    display: none;
+}
+
 // Toolbar tools
 .kalq-tools {
     display: flex;
@@ -2765,15 +2787,16 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
     color: var(--kalq-text, #101010);
     font-family: var(--kalq-font-body, "Clash Grotesk", "Helvetica Neue", Arial, sans-serif);
 
-    // the hinge of a spanned dual screen
+    // the hinge of a spanned dual screen: the same hatched strip as on a real one (utilities/_dual.scss)
     &.is-span-h::after {
         content: "";
         position: absolute;
         top: 0;
         bottom: 0;
-        left: calc(50% - 14px);
-        width: 28px;
-        background: #0a0a0a;
+        left: var(--seg-l);
+        width: var(--seg-hinge);
+        background: repeating-linear-gradient(135deg, rgba(128, 128, 128, 0.42) 0 1px, transparent 1px 5px);
+        box-shadow: inset 1px 0 rgba(128, 128, 128, 0.5), inset -1px 0 rgba(128, 128, 128, 0.5);
         z-index: 2;
     }
 
@@ -3016,4 +3039,17 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
 .kalq-picker__device.is-phone {
     border: 2px solid #2b2b2b;
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+// Two screens: the section bars and the insert plus keep to the left screen as well, like the toolbar (after their
+// own rules, so these win)
+@media (horizontal-viewport-segments: 2) {
+    .kalq-section-tools,
+    .kalq-insert-zone {
+        left: calc(var(--seg-l, 50vw) / 2);
+    }
+
+    .kalq-section-tools {
+        max-width: calc(var(--seg-l, 50vw) - 1rem);
+    }
 }

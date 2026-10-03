@@ -2,12 +2,15 @@
 // js/vendor). An optional enhancement over the normal readable page: built from it on demand, so every word is still
 // in the page itself, without JavaScript too. Opens by itself on a device spanning two screens (the spine on the
 // hinge, one page per screen); on a plain tablet a button in the header opens it.
-//   hard front cover: the hero; pages: the sections' own headings, paragraphs, lists, pictures and buttons, in order,
-//   never split (an element taller than a page makes that page scroll inside); hard back cover: the wordmark.
+//   hard front cover: the hero, with a welcome page beside it (a drawing, a short text and the way back to the web
+//   page); pages: the sections' own headings, paragraphs, lists, pictures and buttons, in order, never split (an
+//   element taller than a page makes that page scroll inside), a heading never last on a page, a section's last item
+//   never alone on one; hard back cover: the wordmark.
 //   turn: on the front cover one "next page" button (a short tap hint plays on arrival); after it drag a page, tap a
 //   page's outer edge, or arrow keys, Page Up/Down, Home/End; the first time the second spread opens, a drawn hand
-//   drags a corner once (with the same hint as one line of text). Esc or the close button returns to the page at the
-//   same place. Reduced motion: pages change without the turning animation, and the hints are not animated.
+//   drags a corner once (with the same hint as one line of text). Esc, the welcome page's button or the icon where the
+//   header's book icon sits return to the web page (for the rest of the visit). Read-only: editing is on the web page.
+//   Reduced motion: pages change without the turning animation or its shadows, and the drawings do not move.
 import { currentLang } from "./i18n.js";
 
 const PAGES_ON = new Set(["home", "platform", "company"]);
@@ -16,19 +19,44 @@ const tablet = window.matchMedia("(pointer: coarse) and (min-width: 600px) and (
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 const TEXT = {
-    de: { open: "Als Magazin lesen", close: "Als Webseite lesen", next: "Nächste Seite", drag: "Seite ziehen zum Umblättern", book: "Magazin", page: (n, of) => `Seite ${n} von ${of}` },
-    en: { open: "Read as a magazine", close: "Read as a web page", next: "Next page", drag: "Drag a page to turn it", book: "Magazine", page: (n, of) => `Page ${n} of ${of}` },
+    de: {
+        open: "Als Magazin lesen", close: "Als normale Webseite lesen", next: "Nächste Seite", drag: "Seite ziehen zum Umblättern", book: "Magazin",
+        page: (n, of) => `Seite ${n} von ${of}`, welcome: "Willkommen",
+        detected: "Gerät mit zwei Bildschirmen erkannt.", intro: "Sie können diese Website als Magazin lesen. Ziehen Sie eine Seite mit dem Finger, um umzublättern.",
+    },
+    en: {
+        open: "Read as a magazine", close: "Read as a normal website", next: "Next page", drag: "Drag a page to turn it", book: "Magazine",
+        page: (n, of) => `Page ${n} of ${of}`, welcome: "Welcome",
+        detected: "Two-screen device detected.", intro: "You can read this website as a magazine. Drag a page with your finger to turn it.",
+    },
 };
 const t = (k) => TEXT[currentLang() === "en" ? "en" : "de"][k];
 
-// A small hand in the manner of a manual's drawings: white, outlined in black, the index finger pointing up (its tip
-// at 23,4 in the drawing). Decorative: the hints it shows are also real text or a labelled button.
-const HAND = '<svg viewBox="0 0 48 58" aria-hidden="true" focusable="false" fill="#fff" stroke="#111" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">'
-    + '<path d="M25 51.6V56h14v-4.4"/>'
+// One drafting style for every drawing in the book, like a manual's: fine black lines of one weight on white. The
+// hand: the index finger pointing up, its tip at 23,4 of 48×58. Decorative: what a drawing shows is also real text
+// or a labelled button.
+const HAND_PATHS = '<path d="M25 51.6V56h14v-4.4"/>'
     + '<path d="M19.5 33V7.5a3.5 3.5 0 0 1 7 0V23a3.2 3.2 0 0 1 6.4 0v2a3.1 3.1 0 0 1 6.2 0v2.5a2.9 2.9 0 0 1 5.8 0V37c0 9-4.9 15-13.9 15H27c-5 0-8-2.5-11-6.5l-6.5-9a3.2 3.2 0 0 1 5.1-3.9L19.5 37z"/>'
-    + '<path d="M26.5 23v6M32.9 25v5M39.1 27.5v4.5M21.4 7a1.6 1.6 0 0 1 3.2 0" fill="none"/></svg>';
+    + '<path d="M26.5 23v6M32.9 25v5M39.1 27.5v4.5M21.4 7a1.6 1.6 0 0 1 3.2 0" fill="none"/>';
+const LINE = 'fill="#fff" stroke="#111" stroke-width="1.1" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"';
+const HAND = `<svg viewBox="0 0 48 58" aria-hidden="true" focusable="false" ${LINE}>${HAND_PATHS}</svg>`;
+// The welcome page's drawing: an open book on its spine (a centre line), a leaf being turned by the same hand, the
+// path of the turn as a dashed arc. The leaf and the hand sway a little.
+const TURN_DRAWING = `<svg class="kalq-mag-welcome__drawing" viewBox="0 0 260 170" aria-hidden="true" focusable="false" ${LINE}>`
+    + '<path d="M130 16V160" fill="none" stroke-dasharray="8 3 1.5 3" opacity=".5"/>'
+    + '<path d="M130 36C108 28 74 26 40 32V142C74 136 108 138 130 146Z"/>'
+    + '<path d="M130 36C152 28 186 26 220 32V142C186 136 152 138 130 146Z"/>'
+    + '<path d="M54 52h58M54 61h52M54 70h56M54 79h40M54 96h58M54 105h48" fill="none" opacity=".35"/>'
+    + '<path d="M150 61h52M150 70h56M150 79h44" fill="none" opacity=".2"/>'
+    + '<path d="M204 12C176 0 118 -1 80 12" fill="none" stroke-dasharray="3 3"/><path d="M86 6l-6 6 8 2.5" fill="none"/>'
+    + '<g class="kalq-mag-welcome__leaf"><path d="M130 36C148 24 170 16 194 18C186 52 182 100 186 130C164 130 146 136 130 146Z"/>'
+    + '<path d="M146 50h34M146 59h30M146 68h33" fill="none" opacity=".35"/>'
+    + `<g transform="translate(170 76) rotate(-28) scale(.78)">${HAND_PATHS}</g></g></svg>`;
 const HAND_TIP = { x: 23 / 48, y: 4 / 58 }; // where the fingertip is, as a share of the drawing's width and height
 const DRAG_SEEN = "kalq-mag-drag-hint";
+const WEB_CHOSEN = "kalq-mag-web"; // the reader chose the web page: no book by itself for the rest of the visit
+const chosenWeb = () => { try { return sessionStorage.getItem(WEB_CHOSEN) === "1"; } catch { return false; } };
+const chooseWeb = (on) => { try { on ? sessionStorage.setItem(WEB_CHOSEN, "1") : sessionStorage.removeItem(WEB_CHOSEN); } catch { /* private mode */ } };
 
 let book = null; // { overlay, flip, pages, closedByUser }
 let closedByUser = false;
@@ -83,6 +111,8 @@ function copyOf(el) {
         c.setAttribute("preload", "metadata");
     }
     if (c.matches("img")) c.removeAttribute("loading");
+    // counters count up as they scroll into view on the page; in the book they show where they end
+    [c, ...c.querySelectorAll("*")].filter((n) => n.dataset?.kalqFinal).forEach((n) => { n.textContent = n.dataset.kalqFinal; n.removeAttribute("data-kalq-final"); });
     if (c.matches(".kalq-m-faq__item")) {
         c.querySelectorAll(".kalq-m-faq__a").forEach((a) => { a.hidden = false; a.removeAttribute("role"); });
         c.querySelectorAll(".kalq-m-faq__toggle").forEach((b) => { const h = document.createElement("span"); h.append(...b.childNodes); b.replaceWith(h); });
@@ -90,11 +120,34 @@ function copyOf(el) {
     return c;
 }
 
-// Fill pages of the given size with whole elements: one goes to the next page if it does not fit; a single element
-// taller than a page gets the page to itself and the page scrolls
-function paginate(measure, blocks, pageW, pageH) {
+// Fill pages of the given size, section by section (each starts on a new page), with whole elements. Elements that
+// lead into the next one travel with it as one unit, so a page never ends on them: a short label ("06") always, a
+// heading when its own content follows (not the next item's label, not a heading of the same or a higher level). A
+// unit that does not fit goes to the next page; a unit taller than a page gets one to itself and the page scrolls; if
+// a section's last page would hold a single unit, the unit before it comes along.
+const isLabel = (el) => el.matches("p, span, div") && el.textContent.trim().length <= 3;
+const level = (el) => (/^H([1-6])$/.exec(el.tagName) || [])[1];
+const leadsIn = (el, next) => {
+    if (!next) return false;
+    if (isLabel(el)) return true;
+    const n = level(el);
+    if (!n) return false;
+    const m = level(next);
+    return !isLabel(next) && !(m && m <= n);
+};
+
+function unitsOf(blocks) {
+    const units = [];
+    let open = [];
+    blocks.forEach((el, i) => {
+        open.push(el);
+        if (!leadsIn(el, blocks[i + 1])) { units.push(open); open = []; }
+    });
+    return units;
+}
+
+function paginate(measure, sections, pageW, pageH) {
     const pages = [];
-    let current = null;
     const fresh = () => {
         const p = document.createElement("div");
         p.className = "kalq-mag-page";
@@ -105,18 +158,35 @@ function paginate(measure, blocks, pageW, pageH) {
         p.append(body);
         measure.append(p);
         pages.push(p);
-        return body;
+        p.units = [];
+        return p;
     };
-    blocks.forEach((block) => {
-        if (block === "break") { current = null; return; } // each section starts on a new page
-        current ||= fresh();
-        current.append(block);
-        if (current.scrollHeight > current.clientHeight + 1 && current.children.length > 1) {
-            block.remove();
-            current = fresh();
-            current.append(block);
+    const overflows = (p) => p.firstChild.scrollHeight > p.firstChild.clientHeight + 1;
+    const place = (p, unit) => { p.firstChild.append(...unit); p.units.push(unit); };
+    const take = (p, unit) => { unit.forEach((el) => el.remove()); p.units.splice(p.units.indexOf(unit), 1); };
+
+    sections.forEach((blocks) => {
+        const own = [];
+        let page = null;
+        unitsOf(blocks).forEach((unit) => {
+            if (!page) own.push(page = fresh());
+            place(page, unit);
+            if (!overflows(page)) return;
+            if (page.units.length > 1) { take(page, unit); own.push(page = fresh()); place(page, unit); }
+            if (!overflows(page)) return;
+            // the unit alone is taller than a page: it keeps the page to itself, whole, and the page scrolls
+            page.classList.add("is-scroll");
+            page = null;
+        });
+        // a section's last page with a single unit on it: the unit before it comes along, if both fit
+        const [prev, last] = own.slice(-2);
+        if (prev && last && last.units.length === 1 && prev.units.length > 1 && !last.classList.contains("is-scroll")) {
+            const unit = prev.units.at(-1);
+            take(prev, unit);
+            last.firstChild.prepend(...unit);
+            last.units.unshift(unit);
+            if (overflows(last)) { take(last, unit); place(prev, unit); }
         }
-        if (current.scrollHeight > current.clientHeight + 1) { current.parentElement.classList.add("is-scroll"); current = null; }
     });
     return pages;
 }
@@ -201,11 +271,22 @@ function dragHand(overlay, pages, pageW) {
 }
 
 //=================================== Open and close ===================================//
+// The gap between the two screens in pixels: none on a continuous fold, a real hinge on a Surface Duo. --seg-hinge is a
+// calc() of env() values, so it is measured rather than parsed.
+function hingeWidth() {
+    const probe = document.createElement("div");
+    probe.style.cssText = "position:fixed;visibility:hidden;width:var(--seg-hinge, 0px);height:0";
+    document.body.append(probe);
+    const w = probe.getBoundingClientRect().width;
+    probe.remove();
+    return Math.max(0, Math.round(w));
+}
+
 function geometry() {
     if (spanned.matches) {
         // one page per screen, the spine in the middle of the hinge
         const w = Math.floor(window.innerWidth / 2), h = window.innerHeight;
-        return { pageW: w, pageH: h, portrait: false, hinge: Math.max(0, parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--seg-hinge")) || 0) };
+        return { pageW: w, pageH: h, portrait: false, hinge: hingeWidth() };
     }
     const landscape = window.innerWidth > window.innerHeight;
     const h = window.innerHeight - 96;
@@ -223,7 +304,7 @@ export function openMagazine(options = {}) {
 
 async function build({ auto = false } = {}) {
     if (book || !PAGES_ON.has(pageName())) return;
-    if (auto && closedByUser) return;
+    if (auto && (closedByUser || chosenWeb())) return;
     const St = await loadEngine().catch(() => null);
     if (!St?.PageFlip || book) return;
     const page = container();
@@ -237,6 +318,11 @@ async function build({ auto = false } = {}) {
     overlay.setAttribute("aria-label", t("book"));
     overlay.style.setProperty("--kalq-mag-hinge", `${hinge}px`);
     if (spanned.matches) overlay.classList.add("is-spanned");
+    // the way back sits where the header's book icon is; pages start their content below it
+    const spotOf = () => (toggle?.isConnected ? toggle : document.querySelector(".site-menu-toggle"))?.getBoundingClientRect();
+    const spot = spotOf();
+    const clear = spot?.width ? Math.ceil(spot.bottom + 14 - (window.innerHeight - pageH) / 2) : 0;
+    overlay.style.setProperty("--kalq-mag-top", `${Math.max(48, clear)}px`);
     const stage = document.createElement("div");
     stage.className = "kalq-magazine__book";
     // measure pages off screen at their real size, then hand them to the engine
@@ -246,11 +332,10 @@ async function build({ auto = false } = {}) {
     document.body.append(overlay);
 
     const hero = sections.find((s) => s.matches(".header, .expertise_header, .about_header"));
-    const blocks = [];
-    sections.filter((s) => s !== hero).forEach((s) => { blocks.push("break"); blocksOf(s).forEach((el) => blocks.push(copyOf(el))); });
+    const parts = sections.filter((s) => s !== hero).map((s) => blocksOf(s).map(copyOf));
     const footer = page.querySelector("footer");
-    if (footer) { blocks.push("break"); blocksOf(footer).forEach((el) => blocks.push(copyOf(el))); }
-    const inner = paginate(measure, blocks, pageW, pageH);
+    if (footer) parts.push(blocksOf(footer).map(copyOf));
+    const inner = paginate(measure, parts.filter((b) => b.length), pageW, pageH);
     // an even number of inner pages, so the back cover closes the book
     if (inner.length % 2 === 1) inner.push(Object.assign(document.createElement("div"), { className: "kalq-mag-page is-blank" }));
     const pages = [cover(hero, pageW, pageH, false), ...inner, cover(null, pageW, pageH, true)];
@@ -268,35 +353,53 @@ async function build({ auto = false } = {}) {
 
     const flip = new St.PageFlip(stage, {
         width: pageW, height: pageH, size: "fixed", showCover: true, usePortrait: portrait, autoSize: false,
-        drawShadow: !reducedMotion.matches, maxShadowOpacity: 0.35, flippingTime: reducedMotion.matches ? 1 : 750,
+        drawShadow: !reducedMotion.matches, maxShadowOpacity: 0.45, flippingTime: reducedMotion.matches ? 1 : 750,
         showPageCorners: !reducedMotion.matches, disableFlipByClick: true, mobileScrollSupport: false, swipeDistance: 24,
         startPage: 0, startZIndex: 2,
     });
     flip.loadFromHTML(pages);
 
-    // Controls: close and the page number; the cover's own button, dragging, the pages' edges and the keys turn pages
+    // Controls: the page number and the drag hint along the bottom; the way back to the web page as an icon where the
+    // header's book icon sits, and on the welcome page. The cover's button, dragging, the pages' edges and the keys
+    // turn pages.
     const bar = document.createElement("div");
     bar.className = "kalq-magazine__bar";
-    const button = (cls, label, fn, html) => {
-        const b = document.createElement("button");
-        b.type = "button";
-        b.className = `kalq-magazine__btn ${cls}`;
-        b.setAttribute("aria-label", label);
-        b.title = label;
-        b.innerHTML = html;
-        b.addEventListener("click", fn);
-        return b;
-    };
     const status = document.createElement("span");
     status.className = "kalq-magazine__status";
     status.setAttribute("aria-live", "polite");
-    const close = button("is-close", t("close"), () => closeMagazine(true), `<span>${t("close")}</span>`);
     const tip = document.createElement("span"); // the drag hint as words
     tip.className = "kalq-magazine__tip";
     tip.setAttribute("role", "status");
     tip.hidden = true;
-    bar.append(close, status, tip);
-    overlay.append(bar);
+    bar.append(status, tip);
+    const exit = document.createElement("button");
+    exit.type = "button";
+    exit.className = "kalq-magazine__exit";
+    exit.setAttribute("aria-label", t("close"));
+    exit.title = t("close");
+    exit.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="14" rx="1.5"/><path d="M3.5 9h17M6.4 7h.01M8.6 7h.01"/></svg>';
+    exit.addEventListener("click", () => leaveForWeb());
+    // the header settles (fonts, its own buttons) after the book opens: the icon follows the book icon's place
+    const placeExit = () => {
+        const r = spotOf();
+        if (r?.width) Object.assign(exit.style, { left: `${Math.round(r.left + r.width / 2 - 17)}px`, top: `${Math.round(r.top + r.height / 2 - 17)}px`, right: "auto" });
+    };
+    placeExit();
+    overlay.append(bar, exit);
+
+    // The welcome page: beside the cover, where the book has no page yet (two pages side by side only)
+    let welcome = null;
+    if (!portrait) {
+        welcome = document.createElement("section");
+        welcome.className = "kalq-mag-welcome";
+        welcome.setAttribute("aria-label", t("welcome"));
+        Object.assign(welcome.style, { width: `${pageW}px`, height: `${pageH}px` });
+        welcome.innerHTML = `<div class="kalq-mag-welcome__body">${TURN_DRAWING}<p class="kalq-mag-welcome__text">`
+            + (spanned.matches ? `<strong>${t("detected")}</strong> ` : "") + `${t("intro")}</p>`
+            + `<button type="button" class="kalq-mag-welcome__web">${t("close")}</button></div>`;
+        welcome.querySelector("button").addEventListener("click", () => leaveForWeb());
+        stage.prepend(welcome);
+    }
     const cue = pages[0].querySelector(".kalq-mag-cue");
     cue.querySelector("button").addEventListener("click", () => flip.flipNext());
     cue.classList.add("is-play"); // the tap hint, once on arrival (CSS; none under reduced motion)
@@ -307,7 +410,7 @@ async function build({ auto = false } = {}) {
     stage.addEventListener("pointerup", (e) => {
         const tap = down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 10 && Date.now() - down.time < 500;
         down = null;
-        if (!tap || e.target.closest("a, button, input, textarea, select, video[controls]")) return;
+        if (!tap || e.target.closest("a, button, input, textarea, select, video[controls], .kalq-mag-welcome")) return;
         const box = shownBox(pages);
         if (!box) return;
         const edge = Math.max(40, pageW * 0.14);
@@ -321,6 +424,14 @@ async function build({ auto = false } = {}) {
         const i = flip.getCurrentPageIndex();
         status.textContent = t("page")(i + 1, pages.length);
         if (i !== 1) tip.hidden = true;
+        placeExit();
+        if (flip.getState() !== "read") overlay.querySelectorAll(".kalq-mag-drag").forEach((n) => n.remove()); // turning on: the hint has done its job
+        // the welcome page lies under the left pages; in front and reachable only while the cover is closed
+        if (welcome) {
+            const atCover = i === 0 && flip.getState() === "read";
+            welcome.classList.toggle("is-front", atCover);
+            welcome.inert = !atCover;
+        }
         // only what is shown is reachable and playing
         pages.forEach((p) => {
             const shown = p.style.display !== "none" && p.closest(".stf__item, .stf__parent") && getComputedStyle(p).display !== "none";
@@ -328,25 +439,28 @@ async function build({ auto = false } = {}) {
             p.querySelectorAll("video").forEach((v) => (shown && !reducedMotion.matches ? v.play?.()?.catch(() => { }) : v.pause()));
         });
     };
-    flip.on("flip", () => { update(); if (flip.getCurrentPageIndex() === 1) dragHint(overlay, pages, pageW, tip); overlay.querySelector(".kalq-mag-page:not([inert]) :is(h1, h2, h3, p)")?.closest(".kalq-mag-page")?.focus?.(); });
+    flip.on("flip", () => { update(); if (flip.getCurrentPageIndex() === 1) dragHint(overlay, pages, pageW, tip); overlay.querySelector(".kalq-mag-page:not([inert]) :is(h1, h2, h3, p)")?.closest(".kalq-mag-page")?.focus?.({ preventScroll: true }); });
     flip.on("changeState", update);
     setTimeout(update, 50);
 
-    // Keys work wherever focus is while the book is open (after a drag it sits on the page body); the site's own
-    // shortcuts stay out of the book
+    // Keys work wherever focus is while the book is open (after a drag it sits on the page body). The book is
+    // read-only: the site's own shortcuts (editing, comments, panels) never reach the page underneath. Tab, Enter
+    // and Space keep their usual meaning.
     const onKey = (e) => {
-        if (e.target.closest?.("input, textarea, [contenteditable='true']")) return;
         const step = { ArrowRight: 1, PageDown: 1, ArrowLeft: -1, PageUp: -1 }[e.key];
         const act = step ? () => (step > 0 ? flip.flipNext() : flip.flipPrev())
             : e.key === "Home" ? () => { flip.turnToPage(0); update(); }
             : e.key === "End" ? () => { flip.turnToPage(pages.length - 1); update(); }
-            : e.key === "Escape" ? () => closeMagazine(true) : null;
+            : e.key === "Escape" ? () => leaveForWeb() : null;
+        e.stopImmediatePropagation();
         if (!act) return;
         e.preventDefault();
-        e.stopImmediatePropagation();
         act();
     };
-    document.addEventListener("keydown", onKey, true);
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("resize", placeExit);
+    document.fonts?.ready.then(placeExit);
+    setTimeout(placeExit, 600);
     // The engine follows the finger through touchmove and touchend on the window, which the site's smooth scroller
     // stops at the document on the way up. Hand them to the engine first while the book is open.
     const ui = flip.getUI?.();
@@ -364,15 +478,23 @@ async function build({ auto = false } = {}) {
     page.inert = true;
     document.querySelector(".site-header")?.setAttribute("inert", "");
     document.documentElement.classList.add("kalq-magazine-open", "kalq-scroll-lock");
-    book = { overlay, flip, pages, onKey, onTouch, returnFocus: document.activeElement };
+    book = { overlay, flip, pages, onKey, onTouch, placeExit, returnFocus: document.activeElement };
     pages[0].tabIndex = -1;
-    cue.querySelector("button").focus();
+    // focus without scrolling: the button sits inside the engine's page, whose clipped ancestors a scroll would shift
+    cue.querySelector("button").focus({ preventScroll: true });
+}
+
+// The reader's way back: the web page for the rest of the visit (the header's book icon still opens the book)
+function leaveForWeb() {
+    chooseWeb(true);
+    closeMagazine(true);
 }
 
 export function closeMagazine(byUser = false) {
     if (!book) return;
     if (byUser) closedByUser = true;
-    document.removeEventListener("keydown", book.onKey, true);
+    window.removeEventListener("keydown", book.onKey, true);
+    window.removeEventListener("resize", book.placeExit);
     window.removeEventListener("touchmove", book.onTouch, { capture: true });
     window.removeEventListener("touchend", book.onTouch, { capture: true });
     book.flip.destroy?.();
@@ -398,7 +520,7 @@ function updateToggle() {
         toggle.type = "button";
         toggle.className = "kalq-magazine-toggle";
         toggle.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 6c-2-1.3-4.7-2-8-2v14c3.3 0 6 .7 8 2 2-1.3 4.7-2 8-2V4c-3.3 0-6 .7-8 2zM12 6v14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
-        toggle.addEventListener("click", () => openMagazine());
+        toggle.addEventListener("click", () => { chooseWeb(false); closedByUser = false; openMagazine(); });
         document.querySelector(".site-header__right")?.prepend(toggle);
     }
     toggle.title = t("open");

@@ -52,7 +52,7 @@
 .kalq-mag-page__body {
     height: 100%;
     overflow: hidden;
-    padding: 3rem var(--spine) 6rem; // room at the bottom for the controls, so they never cover a line
+    padding: var(--kalq-mag-top, 3rem) var(--spine) 6rem; // clear of the way-back icon at the top and the controls at the bottom
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -134,7 +134,7 @@
 
 .kalq-mag-cover__text {
     position: relative;
-    padding: 0 var(--spine);
+    padding: var(--kalq-mag-top, 0px) var(--spine) 0; // clear of the way-back icon, like the pages
     text-align: center;
 
     svg { width: min(100%, 26rem); }
@@ -273,6 +273,96 @@
     white-space: nowrap;
 }
 
+// The welcome page beside the closed cover: a drawing, a short text, the way back to the web page. Under the book's
+// own pages, so the turning cover goes over it; in front only while the cover is closed (its button must be reachable).
+.kalq-mag-welcome {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 0; // the engine's page block paints at the same level, after it: its pages cover the welcome page
+    display: grid;
+    place-items: center;
+    background: var(--kalq-bg, #fff);
+    color: var(--kalq-text, #101010);
+    box-shadow: inset 0 0 0 1px var(--kalq-line, rgba(0, 0, 0, 0.08));
+
+    &.is-front { z-index: 40; }
+}
+
+.kalq-mag-welcome__body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.4rem;
+    width: 100%;
+    padding: 0 var(--spine-welcome, 2.5rem);
+    padding-right: calc(var(--kalq-mag-hinge, 0px) / 2 + 2.5rem);
+}
+
+.kalq-mag-welcome__drawing {
+    width: min(100%, 300px);
+    height: auto;
+    overflow: visible;
+}
+
+.kalq-mag-welcome__leaf { // the leaf sways a little on its spine, the hand with it
+    transform-box: view-box;
+    transform-origin: 130px 91px;
+    animation: kalq-mag-leaf 4.8s ease-in-out infinite alternate;
+}
+
+@keyframes kalq-mag-leaf {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0.86); }
+}
+
+.kalq-mag-welcome__text {
+    max-width: 30ch;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.55;
+
+    strong { display: block; margin-bottom: 0.35rem; font-weight: 500; }
+}
+
+.kalq-mag-welcome__web {
+    padding: 0.75rem 1.2rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+
+    &:hover { background: var(--kalq-text, #101010); color: var(--kalq-bg, #fff); }
+    &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 3px; }
+}
+
+// The way back to the web page, as an icon where the header's book icon sits (the header is under the book)
+.kalq-magazine__exit {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.86);
+    color: #101010;
+    box-shadow: 0 0 0 1px rgba(16, 16, 16, 0.12);
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+
+    &:hover { background: #fff; }
+    &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 2px; }
+}
+
 // Controls along the bottom (on two screens all on the left screen, clear of the hinge)
 .kalq-magazine__bar {
     position: fixed;
@@ -283,7 +373,8 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0.35rem;
+    padding: 0.35rem 0.5rem;
+    min-height: 40px;
     border-radius: 999px;
     background: rgba(16, 16, 16, 0.82);
     color: #fff;
@@ -296,30 +387,8 @@
     left: calc(var(--seg-l, 50vw) / 2);
 }
 
-.kalq-magazine__btn {
-    min-width: 40px;
-    height: 40px;
-    padding: 0 0.9rem;
-    border: 0;
-    border-radius: 999px;
-    background: none;
-    color: inherit;
-    font: inherit;
-    font-size: 1.1rem;
-    cursor: pointer;
-
-    span { font-size: 0.8rem; white-space: nowrap; }
-
-    &:hover:not(:disabled), &:focus-visible {
-        background: rgba(255, 255, 255, 0.16);
-        outline: none;
-    }
-
-    &:disabled { opacity: 0.3; cursor: default; }
-}
-
 .kalq-magazine__status {
-    min-width: 7.5rem;
+    min-width: 6.5rem;
     text-align: center;
     opacity: 0.75;
 }

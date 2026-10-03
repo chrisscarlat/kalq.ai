@@ -141,11 +141,12 @@ function barbaPageTransition() {
 function animateNumbering() {
     document.querySelectorAll('.numbering h2').forEach(h2 => {
         const endValue = parseInt(h2.textContent.replace(/[^\d]/g, ''));
+        h2.dataset.kalqFinal = endValue; // until it has counted up, the magazine shows this instead of the count in progress
         gsap.timeline({ scrollTrigger: { trigger: h2, start: "top bottom", toggleActions: "play none none none" }, defaults: { duration: 1.5, ease: "power1.inOut" } })
             .fromTo(h2, { innerText: 0 }, {
                 innerText: endValue, roundProps: "innerText", ease: "power3.inOut",
                 onUpdate: () => h2.textContent = Math.ceil(gsap.getProperty(h2, "innerText")),
-                onComplete: () => h2.textContent = endValue
+                onComplete: () => { h2.textContent = endValue; delete h2.dataset.kalqFinal; } // counted: the text itself is right
             });
     });
 }

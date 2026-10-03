@@ -401,6 +401,13 @@
     display: none;
 }
 
+// The hatched hinge: fine diagonal lines in a neutral grey that reads on light and dark sections, a hairline at
+// each screen's edge (inset shadows, so a zero-width hinge draws nothing)
+@mixin hinge-strip {
+    background: repeating-linear-gradient(135deg, rgba(128, 128, 128, 0.42) 0 1px, transparent 1px 5px);
+    box-shadow: inset 1px 0 rgba(128, 128, 128, 0.5), inset -1px 0 rgba(128, 128, 128, 0.5);
+}
+
 @media (horizontal-viewport-segments: 2) {
     :root {
         --seg-l: env(viewport-segment-width 0 0, 50vw);
@@ -411,6 +418,21 @@
 
     @include modules-two-screens;
     @include builtins-two-screens;
+
+    // The hinge, where there is one (Surface Duo): a delicate hatched strip joined to both screens, over the page and
+    // the magazine alike. A continuous fold (Galaxy Fold, iPhone Duo) reports no gap: the strip has no width, nothing
+    // shows and no layout leaves room for it.
+    html::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: var(--seg-l);
+        width: var(--seg-hinge);
+        z-index: 71; // above the magazine (70)
+        pointer-events: none;
+        @include hinge-strip;
+    }
 }
 
 .kalq-device.is-span-h {

@@ -1659,25 +1659,6 @@ footer #container .footer_bottom a {
     font-size: clamp(6rem, 4.6cqi, 8.5rem);
   }
 }
-@media (horizontal-viewport-segments: 2) {
-  .kalq-m-inner {
-    padding: 0 1.5rem;
-  }
-  .kalq-m-split .kalq-m-inner {
-    grid-template-columns: 1fr 1fr;
-    column-gap: calc(calc(env(viewport-segment-left 1 0, 0px) - env(viewport-segment-right 0 0, 0px)) + 3rem);
-  }
-  .kalq-m-split__media {
-    aspect-ratio: 3/4;
-  }
-  .kalq-m-faq.is-split .kalq-m-inner {
-    grid-template-columns: 1fr 1fr;
-    column-gap: calc(calc(env(viewport-segment-left 1 0, 0px) - env(viewport-segment-right 0 0, 0px)) + 3rem);
-  }
-  .kalq-m-cta.is-centered .kalq-m-inner {
-    text-align: left;
-  }
-}
 @media (vertical-viewport-segments: 2) {
   .kalq-m-split .kalq-m-inner {
     grid-template-columns: 1fr;
@@ -1690,24 +1671,6 @@ footer #container .footer_bottom a {
     aspect-ratio: 16/9;
   }
 }
-.kalq-device.is-span-h .kalq-m-inner {
-  padding: 0 1.5rem;
-}
-.kalq-device.is-span-h .kalq-m-split .kalq-m-inner {
-  grid-template-columns: 1fr 1fr;
-  column-gap: calc(28px + 3rem);
-}
-.kalq-device.is-span-h .kalq-m-split__media {
-  aspect-ratio: 3/4;
-}
-.kalq-device.is-span-h .kalq-m-faq.is-split .kalq-m-inner {
-  grid-template-columns: 1fr 1fr;
-  column-gap: calc(28px + 3rem);
-}
-.kalq-device.is-span-h .kalq-m-cta.is-centered .kalq-m-inner {
-  text-align: left;
-}
-
 .kalq-device.is-span-v .kalq-m-split .kalq-m-inner {
   grid-template-columns: 1fr;
   row-gap: calc(28px + 2rem);
@@ -2323,4 +2286,502 @@ footer #container .footer_bottom a {
   .borderSeprator {
     margin: 2rem 0;
   }
+}
+/* Two screens (a device spanning both screens, side by side). Keyed only off the browser reporting two viewport
+   segments, never off a brand; folded or on one screen it is a normal single screen and none of this applies.
+   Each screen holds one complete panel: no heading, paragraph, button or list item ever crosses the hinge.
+   --seg-l / --seg-r: the two screens' widths, --seg-hinge: the gap between them, --seg-h: a screen's height. The
+   picker's two-screen frame sets the same variables itself (js/picker.js), so it previews exactly this. */
+.kalq-span-panel {
+  display: none;
+}
+
+.kalq-m-cta__screen2 {
+  display: none;
+}
+
+@media (horizontal-viewport-segments: 2) {
+  :root {
+    --seg-l: env(viewport-segment-width 0 0, 50vw);
+    --seg-r: env(viewport-segment-width 1 0, 50vw);
+    --seg-hinge: calc(env(viewport-segment-left 1 0, 50vw) - env(viewport-segment-right 0 0, 50vw));
+    --seg-h: env(viewport-segment-height 0 0, 100svh);
+  }
+  .kalq-m {
+    padding: 0;
+  }
+  .kalq-m .kalq-m-inner {
+    display: grid;
+    grid-template-columns: var(--seg-l) var(--seg-r);
+    column-gap: var(--seg-hinge);
+    max-width: none;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .kalq-m.kalq-m-split .kalq-m-inner {
+    align-items: stretch;
+    min-height: var(--seg-h);
+    gap: 0 var(--seg-hinge);
+  }
+  .kalq-m-split__media {
+    order: 0;
+    aspect-ratio: auto;
+    height: 100%;
+    min-height: var(--seg-h);
+    border-radius: 0;
+  }
+  .kalq-m.kalq-m-split.is-text-left .kalq-m-split__media {
+    order: 2;
+  }
+  .kalq-m-split__text {
+    align-self: center;
+    padding: 3rem 2rem;
+  }
+  .kalq-m.kalq-m-center .kalq-m-heading {
+    grid-column: 1;
+    max-width: none;
+    margin: 3rem 2rem 2rem;
+    text-align: left;
+  }
+  .kalq-m.kalq-m-center .kalq-m-center__figure {
+    grid-column: 1/-1;
+    max-width: none;
+    margin: 0;
+  }
+  .kalq-m.kalq-m-center .kalq-m-center__media {
+    aspect-ratio: auto;
+    height: var(--seg-h);
+    border-radius: 0;
+  }
+  .kalq-m.kalq-m-center .kalq-m-caption {
+    margin: 1rem 0 2.5rem calc(var(--seg-l) + var(--seg-hinge));
+    padding: 0 2rem;
+    text-align: left;
+  }
+  .kalq-m.kalq-m-cta .kalq-m-inner,
+  .kalq-m.kalq-m-cta.is-split .kalq-m-inner,
+  .kalq-m.kalq-m-cta.is-centered .kalq-m-inner {
+    display: grid;
+    grid-template-columns: var(--seg-l) var(--seg-r);
+    column-gap: var(--seg-hinge);
+    max-width: none;
+    padding-left: 0;
+    padding-right: 0;
+    min-height: var(--seg-h);
+    align-items: center;
+    text-align: center;
+  }
+  .kalq-m.kalq-m-cta .kalq-m-cta__text,
+  .kalq-m.kalq-m-cta .kalq-m-actions {
+    grid-column: 1;
+    padding: 0 2rem;
+    justify-content: center;
+  }
+  .kalq-m.kalq-m-cta .kalq-m-actions {
+    align-self: start;
+    margin-top: 2rem;
+  }
+  .kalq-m.kalq-m-cta .kalq-m-cta__text {
+    align-self: end;
+  }
+  .kalq-m.kalq-m-cta .kalq-m-heading {
+    max-width: none;
+    font-size: clamp(2.2rem, 5cqi, 3.6rem);
+  }
+  .kalq-m.kalq-m-cta .kalq-m-cta__screen2 {
+    display: block;
+    grid-column: 2;
+    grid-row: 1/span 2;
+    align-self: stretch;
+    position: relative;
+    min-height: var(--seg-h);
+    overflow: hidden;
+    background: var(--kalq-dark);
+  }
+  .kalq-m.kalq-m-cta .kalq-m-cta__screen2 img,
+  .kalq-m.kalq-m-cta .kalq-m-cta__screen2 video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .kalq-m.kalq-m-faq .kalq-m-inner {
+    display: grid;
+    grid-template-columns: var(--seg-l) var(--seg-r);
+    column-gap: var(--seg-hinge);
+    max-width: none;
+    padding-left: 0;
+    padding-right: 0;
+    align-items: start;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+  .kalq-m.kalq-m-faq .kalq-m-faq__head {
+    grid-column: 1;
+    margin-bottom: 1.5rem;
+    padding: 0 2rem;
+    text-align: left;
+  }
+  .kalq-m.kalq-m-faq .kalq-m-faq__list {
+    grid-column: 1/-1;
+    display: grid;
+    grid-template-columns: subgrid;
+    border-top: 0;
+  }
+  .kalq-m.kalq-m-faq .kalq-m-faq__item {
+    display: contents;
+  }
+  .kalq-m.kalq-m-faq .kalq-m-faq__title {
+    grid-column: 1;
+    padding: 0 2rem;
+    border-bottom: 1px solid var(--kalq-line, #d9d9d9);
+  }
+  .kalq-m.kalq-m-faq .kalq-m-faq__a {
+    grid-column: 2;
+    padding: 1.4rem 2rem;
+  }
+  .kalq-m.kalq-m-faq.is-tabs .kalq-m-faq__a {
+    grid-row: 1/span 30;
+    align-self: start;
+  }
+  .kalq-m.kalq-m-faq.is-tabs .kalq-m-faq__toggle::after {
+    display: none;
+  }
+  .kalq-m.kalq-m-faq.is-tabs .kalq-m-faq__toggle[aria-selected=true] {
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 currentColor;
+    padding-left: 0.9rem;
+  }
+  .header .hero_layer {
+    display: grid;
+    grid-template-columns: var(--seg-l) var(--seg-r);
+    column-gap: var(--seg-hinge);
+    align-items: center;
+    justify-items: center;
+  }
+  .header .hero_content {
+    grid-column: 1;
+    padding: 0 2rem;
+  }
+  .header .hero_title svg {
+    width: min(100%, var(--seg-l) - 4rem);
+    height: auto;
+  }
+  .header .block {
+    left: calc(var(--seg-l) + var(--seg-hinge) + var(--seg-r) / 2);
+  }
+  .header .hero_video,
+  .hero_media img,
+  .hero_media video,
+  .expertise_header_img img,
+  .about_header_img img,
+  .kalq-m-center__media img,
+  .kalq-m-center__media video {
+    object-position: 78% 50%;
+  }
+  [data-focal=left] .hero_video,
+  [data-focal=left] .hero_media img,
+  [data-focal=left] .hero_media video,
+  [data-focal=left] img,
+  [data-focal=left] video {
+    object-position: 22% 50%;
+  }
+  .expertise_header #container,
+  .about_header #container {
+    max-width: var(--seg-l);
+    padding: 0 2rem;
+  }
+  .expertise_header #container h2,
+  .about_header #container h2 {
+    font-size: clamp(2.2rem, var(--seg-l) * 0.085, 3.8rem);
+    line-height: 1.12;
+  }
+  .expertise_header .block,
+  .about_header .block {
+    left: calc(var(--seg-l) + var(--seg-hinge) + var(--seg-r) / 2);
+    height: min(100vh, var(--seg-h));
+  }
+  .about #container {
+    display: grid;
+    grid-template-columns: var(--seg-l) var(--seg-r);
+    column-gap: var(--seg-hinge);
+    max-width: none;
+    padding-left: 0;
+    padding-right: 0;
+    align-items: center;
+  }
+  .about #container h5 {
+    grid-column: 1;
+    padding: 0 2rem;
+  }
+  .about #container .numbering {
+    grid-column: 2;
+    margin-top: 0;
+    padding: 0 2rem;
+  }
+  .expertise {
+    position: relative;
+  }
+  .expertise #container {
+    max-width: var(--seg-l);
+    padding: 0 2rem;
+  }
+  #fixed-img {
+    display: none;
+  }
+  .kalq-span-panel {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--seg-l) + var(--seg-hinge));
+    width: var(--seg-r);
+    overflow: hidden;
+  }
+  .kalq-span-panel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .expertise_container #container {
+    display: grid;
+    grid-template-columns: var(--seg-l) var(--seg-r);
+    column-gap: var(--seg-hinge);
+    max-width: none;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .expertise_container #container .txt {
+    grid-column: 1;
+    padding: 0 2rem;
+  }
+  .expertise_container #container .expertise_cards_container {
+    grid-column: 1/-1;
+    display: grid;
+    grid-template-columns: subgrid;
+    gap: 0;
+  }
+  .expertise_container #container .expertise_cards_container .col {
+    width: auto;
+    padding: 0 2rem;
+  }
+  .about_goals #container,
+  .about_weDo #container,
+  .about_awwards #container {
+    display: grid;
+    grid-template-columns: var(--seg-l) var(--seg-r);
+    column-gap: var(--seg-hinge);
+    max-width: none;
+    padding-left: 0;
+    padding-right: 0;
+    align-items: start;
+  }
+  .about_goals #container > :not(.img_wrapper):not(.parallax_img),
+  .about_weDo #container > :not(.img_wrapper):not(.parallax_img),
+  .about_awwards #container > :not(.img_wrapper):not(.parallax_img) {
+    grid-column: 1;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+  .about_goals #container > .img_wrapper,
+  .about_goals #container > .parallax_img,
+  .about_weDo #container > .img_wrapper,
+  .about_weDo #container > .parallax_img,
+  .about_awwards #container > .img_wrapper,
+  .about_awwards #container > .parallax_img {
+    grid-column: 2;
+    grid-row: 1/span 8;
+    margin-top: 0;
+  }
+  .about_goals #container .img_wrapper {
+    flex-direction: column;
+    gap: var(--seg-hinge);
+  }
+  .about_goals #container .img_wrapper .parallax_img {
+    width: 100%;
+  }
+  .Belief #container,
+  .social > #container,
+  .social .social_wrapper,
+  .legal #container {
+    max-width: var(--seg-l);
+    margin-left: 0;
+    margin-right: auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+  .Belief {
+    justify-content: flex-start;
+  }
+  footer #container {
+    display: grid;
+    grid-template-columns: var(--seg-l) var(--seg-r);
+    column-gap: var(--seg-hinge);
+    max-width: none;
+    padding-left: 0;
+    padding-right: 0;
+    align-items: center;
+    gap: 0 var(--seg-hinge);
+  }
+  footer #container .footer_header {
+    grid-column: 1;
+    padding: 0 2rem;
+  }
+  footer #container .footer_btns_wrapper {
+    flex-wrap: wrap;
+  }
+  footer #container .footer_btns_wrapper a {
+    padding: 20px 32px;
+  }
+  footer #container .footer_bottom {
+    grid-column: 2;
+    padding: 0 2rem;
+  }
+}
+.kalq-device.is-span-h .kalq-m {
+  padding: 0;
+}
+.kalq-device.is-span-h .kalq-m .kalq-m-inner {
+  display: grid;
+  grid-template-columns: var(--seg-l) var(--seg-r);
+  column-gap: var(--seg-hinge);
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-split .kalq-m-inner {
+  align-items: stretch;
+  min-height: var(--seg-h);
+  gap: 0 var(--seg-hinge);
+}
+.kalq-device.is-span-h .kalq-m-split__media {
+  order: 0;
+  aspect-ratio: auto;
+  height: 100%;
+  min-height: var(--seg-h);
+  border-radius: 0;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-split.is-text-left .kalq-m-split__media {
+  order: 2;
+}
+.kalq-device.is-span-h .kalq-m-split__text {
+  align-self: center;
+  padding: 3rem 2rem;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-center .kalq-m-heading {
+  grid-column: 1;
+  max-width: none;
+  margin: 3rem 2rem 2rem;
+  text-align: left;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-center .kalq-m-center__figure {
+  grid-column: 1/-1;
+  max-width: none;
+  margin: 0;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-center .kalq-m-center__media {
+  aspect-ratio: auto;
+  height: var(--seg-h);
+  border-radius: 0;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-center .kalq-m-caption {
+  margin: 1rem 0 2.5rem calc(var(--seg-l) + var(--seg-hinge));
+  padding: 0 2rem;
+  text-align: left;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-cta .kalq-m-inner,
+.kalq-device.is-span-h .kalq-m.kalq-m-cta.is-split .kalq-m-inner,
+.kalq-device.is-span-h .kalq-m.kalq-m-cta.is-centered .kalq-m-inner {
+  display: grid;
+  grid-template-columns: var(--seg-l) var(--seg-r);
+  column-gap: var(--seg-hinge);
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
+  min-height: var(--seg-h);
+  align-items: center;
+  text-align: center;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-cta .kalq-m-cta__text,
+.kalq-device.is-span-h .kalq-m.kalq-m-cta .kalq-m-actions {
+  grid-column: 1;
+  padding: 0 2rem;
+  justify-content: center;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-cta .kalq-m-actions {
+  align-self: start;
+  margin-top: 2rem;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-cta .kalq-m-cta__text {
+  align-self: end;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-cta .kalq-m-heading {
+  max-width: none;
+  font-size: clamp(2.2rem, 5cqi, 3.6rem);
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-cta .kalq-m-cta__screen2 {
+  display: block;
+  grid-column: 2;
+  grid-row: 1/span 2;
+  align-self: stretch;
+  position: relative;
+  min-height: var(--seg-h);
+  overflow: hidden;
+  background: var(--kalq-dark);
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-cta .kalq-m-cta__screen2 img,
+.kalq-device.is-span-h .kalq-m.kalq-m-cta .kalq-m-cta__screen2 video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-faq .kalq-m-inner {
+  display: grid;
+  grid-template-columns: var(--seg-l) var(--seg-r);
+  column-gap: var(--seg-hinge);
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
+  align-items: start;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-faq .kalq-m-faq__head {
+  grid-column: 1;
+  margin-bottom: 1.5rem;
+  padding: 0 2rem;
+  text-align: left;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-faq .kalq-m-faq__list {
+  grid-column: 1/-1;
+  display: grid;
+  grid-template-columns: subgrid;
+  border-top: 0;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-faq .kalq-m-faq__item {
+  display: contents;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-faq .kalq-m-faq__title {
+  grid-column: 1;
+  padding: 0 2rem;
+  border-bottom: 1px solid var(--kalq-line, #d9d9d9);
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-faq .kalq-m-faq__a {
+  grid-column: 2;
+  padding: 1.4rem 2rem;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-faq.is-tabs .kalq-m-faq__a {
+  grid-row: 1/span 30;
+  align-self: start;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-faq.is-tabs .kalq-m-faq__toggle::after {
+  display: none;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-faq.is-tabs .kalq-m-faq__toggle[aria-selected=true] {
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 currentColor;
+  padding-left: 0.9rem;
 }

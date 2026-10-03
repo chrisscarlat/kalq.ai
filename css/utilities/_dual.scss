@@ -1,0 +1,418 @@
+/* Two screens (a device spanning both screens, side by side). Keyed only off the browser reporting two viewport
+   segments, never off a brand; folded or on one screen it is a normal single screen and none of this applies.
+   Each screen holds one complete panel: no heading, paragraph, button or list item ever crosses the hinge.
+   --seg-l / --seg-r: the two screens' widths, --seg-hinge: the gap between them, --seg-h: a screen's height. The
+   picker's two-screen frame sets the same variables itself (js/picker.js), so it previews exactly this. */
+
+@mixin two-screens {
+    display: grid;
+    grid-template-columns: var(--seg-l) var(--seg-r);
+    column-gap: var(--seg-hinge);
+    max-width: none;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+// Page builder modules
+@mixin modules-two-screens {
+    .kalq-m {
+        padding: 0;
+    }
+
+    .kalq-m .kalq-m-inner {
+        @include two-screens;
+    }
+
+    // Image and text: each on its own screen, in the module's own direction
+    .kalq-m.kalq-m-split .kalq-m-inner {
+        align-items: stretch;
+        min-height: var(--seg-h);
+        gap: 0 var(--seg-hinge);
+    }
+
+    .kalq-m-split__media {
+        order: 0;
+        aspect-ratio: auto;
+        height: 100%;
+        min-height: var(--seg-h);
+        border-radius: 0;
+    }
+
+    .kalq-m.kalq-m-split.is-text-left .kalq-m-split__media {
+        order: 2;
+    }
+
+    .kalq-m-split__text {
+        align-self: center;
+        padding: 3rem 2rem;
+    }
+
+    // Central image or video: one continuous picture across both screens; the heading on the left screen, the
+    // caption on the right, never centred on the hinge
+    .kalq-m.kalq-m-center {
+        .kalq-m-heading {
+            grid-column: 1;
+            max-width: none;
+            margin: 3rem 2rem 2rem;
+            text-align: left;
+        }
+
+        .kalq-m-center__figure {
+            grid-column: 1 / -1;
+            max-width: none;
+            margin: 0;
+        }
+
+        .kalq-m-center__media {
+            aspect-ratio: auto;
+            height: var(--seg-h);
+            border-radius: 0;
+        }
+
+        .kalq-m-caption {
+            margin: 1rem 0 2.5rem calc(var(--seg-l) + var(--seg-hinge));
+            padding: 0 2rem;
+            text-align: left;
+        }
+    }
+
+    // Call to action: everything on the left screen; the right screen shows a picture or a calm panel
+    .kalq-m.kalq-m-cta .kalq-m-inner,
+    .kalq-m.kalq-m-cta.is-split .kalq-m-inner,
+    .kalq-m.kalq-m-cta.is-centered .kalq-m-inner {
+        @include two-screens;
+        min-height: var(--seg-h);
+        align-items: center;
+        text-align: center;
+    }
+
+    .kalq-m.kalq-m-cta .kalq-m-cta__text,
+    .kalq-m.kalq-m-cta .kalq-m-actions {
+        grid-column: 1;
+        padding: 0 2rem;
+        justify-content: center;
+    }
+
+    .kalq-m.kalq-m-cta .kalq-m-actions {
+        align-self: start;
+        margin-top: 2rem;
+    }
+
+    .kalq-m.kalq-m-cta .kalq-m-cta__text {
+        align-self: end;
+    }
+
+    .kalq-m.kalq-m-cta .kalq-m-heading {
+        max-width: none;
+        font-size: clamp(2.2rem, 5cqi, 3.6rem);
+    }
+
+    .kalq-m.kalq-m-cta .kalq-m-cta__screen2 {
+        display: block;
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        align-self: stretch;
+        position: relative;
+        min-height: var(--seg-h);
+        overflow: hidden;
+        background: var(--kalq-dark);
+
+        img,
+        video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+
+    // FAQ: the questions on the left screen, the answers on the right. Without JavaScript each answer sits beside
+    // its question; with it (.is-tabs) the questions are tabs and the selected answer fills the right screen.
+    .kalq-m.kalq-m-faq .kalq-m-inner {
+        @include two-screens;
+        align-items: start;
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+    }
+
+    .kalq-m.kalq-m-faq .kalq-m-faq__head {
+        grid-column: 1;
+        margin-bottom: 1.5rem;
+        padding: 0 2rem;
+        text-align: left;
+    }
+
+    .kalq-m.kalq-m-faq .kalq-m-faq__list {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: subgrid;
+        border-top: 0;
+    }
+
+    .kalq-m.kalq-m-faq .kalq-m-faq__item {
+        display: contents;
+    }
+
+    .kalq-m.kalq-m-faq .kalq-m-faq__title {
+        grid-column: 1;
+        padding: 0 2rem;
+        border-bottom: 1px solid var(--kalq-line, #d9d9d9);
+    }
+
+    .kalq-m.kalq-m-faq .kalq-m-faq__a {
+        grid-column: 2;
+        padding: 1.4rem 2rem;
+    }
+
+    .kalq-m.kalq-m-faq.is-tabs .kalq-m-faq__a {
+        grid-row: 1 / span 30; // all answers in the same place; only the selected one shows
+        align-self: start;
+    }
+
+    .kalq-m.kalq-m-faq.is-tabs .kalq-m-faq__toggle {
+        &::after {
+            display: none;
+        }
+
+        &[aria-selected="true"] {
+            font-weight: 600;
+            box-shadow: inset 3px 0 0 currentColor;
+            padding-left: 0.9rem;
+        }
+    }
+}
+
+// Built-in sections: two-part shapes split across the hinge, centred content keeps to the left screen, full-width
+// pictures and the hero video run across both screens. Only on a real spanning device.
+@mixin builtins-two-screens {
+    // Home hero: the video across both screens, title and slogan on the left screen, the moving line or logo mark
+    // centred on the right screen
+    .header .hero_layer {
+        display: grid;
+        grid-template-columns: var(--seg-l) var(--seg-r);
+        column-gap: var(--seg-hinge);
+        align-items: center;
+        justify-items: center;
+    }
+
+    .header .hero_content {
+        grid-column: 1;
+        padding: 0 2rem;
+    }
+
+    .header .hero_title svg {
+        width: min(100%, calc(var(--seg-l) - 4rem));
+        height: auto;
+    }
+
+    .header .block {
+        left: calc(var(--seg-l) + var(--seg-hinge) + var(--seg-r) / 2);
+    }
+
+    // The heroes' picture or video sits off-centre (right by default, left when the section says so) so the subject
+    // is clear of the hinge
+    .header .hero_video,
+    .hero_media img,
+    .hero_media video,
+    .expertise_header_img img,
+    .about_header_img img,
+    .kalq-m-center__media img,
+    .kalq-m-center__media video {
+        object-position: 78% 50%;
+    }
+
+    [data-focal="left"] {
+        .hero_video,
+        .hero_media img,
+        .hero_media video,
+        img,
+        video {
+            object-position: 22% 50%;
+        }
+    }
+
+    // Platform and Company headers: the statement on the left screen, sized for one screen; their moving line centred
+    // on the right screen, never across the hinge
+    .expertise_header #container,
+    .about_header #container {
+        max-width: var(--seg-l);
+        padding: 0 2rem;
+
+        h2 {
+            font-size: clamp(2.2rem, calc(var(--seg-l) * 0.085), 3.8rem);
+            line-height: 1.12;
+        }
+    }
+
+    .expertise_header .block,
+    .about_header .block {
+        left: calc(var(--seg-l) + var(--seg-hinge) + var(--seg-r) / 2);
+        height: min(100vh, var(--seg-h));
+    }
+
+    // Statement and counters
+    .about #container {
+        @include two-screens;
+        align-items: center;
+
+        h5 {
+            grid-column: 1;
+            padding: 0 2rem;
+        }
+
+        .numbering {
+            grid-column: 2;
+            margin-top: 0;
+            padding: 0 2rem;
+        }
+    }
+
+    // The platform list on the left screen, the picture of the row in focus on the right (js/moduleBehaviour.js)
+    .expertise {
+        position: relative;
+
+        #container {
+            max-width: var(--seg-l);
+            padding: 0 2rem;
+        }
+    }
+
+    #fixed-img {
+        display: none; // the hover picture becomes the right screen's panel
+    }
+
+    .kalq-span-panel {
+        display: block;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: calc(var(--seg-l) + var(--seg-hinge));
+        width: var(--seg-r);
+        overflow: hidden;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+
+    // Platform cards: the intro and the buyer column on the left screen, the supplier column on the right
+    .expertise_container #container {
+        @include two-screens;
+
+        .txt {
+            grid-column: 1;
+            padding: 0 2rem;
+        }
+
+        .expertise_cards_container {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: subgrid;
+            gap: 0;
+
+            .col {
+                width: auto;
+                padding: 0 2rem;
+            }
+        }
+    }
+
+    // Text with pictures: the text on the left screen, the pictures on the right
+    .about_goals #container,
+    .about_weDo #container,
+    .about_awwards #container {
+        @include two-screens;
+        align-items: start;
+
+        > :not(.img_wrapper):not(.parallax_img) {
+            grid-column: 1;
+            padding-left: 2rem;
+            padding-right: 2rem;
+        }
+
+        > .img_wrapper,
+        > .parallax_img {
+            grid-column: 2;
+            grid-row: 1 / span 8;
+            margin-top: 0;
+        }
+    }
+
+    .about_goals #container .img_wrapper {
+        flex-direction: column;
+        gap: var(--seg-hinge);
+
+        .parallax_img {
+            width: 100%;
+        }
+    }
+
+    // Centred content keeps to one screen (the left one)
+    .Belief #container,
+    .social > #container,
+    .social .social_wrapper,
+    .legal #container {
+        max-width: var(--seg-l);
+        margin-left: 0;
+        margin-right: auto;
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+
+    .Belief {
+        justify-content: flex-start; // it centres its content on one screen
+    }
+
+    // Footer (two parts): the call to action and its buttons on the left screen, the link row on the right
+    footer #container {
+        @include two-screens;
+        align-items: center;
+        gap: 0 var(--seg-hinge);
+
+        .footer_header {
+            grid-column: 1;
+            padding: 0 2rem;
+        }
+
+        .footer_btns_wrapper {
+            flex-wrap: wrap;
+
+            a {
+                padding: 20px 32px;
+            }
+        }
+
+        .footer_bottom {
+            grid-column: 2;
+            padding: 0 2rem;
+        }
+    }
+}
+
+.kalq-span-panel {
+    display: none;
+}
+
+// Outside two screens the call to action's second panel only exists for editors (to set its picture)
+.kalq-m-cta__screen2 {
+    display: none;
+}
+
+@media (horizontal-viewport-segments: 2) {
+    :root {
+        --seg-l: env(viewport-segment-width 0 0, 50vw);
+        --seg-r: env(viewport-segment-width 1 0, 50vw);
+        --seg-hinge: calc(env(viewport-segment-left 1 0, 50vw) - env(viewport-segment-right 0 0, 50vw));
+        --seg-h: env(viewport-segment-height 0 0, 100svh);
+    }
+
+    @include modules-two-screens;
+    @include builtins-two-screens;
+}
+
+.kalq-device.is-span-h {
+    @include modules-two-screens;
+}

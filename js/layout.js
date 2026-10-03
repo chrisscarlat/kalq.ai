@@ -9,6 +9,7 @@
 //   other modules:          rendered by the module registry (js/modules), blocks keyed "<page>.<id>.<slot>"
 //   state "draft":          editors only, never in the public page or its HTML
 //   theme "light" | "dark": always that appearance; absent: follows the site's light/dark toggle
+//   focal "left":           on two screens a full-width picture's subject sits on the left screen (default right)
 //   removed:                built-in sections taken out (so a section added to the code later still shows up)
 
 export const layoutKey = (page) => `layout.${page}`;
@@ -94,6 +95,9 @@ export function applyLayout({ doc, container, page, stored, editor = false, rend
         // light or dark regardless of the site toggle; no attribute: follows the page
         if (entry.theme === "light" || entry.theme === "dark") node.setAttribute("data-section-theme", entry.theme);
         else node.removeAttribute("data-section-theme");
+        // where the subject of a full-width picture sits, for two screens (right unless set to left)
+        if (entry.focal === "left") node.setAttribute("data-focal", "left");
+        else node.removeAttribute("data-focal");
         wanted.push(node);
     }
 

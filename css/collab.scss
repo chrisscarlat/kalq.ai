@@ -2885,3 +2885,40 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
         color: #101010;
     }
 }
+
+// Editors set the call to action's "picture for two screens" from a small tile in the band's corner (one screen);
+// on two screens the panel itself shows
+@media not all and (horizontal-viewport-segments: 2) {
+    body.kalq-edit .kalq-m-cta {
+        position: relative;
+    }
+
+    body.kalq-edit .kalq-m-cta__screen2 {
+        display: block;
+        position: absolute;
+        right: 1.25rem;
+        bottom: 1.25rem;
+        width: 200px;
+        height: 130px;
+        border-radius: 12px;
+        overflow: hidden;
+
+        .kalq-m-media,
+        .kalq-ph-media {
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+            border-radius: 0;
+        }
+
+        .kalq-ph-media::before {
+            font-size: 0.7rem;
+            padding: 0 0.5rem;
+            text-align: center;
+        }
+
+        .kalq-auto {
+            display: none;
+        }
+    }
+}

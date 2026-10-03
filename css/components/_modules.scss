@@ -348,15 +348,8 @@
     .kalq-m-cta.is-centered .kalq-m-inner .kalq-m-heading { font-size: clamp(6rem, 4.6cqi, 8.5rem); }
 }
 
-// Dual screens, spanned side by side (a hinge down the middle): each half of a split gets its own screen, the gap is
-// the hinge, so nothing sits under it. The picker shows the same with .kalq-device.is-span-h.
-@mixin span-horizontal($hinge) {
-    .kalq-m-inner { padding: 0 1.5rem; }
-    .kalq-m-split .kalq-m-inner { grid-template-columns: 1fr 1fr; column-gap: calc(#{$hinge} + 3rem); }
-    .kalq-m-split__media { aspect-ratio: 3 / 4; }
-    .kalq-m-faq.is-split .kalq-m-inner { grid-template-columns: 1fr 1fr; column-gap: calc(#{$hinge} + 3rem); }
-    .kalq-m-cta.is-centered .kalq-m-inner { text-align: left; }
-}
+// Dual screens, spanned side by side: see css/utilities/_dual.scss (each screen one complete panel, nothing across
+// the hinge). The picker's two-screen frame uses the same rules.
 
 // Dual screens, spanned top and bottom (a hinge across): the picture on the upper screen, the text on the lower
 @mixin span-vertical($hinge) {
@@ -365,16 +358,8 @@
     .kalq-m-split__media { aspect-ratio: 16 / 9; }
 }
 
-@media (horizontal-viewport-segments: 2) {
-    @include span-horizontal(calc(env(viewport-segment-left 1 0, 0px) - env(viewport-segment-right 0 0, 0px)));
-}
-
 @media (vertical-viewport-segments: 2) {
     @include span-vertical(calc(env(viewport-segment-top 0 1, 0px) - env(viewport-segment-bottom 0 0, 0px)));
-}
-
-.kalq-device.is-span-h {
-    @include span-horizontal(28px);
 }
 
 .kalq-device.is-span-v {

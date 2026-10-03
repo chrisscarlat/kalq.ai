@@ -23,7 +23,7 @@ const DEVICES = [
     { id: "phone", w: 390, h: 844, de: "Smartphone", en: "Phone" },
     { id: "folded", w: 344, h: 882, de: "Faltbar, zugeklappt", en: "Foldable, folded" },
     { id: "unfolded", w: 673, h: 841, de: "Faltbar, aufgeklappt", en: "Foldable, unfolded" },
-    { id: "spanned", w: 1114, h: 705, cls: "is-span-h", de: "Zwei Bildschirme", en: "Dual screen, spanned" },
+    { id: "spanned", w: 1114, h: 705, hinge: 28, cls: "is-span-h", de: "Zwei Bildschirme", en: "Dual screen, spanned" },
     { id: "tablet-p", w: 820, h: 1180, de: "Tablet hochkant", en: "Tablet portrait" },
     { id: "tablet-l", w: 1180, h: 820, de: "Tablet quer", en: "Tablet landscape" },
     { id: "laptop", w: 1440, h: 900, de: "Laptop", en: "Laptop" },
@@ -165,6 +165,13 @@ function devices(item) {
         frame.style.width = `${d.w}px`;
         frame.style.height = `${d.h}px`;
         frame.style.transform = `scale(${scale})`;
+        if (d.hinge) { // two screens: the same variables css/utilities/_dual.scss reads from a real device
+            const screen = (d.w - d.hinge) / 2;
+            frame.style.setProperty("--seg-l", `${screen}px`);
+            frame.style.setProperty("--seg-r", `${screen}px`);
+            frame.style.setProperty("--seg-hinge", `${d.hinge}px`);
+            frame.style.setProperty("--seg-h", `${d.h}px`);
+        }
         frame.setAttribute("aria-hidden", "true");
         // A picture to scroll through, nothing to click
         frame.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); }, true);

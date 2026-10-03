@@ -13,6 +13,7 @@ import { MODULES, missingRequired } from "./modules/registry.js";
 const TEXT = {
     de: {
         theme: "Darstellung", themePage: "Wie die Seite", themeLight: "Immer hell", themeDark: "Immer dunkel",
+        focal: "Motiv auf zwei Bildschirmen", focalLeft: "Motiv links", focalRight: "Motiv rechts",
         move: "Verschieben", up: "Nach oben", down: "Nach unten", copy: "Kopieren (⌘C)", remove: "Entfernen (Entf)", draft: "Entwurf",
         publish: "Veröffentlichen", toDraft: "Zum Entwurf", undo: "Rückgängig (⌘Z)", redo: "Wiederholen (⇧⌘Z)",
         removed: (n) => `${n} entfernt. ⌘Z macht es rückgängig.`, nothing: "Nichts rückgängig zu machen.", nothingRedo: "Nichts zu wiederholen.",
@@ -25,6 +26,7 @@ const TEXT = {
     },
     en: {
         theme: "Appearance", themePage: "Follow page", themeLight: "Force light", themeDark: "Force dark",
+        focal: "Subject on two screens", focalLeft: "Subject left", focalRight: "Subject right",
         move: "Move", up: "Move up", down: "Move down", copy: "Copy (⌘C)", remove: "Remove (Delete)", draft: "Draft",
         publish: "Publish", toDraft: "Back to draft", undo: "Undo (⌘Z)", redo: "Redo (⇧⌘Z)",
         removed: (n) => `${n} removed. ⌘Z undoes it.`, nothing: "Nothing to undo.", nothingRedo: "Nothing to redo.",
@@ -156,6 +158,19 @@ const setTheme = (id, theme) => run(async () => {
     await write(layout, `Section theme ${next || "page"}: ${sectionName(entry)}`);
 });
 
+// Where the subject of a full-width picture sits on two screens: right (default) or left. One history entry.
+const FULL_WIDTH = new Set(["header", "expertise-header", "about-header", "expertise-header-img", "about-header-img"]);
+const hasFullWidthMedia = (entry) => FULL_WIDTH.has(entry.source || entry.id) || entry.module === "content.media-center";
+
+const setFocal = (id, side) => run(async () => {
+    const layout = currentLayout();
+    const entry = layout.sections.find((s) => s.id === id);
+    const next = side === "left" ? "left" : null;
+    if (!entry || (entry.focal || null) === next) return;
+    if (next) entry.focal = next; else delete entry.focal;
+    await write(layout, `Section focal ${next || "right"}: ${sectionName(entry)}`);
+});
+
 // A copy goes directly beneath as a draft, with its own copies of every stored block of the section
 const duplicate = (id) => run(async () => {
     const page = pageName();
@@ -168,6 +183,7 @@ const duplicate = (id) => run(async () => {
         ? { id: copyId, module: "legacy", source: entry.source || entry.id, state: "draft" }
         : { id: copyId, module: entry.module, version: entry.version, state: "draft" };
     if (entry.theme) copy.theme = entry.theme; // the copy looks like its original
+    if (entry.focal) copy.focal = entry.focal;
     const own = sectionPrefix(page, entry.id);
     const newKey = (key) => (key.startsWith(own) ? sectionPrefix(page, copyId) + key.slice(own.length) : copyKey(page, copyId, key));
     // The blocks of the section: its own prefixed keys, or for a built-in section the keys found in its HTML
@@ -244,7 +260,9 @@ const ICONS = {
     duplicate: icon("M8 8h11v11H8zM5 16V5h11"),
     "theme-page": '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg>',
     "theme-light": icon("M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6zM12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"),
-    "theme-dark": icon("M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"), remove: icon("M5 7h14M10 11v6M14 11v6M7 7l1 12h8l1-12M9 7V4h6v3"),
+    "theme-dark": icon("M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"),
+    "focal-left": icon("M3 5h18v14H3zM12 5v14M7.5 10.5a1.6 1.6 0 1 0 0 .1"),
+    "focal-right": icon("M3 5h18v14H3zM12 5v14M16.5 10.5a1.6 1.6 0 1 0 0 .1"), remove: icon("M5 7h14M10 11v6M14 11v6M7 7l1 12h8l1-12M9 7V4h6v3"),
     undo: icon("M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3"), redo: icon("M15 14l5-5-5-5M20 9H10a6 6 0 0 0 0 12h3"),
 };
 
@@ -283,6 +301,19 @@ function tools(entry) {
         toolButton("move", `${t("move")}: ${sectionName(entry)}`, (b) => openMap(entry.id, b)),
         toolButton("duplicate", t("copy"), () => duplicate(entry.id)),
         toolButton("remove", t("remove"), () => remove(entry.id)), theme);
+    // Sections with a full-width picture: where its subject sits on two screens
+    if (hasFullWidthMedia(entry)) {
+        const focal = document.createElement("span");
+        focal.className = "kalq-section-tools__theme kalq-section-tools__focal";
+        focal.setAttribute("role", "group");
+        focal.setAttribute("aria-label", t("focal"));
+        [["left", t("focalLeft")], ["right", t("focalRight")]].forEach(([side, label]) => {
+            const b = toolButton(`focal-${side}`, label, () => setFocal(entry.id, side));
+            b.setAttribute("aria-pressed", (entry.focal || "right") === side);
+            focal.append(b);
+        });
+        box.append(focal);
+    }
     // Copies and new sections: draft or live; built-in sections are always live
     if (!(entry.module === "legacy" && !entry.source)) {
         if (entry.state === "draft") {
@@ -436,12 +467,20 @@ function openMap(id, anchor) {
     list.querySelector(".is-current").focus();
 }
 
+// Below its move button, always fully on screen and below the header. The bar is re-rendered after every move, so a
+// detached button is replaced by the section's current one.
 function position() {
     if (!map) return;
-    const r = map.anchor.getBoundingClientRect();
-    const w = map.node.offsetWidth;
-    map.node.style.left = `${Math.max(8, Math.min(window.innerWidth - w - 8, r.left + r.width / 2 - w / 2))}px`;
-    map.node.style.top = `${Math.min(r.bottom + 10, window.innerHeight - map.node.offsetHeight - 8)}px`;
+    if (!map.anchor?.isConnected) {
+        const fresh = sectionNode(map.id)?.querySelector(".kalq-section-tools .is-move");
+        if (fresh) map.anchor = fresh;
+    }
+    const r = map.anchor?.isConnected ? map.anchor.getBoundingClientRect() : null;
+    const w = map.node.offsetWidth, h = map.node.offsetHeight;
+    const top = r ? r.bottom + 10 : chromeBottom + 12;
+    const left = r ? r.left + r.width / 2 - w / 2 : window.innerWidth / 2 - w / 2;
+    map.node.style.left = `${Math.max(8, Math.min(window.innerWidth - w - 8, left))}px`;
+    map.node.style.top = `${Math.max(chromeBottom + 8, Math.min(window.innerHeight - h - 8, top))}px`;
 }
 
 // Arrows: one step, one history entry; the pill stays open on the moved section

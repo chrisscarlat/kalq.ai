@@ -72,6 +72,7 @@ export const MODULES = {
             text: { kind: "text", label: L("Text", "Text") },
             button: { kind: "button", label: L("Button-Text", "Button label"), required: true },
             link: { kind: "link", label: L("Button-Link", "Button link"), required: true },
+            media2: { kind: "media", label: L("Bild für zwei Bildschirme (optional)", "Picture for two screens (optional)") },
         },
         versions: {
             centered: { name: L("Zentriert", "Centred"),
@@ -231,8 +232,45 @@ function renderCtaBand(ctx) {
     const text = ctx.doc.createElement("div");
     text.className = "kalq-m-cta__text";
     append(text, slotEl(ctx, "heading", "h2", { className: "kalq-m-heading" }), slotEl(ctx, "text", "div", { className: "kalq-m-text", format: "paragraphs" }));
-    append(inner, text, buttonEl(ctx, "kalq-m-button is-light"));
+    append(inner, text, buttonEl(ctx, "kalq-m-button is-light"), screen2(ctx));
     return append(s, inner);
+}
+
+// The right screen on a two-screen device: the optional picture for two screens; without one, the server (and the
+// browser after an edit) put in the page's first video, else its first image, else the panel stays calm in the band's
+// colour. Hidden everywhere else; editors see it to set the picture.
+function screen2(ctx) {
+    const box = ctx.doc.createElement("div");
+    box.className = "kalq-m-cta__screen2";
+    box.setAttribute("aria-hidden", "true");
+    const own = mediaEl(ctx, "media2", "kalq-m-cta__screen2-media");
+    if (own) box.append(own);
+    if (!mediaOf(ctx, "media2")) box.setAttribute("data-auto", "");
+    return box;
+}
+
+// The page's first video, else its first image, outside call-to-action bands (for their right screen)
+export function firstPageMedia(container) {
+    const outside = (n) => !n.closest(".kalq-m-cta, .kalq-picker, .kalq-device");
+    const video = [...container.querySelectorAll("video")].find((v) => outside(v) && (v.getAttribute("src") || v.querySelector("source")?.getAttribute("src")));
+    if (video) return { kind: "video", src: video.getAttribute("src") || video.querySelector("source").getAttribute("src") };
+    const img = [...container.querySelectorAll("img[src]")].find((i) => outside(i) && !/\.svg(\?|$)/i.test(i.getAttribute("src")));
+    return img ? { kind: "img", src: img.getAttribute("src") } : null;
+}
+
+// Fill the call-to-action panels that have no picture of their own; decorative, loaded only when shown
+export function fillScreen2(container, doc) {
+    const media = firstPageMedia(container);
+    container.querySelectorAll(".kalq-m-cta__screen2[data-auto]").forEach((box) => {
+        if (box.querySelector(".kalq-auto") || !media) return;
+        const el = doc.createElement(media.kind === "video" ? "video" : "img");
+        el.className = "kalq-auto";
+        el.setAttribute("src", media.src);
+        el.setAttribute("aria-hidden", "true");
+        if (media.kind === "video") ["muted", "loop", "playsinline"].forEach((a) => el.setAttribute(a, "")), el.setAttribute("preload", "none");
+        else el.setAttribute("alt", ""), el.setAttribute("loading", "lazy");
+        box.append(el);
+    });
 }
 
 // Real headings and buttons: each question is a <button> that opens its answer (works as plain text without JS:

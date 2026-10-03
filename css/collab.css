@@ -2707,3 +2707,34 @@ body:not(.kalq-edit) .kalq-undo-btn {
   background: #fff;
   color: #101010;
 }
+
+@media not all and (horizontal-viewport-segments: 2) {
+  body.kalq-edit .kalq-m-cta {
+    position: relative;
+  }
+  body.kalq-edit .kalq-m-cta__screen2 {
+    display: block;
+    position: absolute;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    width: 200px;
+    height: 130px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  body.kalq-edit .kalq-m-cta__screen2 .kalq-m-media,
+  body.kalq-edit .kalq-m-cta__screen2 .kalq-ph-media {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    border-radius: 0;
+  }
+  body.kalq-edit .kalq-m-cta__screen2 .kalq-ph-media::before {
+    font-size: 0.7rem;
+    padding: 0 0.5rem;
+    text-align: center;
+  }
+  body.kalq-edit .kalq-m-cta__screen2 .kalq-auto {
+    display: none;
+  }
+}

@@ -276,10 +276,20 @@ function renderFaq(ctx) {
 }
 
 // The entry point used by js/layout.js: an element for a registry module, or null for an unknown one
+// A module this code does not know (added by a newer version of the site): visitors never see it, editors get a stub
+// so they can still move or remove it. Its stored entry and blocks stay untouched either way.
 export function renderModule(entry, ctx) {
     const def = MODULES[entry.module];
-    if (!def || !def.versions[entry.version]) return null;
-    return def.render({ ...ctx, entry, id: entry.id });
+    if (def?.versions[entry.version]) return def.render({ ...ctx, entry, id: entry.id });
+    if (!ctx.editor) return null;
+    const stub = ctx.doc.createElement("section");
+    stub.className = "kalq-m-unknown";
+    stub.setAttribute("data-module", `${entry.module}:${entry.version || ""}`);
+    const note = ctx.doc.createElement("p");
+    note.textContent = ctx.lang === "en" ? `Unknown module: ${entry.module} (${entry.version || "–"}), not shown on the page`
+        : `Unbekanntes Modul: ${entry.module} (${entry.version || "–"}), wird auf der Seite nicht angezeigt`;
+    stub.append(note);
+    return stub;
 }
 
 // Required slots that are still placeholders (a section with any cannot go live)

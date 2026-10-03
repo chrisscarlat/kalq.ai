@@ -2,18 +2,33 @@
 // in the middle schematic previews of every version, on the right the selected one large with Insert.
 // Keyboard: arrows browse the previews, Enter inserts, Esc closes, Tab moves between the three areas.
 import { currentLang } from "./i18n.js";
-import { CATEGORIES, MODULES } from "./modules/registry.js";
+import { CATEGORIES, MODULES, renderModule } from "./modules/registry.js";
 
 const TEXT = {
     de: { title: "Modul einfügen", search: "Module suchen", insert: "Einfügen", cancel: "Abbrechen", close: "Schließen",
         none: "Keine Module gefunden.", results: "Suchergebnisse", hint: "Pfeiltasten zum Blättern, Enter fügt ein, Esc schließt.",
-        slots: "Enthält", required: "Pflicht", draft: "Wird als Entwurf eingefügt. Platzhalter ausfüllen, dann veröffentlichen." },
+        slots: "Enthält", required: "Pflicht", draft: "Wird als Entwurf eingefügt. Platzhalter ausfüllen, dann veröffentlichen.",
+        devices: "So passt es sich an" },
     en: { title: "Insert a module", search: "Search modules", insert: "Insert", cancel: "Cancel", close: "Close",
         none: "No modules found.", results: "Search results", hint: "Arrow keys to browse, Enter inserts, Esc closes.",
-        slots: "Contains", required: "required", draft: "Inserted as a draft. Fill in the placeholders, then publish." },
+        slots: "Contains", required: "required", draft: "Inserted as a draft. Fill in the placeholders, then publish.",
+        devices: "How it adapts" },
 };
 const lang = () => (currentLang() === "en" ? "en" : "de");
 const t = (key) => TEXT[lang()][key];
+
+// The preview devices, at their real CSS sizes; each frame is scaled down to the same height
+const DEVICES = [
+    { id: "phone", w: 390, h: 844, de: "Smartphone", en: "Phone" },
+    { id: "folded", w: 344, h: 882, de: "Faltbar, zugeklappt", en: "Foldable, folded" },
+    { id: "unfolded", w: 673, h: 841, de: "Faltbar, aufgeklappt", en: "Foldable, unfolded" },
+    { id: "spanned", w: 1114, h: 705, cls: "is-span-h", de: "Zwei Bildschirme", en: "Dual screen, spanned" },
+    { id: "tablet-p", w: 820, h: 1180, de: "Tablet hochkant", en: "Tablet portrait" },
+    { id: "tablet-l", w: 1180, h: 820, de: "Tablet quer", en: "Tablet landscape" },
+    { id: "laptop", w: 1440, h: 900, de: "Laptop", en: "Laptop" },
+    { id: "large", w: 2560, h: 1440, de: "Großer Bildschirm", en: "Large screen" },
+];
+const FRAME_HEIGHT = 250;
 
 // Every version of every module, flat
 const ALL = Object.entries(MODULES).flatMap(([module, def]) => Object.entries(def.versions).map(([version, v]) => ({ module, version, def, v })));
@@ -62,11 +77,13 @@ function build() {
                 <nav class="kalq-picker__cats"></nav>
             </div>
             <div class="kalq-picker__main">
-                <p class="kalq-picker__hint"></p>
-                <h3 class="kalq-picker__heading"></h3>
-                <div class="kalq-picker__grid" role="listbox"></div>
+                <div class="kalq-picker__browse">
+                    <p class="kalq-picker__hint"></p>
+                    <h3 class="kalq-picker__heading"></h3>
+                    <div class="kalq-picker__grid" role="listbox"></div>
+                </div>
+                <section class="kalq-picker__detail" aria-live="polite"></section>
             </div>
-            <aside class="kalq-picker__detail" aria-live="polite"></aside>
             <button type="button" class="kalq-picker__close" data-close></button>
         </div>`;
     document.body.append(root);
@@ -128,6 +145,34 @@ function draw() {
     detail(list[state.index]);
 }
 
+// The module itself, rendered with empty placeholders (drawn as blue shapes), in a frame of each device's width
+function devices(item) {
+    const L = lang();
+    return el("div", { className: "kalq-picker__devices" }, ...DEVICES.map((d) => {
+        const scale = FRAME_HEIGHT / d.h;
+        const frame = el("div", { className: `kalq-device ${d.cls || ""}` });
+        frame.style.width = `${d.w}px`;
+        frame.style.height = `${d.h}px`;
+        frame.style.transform = `scale(${scale})`;
+        frame.setAttribute("aria-hidden", "true");
+        frame.inert = true;
+        const node = renderModule({ id: "preview", module: item.module, version: item.version, state: "draft" },
+            { doc: document, page: "preview", store: new Map(), lang: L, editor: true });
+        if (node) {
+            // A picture of the module, not a section: nothing in it may look like page content to the rest of the code
+            [node, ...node.querySelectorAll("[data-kalq-key], [data-kalq-type], [data-module], [id]")].forEach((n) =>
+                ["data-kalq-key", "data-kalq-type", "data-module", "id"].forEach((a) => n.removeAttribute(a)));
+            frame.append(node);
+        }
+        const box = el("div", { className: "kalq-picker__device" });
+        box.style.width = `${Math.round(d.w * scale)}px`;
+        box.style.height = `${FRAME_HEIGHT}px`;
+        box.append(frame);
+        return el("figure", { className: "kalq-picker__device-wrap" }, box,
+            el("figcaption", { textContent: `${d[L]} · ${d.w}px` }));
+    }));
+}
+
 function detail(item) {
     const box = root.querySelector(".kalq-picker__detail");
     if (!item) return box.replaceChildren();
@@ -141,10 +186,12 @@ function detail(item) {
     go.addEventListener("click", () => insert(item));
     const cancel = el("button", { type: "button", className: "kalq-btn", textContent: t("cancel") });
     cancel.addEventListener("click", close);
-    box.replaceChildren(preview, el("h3", { className: "kalq-picker__detail-name", textContent: item.v.name[L] }),
-        el("p", { className: "kalq-picker__detail-module", textContent: item.def.name[L] }),
-        el("p", { className: "kalq-picker__label", textContent: t("slots") }), slots,
-        el("p", { className: "kalq-picker__note", textContent: t("draft") }), el("div", { className: "kalq-picker__actions" }, cancel, go));
+    const info = el("div", { className: "kalq-picker__info" }, preview,
+        el("div", {}, el("h3", { className: "kalq-picker__detail-name", textContent: item.v.name[L] }),
+            el("p", { className: "kalq-picker__detail-module", textContent: item.def.name[L] }),
+            el("p", { className: "kalq-picker__label", textContent: t("slots") }), slots),
+        el("div", { className: "kalq-picker__side-actions" }, el("p", { className: "kalq-picker__note", textContent: t("draft") }), el("div", { className: "kalq-picker__actions" }, cancel, go)));
+    box.replaceChildren(info, el("p", { className: "kalq-picker__label", textContent: t("devices") }), devices(item));
 }
 
 const focusGrid = () => root.querySelector(".kalq-picker__item[tabindex='0']")?.focus();
@@ -192,6 +239,7 @@ function insert(item) {
 function close() {
     if (!state) return;
     root.classList.remove("is-open");
+    root.querySelector(".kalq-picker__detail").replaceChildren(); // no previews left in the page
     document.documentElement.classList.remove("kalq-scroll-lock");
     const back = state.returnFocus;
     state = null;

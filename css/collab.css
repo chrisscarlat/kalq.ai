@@ -2149,7 +2149,7 @@ section[data-section]:hover > .kalq-insert,
   position: absolute;
   inset: 2.5rem;
   display: grid;
-  grid-template-columns: 230px 1fr 360px;
+  grid-template-columns: 230px 1fr;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 22px;
@@ -2221,8 +2221,16 @@ section[data-section]:hover > .kalq-insert,
 }
 
 .kalq-picker__main {
-  padding: 1.4rem 1.6rem;
+  display: grid;
+  grid-template-rows: minmax(0, 38%) minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+}
+
+.kalq-picker__browse {
+  padding: 1.4rem 4rem 1rem 1.6rem;
   overflow-y: auto;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .kalq-picker__hint {
@@ -2286,16 +2294,149 @@ section[data-section]:hover > .kalq-insert,
 }
 
 .kalq-picker__detail {
-  padding: 3.6rem 1.4rem 1.4rem;
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.1rem 1.6rem 1.4rem;
   overflow-y: auto;
+  min-width: 0;
+}
+
+.kalq-picker__info {
+  display: grid;
+  grid-template-columns: 150px 1fr auto;
+  gap: 1.4rem;
+  align-items: start;
+  margin-bottom: 0.9rem;
+}
+.kalq-picker__info .kalq-picker__detail-name {
+  margin-top: 0;
+}
+.kalq-picker__info .kalq-picker__label {
+  margin-top: 0.6rem;
+}
+
+.kalq-picker__side-actions {
+  max-width: 280px;
+}
+.kalq-picker__side-actions .kalq-picker__note {
+  margin-top: 0;
 }
 
 .kalq-picker__preview svg {
   display: block;
   width: 100%;
   height: auto;
+  border-radius: 8px;
+}
+
+.kalq-picker__devices {
+  display: flex;
+  gap: 18px;
+  align-items: flex-end;
+  padding: 0.4rem 0 0.6rem;
+  overflow-x: auto;
+}
+
+.kalq-picker__device-wrap {
+  flex-shrink: 0;
+  margin: 0;
+}
+.kalq-picker__device-wrap figcaption {
+  margin-top: 0.45rem;
+  font-size: 0.72rem;
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+.kalq-picker__device {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 10px;
+  background: #fff;
+}
+
+.kalq-device {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  transform-origin: 0 0;
+  container-type: inline-size;
+  background: var(--kalq-bg, #fff);
+  color: var(--kalq-text, #101010);
+  font-family: var(--kalq-font-body, "Clash Grotesk", "Helvetica Neue", Arial, sans-serif);
+}
+.kalq-device.is-span-h::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 14px);
+  width: 28px;
+  background: #0a0a0a;
+  z-index: 2;
+}
+.kalq-device .kalq-ph:empty:not(.kalq-ph-media) {
+  outline: none;
+  min-height: 0;
+  border-radius: 999px;
+  background: #3B82F6;
+}
+.kalq-device .kalq-ph:empty:not(.kalq-ph-media)::before {
+  content: none;
+}
+.kalq-device h2.kalq-ph:empty {
+  height: 0.75em;
+  width: 72%;
+}
+.kalq-device .kalq-m-center h2.kalq-ph:empty, .kalq-device .kalq-m-cta.is-centered h2.kalq-ph:empty {
+  width: 60%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.kalq-device .kalq-m-eyebrow.kalq-ph:empty {
+  height: 0.8em;
+  width: 22%;
+  opacity: 0.6;
+}
+.kalq-device .kalq-m-text.kalq-ph:empty, .kalq-device .kalq-m-faq__a.kalq-ph:empty {
+  height: 4.4em;
+  width: 88%;
+  border-radius: 0;
+  background: repeating-linear-gradient(to bottom, rgba(59, 130, 246, 0.5) 0 0.5em, transparent 0.5em 1.3em);
+}
+.kalq-device .kalq-m-faq__a.kalq-ph:empty {
+  height: 2.4em;
+  margin-bottom: 1.4rem;
+}
+.kalq-device .kalq-m-cta.is-centered .kalq-m-text.kalq-ph:empty {
+  width: 50%;
+}
+.kalq-device .kalq-m-button.kalq-ph:empty {
+  width: 9rem;
+  height: 3rem;
+}
+.kalq-device .kalq-m-faq__q.kalq-ph:empty {
+  height: 0.8em;
+  width: 70%;
+  margin: 1.4rem 0;
+  padding: 0;
+}
+.kalq-device .kalq-m-caption.kalq-ph:empty {
+  height: 0.6em;
+  width: 36%;
+  margin: 1rem auto 0;
+}
+.kalq-device .kalq-m-link-field {
+  display: none;
+}
+.kalq-device .kalq-ph-media {
+  border: 0;
+  border-radius: 0;
+  background: rgba(59, 130, 246, 0.2);
+  outline: none;
+}
+.kalq-device .kalq-ph-media::before {
+  content: none;
 }
 
 .kalq-picker__detail-name {
@@ -2316,10 +2457,18 @@ section[data-section]:hover > .kalq-insert,
 }
 
 .kalq-picker__slots {
-  margin: 0.3rem 0 0;
-  padding-left: 1.1rem;
-  font-size: 0.85rem;
-  line-height: 1.6;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.kalq-picker__slots li {
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.75rem;
 }
 
 .kalq-picker__note {
@@ -2361,11 +2510,12 @@ section[data-section]:hover > .kalq-insert,
     inset: 1rem;
     grid-template-columns: 200px 1fr;
   }
-  .kalq-picker__detail {
+  .kalq-picker__info {
+    grid-template-columns: 140px 1fr;
+  }
+  .kalq-picker__info .kalq-picker__side-actions {
     grid-column: 1/-1;
-    border-left: 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    max-height: 40vh;
+    max-width: none;
   }
 }
 @media (max-width: 640px) {
@@ -2386,4 +2536,11 @@ section[data-section]:hover > .kalq-insert,
   .kalq-picker__cat {
     flex-shrink: 0;
   }
+}
+.kalq-m-unknown {
+  padding: 3.5rem 1.5rem 1.5rem;
+  background: repeating-linear-gradient(135deg, rgba(255, 180, 0, 0.08) 0 12px, transparent 12px 24px);
+  color: #a06a00;
+  font: 500 0.9rem/1.4 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+  text-align: center;
 }

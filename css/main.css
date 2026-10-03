@@ -339,6 +339,32 @@ section[data-tone=light] :is(.hero_layer, #container):has(> .block) {
   filter: invert(1);
 }
 
+/* A section forced to light or dark (page builder): its tokens come from that palette whatever the site toggle says.
+   js/variants.js publishes both palettes as --kalq-l-* and --kalq-d-*; the fallbacks are the default palette, so the
+   server HTML is right without JavaScript. :where keeps a section's own background and colour rules in charge. */
+[data-section-theme=light] {
+  --kalq-bg: var(--kalq-l-bg, #ffffff);
+  --kalq-text: var(--kalq-l-text, #101010);
+  --kalq-light: var(--kalq-l-light, #ffffff);
+  --kalq-dark: var(--kalq-l-dark, #101010);
+  --kalq-line: var(--kalq-l-line, #dbdbdb);
+  color-scheme: light;
+}
+
+[data-section-theme=dark] {
+  --kalq-bg: var(--kalq-d-bg, #101010);
+  --kalq-text: var(--kalq-d-text, #ffffff);
+  --kalq-light: var(--kalq-d-light, #ffffff);
+  --kalq-dark: var(--kalq-d-dark, #212121);
+  --kalq-line: var(--kalq-d-line, #404040);
+  color-scheme: dark;
+}
+
+:where([data-section-theme]) {
+  background-color: var(--kalq-bg);
+  color: var(--kalq-text);
+}
+
 /* Smooth Scroller */
 .site-main.no_scroll {
   height: 100vh;

@@ -12,6 +12,7 @@ import { MODULES, missingRequired } from "./modules/registry.js";
 
 const TEXT = {
     de: {
+        theme: "Darstellung", themePage: "Wie die Seite", themeLight: "Immer hell", themeDark: "Immer dunkel",
         move: "Verschieben", up: "Nach oben", down: "Nach unten", copy: "Kopieren (⌘C)", remove: "Entfernen (Entf)", draft: "Entwurf",
         publish: "Veröffentlichen", toDraft: "Zum Entwurf", undo: "Rückgängig (⌘Z)", redo: "Wiederholen (⇧⌘Z)",
         removed: (n) => `${n} entfernt. ⌘Z macht es rückgängig.`, nothing: "Nichts rückgängig zu machen.", nothingRedo: "Nichts zu wiederholen.",
@@ -23,6 +24,7 @@ const TEXT = {
             "about-wedo": "Was wir tun", "about-awwards": "Logos", legal: "Text" },
     },
     en: {
+        theme: "Appearance", themePage: "Follow page", themeLight: "Force light", themeDark: "Force dark",
         move: "Move", up: "Move up", down: "Move down", copy: "Copy (⌘C)", remove: "Remove (Delete)", draft: "Draft",
         publish: "Publish", toDraft: "Back to draft", undo: "Undo (⌘Z)", redo: "Redo (⇧⌘Z)",
         removed: (n) => `${n} removed. ⌘Z undoes it.`, nothing: "Nothing to undo.", nothingRedo: "Nothing to redo.",
@@ -144,6 +146,16 @@ const setState = (id, state) => run(async () => {
     await write(layout, `Section ${state === "live" ? "published" : "to draft"}: ${sectionName(entry)}`);
 });
 
+// Light, dark or following the site toggle: one history entry
+const setTheme = (id, theme) => run(async () => {
+    const layout = currentLayout();
+    const entry = layout.sections.find((s) => s.id === id);
+    const next = theme === "light" || theme === "dark" ? theme : null;
+    if (!entry || (entry.theme || null) === next) return;
+    if (next) entry.theme = next; else delete entry.theme;
+    await write(layout, `Section theme ${next || "page"}: ${sectionName(entry)}`);
+});
+
 // A copy goes directly beneath as a draft, with its own copies of every stored block of the section
 const duplicate = (id) => run(async () => {
     const page = pageName();
@@ -155,6 +167,7 @@ const duplicate = (id) => run(async () => {
     const copy = entry.module === "legacy"
         ? { id: copyId, module: "legacy", source: entry.source || entry.id, state: "draft" }
         : { id: copyId, module: entry.module, version: entry.version, state: "draft" };
+    if (entry.theme) copy.theme = entry.theme; // the copy looks like its original
     const own = sectionPrefix(page, entry.id);
     const newKey = (key) => (key.startsWith(own) ? sectionPrefix(page, copyId) + key.slice(own.length) : copyKey(page, copyId, key));
     // The blocks of the section: its own prefixed keys, or for a built-in section the keys found in its HTML
@@ -228,7 +241,10 @@ function reveal(id) {
 const icon = (d) => `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const ICONS = {
     move: icon("M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"), up: icon("M12 19V5M6 11l6-6 6 6"), down: icon("M12 5v14M6 13l6 6 6-6"),
-    duplicate: icon("M8 8h11v11H8zM5 16V5h11"), remove: icon("M5 7h14M10 11v6M14 11v6M7 7l1 12h8l1-12M9 7V4h6v3"),
+    duplicate: icon("M8 8h11v11H8zM5 16V5h11"),
+    "theme-page": '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg>',
+    "theme-light": icon("M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6zM12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"),
+    "theme-dark": icon("M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"), remove: icon("M5 7h14M10 11v6M14 11v6M7 7l1 12h8l1-12M9 7V4h6v3"),
     undo: icon("M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3"), redo: icon("M15 14l5-5-5-5M20 9H10a6 6 0 0 0 0 12h3"),
 };
 
@@ -253,10 +269,20 @@ function tools(entry) {
     name.className = "kalq-section-tools__name";
     name.textContent = sectionName(entry);
     name.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); select(entry.id); });
+    // Appearance: follow the page, always light, always dark
+    const theme = document.createElement("span");
+    theme.className = "kalq-section-tools__theme";
+    theme.setAttribute("role", "group");
+    theme.setAttribute("aria-label", t("theme"));
+    [["page", t("themePage")], ["light", t("themeLight")], ["dark", t("themeDark")]].forEach(([value, label]) => {
+        const b = toolButton(`theme-${value}`, `${t("theme")}: ${label}`, () => setTheme(entry.id, value));
+        b.setAttribute("aria-pressed", (entry.theme || "page") === value);
+        theme.append(b);
+    });
     box.append(name,
         toolButton("move", `${t("move")}: ${sectionName(entry)}`, (b) => openMap(entry.id, b)),
         toolButton("duplicate", t("copy"), () => duplicate(entry.id)),
-        toolButton("remove", t("remove"), () => remove(entry.id)));
+        toolButton("remove", t("remove"), () => remove(entry.id)), theme);
     // Copies and new sections: draft or live; built-in sections are always live
     if (!(entry.module === "legacy" && !entry.source)) {
         if (entry.state === "draft") {

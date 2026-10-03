@@ -113,12 +113,13 @@ const currentContainer = () => { const all = document.querySelectorAll('[data-ba
 export function applyStoredLayout(container = currentContainer()) {
     const page = container?.dataset.page;
     if (!page) return null;
-    const before = [...container.querySelectorAll(":scope > section[data-section]")].map((s) => s.dataset.section + (s.dataset.sectionState || "")).join();
+    const sig = (s) => s.dataset.section + (s.dataset.sectionState || "") + (s.dataset.sectionTheme || "");
+    const before = [...container.querySelectorAll(":scope > section[data-section]")].map(sig).join();
     const editor = !!container.querySelector(":scope > template.kalq-sections");
     const modules = (entry, doc) => renderModule(entry, { doc, page, store, lang: currentLang(), editor });
     const layout = applyLayout({ doc: document, container, page, stored: parseLayout(store.get(layoutKey(page))?.media), editor,
         renderModule: modules, fresh: !editor });
-    const after = [...container.querySelectorAll(":scope > section[data-section]")].map((s) => s.dataset.section + (s.dataset.sectionState || "")).join();
+    const after = [...container.querySelectorAll(":scope > section[data-section]")].map(sig).join();
     if (before !== after) document.dispatchEvent(new CustomEvent("kalq:layout", { detail: { page, layout } }));
     return layout;
 }

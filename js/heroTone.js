@@ -50,7 +50,8 @@ function overlayFor(pixels, text, scrim, floor) {
 // The theme decides the hero: light theme (default) white text over a dark layer, dark theme the opposite, black
 // text over a light layer. The image decides only how strong the layer must be for the contrast.
 const WHITE = [255, 255, 255], BLACK = [0, 0, 0];
-const heroTone = () => (document.documentElement.dataset.mode === "dark" ? "light" : "dark");
+// A hero forced to light or dark (page builder) uses its own theme instead of the site toggle
+const heroTone = () => ((hero?.dataset.sectionTheme || document.documentElement.dataset.mode) === "dark" ? "light" : "dark");
 
 function measure() {
     if (!hero || !media) return;
@@ -138,6 +139,7 @@ export function initHeroTone() {
         window.addEventListener("resize", () => { measure(); updateHeader(); });
         // Variant or light/dark changed; once more after the sections' colour transition
         document.addEventListener("kalq:look", () => { measure(); updateHeader(); setTimeout(updateHeader, 650); });
+        document.addEventListener("kalq:layout", () => { measure(); updateHeader(); }); // a section's own theme changed
     }
     const container = document.querySelector(".scrollbar-container");
     const next = container && window.Scrollbar ? Scrollbar.get(container) : null;

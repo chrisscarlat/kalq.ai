@@ -8,6 +8,7 @@
 //   module "legacy", source: a copy of built-in section <source>; its blocks are keyed "<page>.<id>.<key without page>"
 //   other modules:          rendered by the module registry (js/modules), blocks keyed "<page>.<id>.<slot>"
 //   state "draft":          editors only, never in the public page or its HTML
+//   theme "light" | "dark": always that appearance; absent: follows the site's light/dark toggle
 //   removed:                built-in sections taken out (so a section added to the code later still shows up)
 
 export const layoutKey = (page) => `layout.${page}`;
@@ -90,6 +91,9 @@ export function applyLayout({ doc, container, page, stored, editor = false, rend
         node.setAttribute("data-section", entry.id);
         if (entry.state === "draft") node.setAttribute("data-section-state", "draft");
         else node.removeAttribute("data-section-state");
+        // light or dark regardless of the site toggle; no attribute: follows the page
+        if (entry.theme === "light" || entry.theme === "dark") node.setAttribute("data-section-theme", entry.theme);
+        else node.removeAttribute("data-section-theme");
         wanted.push(node);
     }
 

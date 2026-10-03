@@ -39,12 +39,17 @@ const mix = (a, b, amount) => {
     return `#${[16, 8, 0].map((sh) => ch(sh).toString(16).padStart(2, "0")).join("")}`;
 };
 
+// Both palettes are also published as --kalq-l-* and --kalq-d-*: a section forced to light or dark (page builder)
+// maps its own tokens to one of them, whatever the site toggle says
 function palette(colors) {
     const c = { bg: "#ffffff", text: "#101010", accent: "#3b82f6", light: "#ffffff", dark: "#101010", ...colors };
-    if (mode !== "dark") return { "--kalq-bg": c.bg, "--kalq-text": c.text, "--kalq-accent": c.accent, "--kalq-light": c.light, "--kalq-dark": c.dark, "--kalq-line": null };
+    const light = { bg: c.bg, text: c.text, light: c.light, dark: c.dark, line: mix(c.bg, c.text, 0.15) };
+    const dark = { bg: c.dark, text: c.light, light: c.light, dark: mix(c.dark, c.light, 0.07), line: mix(c.dark, c.light, 0.2) };
+    const both = Object.fromEntries(["bg", "text", "light", "dark", "line"].flatMap((k) => [[`--kalq-l-${k}`, light[k]], [`--kalq-d-${k}`, dark[k]]]));
+    if (mode !== "dark") return { "--kalq-bg": c.bg, "--kalq-text": c.text, "--kalq-accent": c.accent, "--kalq-light": c.light, "--kalq-dark": c.dark, "--kalq-line": null, ...both };
     return {
-        "--kalq-bg": c.dark, "--kalq-text": c.light, "--kalq-accent": c.accent, "--kalq-light": c.light,
-        "--kalq-dark": mix(c.dark, c.light, 0.07), "--kalq-line": mix(c.dark, c.light, 0.2),
+        "--kalq-bg": dark.bg, "--kalq-text": dark.text, "--kalq-accent": c.accent, "--kalq-light": dark.light,
+        "--kalq-dark": dark.dark, "--kalq-line": dark.line, ...both,
     };
 }
 

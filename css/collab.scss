@@ -2864,3 +2864,24 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
     visibility: hidden;
     pointer-events: none;
 }
+
+// The section bar's appearance choice: follow page, light, dark
+.kalq-section-tools__theme {
+    display: inline-flex;
+    gap: 1px;
+    margin-left: 4px;
+    padding: 2px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+
+    .kalq-section-tools__btn {
+        min-width: 26px;
+        height: 26px;
+        padding: 0 0.35rem;
+    }
+
+    .kalq-section-tools__btn[aria-pressed="true"] {
+        background: #fff;
+        color: #101010;
+    }
+}

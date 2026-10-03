@@ -17,9 +17,10 @@ const TEXT = {
         move: "Verschieben", up: "Nach oben", down: "Nach unten", copy: "Kopieren (⌘C)", remove: "Entfernen (Entf)", draft: "Entwurf",
         publish: "Veröffentlichen", toDraft: "Zum Entwurf", undo: "Rückgängig (⌘Z)", redo: "Wiederholen (⇧⌘Z)",
         removed: (n) => `${n} entfernt. ⌘Z macht es rückgängig.`, nothing: "Nichts rückgängig zu machen.", nothingRedo: "Nichts zu wiederholen.",
-        changed: "Die Seite wurde inzwischen geändert. In den Versionen wiederherstellen.", map: "Seitenaufbau", mapHint: "Ziehen oder Pfeiltasten",
+        changed: "Die Seite wurde inzwischen geändert. In den Versionen wiederherstellen.", map: "Seitenaufbau", fixed: "Fixiert", footer: "Footer",
+        themeChoose: "Darstellung wählen",
         failed: "Das hat nicht geklappt.", relogin: "Bitte melden Sie sich erneut an.", copyOf: "Kopie", section: "Abschnitt",
-        insert: "Modul hier einfügen", missing: (list) => `Erst ausfüllen: ${list}`,
+        insert: "Modul hier einfügen", insertAfter: "Modul darunter einfügen", missing: (list) => `Erst ausfüllen: ${list}`,
         names: { header: "Hero", about: "Über Kalq", expertise: "Plattform-Liste", belief: "Haltung", social: "Social", "expertise-header": "Kopf",
             "expertise-header-img": "Bild", "expertise-container": "Karten", "about-header": "Kopf", "about-header-img": "Bild", "about-goals": "Ziele",
             "about-wedo": "Was wir tun", "about-awwards": "Logos", legal: "Text" },
@@ -30,9 +31,10 @@ const TEXT = {
         move: "Move", up: "Move up", down: "Move down", copy: "Copy (⌘C)", remove: "Remove (Delete)", draft: "Draft",
         publish: "Publish", toDraft: "Back to draft", undo: "Undo (⌘Z)", redo: "Redo (⇧⌘Z)",
         removed: (n) => `${n} removed. ⌘Z undoes it.`, nothing: "Nothing to undo.", nothingRedo: "Nothing to redo.",
-        changed: "The page has changed since. Restore it from Versions.", map: "Page outline", mapHint: "Drag or arrow keys",
+        changed: "The page has changed since. Restore it from Versions.", map: "Page outline", fixed: "Fixed", footer: "Footer",
+        themeChoose: "Choose appearance",
         failed: "That did not work.", relogin: "Please log in again.", copyOf: "copy", section: "Section",
-        insert: "Insert a module here", missing: (list) => `Fill in first: ${list}`,
+        insert: "Insert a module here", insertAfter: "Insert a module below", missing: (list) => `Fill in first: ${list}`,
         names: { header: "Hero", about: "About Kalq", expertise: "Platform list", belief: "Belief", social: "Social", "expertise-header": "Header",
             "expertise-header-img": "Image", "expertise-container": "Cards", "about-header": "Header", "about-header-img": "Image", "about-goals": "Goals",
             "about-wedo": "What we do", "about-awwards": "Logos", legal: "Text" },
@@ -111,11 +113,21 @@ async function run(action) {
     }
 }
 
+// The top hero is fixed: first on the page, never moved, nothing goes above it. Only the built-in hero at the top
+// counts; a copy of it placed lower is a normal section. The footer is not a section: it always closes the page.
+const HERO_IDS = new Set(["header", "expertise-header", "about-header"]);
+const isTopHero = (layout, id) => {
+    const first = layout.sections[0];
+    return !!first && first.id === id && first.module === "legacy" && !first.source && HERO_IDS.has(first.id);
+};
+const firstMovable = (layout) => (layout.sections[0] && isTopHero(layout, layout.sections[0].id) ? 1 : 0);
+
 // Move to a position (one step from the arrows, many from a drag): one history entry
 const moveTo = (id, target) => run(async () => {
     const layout = currentLayout();
     const i = layout.sections.findIndex((s) => s.id === id);
-    const j = Math.max(0, Math.min(layout.sections.length - 1, target));
+    if (isTopHero(layout, id)) return;
+    const j = Math.max(firstMovable(layout), Math.min(layout.sections.length - 1, target));
     if (i < 0 || i === j) return;
     const [entry] = layout.sections.splice(i, 1);
     layout.sections.splice(j, 0, entry);
@@ -232,7 +244,7 @@ export const insertModule = (index, module, version) => run(async () => {
     if (!MODULES[module]?.versions[version]) return;
     const layout = currentLayout();
     const entry = { id: newSectionId(), module, version, state: "draft" };
-    layout.sections.splice(Math.max(0, Math.min(index, layout.sections.length)), 0, entry);
+    layout.sections.splice(Math.max(firstMovable(layout), Math.min(index, layout.sections.length)), 0, entry);
     await write(layout, `Section inserted: ${sectionName(entry)}`);
     selected = entry.id;
     reveal(entry.id);
@@ -243,13 +255,14 @@ async function openPicker(index) {
     open({ onInsert: (module, version) => insertModule(index, module, version) });
 }
 
-// Scroll the page so a section is in view
+// Scroll the page so a section is in view, its bar clear below the header
 function reveal(id) {
     const node = sectionNode(id);
     if (!node) return;
     const scroller = document.querySelector(".scrollbar-container");
     const bar = scroller && window.Scrollbar ? Scrollbar.get(scroller) : null;
-    if (bar) bar.scrollIntoView(node, { offsetTop: 90, onlyScrollIfNeeded: true });
+    const offsetTop = Math.round(chromeBottom + 24);
+    if (bar) bar.scrollIntoView(node, { offsetTop, onlyScrollIfNeeded: !expanded });
     else node.scrollIntoView({ block: "nearest" });
 }
 
@@ -257,7 +270,7 @@ function reveal(id) {
 const icon = (d) => `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const ICONS = {
     move: icon("M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"), up: icon("M12 19V5M6 11l6-6 6 6"), down: icon("M12 5v14M6 13l6 6 6-6"),
-    duplicate: icon("M8 8h11v11H8zM5 16V5h11"),
+    duplicate: icon("M8 8h11v11H8zM5 16V5h11"), insert: icon("M12 5v14M5 12h14"),
     "theme-page": '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg>',
     "theme-light": icon("M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6zM12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"),
     "theme-dark": icon("M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"),
@@ -287,19 +300,30 @@ function tools(entry) {
     name.className = "kalq-section-tools__name";
     name.textContent = sectionName(entry);
     name.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); select(entry.id); });
-    // Appearance: follow the page, always light, always dark
+    // Appearance in one control, like the language switch: the chosen option shows, pressing it unfolds the others
+    const current = entry.theme || "page";
     const theme = document.createElement("span");
-    theme.className = "kalq-section-tools__theme";
+    theme.className = "kalq-section-tools__theme kalq-theme-switch";
     theme.setAttribute("role", "group");
     theme.setAttribute("aria-label", t("theme"));
-    [["page", t("themePage")], ["light", t("themeLight")], ["dark", t("themeDark")]].forEach(([value, label]) => {
-        const b = toolButton(`theme-${value}`, `${t("theme")}: ${label}`, () => setTheme(entry.id, value));
-        b.setAttribute("aria-pressed", (entry.theme || "page") === value);
+    const labels = { page: t("themePage"), light: t("themeLight"), dark: t("themeDark") };
+    [current, ...["page", "light", "dark"].filter((v) => v !== current)].forEach((value) => {
+        const chosen = value === current;
+        const b = toolButton(`theme-${value}`, chosen ? `${t("theme")}: ${labels[value]} (${t("themeChoose")})` : `${t("theme")}: ${labels[value]}`, () => {
+            if (chosen) { const open = !theme.classList.contains("is-open"); theme.classList.toggle("is-open", open); b.setAttribute("aria-expanded", open); }
+            else setTheme(entry.id, value);
+        });
+        b.setAttribute("aria-pressed", chosen);
+        if (chosen) b.setAttribute("aria-expanded", "false");
         theme.append(b);
     });
-    box.append(name,
-        toolButton("move", `${t("move")}: ${sectionName(entry)}`, (b) => openMap(entry.id, b)),
-        toolButton("duplicate", t("copy"), () => duplicate(entry.id)),
+    const layout = currentLayout();
+    box.append(name);
+    if (!isTopHero(layout, entry.id)) box.append(toolButton("move", `${t("move")}: ${sectionName(entry)}`, (b) => toggleOutline(entry.id, b)));
+    // insert: the same as the plus on the seam below this section (opens the picker, inserts directly after it)
+    const index = layout.sections.findIndex((s) => s.id === entry.id);
+    box.append(toolButton("duplicate", t("copy"), () => duplicate(entry.id)),
+        toolButton("insert", t("insertAfter"), () => openPicker(index + 1)),
         toolButton("remove", t("remove"), () => remove(entry.id)), theme);
     // Sections with a full-width picture: where its subject sits on two screens
     if (hasFullWidthMedia(entry)) {
@@ -344,7 +368,9 @@ function clearChrome() {
     if (!editing()) return;
     // the editor's own toolbar at the bottom counts too
     const bar = document.querySelector(".kalq-toolbar")?.getBoundingClientRect();
-    document.querySelectorAll(".kalq-section-tools, .kalq-insert-zone").forEach((n) => {
+    // the open move panel is the control in use: it is never hidden (moves keep it below the header, and the header
+    // stays on top of it)
+    document.querySelectorAll(".kalq-section-tools:not(.is-expanded), .kalq-insert-zone").forEach((n) => {
         const r = n.getBoundingClientRect();
         const underHeader = r.bottom > 0 && r.top < chromeBottom + 6;
         const underToolbar = bar && r.bottom > bar.top - 6 && r.top < bar.bottom && r.right > bar.left && r.left < bar.right;
@@ -364,9 +390,8 @@ function placeInserts() {
     const sections = [...c.querySelectorAll(":scope > section[data-section]")];
     const seams = sections.map((s) => s.offsetTop);
     if (sections.length) seams.push(sections.at(-1).offsetTop + sections.at(-1).offsetHeight);
-    const zones = [...insertLayer.children];
-    // the first one, "before the first section", sits just below the header band
-    seams.forEach((y, i) => { if (zones[i]) zones[i].style.top = `${Math.max(i === 0 ? chromeBottom + 26 : 0, y)}px`; });
+    // the one "before the first section" (when there is one) sits just below the header band
+    [...insertLayer.children].forEach((zone) => { const i = Number(zone.dataset.index); zone.style.top = `${Math.max(i === 0 ? chromeBottom + 26 : 0, seams[i] ?? 0)}px`; });
     clearChrome();
 }
 
@@ -378,9 +403,11 @@ function renderInserts() {
     const count = c.querySelectorAll(":scope > section[data-section]").length;
     insertLayer = document.createElement("div");
     insertLayer.className = "kalq-inserts";
-    for (let i = 0; i <= count; i++) {
+    // nothing goes above a fixed top hero: its seam has no plus
+    for (let i = firstMovable(currentLayout()); i <= count; i++) {
         const zone = document.createElement("div");
         zone.className = "kalq-insert-zone";
+        zone.dataset.index = i;
         const line = document.createElement("span");
         line.className = "kalq-insert-line";
         line.setAttribute("aria-hidden", "true");
@@ -401,133 +428,149 @@ function renderInserts() {
     layerObserver.observe(c);
 }
 
-//=================================== Page map (one move control) ===================================//
-// A pill below the move button: every section of the page as a small labelled block in order, heights in proportion,
-// the one being moved in blue. Arrows nudge it a step, dragging the blue block moves it many steps at once.
-let map = null;
+//=================================== Move: the bar grows into the page outline ===================================//
+// Pressing the move control selects the section and the same bar extends downward into a small true map of the page:
+// every section a block at the screen's proportion and its real height, in order, the one being moved in blue, the
+// fixed top hero and the footer marked. Dragging the blue block moves it many steps, the arrows on the right one step;
+// each move is one history entry. The bar is lifted into a page layer at the same spot, so no section clips it.
+let expanded = null; // id of the section whose bar shows the outline
+let animateNext = false; // the next render opens the outline with its growing animation
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const OUTLINE_W = 72; // px: a block's width; heights follow the page's own proportions
 
-function closeMap(returnFocus = true) {
-    if (!map) return;
-    const back = map.anchor;
-    map.node.remove();
-    map = null;
-    if (returnFocus && back?.isConnected) back.focus();
+function toggleOutline(id) {
+    if (expanded === id) return collapse(true);
+    expanded = id;
+    select(id);
+    animateNext = true;
+    render();
 }
 
-function openMap(id, anchor) {
-    closeMap(false);
-    select(id);
+function collapse(returnFocus = false) {
+    if (!expanded) return;
+    const id = expanded;
+    expanded = null;
+    render();
+    if (returnFocus) sectionNode(id)?.querySelector(".kalq-section-tools .is-move")?.focus();
+}
+
+function expand(id, { animate = false } = {}) {
+    const node = sectionNode(id);
+    const bar = node?.querySelector(":scope > .kalq-section-tools");
+    if (!bar) { expanded = null; return; }
+    const top = node.offsetTop + bar.offsetTop;
+    bar.classList.add("is-expanded");
+    bar.style.top = `${top}px`;
+    container().append(bar);
+    bar.querySelector(".is-move")?.setAttribute("aria-expanded", "true");
+    const outline = buildOutline(id);
+    bar.append(outline);
+    if (animate && !reducedMotion.matches) requestAnimationFrame(() => requestAnimationFrame(() => outline.classList.add("is-open")));
+    else outline.classList.add("is-open");
+    // keys anywhere in the panel: arrows move the section, Esc folds the panel back
+    bar.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowUp" || e.key === "ArrowDown") { e.preventDefault(); e.stopPropagation(); nudge(e.key === "ArrowUp" ? -1 : 1); }
+        else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); collapse(true); }
+    });
+    // focus the moved section's row once the panel is in place (a move rebuilds the panel)
+    requestAnimationFrame(() => { if (expanded === id) bar.querySelector(".kalq-outline__row.is-current")?.focus({ preventScroll: true }); });
+    clearChrome();
+}
+
+function buildOutline(id) {
     const layout = currentLayout();
-    const node = document.createElement("div");
-    node.className = "kalq-map-pill";
-    node.setAttribute("role", "dialog");
-    node.setAttribute("aria-label", t("map"));
+    const c = container();
+    const scale = OUTLINE_W / (c.clientWidth || window.innerWidth);
+    const outline = document.createElement("div");
+    outline.className = "kalq-outline";
+    const inner = document.createElement("div");
+    inner.className = "kalq-outline__inner";
     const head = document.createElement("div");
-    head.className = "kalq-map-pill__head";
-    head.append(Object.assign(document.createElement("span"), { textContent: t("map") }),
-        toolButton("up", t("up"), () => nudge(-1)), toolButton("down", t("down"), () => nudge(1)));
+    head.className = "kalq-outline__head";
+    const i = layout.sections.findIndex((s) => s.id === id);
+    const up = toolButton("up", t("up"), () => nudge(-1));
+    const down = toolButton("down", t("down"), () => nudge(1));
+    up.disabled = i <= firstMovable(layout);
+    down.disabled = i >= layout.sections.length - 1;
+    head.append(Object.assign(document.createElement("span"), { className: "kalq-outline__title", textContent: t("map") }), up, down);
     const list = document.createElement("div");
-    list.className = "kalq-map-pill__list";
+    list.className = "kalq-outline__list";
     list.setAttribute("role", "listbox");
     list.setAttribute("aria-label", t("map"));
-    const heights = layout.sections.map((s) => sectionNode(s.id)?.offsetHeight || 400);
-    const total = heights.reduce((a, b) => a + b, 0) || 1;
-    layout.sections.forEach((s, i) => {
-        const block = document.createElement("div");
-        block.className = "kalq-map-pill__block";
-        block.dataset.id = s.id;
-        block.style.height = `${Math.max(20, Math.round((heights[i] / total) * 360))}px`;
-        block.textContent = sectionName(s);
-        block.setAttribute("role", "option");
-        if (s.state === "draft") block.classList.add("is-draft");
-        if (s.id === id) {
-            block.classList.add("is-current");
-            block.setAttribute("aria-selected", "true");
-            block.tabIndex = 0;
-            block.setAttribute("aria-label", `${sectionName(s)}: ${t("mapHint")}`);
-        }
-        list.append(block);
+    const row = (label, height, { current = false, fixed = false, draft = false, id: rowId } = {}) => {
+        const r = document.createElement("div");
+        r.className = `kalq-outline__row${current ? " is-current" : ""}${fixed ? " is-fixed" : ""}${draft ? " is-draft" : ""}`;
+        if (rowId) r.dataset.id = rowId;
+        r.setAttribute("role", "option");
+        r.setAttribute("aria-selected", current);
+        const block = document.createElement("span");
+        block.className = "kalq-outline__block";
+        block.style.width = `${OUTLINE_W}px`;
+        block.style.height = `${Math.max(5, Math.round(height * scale))}px`;
+        r.append(block, Object.assign(document.createElement("span"), { className: "kalq-outline__name", textContent: label }));
+        if (fixed) r.append(Object.assign(document.createElement("span"), { className: "kalq-outline__fixed", textContent: t("fixed") }));
+        if (current) { r.tabIndex = 0; r.setAttribute("aria-label", `${label}, ${t("move")}`); }
+        return r;
+    };
+    layout.sections.forEach((s) => {
+        const h = sectionNode(s.id)?.offsetHeight || 0;
+        if (!h && s.state === "draft" && !sectionNode(s.id)) return;
+        list.append(row(sectionName(s), h || 300, { current: s.id === id, fixed: isTopHero(layout, s.id), draft: s.state === "draft", id: s.id }));
     });
-    node.append(head, list, Object.assign(document.createElement("p"), { className: "kalq-map-pill__hint", textContent: t("mapHint") }));
-    document.body.append(node);
-    map = { node, anchor, id };
-    position();
-    node.addEventListener("keydown", (e) => {
-        e.stopPropagation();
-        if (e.key === "Escape") { e.preventDefault(); closeMap(); }
-        else if (e.key === "ArrowUp" || e.key === "ArrowDown") { e.preventDefault(); nudge(e.key === "ArrowUp" ? -1 : 1); }
-        else if (e.key === "Tab") { // stay inside the pill
-            const f = [...node.querySelectorAll("button, [tabindex='0']")];
-            const i = f.indexOf(document.activeElement);
-            e.preventDefault();
-            f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus();
-        }
-    });
-    list.querySelector(".is-current").addEventListener("pointerdown", startDrag);
-    list.querySelector(".is-current").focus();
+    const footer = c.querySelector("footer") || document.querySelector("footer");
+    if (footer) list.append(row(t("footer"), footer.offsetHeight, { fixed: true }));
+    inner.append(head, list);
+    outline.append(inner);
+    const cur = list.querySelector(".is-current");
+    cur?.addEventListener("pointerdown", startDrag);
+    return outline;
 }
 
-// Below its move button, always fully on screen and below the header. The bar is re-rendered after every move, so a
-// detached button is replaced by the section's current one.
-function position() {
-    if (!map) return;
-    if (!map.anchor?.isConnected) {
-        const fresh = sectionNode(map.id)?.querySelector(".kalq-section-tools .is-move");
-        if (fresh) map.anchor = fresh;
-    }
-    const r = map.anchor?.isConnected ? map.anchor.getBoundingClientRect() : null;
-    const w = map.node.offsetWidth, h = map.node.offsetHeight;
-    const top = r ? r.bottom + 10 : chromeBottom + 12;
-    const left = r ? r.left + r.width / 2 - w / 2 : window.innerWidth / 2 - w / 2;
-    map.node.style.left = `${Math.max(8, Math.min(window.innerWidth - w - 8, left))}px`;
-    map.node.style.top = `${Math.max(chromeBottom + 8, Math.min(window.innerHeight - h - 8, top))}px`;
-}
-
-// Arrows: one step, one history entry; the pill stays open on the moved section
+// Arrows: one step, one history entry; the outline stays open on the moved section
 async function nudge(delta) {
-    if (!map) return;
-    const { id, anchor } = map;
+    const id = expanded;
+    if (!id) return;
     const layout = currentLayout();
     const i = layout.sections.findIndex((s) => s.id === id);
     await moveTo(id, i + delta);
-    const button = sectionNode(id)?.querySelector(".kalq-section-tools .is-move") || anchor;
-    openMap(id, button);
 }
 
-// Drag the blue block along the map; dropping it moves the real section there (one history entry)
+// Drag the blue block along the outline; dropping it moves the real section there (one history entry). The fixed
+// rows (top hero, footer) stay where they are: nothing goes above the hero or below the footer.
 function startDrag(e) {
-    if (!map) return;
+    if (!expanded) return;
     e.preventDefault();
-    const block = e.currentTarget;
-    const list = block.parentElement;
-    const others = [...list.children].filter((b) => b !== block);
-    block.setPointerCapture(e.pointerId);
-    block.classList.add("is-dragging");
+    const rowEl = e.currentTarget;
+    const list = rowEl.parentElement;
+    const layout = currentLayout();
+    const sectionsRows = [...list.children].filter((r) => r.dataset.id);
+    const others = sectionsRows.filter((r) => r !== rowEl);
+    rowEl.setPointerCapture(e.pointerId);
+    rowEl.classList.add("is-dragging");
     const startY = e.clientY;
-    let target = [...list.children].indexOf(block);
+    let target = sectionsRows.indexOf(rowEl);
     const marker = document.createElement("div");
-    marker.className = "kalq-map-pill__marker";
+    marker.className = "kalq-outline__marker";
+    const lo = firstMovable(layout), hi = layout.sections.length - 1;
     const move = (ev) => {
-        block.style.transform = `translateY(${ev.clientY - startY}px)`;
-        // the gap the pointer is in, among the other blocks
-        target = others.findIndex((b) => { const r = b.getBoundingClientRect(); return ev.clientY < r.top + r.height / 2; });
-        if (target < 0) target = others.length;
-        const ref = others[target] || null;
-        list.insertBefore(marker, ref);
+        rowEl.style.transform = `translateY(${ev.clientY - startY}px)`;
+        let k = others.findIndex((r) => { const b = r.getBoundingClientRect(); return ev.clientY < b.top + b.height / 2; });
+        if (k < 0) k = others.length;
+        target = Math.max(lo, Math.min(hi, k));
+        list.insertBefore(marker, others[target] || list.querySelector(".kalq-outline__row.is-fixed:last-child") || null);
     };
     const up = () => {
-        block.removeEventListener("pointermove", move);
-        block.removeEventListener("pointerup", up);
-        block.removeEventListener("pointercancel", up);
+        rowEl.removeEventListener("pointermove", move);
+        rowEl.removeEventListener("pointerup", up);
+        rowEl.removeEventListener("pointercancel", up);
         marker.remove();
-        block.style.transform = "";
-        block.classList.remove("is-dragging");
-        const { id } = map;
-        moveTo(id, target).then(() => openMap(id, sectionNode(id)?.querySelector(".kalq-section-tools .is-move") || map?.anchor));
+        rowEl.style.transform = "";
+        rowEl.classList.remove("is-dragging");
+        moveTo(expanded, target);
     };
-    block.addEventListener("pointermove", move);
-    block.addEventListener("pointerup", up);
-    block.addEventListener("pointercancel", up);
+    rowEl.addEventListener("pointermove", move);
+    rowEl.addEventListener("pointerup", up);
+    rowEl.addEventListener("pointercancel", up);
 }
 
 //=================================== Selection and keys ===================================//
@@ -538,8 +581,10 @@ function select(id) {
 
 // Clicking a section's background (not its text, links or controls) in edit mode selects it
 function onPointerDown(e) {
-    if (!editing() || e.target.closest(".kalq-map-pill, .kalq-picker, .kalq-toolbar, .kalq-panel, .kalq-styles")) return;
-    if (map && !e.target.closest(".kalq-map-pill")) closeMap(false);
+    if (!editing() || e.target.closest(".kalq-picker, .kalq-toolbar, .kalq-panel, .kalq-styles")) return;
+    // a theme choice left open folds back
+    document.querySelectorAll(".kalq-theme-switch.is-open").forEach((sw) => { if (!sw.contains(e.target)) sw.classList.remove("is-open"); });
+    if (e.target.closest(".kalq-section-tools.is-expanded")) return;
     const section = e.target.closest?.('[data-barba="container"] > section[data-section]');
     // Clicking into a text, link or control works on that, not on the section: the selection ends
     if (!section || e.target.closest("[data-kalq-key], a, button, input, textarea, [contenteditable='true'], .kalq-media-tools")) {
@@ -552,10 +597,11 @@ function onPointerDown(e) {
 const typing = (target) => !!target.closest?.("input, textarea, select, [contenteditable='true']");
 
 function onKey(e) {
-    if (!editing() || typing(e.target) || e.target.closest?.(".kalq-picker, .kalq-map-pill")) return;
+    if (!editing() || typing(e.target) || e.target.closest?.(".kalq-picker, .kalq-outline")) return;
     const mod = e.metaKey || e.ctrlKey;
     if (mod && e.key.toLowerCase() === "z") { e.preventDefault(); e.stopImmediatePropagation(); return e.shiftKey ? redo() : undo(); }
     if (mod && e.key.toLowerCase() === "y") { e.preventDefault(); e.stopImmediatePropagation(); return redo(); }
+    if (e.key === "Escape" && expanded) { e.preventDefault(); e.stopImmediatePropagation(); collapse(true); return; }
     if (!selected || !sectionNode(selected)) return;
     if (e.key === "Escape") { e.preventDefault(); e.stopImmediatePropagation(); select(null); return; } // before Esc leaves edit mode
     if (e.key === "Delete" || e.key === "Backspace") { e.preventDefault(); e.stopImmediatePropagation(); return remove(selected); }
@@ -592,7 +638,7 @@ function addUndoButtons() {
 //=================================== Render ===================================//
 export function render() {
     document.querySelectorAll(".kalq-section-tools").forEach((n) => n.remove());
-    if (!editing() || !container()) { insertLayer?.remove(); closeMap(false); return; }
+    if (!editing() || !container()) { insertLayer?.remove(); expanded = null; return; }
     const layout = currentLayout();
     measureChrome();
     container().querySelectorAll(":scope > section[data-section]").forEach((node, i) => {
@@ -604,6 +650,8 @@ export function render() {
     });
     renderInserts();
     if (selected) select(selected);
+    if (expanded) expand(expanded, { animate: animateNext }); // after a move the outline stays open on the section
+    animateNext = false;
     updateUndoButtons();
 }
 
@@ -615,13 +663,16 @@ export function initSections(api) {
     new MutationObserver(() => { if (editing() !== wasEditing) { wasEditing = editing(); render(); } }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
     document.addEventListener("kalq:layout", render);
     document.addEventListener("kalq:language", render);
-    collab.on("page", () => { selected = null; closeMap(false); render(); });
+    collab.on("page", () => { selected = null; expanded = null; render(); });
     document.addEventListener("pointerdown", onPointerDown, true);
+    // A click outside the open panel folds it back, after the click has reached its target (a button on another
+    // section's bar still does what it says)
+    document.addEventListener("click", (e) => { if (expanded && !e.target.closest(".kalq-section-tools.is-expanded")) setTimeout(() => collapse(false)); }, true);
     document.addEventListener("keydown", onKey, true);
-    window.addEventListener("resize", () => { measureChrome(); placeInserts(); position(); });
+    window.addEventListener("resize", () => { measureChrome(); placeInserts(); });
     const scroller = document.querySelector(".scrollbar-container");
     const bar = scroller && window.Scrollbar ? Scrollbar.get(scroller) : null;
-    bar?.addListener(() => { position(); clearChrome(); });
+    bar?.addListener(clearChrome);
     if (!bar) window.addEventListener("scroll", clearChrome, { passive: true });
     render();
 }

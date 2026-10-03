@@ -908,23 +908,32 @@ html.menu-panels .site-menu-toggle .dots {
 }
 html.menu-panels .site-menu-toggle__panels {
   display: block;
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
+  overflow: visible;
+}
+html.menu-panels .site-menu-toggle__panels .unit {
+  transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
 }
 html.menu-panels .site-menu-toggle__panels .drop {
   transform: scaleY(0);
-  transform-origin: 50% 8.6px;
+  transform-origin: 50% 13.65px;
   transform-box: view-box;
-  transition: transform 0.35s cubic-bezier(0.76, 0, 0.24, 1);
-}
-html.menu-panels .site-menu-toggle__panels .drop-1 {
-  transition-delay: 0.1s;
-}
-html.menu-panels .site-menu-toggle__panels .drop-2 {
-  transition-delay: 0.05s;
+  transition: transform 0.38s cubic-bezier(0.65, 0, 0.35, 1);
 }
 html.menu-panels .site-menu-toggle__panels .drop-3 {
   transition-delay: 0s;
+}
+html.menu-panels .site-menu-toggle__panels .drop-2 {
+  transition-delay: 0.06s;
+}
+html.menu-panels .site-menu-toggle__panels .drop-1 {
+  transition-delay: 0.12s;
+}
+html.menu-panels .site-menu-toggle:hover .site-menu-toggle__panels .unit,
+html.menu-panels .site-menu-toggle:focus-visible .site-menu-toggle__panels .unit,
+html.menu-panels .site-menu-toggle[aria-expanded=true] .site-menu-toggle__panels .unit {
+  transform: translateY(-3px);
 }
 html.menu-panels .site-menu-toggle:hover .site-menu-toggle__panels .drop,
 html.menu-panels .site-menu-toggle:focus-visible .site-menu-toggle__panels .drop,

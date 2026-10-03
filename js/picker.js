@@ -8,28 +8,36 @@ const TEXT = {
     de: { title: "Modul einfügen", search: "Module suchen", insert: "Einfügen", cancel: "Abbrechen", close: "Schließen",
         none: "Keine Module gefunden.", results: "Suchergebnisse", hint: "Pfeiltasten zum Blättern, Enter fügt ein, Esc schließt.",
         slots: "Enthält", required: "Pflicht", draft: "Wird als Entwurf eingefügt. Platzhalter ausfüllen, dann veröffentlichen.",
-        devices: "So passt es sich an" },
+        devices: "So passt es sich an", derived: "abgeleitet", viewport: "CSS-Viewport" },
     en: { title: "Insert a module", search: "Search modules", insert: "Insert", cancel: "Cancel", close: "Close",
         none: "No modules found.", results: "Search results", hint: "Arrow keys to browse, Enter inserts, Esc closes.",
         slots: "Contains", required: "required", draft: "Inserted as a draft. Fill in the placeholders, then publish.",
-        devices: "How it adapts" },
+        devices: "How it adapts", derived: "derived", viewport: "CSS viewport" },
 };
 const lang = () => (currentLang() === "en" ? "en" : "de");
 const t = (key) => TEXT[lang()][key];
 
-// The preview devices, at their real CSS sizes, all scaled by the same factor: a phone looks like a phone next to a
-// tablet. Each frame is a fixed window of the device's screen; a taller section scrolls inside it.
+// The preview devices at their real physical sizes next to each other: each frame renders the device's CSS viewport
+// (w × h) and is shrunk to the size of its actual screen (device pixels ÷ pixel density, from the maker's specs),
+// times one common factor. So a phone is as small next to a laptop as it is on a desk. Each frame is a fixed window
+// of the device's screen; a taller section scrolls inside it.
+// Device pixels and ppi: apple.com/iphone-18-pro/specs, apple.com/iphone-duo/specs, Apple's tech specs of iPhone 13
+// mini, iPad Air 11", MacBook Air 13" (M1) and Studio Display, Microsoft's Surface Duo specs. The CSS viewports of the
+// iPhone Duo and 18 Pro / Pro Max are their device pixels ÷ 3; Apple has not published them yet (derived).
 const DEVICES = [
-    { id: "phone", w: 390, h: 844, de: "Smartphone", en: "Phone" },
-    { id: "folded", w: 344, h: 882, de: "Faltbar, zugeklappt", en: "Foldable, folded" },
-    { id: "unfolded", w: 673, h: 841, de: "Faltbar, aufgeklappt", en: "Foldable, unfolded" },
-    { id: "spanned", w: 1114, h: 705, hinge: 28, cls: "is-span-h", de: "Zwei Bildschirme", en: "Dual screen, spanned" },
-    { id: "tablet-p", w: 820, h: 1180, de: "Tablet hochkant", en: "Tablet portrait" },
-    { id: "tablet-l", w: 1180, h: 820, de: "Tablet quer", en: "Tablet landscape" },
-    { id: "laptop", w: 1440, h: 900, de: "Laptop", en: "Laptop" },
-    { id: "large", w: 2560, h: 1440, de: "Großer Bildschirm", en: "Large screen" },
+    { id: "iphone-13-mini", w: 375, h: 812, px: [1080, 2340], ppi: 476, phone: true, de: "iPhone 13 mini", en: "iPhone 13 mini" },
+    { id: "iphone-duo-folded", w: 466, h: 678, px: [1398, 2034], ppi: 460, phone: true, derived: true, de: "iPhone Duo, zugeklappt", en: "iPhone Duo, folded" },
+    { id: "iphone-duo-unfolded", w: 626, h: 890, px: [1878, 2670], ppi: 430, phone: true, derived: true, de: "iPhone Duo, aufgeklappt", en: "iPhone Duo, unfolded" },
+    { id: "iphone-18-pro", w: 402, h: 874, px: [1206, 2622], ppi: 460, phone: true, derived: true, de: "iPhone 18 Pro", en: "iPhone 18 Pro" },
+    { id: "iphone-18-pro-max", w: 440, h: 956, px: [1320, 2868], ppi: 460, phone: true, derived: true, de: "iPhone 18 Pro Max", en: "iPhone 18 Pro Max" },
+    { id: "spanned", w: 1114, h: 705, hinge: 28, px: [2700, 1800], ppi: 401, cls: "is-span-h", de: "Surface Duo, aufgeklappt", en: "Surface Duo, spanned" },
+    { id: "tablet-p", w: 820, h: 1180, px: [1640, 2360], ppi: 264, de: "iPad Air 11″, hochkant", en: "iPad Air 11″, portrait" },
+    { id: "tablet-l", w: 1180, h: 820, px: [2360, 1640], ppi: 264, de: "iPad Air 11″, quer", en: "iPad Air 11″, landscape" },
+    { id: "laptop", w: 1440, h: 900, px: [2560, 1600], ppi: 227, de: "MacBook Air 13″", en: "MacBook Air 13″" },
+    { id: "large", w: 2560, h: 1440, px: [5120, 2880], ppi: 218, de: "Studio Display 27″", en: "Studio Display 27″" },
 ];
-const SCALE = 0.18;
+const PX_PER_INCH = 18; // the common factor: one inch of real screen is 18 pixels here
+const scaleOf = (d) => (d.px[0] / d.ppi) * PX_PER_INCH / d.w;
 
 // Every version of every module, flat
 const ALL = Object.entries(MODULES).flatMap(([module, def]) => Object.entries(def.versions).map(([version, v]) => ({ module, version, def, v })));
@@ -159,8 +167,8 @@ function draw() {
 // The module itself, rendered with empty placeholders (drawn as blue shapes), in a frame of each device's width
 function devices(item) {
     const L = lang();
-    return el("div", { className: "kalq-picker__devices" }, ...DEVICES.map((d) => {
-        const scale = SCALE;
+    const row = el("div", { className: "kalq-picker__devices" }, ...DEVICES.map((d) => {
+        const scale = scaleOf(d);
         const frame = el("div", { className: `kalq-device ${d.cls || ""}` });
         frame.style.width = `${d.w}px`;
         frame.style.height = `${d.h}px`;
@@ -187,9 +195,47 @@ function devices(item) {
         box.style.width = `${Math.round(d.w * scale)}px`;
         box.style.height = `${Math.round(d.h * scale)}px`;
         box.append(frame);
+        if (d.phone) { // rounded like the real screen's corners, at this device's scale
+            box.classList.add("is-phone");
+            box.style.borderRadius = `${Math.round(d.w * 0.13 * scale)}px`;
+        }
+        // the model, and below it small its resolution in device pixels; the CSS viewport on hover
+        const size = el("span", { className: "kalq-picker__device-size", textContent: `${d.px[0]} × ${d.px[1]} px` });
+        size.title = `${t("viewport")}: ${d.w} × ${d.h}` + (d.derived ? ` (${t("derived")})` : "");
         return el("figure", { className: "kalq-picker__device-wrap" }, box,
-            el("figcaption", { textContent: `${d[L]} · ${d.w}px` }));
+            el("figcaption", {}, el("span", { className: "kalq-picker__device-name", textContent: d[L] }), size));
     }));
+    // The row scrolls by itself while the pointer is near either end (hovering or dragging), and by dragging it with a
+    // mouse; touch, trackpad and the arrow keys scroll it as usual. No visible scrollbar.
+    row.tabIndex = 0;
+    row.setAttribute("aria-label", t("devices"));
+    let speed = 0, raf = 0, drag = null;
+    const EDGE = 72;
+    const tick = () => { raf = 0; if (!speed) return; row.scrollLeft += speed; raf = requestAnimationFrame(tick); };
+    const steer = (x) => {
+        const r = row.getBoundingClientRect();
+        const left = x - r.left, right = r.right - x;
+        speed = left < EDGE ? -Math.ceil((EDGE - left) / 6) : right < EDGE ? Math.ceil((EDGE - right) / 6) : 0;
+        if (speed && !raf) raf = requestAnimationFrame(tick);
+    };
+    row.addEventListener("pointermove", (e) => {
+        if (e.pointerType === "touch") return; // fingers scroll it natively
+        if (drag) { row.scrollLeft = drag.left - (e.clientX - drag.x); }
+        steer(e.clientX);
+    });
+    row.addEventListener("pointerleave", () => { speed = 0; });
+    row.addEventListener("pointerdown", (e) => { if (e.pointerType === "mouse") { drag = { x: e.clientX, left: row.scrollLeft }; row.setPointerCapture(e.pointerId); } });
+    const end = () => { drag = null; speed = 0; };
+    row.addEventListener("pointerup", end);
+    row.addEventListener("pointercancel", end);
+    row.addEventListener("keydown", (e) => {
+        const step = { ArrowRight: 160, ArrowLeft: -160, End: Infinity, Home: -Infinity }[e.key];
+        if (step === undefined) return;
+        e.preventDefault();
+        e.stopPropagation();
+        row.scrollLeft = Number.isFinite(step) ? row.scrollLeft + step : step > 0 ? row.scrollWidth : 0;
+    });
+    return row;
 }
 
 function detail(item) {

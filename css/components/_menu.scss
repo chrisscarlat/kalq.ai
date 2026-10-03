@@ -84,28 +84,41 @@ html.menu-panels {
         }
     }
 
-    // One thick bar; on hover (and while open) three small panels drop out of it, rightmost first, in a staircase
+    // One connected block: a thick bar, centred on the same line as the language switch and the light/dark toggle.
+    // On hover (and while open) it lifts slightly and three bars unfold beneath it, touching it and each other, graded
+    // left largest to right smallest like the panels; right first, then middle, then left.
     .site-menu-toggle__panels {
         display: block;
-        width: 26px;
-        height: 26px;
+        width: 22px;
+        height: 22px;
+        overflow: visible;
+
+        .unit {
+            transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+        }
 
         .drop {
             transform: scaleY(0);
-            transform-origin: 50% 8.6px;
+            transform-origin: 50% 13.65px;
             transform-box: view-box;
-            transition: transform 0.35s cubic-bezier(0.76, 0, 0.24, 1);
+            transition: transform 0.38s cubic-bezier(0.65, 0, 0.35, 1);
         }
 
-        .drop-1 { transition-delay: 0.1s; }
-        .drop-2 { transition-delay: 0.05s; }
         .drop-3 { transition-delay: 0s; }
+        .drop-2 { transition-delay: 0.06s; }
+        .drop-1 { transition-delay: 0.12s; }
     }
 
-    .site-menu-toggle:hover .site-menu-toggle__panels .drop,
-    .site-menu-toggle:focus-visible .site-menu-toggle__panels .drop,
-    .site-menu-toggle[aria-expanded="true"] .site-menu-toggle__panels .drop {
-        transform: none;
+    .site-menu-toggle:hover .site-menu-toggle__panels,
+    .site-menu-toggle:focus-visible .site-menu-toggle__panels,
+    .site-menu-toggle[aria-expanded="true"] .site-menu-toggle__panels {
+        .unit {
+            transform: translateY(-3px);
+        }
+
+        .drop {
+            transform: none;
+        }
     }
 
     // While open the right side of the header sits over the light panels

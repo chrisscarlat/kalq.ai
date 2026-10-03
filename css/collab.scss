@@ -2204,26 +2204,27 @@ body.kalq-edit [data-barba="container"] {
     height: 2px;
     margin-top: -1px;
     border-radius: 2px;
-    background: #3B82F6;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
+    background: #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
 }
 
+// White plus in a white ring on a dark disc, readable on light and dark sections
 .kalq-insert {
     position: relative;
     width: 30px;
     height: 30px;
     display: grid;
     place-items: center;
-    border: 0;
+    border: 1.5px solid #fff;
     border-radius: 50%;
-    background: #3B82F6;
+    background: rgba(16, 16, 16, 0.82);
     color: #fff;
-    font: 400 1.3rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
-    box-shadow: 0 0 0 3px #fff, 0 6px 18px rgba(0, 0, 0, 0.25);
+    font: 300 1.35rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35), 0 6px 18px rgba(0, 0, 0, 0.25);
     cursor: pointer;
 
     &:hover {
-        background: #2563EB;
+        background: rgba(16, 16, 16, 0.95);
     }
 
     &:focus-visible {
@@ -2249,70 +2250,83 @@ body.kalq-edit [data-barba="container"] {
     opacity: 1;
 }
 
-/* One move control: the page map in a pill */
-.kalq-map-pill {
-    position: fixed;
-    z-index: 55;
-    width: 240px;
-    padding: 0.6rem;
-    border: 1px solid rgba(255, 255, 255, 0.16);
+/* Move: the section's own bar grows downward into the page outline (one piece, buttons on top) */
+.kalq-section-tools.is-expanded {
+    position: absolute;
+    left: 50%;
+    z-index: 27;
+    transform: translateX(-50%);
+    min-width: 300px;
     border-radius: 18px;
-    background: rgba(16, 16, 16, 0.94);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
-    color: #fff;
-    font: 500 0.75rem/1.2 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    opacity: 1;
 }
 
-.kalq-map-pill__head {
+.kalq-outline {
+    flex-basis: 100%;
+    display: grid;
+    grid-template-rows: 0fr; // grows open: 0fr → 1fr
+    transition: grid-template-rows 0.38s cubic-bezier(0.65, 0, 0.35, 1);
+
+    &.is-open {
+        grid-template-rows: 1fr;
+    }
+}
+
+.kalq-outline__inner {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.kalq-outline__head {
     display: flex;
     align-items: center;
     gap: 2px;
-    margin-bottom: 0.5rem;
-    padding-left: 0.4rem;
-
-    span {
-        flex: 1;
-        opacity: 0.7;
-    }
+    padding: 0.55rem 0.2rem 0.35rem 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    margin-top: 4px;
 }
 
-.kalq-map-pill__list {
+.kalq-outline__title {
+    flex: 1; // the arrows sit on the right
+    opacity: 0.6;
+}
+
+.kalq-outline__list {
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    max-height: 60vh;
+    gap: 2px;
+    max-height: min(56vh, 520px);
     overflow-y: auto;
+    padding: 0 0.4rem 0.45rem;
 }
 
-.kalq-map-pill__block {
+// A row: the section as a block at the screen's proportion and its real height, its name, "Fixed" on the right
+.kalq-outline__row {
     display: flex;
     align-items: center;
-    padding: 0 0.6rem;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.75);
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    gap: 0.6rem;
+    min-height: 12px;
+    padding: 1px 0.3rem 1px 1px;
+    border-radius: 5px;
+    color: rgba(255, 255, 255, 0.72);
     user-select: none;
-
-    &.is-draft {
-        background: repeating-linear-gradient(135deg, rgba(255, 180, 0, 0.18) 0 6px, rgba(255, 255, 255, 0.08) 6px 12px);
-    }
 
     &.is-current {
         position: relative;
         z-index: 1;
-        background: #3B82F6;
+        background: rgba(59, 130, 246, 0.22);
         color: #fff;
         cursor: grab;
         touch-action: none; // the finger drags the block, not the list
 
+        .kalq-outline__block {
+            background: #3B82F6;
+            border-color: #3B82F6;
+        }
+
         &:focus-visible {
             outline: 2px solid #fff;
-            outline-offset: 2px;
+            outline-offset: 1px;
         }
     }
 
@@ -2320,20 +2334,71 @@ body.kalq-edit [data-barba="container"] {
         cursor: grabbing;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
     }
+
+    &.is-draft .kalq-outline__block {
+        background: repeating-linear-gradient(135deg, rgba(255, 180, 0, 0.35) 0 4px, rgba(255, 255, 255, 0.12) 4px 8px);
+    }
+
+    &.is-fixed .kalq-outline__block {
+        background: rgba(255, 255, 255, 0.07);
+        border-style: dashed;
+    }
 }
 
-.kalq-map-pill__marker {
+.kalq-outline__block {
     flex-shrink: 0;
-    height: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.kalq-outline__name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.7rem;
+}
+
+.kalq-outline__fixed {
+    flex-shrink: 0;
+    padding: 0.1rem 0.4rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.kalq-outline__marker {
+    flex-shrink: 0;
+    height: 2px;
     margin: -1px 0;
     border-radius: 2px;
     background: #fff;
 }
 
-.kalq-map-pill__hint {
-    margin-top: 0.5rem;
-    padding-left: 0.4rem;
-    opacity: 0.5;
+// Appearance in one control (like the language switch): only the chosen option shows; pressing it unfolds the rest
+.kalq-theme-switch > .kalq-section-tools__btn {
+    max-width: 32px;
+    overflow: hidden;
+    transition: max-width 0.3s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.2s ease, padding 0.3s ease, min-width 0.3s ease;
+}
+
+.kalq-theme-switch:not(.is-open) > .kalq-section-tools__btn:not([aria-pressed="true"]) {
+    max-width: 0;
+    min-width: 0;
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .kalq-outline,
+    .kalq-theme-switch > .kalq-section-tools__btn {
+        transition: none;
+    }
 }
 
 /* Undo and redo: in the toolbar, only while editing */
@@ -2646,7 +2711,17 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
     margin: 0 -1.6rem;
     padding: 1.2rem 1.6rem 1rem;
     overflow-x: auto;
+    scrollbar-width: none; // no visible scrollbar: touch, trackpad, keys and the edges scroll it
     background: #0b0b0b;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: -2px;
+    }
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -2656,9 +2731,10 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
     margin: 0;
 
     figcaption {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
         margin-top: 0.45rem;
-        font-size: 0.72rem;
-        opacity: 0.6;
         white-space: nowrap;
     }
 }
@@ -2682,7 +2758,7 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
     overflow-x: hidden;
     overflow-y: auto; // the device's screen: a taller section scrolls inside
     scrollbar-width: none;
-    overscroll-behavior: contain;
+    overscroll-behavior: auto contain; // vertical scrolling stays in the frame, a sideways swipe moves the row
     transform-origin: 0 0;
     container-type: inline-size;
     background: var(--kalq-bg, #fff);
@@ -2921,4 +2997,23 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
             display: none;
         }
     }
+}
+
+
+// Device labels: the name, and its resolution small below
+.kalq-picker__device-name {
+    font-size: 0.72rem;
+    opacity: 0.8;
+}
+
+.kalq-picker__device-size {
+    font-size: 0.64rem;
+    opacity: 0.5;
+    font-variant-numeric: tabular-nums;
+}
+
+// Phones look like phones: a thin dark bezel around the screen (the corner radius is set per device)
+.kalq-picker__device.is-phone {
+    border: 2px solid #2b2b2b;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22);
 }

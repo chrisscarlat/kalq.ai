@@ -272,6 +272,29 @@ function tools(entry) {
     return box;
 }
 
+//=================================== Clear of the site chrome ===================================//
+// The fixed header (logo, version dots, mode, language, menu) is never covered: the controls of the first section and
+// the plus above it start below the header band, and any control that scrolls under the band is hidden until clear.
+let chromeBottom = 0;
+
+function measureChrome() {
+    const parts = [...document.querySelectorAll(".site-header > *, .kalq-switcher:not([hidden])")];
+    chromeBottom = Math.max(0, ...parts.map((n) => n.getBoundingClientRect().bottom).filter((b) => b > 0 && b < window.innerHeight / 2));
+    document.documentElement.style.setProperty("--kalq-chrome", `${Math.round(chromeBottom)}px`);
+}
+
+function clearChrome() {
+    if (!editing()) return;
+    // the editor's own toolbar at the bottom counts too
+    const bar = document.querySelector(".kalq-toolbar")?.getBoundingClientRect();
+    document.querySelectorAll(".kalq-section-tools, .kalq-insert-zone").forEach((n) => {
+        const r = n.getBoundingClientRect();
+        const underHeader = r.bottom > 0 && r.top < chromeBottom + 6;
+        const underToolbar = bar && r.bottom > bar.top - 6 && r.top < bar.bottom && r.right > bar.left && r.left < bar.right;
+        n.classList.toggle("is-under-chrome", underHeader || !!underToolbar);
+    });
+}
+
 //=================================== Insert plus on every seam ===================================//
 // One layer over the page: a short blue line with a plus, centred on each boundary between two sections (and above
 // the first, below the last), straddling both. Revealed on hover with a pointer, always shown on touch.
@@ -285,7 +308,9 @@ function placeInserts() {
     const seams = sections.map((s) => s.offsetTop);
     if (sections.length) seams.push(sections.at(-1).offsetTop + sections.at(-1).offsetHeight);
     const zones = [...insertLayer.children];
-    seams.forEach((y, i) => { if (zones[i]) zones[i].style.top = `${Math.max(i === 0 ? 18 : 0, y)}px`; });
+    // the first one, "before the first section", sits just below the header band
+    seams.forEach((y, i) => { if (zones[i]) zones[i].style.top = `${Math.max(i === 0 ? chromeBottom + 26 : 0, y)}px`; });
+    clearChrome();
 }
 
 function renderInserts() {
@@ -504,9 +529,13 @@ export function render() {
     document.querySelectorAll(".kalq-section-tools").forEach((n) => n.remove());
     if (!editing() || !container()) { insertLayer?.remove(); closeMap(false); return; }
     const layout = currentLayout();
-    container().querySelectorAll(":scope > section[data-section]").forEach((node) => {
+    measureChrome();
+    container().querySelectorAll(":scope > section[data-section]").forEach((node, i) => {
         const entry = layout.sections.find((s) => s.id === node.dataset.section);
-        if (entry) node.prepend(tools(entry));
+        if (!entry) return;
+        const bar = tools(entry);
+        if (i === 0) bar.classList.add("is-first"); // below the header band and the plus before it
+        node.prepend(bar);
     });
     renderInserts();
     if (selected) select(selected);
@@ -524,9 +553,10 @@ export function initSections(api) {
     collab.on("page", () => { selected = null; closeMap(false); render(); });
     document.addEventListener("pointerdown", onPointerDown, true);
     document.addEventListener("keydown", onKey, true);
-    window.addEventListener("resize", () => { placeInserts(); position(); });
+    window.addEventListener("resize", () => { measureChrome(); placeInserts(); position(); });
     const scroller = document.querySelector(".scrollbar-container");
     const bar = scroller && window.Scrollbar ? Scrollbar.get(scroller) : null;
-    bar?.addListener(position);
+    bar?.addListener(() => { position(); clearChrome(); });
+    if (!bar) window.addEventListener("scroll", clearChrome, { passive: true });
     render();
 }

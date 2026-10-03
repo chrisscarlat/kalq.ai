@@ -2072,10 +2072,19 @@ body.kalq-edit section[data-section] {
     position: relative;
 }
 
+// At the top of its section, centred, below the seam plus; the first section's bar below the header band
 .kalq-section-tools {
     position: absolute;
-    top: 1.1rem;
-    left: 1rem;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: calc(100% - 2rem);
+    flex-wrap: wrap;
+    justify-content: center;
+
+    &.is-first {
+        top: calc(var(--kalq-chrome, 84px) + 62px);
+    }
     z-index: 25;
     display: flex;
     align-items: center;
@@ -2847,4 +2856,11 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
     color: #a06a00;
     font: 500 0.9rem/1.4 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
     text-align: center;
+}
+
+// Controls that scroll under the fixed header are hidden until they are clear of it again
+.kalq-section-tools.is-under-chrome,
+.kalq-insert-zone.is-under-chrome {
+    visibility: hidden;
+    pointer-events: none;
 }

@@ -69,66 +69,48 @@
 }
 
 /* Panel menu (style variant option, html.menu-panels): three panels drop from the top right in a staircase, the
-   rightmost first; a number at the top, the page at the bottom. The four dots become a "Menü" / "Schließen" pill. */
-.site-menu-toggle__pill {
+   rightmost first; a number at the top, the page at the bottom. The four dots become a bar the panels drop out of. */
+.site-menu-toggle__panels {
     display: none;
 }
 
 html.menu-panels {
     .site-menu-toggle {
-        width: auto;
-        height: auto;
         position: relative;
         z-index: 2;
 
         .dots {
             display: none;
         }
-
-        &:focus-visible {
-            border-radius: 999px;
-        }
     }
 
-    .site-menu-toggle__pill {
-        display: grid;
-        padding: 0.35rem 0.8rem;
-        border-radius: 999px;
-        background: currentColor;
-        font-size: 0.85rem;
-        font-weight: 600;
-        line-height: 1;
-        letter-spacing: 0;
+    // One thick bar; on hover (and while open) three small panels drop out of it, rightmost first, in a staircase
+    .site-menu-toggle__panels {
+        display: block;
+        width: 26px;
+        height: 26px;
 
-        > span {
-            grid-area: 1 / 1;
-            // the word in the opposite of the pill: the header colour is pure white or black
-            color: #000;
-            text-align: center;
-            transition: opacity 0.2s ease;
+        .drop {
+            transform: scaleY(0);
+            transform-origin: 50% 8.6px;
+            transform-box: view-box;
+            transition: transform 0.35s cubic-bezier(0.76, 0, 0.24, 1);
         }
 
-        .is-close-label {
-            opacity: 0;
-        }
+        .drop-1 { transition-delay: 0.1s; }
+        .drop-2 { transition-delay: 0.05s; }
+        .drop-3 { transition-delay: 0s; }
     }
 
-    &[data-header-tone="light"] .site-menu-toggle__pill > span {
-        color: #fff;
-    }
-
-    .site-menu-toggle[aria-expanded="true"] .site-menu-toggle__pill {
-        .is-open-label { opacity: 0; }
-        .is-close-label { opacity: 1; }
+    .site-menu-toggle:hover .site-menu-toggle__panels .drop,
+    .site-menu-toggle:focus-visible .site-menu-toggle__panels .drop,
+    .site-menu-toggle[aria-expanded="true"] .site-menu-toggle__panels .drop {
+        transform: none;
     }
 
     // While open the right side of the header sits over the light panels
     &.menu-is-open .site-header__right {
         color: #000;
-
-        .site-menu-toggle__pill > span {
-            color: #fff;
-        }
     }
 
     .site-menu {
@@ -147,7 +129,7 @@ html.menu-panels {
         backdrop-filter: none;
         transform: none;
         opacity: 1;
-        z-index: 29; // under the header, so the pill and the language stay on top
+        z-index: 29; // under the header, so the menu button and the language stay on top
         counter-reset: kalq-menu;
         transition: visibility 0s linear 0.8s;
 

@@ -171,5 +171,9 @@ export const STRINGS = {
     "company.sharedText": {
         "de": "Einkäufer und Lieferanten nutzen dasselbe Verständnis eines Teils. Sonst wird nichts geteilt. Preise, Margen und Maschinendaten jedes Mandanten bleiben in seinem eigenen Bereich und werden nur für den Zweck genutzt, für den sie bereitgestellt wurden.\n\nDie Daten werden in der EU gehostet. Jedes automatisierte Ergebnis kann von einem Menschen geprüft und übersteuert werden. Und Kalq bleibt neutral: Kalq verkauft keine Teile und ergreift im Geschäft keine Partei.",
         "en": "Buyers and suppliers use the same understanding of a part. Nothing else crosses over. Each tenant's prices, margins and machine data stay in their own space, used only for the purpose they were given for.\n\nData is hosted in the EU. Every automated result can be reviewed and overruled by a person. And Kalq stays neutral: it does not sell parts, and it does not take a side in the deal."
+    },
+    "home.platformText": {
+        "en": "A part enters as a STEP file and a drawing. Kalq turns it into features, process alternatives and a route on real machines.",
+        "de": "Ein Teil kommt als STEP-Datei und Zeichnung herein. Kalq macht daraus Features, Prozessalternativen und eine Route auf realen Maschinen."
     }
 };

@@ -1702,8 +1702,8 @@ footer #container .footer_bottom a {
     transition: none;
   }
 }
-/* Magazine mode (js/magazine.js, prototype). The book sits on the site's own background, in its type and colours:
-   no table, no paper texture. */
+/* Magazine mode (js/magazine.js): the site as one book, every section its own spread (js/book/layouts.js). It sits on
+   the site's own background and colours: no table, no paper texture. */
 .stf__parent {
   position: relative;
   display: block;
@@ -1769,11 +1769,16 @@ footer #container .footer_bottom a {
 
 .kalq-mag-page {
   --spine: calc(var(--kalq-mag-hinge, 0px) / 2 + 1.75rem);
+  --outer: clamp(1.5rem, 7%, 3.25rem);
+  --side: max(var(--spine), var(--outer));
+  --foot: 3.6rem;
+  --line: var(--kalq-line, rgba(16, 16, 16, 0.14));
   position: relative;
   overflow: hidden;
   background: var(--kalq-bg, #fff);
   color: var(--kalq-text, #101010);
-  box-shadow: inset 0 0 0 1px var(--kalq-line, rgba(0, 0, 0, 0.08));
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-family: "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
 }
 .kalq-mag-page:focus {
   outline: none;
@@ -1782,125 +1787,530 @@ footer #container .footer_bottom a {
   outline: 2px solid var(--kalq-accent, #3b82f6);
   outline-offset: -2px;
 }
+.kalq-mag-page a {
+  color: inherit;
+}
+.kalq-mag-page .kalq-line {
+  display: block;
+}
 
-.kalq-mag-page__body {
-  height: 100%;
-  overflow: hidden;
-  padding: var(--kalq-mag-top, 3rem) var(--spine) 6rem;
+.bk-in {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  padding: var(--kalq-mag-top, 3rem) var(--side) var(--foot);
 }
-.kalq-mag-page__body > * {
+
+.bk-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-top: auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+}
+.bk-flow > * {
   flex-shrink: 0;
-  max-width: 100%;
   margin: 0;
+  max-width: 100%;
 }
-.kalq-mag-page__body h1, .kalq-mag-page__body h2 {
-  font-size: clamp(1.9rem, 4.2vmin, 2.8rem);
-  line-height: 1.08;
+.bk-flow.is-cols {
+  display: block;
+  height: 100%;
+  column-count: 2;
+  column-gap: 1.6rem;
+}
+.bk-flow.is-cols > * {
+  break-inside: avoid;
+  margin: 0 0 0.9rem;
+}
+
+.kalq-mag-page.is-scroll .bk-flow {
+  overflow-y: auto;
+  margin-top: 0;
+}
+
+.kalq-mag-page.is-scroll .bk-flow.is-cols {
+  overflow-x: auto;
+}
+
+.bk-display {
+  font-size: clamp(2rem, 5.2vmin, 3.6rem);
+  line-height: 1.05;
   letter-spacing: -0.02em;
   font-weight: 400;
 }
-.kalq-mag-page__body h3, .kalq-mag-page__body h4 {
-  font-size: clamp(1.3rem, 2.6vmin, 1.7rem);
+
+.bk-title {
+  font-size: clamp(1.7rem, 3.8vmin, 2.6rem);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  font-weight: 400;
+}
+
+.bk-subtitle {
+  font-size: clamp(1.3rem, 2.8vmin, 1.9rem);
   line-height: 1.2;
   font-weight: 400;
 }
-.kalq-mag-page__body h5 {
-  font-size: clamp(1.1rem, 2.2vmin, 1.4rem);
-  line-height: 1.35;
+
+.bk-item {
+  font-size: clamp(1.15rem, 2.2vmin, 1.4rem);
+  line-height: 1.25;
+  font-weight: 400;
+}
+
+.bk-lead {
+  font-size: 1.15rem;
+  line-height: 1.45;
   font-weight: 300;
 }
-.kalq-mag-page__body p, .kalq-mag-page__body li {
+
+.bk-eyebrow {
+  font-size: 0.72rem;
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+  opacity: 0.65;
+}
+
+.bk-body {
   font-size: 1rem;
   line-height: 1.55;
 }
-.kalq-mag-page__body ul, .kalq-mag-page__body ol {
-  padding-left: 1.2rem;
+
+.bk-small {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  opacity: 0.8;
 }
-.kalq-mag-page__body img, .kalq-mag-page__body video {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: 46vh;
-  object-fit: cover;
-  border-radius: 14px;
+
+.bk-figure {
+  font-size: clamp(2.4rem, 6vmin, 4.5rem);
+  line-height: 1;
+  font-weight: 300;
 }
-.kalq-mag-page__body a {
-  color: inherit;
+
+.bk-display, .bk-title, .bk-subtitle, .bk-item, .bk-lead, .bk-eyebrow, .bk-body, .bk-small, .bk-figure {
+  margin: 0;
 }
-.kalq-mag-page__body .kalq-line {
-  display: block;
+
+.bk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
-.kalq-mag-page__body .kalq-m-button, .kalq-mag-page__body a.btn {
-  align-self: flex-start;
-  padding: 0.8rem 1.3rem;
+
+.bk-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.65rem 1.1rem;
   border-radius: 999px;
   background: var(--kalq-text, #101010);
-  color: var(--kalq-bg, #fff);
-  mix-blend-mode: normal;
+  color: var(--kalq-bg, #fff) !important;
+  font-size: 0.85rem;
   text-decoration: none;
 }
-.kalq-mag-page__body .kalq-m-faq__item {
-  padding-bottom: 0.8rem;
-  border-bottom: 1px solid var(--kalq-line, #d9d9d9);
-}
-.kalq-mag-page__body .kalq-m-faq__title {
-  font-size: 1.1rem;
-  font-weight: 500;
+.bk-btn:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 2px;
 }
 
-.kalq-mag-page.is-scroll .kalq-mag-page__body {
-  overflow-y: auto;
+.bk-media {
+  position: relative;
+  overflow: hidden;
+  background: var(--line);
 }
-
-.kalq-mag-page.is-cover {
-  display: grid;
-  place-items: center;
-  background: var(--kalq-dark, #101010);
-  color: var(--kalq-light, #fff);
-}
-.kalq-mag-page.is-cover > video, .kalq-mag-page.is-cover > img {
+.bk-media img, .bk-media video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-.kalq-mag-page.is-cover svg {
-  width: 60%;
-  height: auto;
-  fill: currentColor;
+  display: block;
 }
 
-.kalq-mag-cover__shade {
+.bk-ph {
+  background: #1D4ED8 url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 70%22%3E%3Ccircle cx=%2261%22 cy=%2225%22 r=%2210%22 fill=%22%237DB3FF%22/%3E%3Cpath d=%22M24 62L48 19L72 62Z%22 fill=%22%23172E7A%22/%3E%3C/svg%3E") center 45%/auto 28% no-repeat;
+}
+
+.kalq-mag-page.is-media .bk-in {
+  padding: 0;
+}
+.kalq-mag-page.is-media .bk-in > .bk-media {
+  position: absolute;
+  inset: 0;
+}
+.kalq-mag-page.is-media .bk-in.bk-stack {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 6px;
+}
+.kalq-mag-page.is-media .bk-in.bk-stack > .bk-media {
+  position: relative;
+  inset: auto;
+}
+
+.is-across-left .bk-media img, .is-across-left .bk-media video {
+  width: 200%;
+  left: 0;
+}
+
+.is-across-right .bk-media img, .is-across-right .bk-media video {
+  width: 200%;
+  left: -100%;
+}
+
+.bk-over {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 4rem var(--side) var(--foot);
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.62));
+  color: #fff;
+}
+.bk-over .bk-btn {
+  background: #fff;
+  color: #101010 !important;
+}
+.bk-over .bk-lead {
+  max-width: 30ch;
+}
+
+.bk-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.bk-list li {
+  display: grid;
+  grid-template-columns: 2.6rem 1fr;
+  align-items: baseline;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--line);
+}
+.bk-list li:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 2px;
+}
+
+.bk-num {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.bk-card .bk-in {
+  gap: 1.2rem;
+}
+
+.bk-card__media {
+  flex: 1 1 auto;
+  min-height: 38%;
+  border-radius: 6px;
+}
+
+.bk-card .bk-flow {
+  gap: 0.7rem;
+}
+
+.bk-tabs {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--line);
+}
+
+.bk-tab {
+  padding: 0.85rem 1.6rem 0.85rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+  opacity: 0.6;
+}
+.bk-tab[aria-selected=true] {
+  opacity: 1;
+  font-weight: 500;
+}
+.bk-tab:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 2px;
+}
+
+.bk-answers .bk-answer {
+  gap: 1rem;
+}
+
+.bk-answer[hidden] {
+  display: none;
+}
+
+.bk-figures {
+  display: flex;
+  gap: 2.2rem;
+  margin: 0 0 0.6rem;
+}
+.bk-figures dd {
+  margin: 0.45rem 0 0;
+}
+
+.bk-centre .bk-in {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.bk-statement {
+  margin: 0;
+  max-width: 20ch;
+  font-size: clamp(1.6rem, 4.2vmin, 2.7rem);
+  line-height: 1.2;
+  font-weight: 300;
+  letter-spacing: -0.01em;
+}
+
+.bk-contents .bk-in {
+  gap: 1.8rem;
+}
+.bk-contents .bk-flow {
+  margin-top: 0;
+  gap: 1.6rem;
+}
+
+.bk-chapter .bk-eyebrow {
+  margin-bottom: 0.5rem;
+}
+
+.bk-entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.bk-entries a {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 1rem;
+  line-height: 1.35;
+  text-decoration: none;
+}
+.bk-entries a:hover .bk-entry__label {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.bk-entries a:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 2px;
+}
+
+.bk-entry__folio {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.kalq-mag-page.is-tech {
+  --grid: rgba(128, 128, 128, 0.12);
+  background: color-mix(in srgb, var(--kalq-bg, #fff) 88%, var(--kalq-text, #101010) 12%);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+.kalq-mag-page.is-tech .bk-flow {
+  margin-top: 0;
+  gap: 0.55rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+.kalq-mag-page.is-tech .bk-flow.is-cols {
+  column-gap: 1.4rem;
+}
+.kalq-mag-page.is-tech .bk-title {
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.kalq-mag-page.is-tech .bk-subtitle {
+  margin-top: 0.7rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.kalq-mag-page.is-tech .bk-lead, .kalq-mag-page.is-tech .bk-body {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.bk-code {
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid currentColor;
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.bk-folio {
+  position: absolute;
+  bottom: 1.3rem;
+  z-index: 3;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.kalq-mag-page[data-side=left] .bk-folio {
+  left: var(--outer);
+}
+
+.kalq-mag-page[data-side=right] .bk-folio {
+  right: var(--outer);
+}
+
+.kalq-mag-page.is-media .bk-folio, .kalq-mag-page:has(.bk-over) .bk-folio {
+  color: #fff;
+  opacity: 0.85;
+}
+
+.kalq-mag-page.is-cover {
+  background: var(--kalq-dark, #101010);
+  color: #fff;
+}
+.kalq-mag-page.is-cover .bk-in {
+  padding: var(--kalq-mag-top, 3rem) var(--side) 2.4rem;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.kalq-mag-page.is-cover .bk-cover__media {
+  position: absolute;
+  inset: 0;
+}
+
+.bk-cover__shade {
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.55));
 }
 
-.kalq-mag-cover__text {
+.bk-cover__mark {
   position: relative;
-  padding: var(--kalq-mag-top, 0px) var(--spine) 0;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3rem;
+  width: 100%;
 }
-.kalq-mag-cover__text svg {
-  width: min(100%, 26rem);
+
+.bk-cover__title {
+  margin: 0;
+  width: min(78%, 24rem);
 }
-.kalq-mag-cover__text p {
-  margin-top: 1.25rem;
-  font-size: 1.15rem;
-  line-height: 1.45;
-}
-.kalq-mag-cover__text .kalq-line {
+
+.kalq-mag-page.is-cover .bk-cover__title svg {
   display: block;
+  width: 100%;
+  height: auto;
+  fill: currentColor;
+}
+
+.kalq-mag-page.is-back-cover .bk-in {
+  justify-content: space-between;
+}
+
+.bk-back__name {
+  position: relative;
+  margin: 0;
+}
+
+.kalq-mag-page.is-cover .bk-back__name svg {
+  display: block;
+  width: 4.5rem;
+  height: auto;
+  fill: currentColor;
+}
+
+.bk-back__logo {
+  position: relative;
+}
+
+.kalq-mag-page.is-cover .bk-back__logo svg {
+  display: block;
+  width: clamp(5rem, 22%, 8rem);
+  height: auto;
+  margin: 0 auto;
+  stroke: currentColor;
+}
+
+.bk-back__end {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  max-width: 30rem;
+}
+
+.bk-back__closing {
+  margin: 0;
+  font-size: clamp(1.4rem, 3.4vmin, 2.1rem);
+  line-height: 1.15;
+  font-weight: 400;
+}
+
+.bk-back__end .bk-actions {
+  justify-content: center;
+}
+
+.bk-back__end .bk-btn {
+  padding: 0.5rem 0.9rem;
+  background: rgba(255, 255, 255, 0.92);
+  color: #101010 !important;
+  font-size: 0.78rem;
+}
+
+.bk-back__plain {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1.1rem;
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+.kalq-magazine .kalq-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .kalq-mag-cue {
-  position: absolute;
-  right: 9%;
-  bottom: 17%;
+  position: relative;
   z-index: 2;
   width: 58px;
   height: 58px;
@@ -1948,7 +2358,7 @@ footer #container .footer_bottom a {
 
 .kalq-mag-page.is-cover .kalq-mag-cue__hand {
   position: absolute;
-  left: calc(50% - 19px);
+  left: calc(50% - 17px);
   top: calc(50% + 3px);
   width: 40px;
   opacity: 0;
@@ -2065,8 +2475,15 @@ footer #container .footer_bottom a {
 }
 
 .kalq-magazine__tip {
-  padding: 0 0.9rem 0 0.3rem;
+  position: fixed;
+  bottom: 1.05rem;
+  z-index: 4;
+  margin: 0;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
   white-space: nowrap;
+  opacity: 0.75;
+  pointer-events: none;
 }
 
 .kalq-mag-welcome {
@@ -2087,11 +2504,11 @@ footer #container .footer_bottom a {
 .kalq-mag-welcome__body {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 1.4rem;
   width: 100%;
-  padding: 0 var(--spine-welcome, 2.5rem);
-  padding-right: calc(var(--kalq-mag-hinge, 0px) / 2 + 2.5rem);
+  padding: 0 calc(var(--kalq-mag-hinge, 0px) / 2 + 2.5rem);
+  text-align: center;
 }
 
 .kalq-mag-welcome__drawing {
@@ -2145,60 +2562,41 @@ footer #container .footer_bottom a {
   outline-offset: 3px;
 }
 
-.kalq-magazine__exit {
+.kalq-magazine__tools {
   position: fixed;
   top: 14px;
-  right: 14px;
-  z-index: 4;
+  left: 14px;
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+}
+
+.kalq-magazine__tool {
   display: grid;
   place-items: center;
-  width: 34px;
+  min-width: 34px;
   height: 34px;
-  padding: 0;
+  padding: 0 0.8rem;
   border: 0;
-  border-radius: 50%;
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.86);
   color: #101010;
   box-shadow: 0 0 0 1px rgba(16, 16, 16, 0.12);
+  font: 500 0.78rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
   cursor: pointer;
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
-.kalq-magazine__exit:hover {
+.kalq-magazine__tool.is-exit, .kalq-magazine__tool.is-theme {
+  width: 34px;
+  padding: 0;
+}
+.kalq-magazine__tool:hover {
   background: #fff;
 }
-.kalq-magazine__exit:focus-visible {
+.kalq-magazine__tool:focus-visible {
   outline: 2px solid var(--kalq-accent, #3b82f6);
   outline-offset: 2px;
-}
-
-.kalq-magazine__bar {
-  position: fixed;
-  left: 50%;
-  bottom: 1rem;
-  transform: translateX(-50%);
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.5rem;
-  min-height: 40px;
-  border-radius: 999px;
-  background: rgba(16, 16, 16, 0.82);
-  color: #fff;
-  font: 500 0.8rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-}
-
-.kalq-magazine.is-spanned .kalq-magazine__bar {
-  left: calc(var(--seg-l, 50vw) / 2);
-}
-
-.kalq-magazine__status {
-  min-width: 6.5rem;
-  text-align: center;
-  opacity: 0.75;
 }
 
 .kalq-magazine-toggle {
@@ -2224,6 +2622,15 @@ footer #container .footer_bottom a {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  gap: 2rem;
+}
+
+.title_desc {
+  max-width: 34rem;
+  margin-top: 1rem;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  opacity: 0.75;
 }
 
 @media (max-width: 540px) {

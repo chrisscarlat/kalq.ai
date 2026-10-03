@@ -188,6 +188,7 @@ export async function refreshContent(keys = [], color) {
     blocks.forEach(({ key, lang, content, type }) => setLocalContent(key, lang, content, type));
     applyAll();
     flash(keys, color);
+    document.dispatchEvent(new CustomEvent("kalq:content", { detail: { page: name, keys } })); // e.g. the magazine rebuilds
 }
 
 // container: the Barba container of the page being shown (the new one during a transition)

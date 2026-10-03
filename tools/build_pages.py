@@ -271,7 +271,7 @@ FIXED_KEYS = {
     "footer.sub": "site.footer.sub",
     "footer.pilot": "site.footer.pilot", "footer.impressum": "site.footer.impressum", "footer.privacy": "site.footer.privacy",
     "home.about": "home.about.text", "home.count1": "home.about.count1.label", "home.count2": "home.about.count2.label",
-    "home.count3": "home.about.count3.label", "home.platformCta": "home.platform.cta", "home.approach": "home.approach.title",
+    "home.count3": "home.about.count3.label", "home.platformCta": "home.platform.cta", "home.platformText": "home.platform.text", "home.approach": "home.approach.title",
     "platform.header": "platform.header.title", "platform.introTitle": "platform.intro.title", "platform.intro": "platform.intro.text",
     "company.header": "company.header.title", "company.why": "company.why.title", "company.whyText": "company.why.text",
     "company.shared": "company.shared.title",
@@ -380,7 +380,10 @@ home = head("Kalq | The decision layer for manufactured parts") + f'''          
                 <section class="expertise">
                     <div id="container">
                         <div class="title_heading">
-                            <h2>Platform</h2>
+                            <div class="title_text">
+                                <h2>Platform</h2>
+                                <p class="title_desc">A part enters as a STEP file and a drawing. Kalq turns it into features, process alternatives and a route on real machines.</p>
+                            </div>
                             <a href="platform.html" class="btn">
                                 <span>Explore the platform</span>
                             </a>

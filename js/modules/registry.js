@@ -22,6 +22,9 @@ export const CATEGORIES = [
 ];
 
 // Slot kinds: heading (h2), eyebrow, text (paragraphs), button (label) + link (address), media (image or video)
+// magazine: how the module reads as a spread in the magazine (js/book/layouts.js), like its versions for the page:
+//   layout A (picture | text, order per version), C (picture across), F (questions | answer); media: which slot is the
+//   spread's picture
 const L = (de, en) => ({ de, en });
 const FAQ_ITEMS = 6;
 
@@ -44,6 +47,7 @@ export const MODULES = {
             "text-left": { name: L("Text links, Bild rechts", "Text left, image right"),
                 wire: [["eyebrow", 4, 16, 14], ["heading", 4, 22, 36], ["heading", 4, 28, 26], ["line", 4, 36, 38], ["line", 4, 40, 34], ["line", 4, 44, 30], ["button", 4, 50, 14], ["media", 52, 6, 44, 48]] },
         },
+        magazine: { layout: "A", order: { "image-left": "media-text", "text-left": "text-media" } },
         render: renderSplit,
     },
     "content.media-center": {
@@ -61,6 +65,7 @@ export const MODULES = {
             video: { name: L("Zentrales Video", "Central video"),
                 wire: [["heading", 30, 6, 40], ["media", 4, 13, 92, 36, "play"], ["line", 30, 53, 40]] },
         },
+        magazine: { layout: "C" },
         render: renderMediaCenter,
     },
     "cta.band": {
@@ -80,6 +85,7 @@ export const MODULES = {
             split: { name: L("Text links, Button rechts", "Text left, button right"),
                 wire: [["band", 0, 14, 100, 32], ["heading", 6, 23, 50, "light"], ["line", 6, 31, 40, "light"], ["button", 78, 26, 16, "light"]] },
         },
+        magazine: { layout: "A", order: "text-media", media: "media2" }, // the text facing its picture for two screens
         render: renderCtaBand,
     },
     "faq.single": {
@@ -99,6 +105,7 @@ export const MODULES = {
             split: { name: L("Überschrift links, Fragen rechts", "Heading left, questions right"),
                 wire: [["heading", 4, 10, 28], ["heading", 4, 16, 20], ...[10, 20, 30, 40].flatMap((y) => [["line", 42, y, 44, "bold"], ["plus", 92, y], ["rule", 42, y + 5, 54]])] },
         },
+        magazine: { layout: "F" },
         render: renderFaq,
     },
 };

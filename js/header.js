@@ -47,6 +47,10 @@ function initLogoCollapse() {
 
 //=================================== Language ===================================//
 // English and German, both fully translated.
+let chooseLanguage = null;
+// Switch language from elsewhere (the magazine's own control): the same as picking it here, remembered
+export const setLanguage = (code) => chooseLanguage?.(code);
+
 function initLangSwitcher(root) {
     if (!root) return;
     const items = [...root.querySelectorAll("[data-lang]")];
@@ -75,6 +79,8 @@ function initLangSwitcher(root) {
             try { localStorage.setItem(LANG_KEY, code); } catch (e) { }
         }
     };
+
+    chooseLanguage = (code) => setActive(code, true);
 
     let stored = null;
     try { stored = localStorage.getItem(LANG_KEY); } catch (e) { }

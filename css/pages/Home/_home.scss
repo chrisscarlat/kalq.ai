@@ -2,6 +2,16 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
+    gap: 2rem;
+}
+
+// The platform's short description under its title (editable, also the magazine's text over the picture)
+.title_desc {
+    max-width: 34rem;
+    margin-top: 1rem;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    opacity: 0.75;
 }
 
 @media (max-width: 540px) {

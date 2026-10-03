@@ -1,19 +1,27 @@
-// Magazine mode (prototype, branch only): the page as a book whose pages turn under a finger (StPageFlip 2.0.7,
-// js/vendor). An optional enhancement over the normal readable page: built from it on demand, so every word is still
-// in the page itself, without JavaScript too. Opens by itself on a device spanning two screens (the spine on the
-// hinge, one page per screen); on a plain tablet a button in the header opens it.
-//   hard front cover: the hero, with a welcome page beside it (a drawing, a short text and the way back to the web
-//   page); pages: the sections' own headings, paragraphs, lists, pictures and buttons, in order, never split (an
-//   element taller than a page makes that page scroll inside), a heading never last on a page, a section's last item
-//   never alone on one; hard back cover: the wordmark.
-//   turn: on the front cover one "next page" button (a short tap hint plays on arrival); after it drag a page, tap a
-//   page's outer edge, or arrow keys, Page Up/Down, Home/End; the first time the second spread opens, a drawn hand
-//   drags a corner once (with the same hint as one line of text). Esc, the welcome page's button or the icon where the
-//   header's book icon sits return to the web page (for the rest of the visit). Read-only: editing is on the web page.
-//   Reduced motion: pages change without the turning animation or its shadows, and the drawings do not move.
-import { currentLang } from "./i18n.js";
+// Magazine mode (branch only): the whole site as one bound book whose pages turn under a finger (StPageFlip 2.0.7,
+// js/vendor). An optional enhancement: the normal scrolling site stays the readable version (also without
+// JavaScript), and the book is drawn from it, so nothing exists only in the book. Opens by itself on a device spanning
+// two screens (one page per screen); on a tablet the book icon in the header opens it.
+//   The book: hard front cover (the brand mark and the way in), with a welcome page beside it while it is closed;
+//   About (the project in one statement); Contents (every spread, each line a link); then every page of the site as a
+//   chapter, every section as its own designed spread (js/book/layouts.js; built-in sections in js/book/kalq.js,
+//   page builder modules in js/modules/registry.js); the legal pages as a technical appendix; hard back cover
+//   (brand, contacts, closing line). One more turn there closes the book.
+//   Navigation: the contents, the "Contents" control at the top left (always back to the contents), dragging, a tap on
+//   a page's outer edge, arrow keys, Page Up/Down, Home/End. Links to the site's own pages turn to their chapter.
+//   The way back to the web page, light/dark and the language sit with it at the top left. Esc leaves too.
+//   Read-only: editing happens on the web page. Reduced motion: pages change without the turning animation or its
+//   shadows, the drawings do not move.
+import { currentLang, t as tr } from "./i18n.js";
+import { renderBlock, textToHtml } from "./blocks.js";
+import { MODULES } from "./modules/registry.js";
+import { setLanguage } from "./header.js";
+import { getMode, setMode } from "./variants.js";
+import { HAND, HAND_TIP, TURN } from "./book/drawings.js";
+import { LAYOUTS, page as newPage, textOf, parasOf, mediaUrl, mediaBox, actionOf, fit } from "./book/layouts.js";
+import { CHAPTERS, SECTIONS, footerOf } from "./book/kalq.js";
 
-const PAGES_ON = new Set(["home", "platform", "company"]);
+const PAGES_ON = new Set(CHAPTERS.filter((c) => !c.appendix).map((c) => c.page));
 const spanned = window.matchMedia("(horizontal-viewport-segments: 2)");
 const tablet = window.matchMedia("(pointer: coarse) and (min-width: 600px) and (max-width: 1366px)");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -21,48 +29,31 @@ const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const TEXT = {
     de: {
         open: "Als Magazin lesen", close: "Als normale Webseite lesen", next: "Nächste Seite", drag: "Seite ziehen zum Umblättern", book: "Magazin",
-        page: (n, of) => `Seite ${n} von ${of}`, welcome: "Willkommen",
+        page: (n, of) => `Seite ${n} von ${of}`, welcome: "Willkommen", contents: "Inhalt", index: "Index", toContents: "Index: zum Inhaltsverzeichnis", appendix: "Rechtliches",
         detected: "Gerät mit zwei Bildschirmen erkannt.", intro: "Sie können diese Website als Magazin lesen. Ziehen Sie eine Seite mit dem Finger, um umzublättern.",
+        dark: "Dunkle Darstellung", light: "Helle Darstellung", other: "English", otherCode: "en", otherShort: "EN",
     },
     en: {
         open: "Read as a magazine", close: "Read as a normal website", next: "Next page", drag: "Drag a page to turn it", book: "Magazine",
-        page: (n, of) => `Page ${n} of ${of}`, welcome: "Welcome",
+        page: (n, of) => `Page ${n} of ${of}`, welcome: "Welcome", contents: "Contents", index: "Index", toContents: "Index: back to the contents", appendix: "Legal",
         detected: "Two-screen device detected.", intro: "You can read this website as a magazine. Drag a page with your finger to turn it.",
+        dark: "Dark appearance", light: "Light appearance", other: "Deutsch", otherCode: "de", otherShort: "DE",
     },
 };
 const t = (k) => TEXT[currentLang() === "en" ? "en" : "de"][k];
 
-// One drafting style for every drawing in the book, like a manual's: fine black lines of one weight on white. The
-// hand: the index finger pointing up, its tip at 23,4 of 48×58. Decorative: what a drawing shows is also real text
-// or a labelled button.
-const HAND_PATHS = '<path d="M25 51.6V56h14v-4.4"/>'
-    + '<path d="M19.5 33V7.5a3.5 3.5 0 0 1 7 0V23a3.2 3.2 0 0 1 6.4 0v2a3.1 3.1 0 0 1 6.2 0v2.5a2.9 2.9 0 0 1 5.8 0V37c0 9-4.9 15-13.9 15H27c-5 0-8-2.5-11-6.5l-6.5-9a3.2 3.2 0 0 1 5.1-3.9L19.5 37z"/>'
-    + '<path d="M26.5 23v6M32.9 25v5M39.1 27.5v4.5M21.4 7a1.6 1.6 0 0 1 3.2 0" fill="none"/>';
-const LINE = 'fill="#fff" stroke="#111" stroke-width="1.1" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"';
-const HAND = `<svg viewBox="0 0 48 58" aria-hidden="true" focusable="false" ${LINE}>${HAND_PATHS}</svg>`;
-// The welcome page's drawing: an open book on its spine (a centre line), a leaf being turned by the same hand, the
-// path of the turn as a dashed arc. The leaf and the hand sway a little.
-const TURN_DRAWING = `<svg class="kalq-mag-welcome__drawing" viewBox="0 0 260 170" aria-hidden="true" focusable="false" ${LINE}>`
-    + '<path d="M130 16V160" fill="none" stroke-dasharray="8 3 1.5 3" opacity=".5"/>'
-    + '<path d="M130 36C108 28 74 26 40 32V142C74 136 108 138 130 146Z"/>'
-    + '<path d="M130 36C152 28 186 26 220 32V142C186 136 152 138 130 146Z"/>'
-    + '<path d="M54 52h58M54 61h52M54 70h56M54 79h40M54 96h58M54 105h48" fill="none" opacity=".35"/>'
-    + '<path d="M150 61h52M150 70h56M150 79h44" fill="none" opacity=".2"/>'
-    + '<path d="M204 12C176 0 118 -1 80 12" fill="none" stroke-dasharray="3 3"/><path d="M86 6l-6 6 8 2.5" fill="none"/>'
-    + '<g class="kalq-mag-welcome__leaf"><path d="M130 36C148 24 170 16 194 18C186 52 182 100 186 130C164 130 146 136 130 146Z"/>'
-    + '<path d="M146 50h34M146 59h30M146 68h33" fill="none" opacity=".35"/>'
-    + `<g transform="translate(170 76) rotate(-28) scale(.78)">${HAND_PATHS}</g></g></svg>`;
-const HAND_TIP = { x: 23 / 48, y: 4 / 58 }; // where the fingertip is, as a share of the drawing's width and height
 const DRAG_SEEN = "kalq-mag-drag-hint";
 const WEB_CHOSEN = "kalq-mag-web"; // the reader chose the web page: no book by itself for the rest of the visit
 const chosenWeb = () => { try { return sessionStorage.getItem(WEB_CHOSEN) === "1"; } catch { return false; } };
 const chooseWeb = (on) => { try { on ? sessionStorage.setItem(WEB_CHOSEN, "1") : sessionStorage.removeItem(WEB_CHOSEN); } catch { /* private mode */ } };
+const CONTENTS_AT = 3; // front cover, About (1–2), Contents (3–4)
 
-let book = null; // { overlay, flip, pages, closedByUser }
+let book = null;
 let closedByUser = false;
 
 const container = () => [...document.querySelectorAll('[data-barba="container"]')].pop();
 const pageName = () => container()?.dataset.page;
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
 
 //=================================== The engine ===================================//
 let engine = null;
@@ -78,153 +69,205 @@ function loadEngine() {
     return engine;
 }
 
-//=================================== Content ===================================//
-// The readable elements of a section, outermost only, in order; decoration, editing tools and placeholders left out
-const BLOCKS = "h1, h2, h3, h4, h5, h6, p, ul, ol, blockquote, img, video, .kalq-m-button, a.btn, .kalq-m-faq__item";
-const SKIP = "[aria-hidden='true'], .marquee, .kalq-section-tools, .kalq-inserts, .kalq-ph, .kalq-media-tools, template, .kalq-m-cta__screen2, .overlay, .kalq-span-panel, script, style";
+//=================================== Sources ===================================//
+// Every chapter's page as the site shows it: the page open now from the document itself (with whatever is being
+// edited), the others as the server renders them (published content), in the reader's language.
+const sourceCache = new Map();
 
-function blocksOf(section) {
-    const taken = [];
-    section.querySelectorAll(BLOCKS).forEach((el) => {
-        if (el.closest(SKIP) || taken.some((t) => t.contains(el))) return;
-        const media = el.matches("img, video");
-        if (!media && !el.textContent.trim()) return;
-        if (media && !(el.getAttribute("src") || el.querySelector("source")?.getAttribute("src"))) return;
-        taken.push(el);
+async function localize(root, page, lang) {
+    const res = await fetch(`/api/content?page=${encodeURIComponent(page)}`, { credentials: "same-origin" }).catch(() => null);
+    const { blocks = [] } = res?.ok ? await res.json() : {};
+    const edited = new Map(blocks.filter((b) => b.type === "text" && b.lang === lang).map((b) => [b.key, b.content]));
+    root.querySelectorAll("[data-i18n], [data-kalq-key]").forEach((n) => {
+        if ((n.dataset.kalqType || "text") !== "text" || n.hasAttribute("data-i18n-marquee")) return;
+        const own = n.dataset.kalqKey && edited.get(n.dataset.kalqKey);
+        if (own != null) return renderBlock(n, own);
+        const key = n.dataset.i18n;
+        if (!key || tr(key) === key) return;
+        if (n.dataset.kalqFormat) renderBlock(n, textToHtml(tr(key), n.dataset.kalqFormat));
+        else n.textContent = tr(key);
     });
-    return taken;
 }
 
-// A clean copy: no ids, keys or scripts' hooks, links keep working, media without autoplay
-function copyOf(el) {
-    const c = el.cloneNode(true);
-    [c, ...c.querySelectorAll("*")].forEach((n) => {
-        ["id", "data-kalq-key", "data-i18n", "contenteditable", "style", "data-kalq-animated"].forEach((a) => n.removeAttribute(a));
-        n.classList?.remove("kalq-flash", "kalq-section-selected");
-    });
-    if (c.matches("video")) {
-        const src = el.getAttribute("src") || el.querySelector("source")?.getAttribute("src");
-        c.replaceChildren();
-        c.setAttribute("src", src);
-        ["muted", "loop", "playsinline"].forEach((a) => c.setAttribute(a, ""));
-        c.removeAttribute("autoplay");
-        c.setAttribute("preload", "metadata");
+function sourceOf(ch) {
+    const here = container();
+    if (here?.dataset.page === ch.page) return Promise.resolve(here.cloneNode(true));
+    const lang = currentLang();
+    const key = `${ch.file}|${lang}`;
+    if (!sourceCache.has(key)) {
+        sourceCache.set(key, (async () => {
+            const res = await fetch(ch.file, { credentials: "same-origin" });
+            if (!res.ok) throw new Error(`${ch.file}: ${res.status}`);
+            const root = new DOMParser().parseFromString(await res.text(), "text/html").querySelector('[data-barba="container"]');
+            if (!root) throw new Error(`${ch.file}: no page`);
+            if (lang !== "de") await localize(root, ch.page, lang); // the server writes German
+            return root;
+        })().catch((e) => { sourceCache.delete(key); console.warn("magazine", e.message); return null; }));
     }
-    if (c.matches("img")) c.removeAttribute("loading");
-    // counters count up as they scroll into view on the page; in the book they show where they end
-    [c, ...c.querySelectorAll("*")].filter((n) => n.dataset?.kalqFinal).forEach((n) => { n.textContent = n.dataset.kalqFinal; n.removeAttribute("data-kalq-final"); });
-    if (c.matches(".kalq-m-faq__item")) {
-        c.querySelectorAll(".kalq-m-faq__a").forEach((a) => { a.hidden = false; a.removeAttribute("role"); });
-        c.querySelectorAll(".kalq-m-faq__toggle").forEach((b) => { const h = document.createElement("span"); h.append(...b.childNodes); b.replaceWith(h); });
-    }
-    return c;
+    return sourceCache.get(key).then((root) => root?.cloneNode(true) || null);
 }
 
-// Fill pages of the given size, section by section (each starts on a new page), with whole elements. Elements that
-// lead into the next one travel with it as one unit, so a page never ends on them: a short label ("06") always, a
-// heading when its own content follows (not the next item's label, not a heading of the same or a higher level). A
-// unit that does not fit goes to the next page; a unit taller than a page gets one to itself and the page scrolls; if
-// a section's last page would hold a single unit, the unit before it comes along.
-const isLabel = (el) => el.matches("p, span, div") && el.textContent.trim().length <= 3;
-const level = (el) => (/^H([1-6])$/.exec(el.tagName) || [])[1];
-const leadsIn = (el, next) => {
-    if (!next) return false;
-    if (isLabel(el)) return true;
-    const n = level(el);
-    if (!n) return false;
-    const m = level(next);
-    return !isLabel(next) && !(m && m <= n);
-};
+//=================================== Units ===================================//
+const sectionKind = (s) => s.dataset.section in SECTIONS ? s.dataset.section
+    : (s.classList[0] || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); // a copy keeps its class
 
-function unitsOf(blocks) {
+function moduleUnit(s, module, version) {
+    const m = MODULES[module].magazine;
+    const slot = (name) => s.querySelector(`[data-kalq-key$=".${name}"]`);
+    if (m.layout === "F") {
+        const pairs = [...s.querySelectorAll(".kalq-m-faq__item")].map((it) => ({ q: it.querySelector(".kalq-m-faq__q"), a: it.querySelector(".kalq-m-faq__a") }))
+            .filter((p) => p.q?.textContent.trim());
+        return { layout: "F", title: slot("heading"), pairs };
+    }
+    return {
+        layout: m.layout, order: typeof m.order === "object" ? m.order[version] : m.order,
+        eyebrow: slot("eyebrow"), title: slot("heading"), body: parasOf(slot("text")), caption: slot("caption"),
+        actions: [...s.querySelectorAll("a.kalq-m-button, a.btn")], media: [mediaUrl(slot(m.media || "media"))], focal: s.dataset.focal,
+    };
+}
+
+// A chapter's sections as units, in order; the hero, the About text, social links and the footer are kept aside for
+// the covers and the opening (the first page that has them gives them)
+function unitsOf(root, ch, shared) {
     const units = [];
-    let open = [];
-    blocks.forEach((el, i) => {
-        open.push(el);
-        if (!leadsIn(el, blocks[i + 1])) { units.push(open); open = []; }
+    const sections = [...root.querySelectorAll(":scope > section[data-section]")].filter((s) => s.dataset.sectionState !== "draft");
+    const taken = new Set();
+    sections.forEach((s, i) => {
+        if (taken.has(s.dataset.section)) return;
+        const [module, version] = (s.dataset.module || "").split(":");
+        let made = null;
+        if (module && MODULES[module]?.magazine) made = moduleUnit(s, module, version);
+        else if (SECTIONS[sectionKind(s)]) made = SECTIONS[sectionKind(s)](s, { next: sections[i + 1], chapter: ch });
+        [made].flat().filter(Boolean).forEach((u) => {
+            if (u.takes) taken.add(u.takes);
+            if (u.role) { shared[u.role] ||= u; return; }
+            units.push(u);
+        });
     });
+    shared.footer ||= footerOf(root);
     return units;
 }
 
-function paginate(measure, sections, pageW, pageH) {
-    const pages = [];
-    const fresh = () => {
-        const p = document.createElement("div");
-        p.className = "kalq-mag-page";
-        p.style.width = `${pageW}px`;
-        p.style.height = `${pageH}px`;
-        const body = document.createElement("div");
-        body.className = "kalq-mag-page__body";
-        p.append(body);
-        measure.append(p);
-        pages.push(p);
-        p.units = [];
-        return p;
-    };
-    const overflows = (p) => p.firstChild.scrollHeight > p.firstChild.clientHeight + 1;
-    const place = (p, unit) => { p.firstChild.append(...unit); p.units.push(unit); };
-    const take = (p, unit) => { unit.forEach((el) => el.remove()); p.units.splice(p.units.indexOf(unit), 1); };
+const firstSentence = (s) => (s || "").replace(/\s+/g, " ").trim().replace(/^(.{12,}?[.!?])\s.*$/, "$1");
+const labelOf = (u) => {
+    if (Array.isArray(u.label)) return u.label.map((n) => n?.textContent.trim()).filter(Boolean).join(" · ");
+    const src = u.title || u.statement;
+    return firstSentence(src?.textContent || "");
+};
 
-    sections.forEach((blocks) => {
-        const own = [];
-        let page = null;
-        unitsOf(blocks).forEach((unit) => {
-            if (!page) own.push(page = fresh());
-            place(page, unit);
-            if (!overflows(page)) return;
-            if (page.units.length > 1) { take(page, unit); own.push(page = fresh()); place(page, unit); }
-            if (!overflows(page)) return;
-            // the unit alone is taller than a page: it keeps the page to itself, whole, and the page scrolls
-            page.classList.add("is-scroll");
-            page = null;
-        });
-        // a section's last page with a single unit on it: the unit before it comes along, if both fit
-        const [prev, last] = own.slice(-2);
-        if (prev && last && last.units.length === 1 && prev.units.length > 1 && !last.classList.contains("is-scroll")) {
-            const unit = prev.units.at(-1);
-            take(prev, unit);
-            last.firstChild.prepend(...unit);
-            last.units.unshift(unit);
-            if (overflows(last)) { take(last, unit); place(prev, unit); }
-        }
-    });
-    return pages;
+//=================================== Special pages ===================================//
+function markOf(selector) {
+    const svg = document.querySelector(selector)?.cloneNode(true);
+    if (!svg) return null;
+    svg.removeAttribute("role");
+    svg.setAttribute("aria-hidden", "true");
+    return svg;
 }
 
-function cover(section, pageW, pageH, back) {
-    const p = document.createElement("div");
-    p.className = `kalq-mag-page is-cover${back ? " is-back" : ""}`;
+// Front cover: the hero's video, the brand mark and the way in, nothing else
+function frontCover(cover) {
+    const p = newPage("is-cover is-front-cover");
     p.setAttribute("data-density", "hard");
-    p.style.width = `${pageW}px`;
-    p.style.height = `${pageH}px`;
-    if (back) {
-        const mark = document.querySelector(".hero_title svg, .site-logo__word svg")?.cloneNode(true);
-        if (mark) { mark.removeAttribute("role"); mark.setAttribute("aria-hidden", "true"); p.append(mark); }
-        return p;
-    }
-    // the hero: its picture or video and its title and slogan
-    const media = section?.querySelector("video, .hero_media img, .hero_media video");
-    if (media) p.append(copyOf(media));
-    const shade = document.createElement("div");
-    shade.className = "kalq-mag-cover__shade";
-    p.append(shade);
-    const text = document.createElement("div");
-    text.className = "kalq-mag-cover__text";
-    section?.querySelectorAll(".hero_title, .hero_slogan, h1, h2").forEach((el) => { if (!text.querySelector(el.tagName) && el.textContent.trim()) text.append(copyOf(el)); });
-    p.append(text);
-    // the one way on from the cover: an arrow in a circle, a real button (the engine leaves buttons to themselves)
-    const cue = document.createElement("div");
-    cue.className = "kalq-mag-cue";
+    p.inner.append(mediaBox(cover?.media?.[0] || null, { cls: "bk-cover__media" }), el("div", "bk-cover__shade"));
+    const mark = el("div", "bk-cover__mark");
+    const title = cover?.mark ? textOf(cover.mark, "h1", "bk-display") : null;
+    const svg = cover?.mark?.querySelector("svg")?.cloneNode(true);
+    if (svg) { const h1 = el("h1", "bk-cover__title"); svg.setAttribute("aria-hidden", "true"); h1.append(svg, el("span", "kalq-sr", cover.mark.textContent.trim() || "KALQ")); mark.append(h1); }
+    else if (title) mark.append(title);
+    const cue = el("div", "kalq-mag-cue");
     cue.innerHTML = '<span class="kalq-mag-cue__ripple" aria-hidden="true"></span><span class="kalq-mag-cue__ripple" aria-hidden="true"></span>'
         + `<button type="button" class="kalq-mag-cue__btn" aria-label="${t("next")}" title="${t("next")}">`
         + '<svg class="kalq-mag-cue__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h13M13 6.5l5.5 5.5-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
         + `<span class="kalq-mag-cue__hand" aria-hidden="true">${HAND}</span>`;
-    p.append(cue);
+    mark.append(cue);
+    p.inner.append(mark);
+    return p;
+}
+
+// About: the left page nearly empty, the counters and the short description low down; the statement centred right
+function aboutSpread(cover, about) {
+    const left = newPage("bk-about");
+    const flow = el("div", "bk-flow");
+    if (about?.figures?.length) {
+        const row = el("dl", "bk-figures");
+        about.figures.forEach((f) => { const d = el("div"); d.append(textOf(f.value, "dt", "bk-figure"), textOf(f.label, "dd", "bk-eyebrow")); row.append(d); });
+        flow.append(row);
+    }
+    if (about?.lead) flow.append(textOf(about.lead, "p", "bk-small"));
+    left.inner.append(flow);
+    const right = newPage("bk-about bk-centre");
+    const statement = textOf(cover?.statement, "p", "bk-statement");
+    if (statement) right.inner.append(statement);
+    return [left, right];
+}
+
+// Contents: one block per chapter, every spread a line that turns to it
+function contentsSpread(groups) {
+    const [left, right] = [newPage("bk-contents"), newPage("bk-contents")];
+    const head = el("h2", "bk-title", t("contents"));
+    head.id = "kalq-book-contents";
+    left.inner.append(head);
+    const lists = [el("div", "bk-flow"), el("div", "bk-flow")];
+    groups.forEach((g) => {
+        const block = el("section", "bk-chapter");
+        block.append(el("h3", "bk-eyebrow", g.title));
+        const ol = el("ol", "bk-entries");
+        g.entries.forEach((e) => {
+            const li = el("li");
+            const a = el("a", null);
+            a.href = `#kalq-book-p${e.at}`;
+            a.dataset.to = e.at;
+            a.append(el("span", "bk-entry__label", e.label), el("span", "bk-entry__folio", String(e.at + 1)));
+            li.append(a);
+            ol.append(li);
+        });
+        block.append(ol);
+        lists[0].append(block);
+    });
+    left.inner.append(lists[0]);
+    right.inner.append(lists[1]);
+    return [left, right];
+}
+
+// Chapters move to the right page until the left one holds what it can
+function balance([left, right]) {
+    const [a, b] = [left.querySelector(".bk-flow"), right.querySelector(".bk-flow")];
+    const over = (f) => f.scrollHeight > f.clientHeight + 1;
+    while (over(a) && a.children.length > 1) b.prepend(a.lastElementChild);
+    if (!b.children.length && a.children.length > 2) { // all fitted on the left: share them out over both pages
+        while (a.children.length > b.children.length + 1) b.prepend(a.lastElementChild);
+    }
+}
+
+// Back cover: the brand name small on top, the logo in the middle, the cover video again; contacts (some as small
+// buttons, some as plain text), the closing line
+function backCover(cover, footer, social) {
+    const p = newPage("is-cover is-back-cover");
+    p.setAttribute("data-density", "hard");
+    p.inner.append(mediaBox(cover?.media?.[0] || null, { cls: "bk-cover__media" }), el("div", "bk-cover__shade"));
+    const word = markOf(".site-logo__word svg") || markOf(".hero_title svg");
+    const top = el("p", "bk-back__name");
+    if (word) top.append(word); else top.textContent = "KALQ";
+    const logo = el("div", "bk-back__logo");
+    const mark = markOf(".site-logo__custom svg") || markOf("svg.site-logo__mark");
+    if (mark) logo.append(mark);
+    const end = el("div", "bk-back__end");
+    if (footer?.closing) end.append(textOf(footer.closing, "p", "bk-back__closing"));
+    if (footer?.sub) end.append(textOf(footer.sub, "p", "bk-small"));
+    if (social?.label) end.append(textOf(social.label, "p", "bk-eyebrow"));
+    const buttons = el("div", "bk-actions");
+    [...(footer?.buttons || []), ...(social?.links || []).map((l) => Object.assign(document.createElement("a"), { href: l.href, textContent: l.text, target: "_blank" }))]
+        .map(actionOf).filter(Boolean).forEach((a) => buttons.append(a));
+    if (buttons.children.length) end.append(buttons);
+    const plain = el("p", "bk-back__plain");
+    if (footer?.small) plain.append(el("span", null, footer.small.textContent.trim()));
+    (footer?.links || []).forEach((a) => { const l = el("a", null, a.textContent.trim()); l.href = a.getAttribute("href"); plain.append(l); });
+    if (plain.children.length) end.append(plain);
+    p.inner.append(top, logo, end);
     return p;
 }
 
 //=================================== Hints ===================================//
-// The box around the pages in view
 function shownBox(pages) {
     const rects = pages.filter((p) => !p.inert && getComputedStyle(p).display !== "none").map((p) => p.getBoundingClientRect()).filter((r) => r.width);
     if (!rects.length) return null;
@@ -238,15 +281,13 @@ function dragHint(overlay, pages, pageW, tip) {
     tip.textContent = t("drag");
     tip.hidden = false;
     if (reducedMotion.matches) return;
-    // measured once the turned page has settled
     requestAnimationFrame(() => requestAnimationFrame(() => { if (overlay.isConnected) dragHand(overlay, pages, pageW); }));
 }
 
 function dragHand(overlay, pages, pageW) {
     const box = shownBox(pages);
     if (!box) return;
-    const hint = document.createElement("div");
-    hint.className = "kalq-mag-drag";
+    const hint = el("div", "kalq-mag-drag");
     hint.setAttribute("aria-hidden", "true");
     hint.style.left = `${box.right}px`;
     hint.style.top = `${box.bottom}px`;
@@ -254,7 +295,7 @@ function dragHand(overlay, pages, pageW) {
     overlay.append(hint);
     const fold = hint.firstElementChild, hand = hint.lastElementChild;
     const size = Math.round(Math.min(pageW * 0.42, 220));
-    const hw = 46, hh = hw * 58 / 48;
+    const hw = 46, hh = hw * 60 / 48;
     const at = (s) => `translate(${-s - hw * HAND_TIP.x}px, ${-s - hh * HAND_TIP.y}px)`; // fingertip on the folded corner
     const timing = { duration: 3000, delay: 350, easing: "cubic-bezier(.45,0,.25,1)", fill: "both" };
     fold.animate([
@@ -270,7 +311,7 @@ function dragHand(overlay, pages, pageW) {
     ], timing).finished.then(() => hint.remove(), () => hint.remove());
 }
 
-//=================================== Open and close ===================================//
+//=================================== Geometry ===================================//
 // The gap between the two screens in pixels: none on a continuous fold, a real hinge on a Surface Duo. --seg-hinge is a
 // calc() of env() values, so it is measured rather than parsed.
 function hingeWidth() {
@@ -282,18 +323,24 @@ function hingeWidth() {
     return Math.max(0, Math.round(w));
 }
 
+// Exploration (not committed): ?book=inset (or localStorage kalq-book-inset=1) shows the book a little smaller than
+// the screen on a tablet, so it reads as a magazine lying on the page
+const inset = () => { try { return /[?&]book=inset\b/.test(location.search) || localStorage.getItem("kalq-book-inset") === "1"; } catch { return false; } };
+
 function geometry() {
     if (spanned.matches) {
         // one page per screen, the spine in the middle of the hinge
         const w = Math.floor(window.innerWidth / 2), h = window.innerHeight;
         return { pageW: w, pageH: h, portrait: false, hinge: hingeWidth() };
     }
+    const scale = inset() ? 0.92 : 1;
     const landscape = window.innerWidth > window.innerHeight;
-    const h = window.innerHeight - 96;
-    const w = landscape ? Math.min(Math.floor((window.innerWidth - 48) / 2), Math.round(h * 0.75)) : Math.min(window.innerWidth - 32, Math.round(h * 0.72));
+    const h = Math.round((window.innerHeight - 96) * scale);
+    const w = landscape ? Math.min(Math.floor((window.innerWidth - 48) * scale / 2), Math.round(h * 0.75)) : Math.min(Math.round((window.innerWidth - 32) * scale), Math.round(h * 0.72));
     return { pageW: w, pageH: h, portrait: !landscape, hinge: 0 };
 }
 
+//=================================== Open and close ===================================//
 // Only one book at a time: a second request while one is being built (page start and a posture change can come
 // together) waits for the first
 let opening = null;
@@ -302,99 +349,136 @@ export function openMagazine(options = {}) {
     return opening;
 }
 
-async function build({ auto = false } = {}) {
+async function build({ auto = false, at = null } = {}) {
     if (book || !PAGES_ON.has(pageName())) return;
     if (auto && (closedByUser || chosenWeb())) return;
-    const St = await loadEngine().catch(() => null);
+    const [St, sources] = await Promise.all([loadEngine().catch(() => null), Promise.all(CHAPTERS.map(sourceOf))]);
     if (!St?.PageFlip || book) return;
-    const page = container();
-    const sections = [...page.querySelectorAll(":scope > section[data-section]")].filter((s) => s.dataset.sectionState !== "draft");
     const { pageW, pageH, portrait, hinge } = geometry();
 
-    const overlay = document.createElement("div");
-    overlay.className = "kalq-magazine";
+    const overlay = el("div", "kalq-magazine");
     overlay.setAttribute("role", "dialog");
     overlay.setAttribute("aria-modal", "true");
     overlay.setAttribute("aria-label", t("book"));
     overlay.style.setProperty("--kalq-mag-hinge", `${hinge}px`);
+    overlay.style.setProperty("--bk-w", `${pageW}px`);
+    overlay.style.setProperty("--bk-h", `${pageH}px`);
     if (spanned.matches) overlay.classList.add("is-spanned");
-    // the way back sits where the header's book icon is; pages start their content below it
-    const spotOf = () => (toggle?.isConnected ? toggle : document.querySelector(".site-menu-toggle"))?.getBoundingClientRect();
-    const spot = spotOf();
-    const clear = spot?.width ? Math.ceil(spot.bottom + 14 - (window.innerHeight - pageH) / 2) : 0;
-    overlay.style.setProperty("--kalq-mag-top", `${Math.max(48, clear)}px`);
-    const stage = document.createElement("div");
-    stage.className = "kalq-magazine__book";
-    // measure pages off screen at their real size, then hand them to the engine
-    const measure = document.createElement("div");
-    measure.className = "kalq-magazine__measure";
+    if (inset() && !spanned.matches) overlay.classList.add("is-inset");
+    // the controls at the top left: pages start their text below them
+    const bookTop = (window.innerHeight - pageH) / 2;
+    overlay.style.setProperty("--kalq-mag-top", `${Math.max(48, Math.ceil(14 + 34 + 16 - bookTop))}px`);
+    const stage = el("div", "kalq-magazine__book");
+    const measure = el("div", "kalq-magazine__measure");
     overlay.append(stage, measure);
     document.body.append(overlay);
 
-    const hero = sections.find((s) => s.matches(".header, .expertise_header, .about_header"));
-    const parts = sections.filter((s) => s !== hero).map((s) => blocksOf(s).map(copyOf));
-    const footer = page.querySelector("footer");
-    if (footer) parts.push(blocksOf(footer).map(copyOf));
-    const inner = paginate(measure, parts.filter((b) => b.length), pageW, pageH);
-    // an even number of inner pages, so the back cover closes the book
-    if (inner.length % 2 === 1) inner.push(Object.assign(document.createElement("div"), { className: "kalq-mag-page is-blank" }));
-    const pages = [cover(hero, pageW, pageH, false), ...inner, cover(null, pageW, pageH, true)];
+    // Units, chapter by chapter
+    const shared = {};
+    const chapters = CHAPTERS.map((ch, i) => ({ ch, root: sources[i] })).filter((c) => c.root)
+        .map(({ ch, root }) => ({ ch, units: unitsOf(root, ch, shared) }));
+    let uid = 0;
+    const spreads = [];
+    chapters.forEach(({ ch, units }) => units.forEach((u) => {
+        if (u.layout === "opener") u.chapter = tr(ch.label);
+        if (u.tech) u.code = `${t("appendix")} · ${tr(ch.label)}`;
+        const layout = LAYOUTS[u.layout];
+        if (!layout) return;
+        spreads.push({ ch, unit: u, label: labelOf(u), pages: layout(u, { uid: `bk${uid++}` }) });
+    }));
+
+    // Lay every page out at its real size, fit long text (two columns, then more pages), keep spreads in pairs
+    const sized = (p) => { p.style.width = `${pageW}px`; p.style.height = `${pageH}px`; return p; };
+    spreads.forEach((s) => { s.pages.forEach((p) => measure.append(sized(p))); });
+    let appendixPages = [];
+    spreads.forEach((s) => {
+        s.pages = fit(s.pages, pageW >= 440, measure).map(sized);
+        if (s.unit.tech) return;
+        if (s.pages.length % 2) s.pages.push(sized(newPage("is-blank")));
+    });
+    // the appendix runs on as one technical section: an even number of pages in all
+    const appendix = spreads.filter((s) => s.unit.tech);
+    appendixPages = appendix.flatMap((s) => s.pages);
+    if (appendixPages.length % 2) { const blank = sized(newPage("is-tech is-blank")); appendix.at(-1).pages.push(blank); }
+
+    // Numbering: front cover 0, About 1–2, Contents 3–4, then the chapters
+    let folio = CONTENTS_AT + 2;
+    spreads.forEach((s) => { s.at = folio; folio += s.pages.length; });
+    const groups = [];
+    spreads.forEach((s) => {
+        const title = s.unit.tech ? t("appendix") : tr(s.ch.label);
+        let g = groups.at(-1);
+        if (!g || g.title !== title) groups.push(g = { title, entries: [], at: s.at, page: s.ch.page });
+        if (s.unit.tech && g.entries.some((e) => e.page === s.ch.page)) return;
+        g.entries.push({ label: s.unit.tech ? tr(s.ch.label) : s.label || tr(s.ch.label), at: s.at, page: s.ch.page });
+    });
+    const chapterAt = Object.fromEntries(spreads.map((s) => [s.ch.file, s.at]).reverse());
+    const contents = contentsSpread(groups);
+    contents.forEach((p) => measure.append(sized(p)));
+    balance(contents);
+    const pages = [frontCover(shared.cover), ...aboutSpread(shared.cover, shared.about), ...contents,
+        ...spreads.flatMap((s) => s.pages), backCover(shared.cover, shared.footer, shared.social)];
+    measure.remove();
     pages.forEach((p, i) => {
+        sized(p);
         p.tabIndex = -1;
-        p.style.width = `${pageW}px`;
-        p.style.height = `${pageH}px`;
+        p.id = `kalq-book-p${i}`;
         p.dataset.side = i % 2 ? "left" : "right"; // after the single front cover, pages alternate left, right
         p.setAttribute("role", "group");
         p.setAttribute("aria-roledescription", "page");
         p.setAttribute("aria-label", t("page")(i + 1, pages.length));
+        if (i > 0 && i < pages.length - 1) p.append(el("span", "bk-folio", String(i + 1)));
         stage.append(p);
     });
-    measure.remove();
 
+    const start = at ?? (pageName() === "home" ? 0 : chapterAt[CHAPTERS.find((c) => c.page === pageName())?.file] ?? 0);
     const flip = new St.PageFlip(stage, {
         width: pageW, height: pageH, size: "fixed", showCover: true, usePortrait: portrait, autoSize: false,
         drawShadow: !reducedMotion.matches, maxShadowOpacity: 0.45, flippingTime: reducedMotion.matches ? 1 : 750,
         showPageCorners: !reducedMotion.matches, disableFlipByClick: true, mobileScrollSupport: false, swipeDistance: 24,
-        startPage: 0, startZIndex: 2,
+        startPage: Math.min(start, pages.length - 1), startZIndex: 2,
     });
     flip.loadFromHTML(pages);
+    const goTo = (i) => {
+        if (i === flip.getCurrentPageIndex()) return;
+        if (reducedMotion.matches) { flip.turnToPage(i); update(); } else flip.flip(i);
+    };
 
-    // Controls: the page number and the drag hint along the bottom; the way back to the web page as an icon where the
-    // header's book icon sits, and on the welcome page. The cover's button, dragging, the pages' edges and the keys
-    // turn pages.
-    const bar = document.createElement("div");
-    bar.className = "kalq-magazine__bar";
-    const status = document.createElement("span");
-    status.className = "kalq-magazine__status";
+    // The controls at the top left: the contents, the way back to the web page, light or dark, the other language
+    const tools = el("nav", "kalq-magazine__tools");
+    tools.setAttribute("aria-label", t("book"));
+    const tool = (cls, label, html, fn) => {
+        const b = el("button", `kalq-magazine__tool ${cls}`);
+        b.type = "button";
+        b.setAttribute("aria-label", label);
+        b.title = label;
+        b.innerHTML = html;
+        b.addEventListener("click", fn);
+        tools.append(b);
+        return b;
+    };
+    tool("is-contents", t("toContents"), `<span>${t("index")}</span>`, () => goTo(CONTENTS_AT));
+    tool("is-exit", t("close"), '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="14" rx="1.5"/><path d="M3.5 9h17M6.4 7h.01M8.6 7h.01"/></svg>', () => leaveForWeb());
+    const dark = getMode() === "dark";
+    tool("is-theme", dark ? t("light") : t("dark"), dark
+        ? '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></svg>'
+        : '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M19.5 14.5A8 8 0 1 1 9.5 4.5a6.5 6.5 0 0 0 10 10z"/></svg>',
+    () => setMode(getMode() === "dark" ? "light" : "dark"));
+    tool("is-lang", t("other"), `<span lang="${t("otherCode")}">${t("otherShort")}</span>`, () => setLanguage(t("otherCode")));
+    const status = el("p", "kalq-magazine__status kalq-sr"); // the page number, announced (the folios are what one sees)
     status.setAttribute("aria-live", "polite");
-    const tip = document.createElement("span"); // the drag hint as words
-    tip.className = "kalq-magazine__tip";
+    const tip = el("p", "kalq-magazine__tip"); // the drag hint as words
     tip.setAttribute("role", "status");
     tip.hidden = true;
-    bar.append(status, tip);
-    const exit = document.createElement("button");
-    exit.type = "button";
-    exit.className = "kalq-magazine__exit";
-    exit.setAttribute("aria-label", t("close"));
-    exit.title = t("close");
-    exit.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="14" rx="1.5"/><path d="M3.5 9h17M6.4 7h.01M8.6 7h.01"/></svg>';
-    exit.addEventListener("click", () => leaveForWeb());
-    // the header settles (fonts, its own buttons) after the book opens: the icon follows the book icon's place
-    const placeExit = () => {
-        const r = spotOf();
-        if (r?.width) Object.assign(exit.style, { left: `${Math.round(r.left + r.width / 2 - 17)}px`, top: `${Math.round(r.top + r.height / 2 - 17)}px`, right: "auto" });
-    };
-    placeExit();
-    overlay.append(bar, exit);
+    overlay.append(tools, status, tip);
 
     // The welcome page: beside the cover, where the book has no page yet (two pages side by side only)
     let welcome = null;
     if (!portrait) {
-        welcome = document.createElement("section");
-        welcome.className = "kalq-mag-welcome";
+        welcome = el("section", "kalq-mag-welcome");
         welcome.setAttribute("aria-label", t("welcome"));
         Object.assign(welcome.style, { width: `${pageW}px`, height: `${pageH}px` });
-        welcome.innerHTML = `<div class="kalq-mag-welcome__body">${TURN_DRAWING}<p class="kalq-mag-welcome__text">`
+        welcome.innerHTML = `<div class="kalq-mag-welcome__body">${TURN}<p class="kalq-mag-welcome__text">`
             + (spanned.matches ? `<strong>${t("detected")}</strong> ` : "") + `${t("intro")}</p>`
             + `<button type="button" class="kalq-mag-welcome__web">${t("close")}</button></div>`;
         welcome.querySelector("button").addEventListener("click", () => leaveForWeb());
@@ -404,27 +488,34 @@ async function build({ auto = false } = {}) {
     cue.querySelector("button").addEventListener("click", () => flip.flipNext());
     cue.classList.add("is-play"); // the tap hint, once on arrival (CSS; none under reduced motion)
 
+    // Past the back cover: the book closes to the normal background
+    const finish = () => {
+        if (reducedMotion.matches) return closeMagazine(true);
+        overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 420, easing: "ease-in", fill: "forwards" }).finished.then(() => closeMagazine(true));
+    };
+    const last = pages.length - 1;
+
     // A tap on a page's outer edge turns it (the engine itself turns pages tapped on a corner: then nothing more)
     let down = null;
     stage.addEventListener("pointerdown", (e) => { down = { x: e.clientX, y: e.clientY, time: Date.now() }; });
     stage.addEventListener("pointerup", (e) => {
         const tap = down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 10 && Date.now() - down.time < 500;
         down = null;
-        if (!tap || e.target.closest("a, button, input, textarea, select, video[controls], .kalq-mag-welcome")) return;
+        if (!tap || e.target.closest("a, button, input, textarea, select, video[controls], [tabindex='0'], .kalq-mag-welcome")) return;
         const box = shownBox(pages);
         if (!box) return;
         const edge = Math.max(40, pageW * 0.14);
         const dir = e.clientX > box.right - edge ? 1 : e.clientX < box.left + edge ? -1 : 0;
         if (!dir) return;
-        const at = flip.getCurrentPageIndex();
-        setTimeout(() => { if (flip.getState() === "read" && flip.getCurrentPageIndex() === at) (dir > 0 ? flip.flipNext() : flip.flipPrev()); }, 40);
+        const i = flip.getCurrentPageIndex();
+        if (dir > 0 && i >= last) return finish();
+        setTimeout(() => { if (flip.getState() === "read" && flip.getCurrentPageIndex() === i) (dir > 0 ? flip.flipNext() : flip.flipPrev()); }, 40);
     });
 
     const update = () => {
         const i = flip.getCurrentPageIndex();
         status.textContent = t("page")(i + 1, pages.length);
         if (i !== 1) tip.hidden = true;
-        placeExit();
         if (flip.getState() !== "read") overlay.querySelectorAll(".kalq-mag-drag").forEach((n) => n.remove()); // turning on: the hint has done its job
         // the welcome page lies under the left pages; in front and reachable only while the cover is closed
         if (welcome) {
@@ -434,12 +525,19 @@ async function build({ auto = false } = {}) {
         }
         // only what is shown is reachable and playing
         pages.forEach((p) => {
-            const shown = p.style.display !== "none" && p.closest(".stf__item, .stf__parent") && getComputedStyle(p).display !== "none";
+            const shown = p.style.display !== "none" && getComputedStyle(p).display !== "none";
             p.inert = !shown;
             p.querySelectorAll("video").forEach((v) => (shown && !reducedMotion.matches ? v.play?.()?.catch(() => { }) : v.pause()));
         });
+        // the drag hint's words sit under the left page (on two screens: the left screen)
+        const box = shownBox(pages);
+        if (box) tip.style.left = `${Math.round(portrait ? (box.left + box.right) / 2 : box.left + pageW / 2)}px`;
     };
-    flip.on("flip", () => { update(); if (flip.getCurrentPageIndex() === 1) dragHint(overlay, pages, pageW, tip); overlay.querySelector(".kalq-mag-page:not([inert]) :is(h1, h2, h3, p)")?.closest(".kalq-mag-page")?.focus?.({ preventScroll: true }); });
+    flip.on("flip", () => {
+        update();
+        if (flip.getCurrentPageIndex() === 1) dragHint(overlay, pages, pageW, tip);
+        overlay.querySelector(".kalq-mag-page:not([inert]) :is(h1, h2, h3, p)")?.closest(".kalq-mag-page")?.focus?.({ preventScroll: true });
+    });
     flip.on("changeState", update);
     setTimeout(update, 50);
 
@@ -448,9 +546,10 @@ async function build({ auto = false } = {}) {
     // and Space keep their usual meaning.
     const onKey = (e) => {
         const step = { ArrowRight: 1, PageDown: 1, ArrowLeft: -1, PageUp: -1 }[e.key];
-        const act = step ? () => (step > 0 ? flip.flipNext() : flip.flipPrev())
-            : e.key === "Home" ? () => { flip.turnToPage(0); update(); }
-            : e.key === "End" ? () => { flip.turnToPage(pages.length - 1); update(); }
+        const inTabs = e.target.closest?.(".bk-tabs, .bk-list");
+        const act = step && !(inTabs && /Arrow(Up|Down)/.test(e.key)) ? () => (step > 0 && flip.getCurrentPageIndex() >= last ? finish() : step > 0 ? flip.flipNext() : flip.flipPrev())
+            : e.key === "Home" && !inTabs ? () => goTo(0)
+            : e.key === "End" && !inTabs ? () => goTo(last)
             : e.key === "Escape" ? () => leaveForWeb() : null;
         e.stopImmediatePropagation();
         if (!act) return;
@@ -458,9 +557,6 @@ async function build({ auto = false } = {}) {
         act();
     };
     window.addEventListener("keydown", onKey, true);
-    window.addEventListener("resize", placeExit);
-    document.fonts?.ready.then(placeExit);
-    setTimeout(placeExit, 600);
     // The engine follows the finger through touchmove and touchend on the window, which the site's smooth scroller
     // stops at the document on the way up. Hand them to the engine first while the book is open.
     const ui = flip.getUI?.();
@@ -471,17 +567,43 @@ async function build({ auto = false } = {}) {
     };
     window.addEventListener("touchmove", onTouch, { capture: true, passive: false });
     window.addEventListener("touchend", onTouch, { capture: true });
-    // a link in the book leaves it (the page change goes on as usual)
-    overlay.addEventListener("click", (e) => { if (e.target.closest(".kalq-mag-page a[href]")) closeMagazine(false); });
+    // Links: the contents and the site's own pages turn the book; mail and other sites open as usual; any other link
+    // on the site leaves the book for it
+    overlay.addEventListener("click", (e) => {
+        const a = e.target.closest(".kalq-mag-page a[href]");
+        if (!a) return;
+        const href = a.getAttribute("href");
+        const file = href.replace(/^\.?\//, "").split(/[?#]/)[0] || "index.html";
+        const to = a.dataset.to != null ? +a.dataset.to : chapterAt[file];
+        if (to != null) { e.preventDefault(); goTo(to); return; }
+        if (/^(mailto:|tel:|https?:)/.test(href) || a.target === "_blank") return;
+        closeMagazine(false);
+    });
+
+    // Rebuild in place: another language, or new content (a picture arrives in its slot)
+    const rebuild = () => { const i = flip.getCurrentPageIndex(); closeMagazine(false, { keepFocus: true }); openMagazine({ at: i }); };
+    const onLanguage = () => rebuild();
+    let pending = 0;
+    const onContent = () => { clearTimeout(pending); pending = setTimeout(() => { sourceCache.clear(); rebuild(); }, 600); };
+    const onLook = () => {
+        const b = tools.querySelector(".is-theme");
+        const nowDark = getMode() === "dark";
+        b.setAttribute("aria-label", nowDark ? t("light") : t("dark"));
+        b.title = b.getAttribute("aria-label");
+    };
+    document.addEventListener("kalq:language", onLanguage);
+    document.addEventListener("kalq:content", onContent);
+    document.addEventListener("kalq:look", onLook);
 
     // the page underneath is out of reach while the book is open
+    const page = container();
     page.inert = true;
     document.querySelector(".site-header")?.setAttribute("inert", "");
     document.documentElement.classList.add("kalq-magazine-open", "kalq-scroll-lock");
-    book = { overlay, flip, pages, onKey, onTouch, placeExit, returnFocus: document.activeElement };
-    pages[0].tabIndex = -1;
+    book = { overlay, flip, pages, onKey, onTouch, onLanguage, onContent, onLook, returnFocus: book?.returnFocus || document.activeElement };
     // focus without scrolling: the button sits inside the engine's page, whose clipped ancestors a scroll would shift
-    cue.querySelector("button").focus({ preventScroll: true });
+    if (start === 0) cue.querySelector("button").focus({ preventScroll: true });
+    else tools.querySelector(".is-contents").focus({ preventScroll: true });
 }
 
 // The reader's way back: the web page for the rest of the visit (the header's book icon still opens the book)
@@ -490,13 +612,15 @@ function leaveForWeb() {
     closeMagazine(true);
 }
 
-export function closeMagazine(byUser = false) {
+export function closeMagazine(byUser = false, { keepFocus = false } = {}) {
     if (!book) return;
     if (byUser) closedByUser = true;
     window.removeEventListener("keydown", book.onKey, true);
-    window.removeEventListener("resize", book.placeExit);
     window.removeEventListener("touchmove", book.onTouch, { capture: true });
     window.removeEventListener("touchend", book.onTouch, { capture: true });
+    document.removeEventListener("kalq:language", book.onLanguage);
+    document.removeEventListener("kalq:content", book.onContent);
+    document.removeEventListener("kalq:look", book.onLook);
     book.flip.destroy?.();
     book.overlay.remove();
     const page = container();
@@ -506,7 +630,7 @@ export function closeMagazine(byUser = false) {
     const back = book.returnFocus;
     book = null;
     updateToggle();
-    back?.focus?.();
+    if (!keepFocus) back?.focus?.();
 }
 
 //=================================== Start ===================================//

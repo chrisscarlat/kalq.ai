@@ -1,5 +1,5 @@
-/* Magazine mode (js/magazine.js, prototype). The book sits on the site's own background, in its type and colours:
-   no table, no paper texture. */
+/* Magazine mode (js/magazine.js): the site as one book, every section its own spread (js/book/layouts.js). It sits on
+   the site's own background and colours: no table, no paper texture. */
 
 // StPageFlip's own layout rules (page-flip 2.0.7, src/Style/stPageFlip.css, MIT), unchanged
 .stf__parent { position: relative; display: block; box-sizing: border-box; transform: translateZ(0); touch-action: pan-y; }
@@ -30,124 +30,288 @@
     position: relative;
 }
 
-// A page: the site's background and type; its content never runs under the spine (or the hinge on two screens)
+// A page: the site's own colours, the book's own type (one scale, by role). Its text keeps clear of the spine (and
+// the hinge on two screens), of the controls at the top and of the page number at the foot.
 .kalq-mag-page {
     --spine: calc(var(--kalq-mag-hinge, 0px) / 2 + 1.75rem);
+    --outer: clamp(1.5rem, 7%, 3.25rem);
+    --side: max(var(--spine), var(--outer));
+    --foot: 3.6rem;
+    --line: var(--kalq-line, rgba(16, 16, 16, 0.14));
     position: relative;
     overflow: hidden;
     background: var(--kalq-bg, #fff);
     color: var(--kalq-text, #101010);
-    box-shadow: inset 0 0 0 1px var(--kalq-line, rgba(0, 0, 0, 0.08));
+    box-shadow: inset 0 0 0 1px var(--line);
+    font-family: "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
 
-    &:focus {
-        outline: none;
-    }
+    &:focus { outline: none; }
 
     &:focus-visible {
         outline: 2px solid var(--kalq-accent, #3b82f6);
         outline-offset: -2px;
     }
-}
-
-.kalq-mag-page__body {
-    height: 100%;
-    overflow: hidden;
-    padding: var(--kalq-mag-top, 3rem) var(--spine) 6rem; // clear of the way-back icon at the top and the controls at the bottom
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-
-    > * {
-        flex-shrink: 0;
-        max-width: 100%;
-        margin: 0;
-    }
-
-    h1, h2 { font-size: clamp(1.9rem, 4.2vmin, 2.8rem); line-height: 1.08; letter-spacing: -0.02em; font-weight: 400; }
-    h3, h4 { font-size: clamp(1.3rem, 2.6vmin, 1.7rem); line-height: 1.2; font-weight: 400; }
-    h5 { font-size: clamp(1.1rem, 2.2vmin, 1.4rem); line-height: 1.35; font-weight: 300; }
-    p, li { font-size: 1rem; line-height: 1.55; }
-    ul, ol { padding-left: 1.2rem; }
-
-    img, video {
-        display: block;
-        width: 100%;
-        height: auto;
-        max-height: 46vh;
-        object-fit: cover;
-        border-radius: 14px;
-    }
 
     a { color: inherit; }
     .kalq-line { display: block; }
-
-    .kalq-m-button, a.btn {
-        align-self: flex-start;
-        padding: 0.8rem 1.3rem;
-        border-radius: 999px;
-        background: var(--kalq-text, #101010);
-        color: var(--kalq-bg, #fff);
-        mix-blend-mode: normal;
-        text-decoration: none;
-    }
-
-    .kalq-m-faq__item {
-        padding-bottom: 0.8rem;
-        border-bottom: 1px solid var(--kalq-line, #d9d9d9);
-    }
-
-    .kalq-m-faq__title { font-size: 1.1rem; font-weight: 500; }
 }
 
-// A single element taller than the page: the page scrolls inside, the element stays whole
-.kalq-mag-page.is-scroll .kalq-mag-page__body {
-    overflow-y: auto;
-}
-
-// Covers: hard pages. Front: the hero's picture or video with its title; back: the wordmark.
-.kalq-mag-page.is-cover {
-    display: grid;
-    place-items: center;
-    background: var(--kalq-dark, #101010);
-    color: var(--kalq-light, #fff);
-
-    > video, > img {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    svg {
-        width: 60%;
-        height: auto;
-        fill: currentColor;
-    }
-}
-
-.kalq-mag-cover__shade {
+.bk-in {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.55));
+    display: flex;
+    flex-direction: column;
+    padding: var(--kalq-mag-top, 3rem) var(--side) var(--foot);
 }
 
-.kalq-mag-cover__text {
+// Text sits at the foot of its page; longer text sets in two columns, then carries on over the next spread
+.bk-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    margin-top: auto;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+
+    > * { flex-shrink: 0; margin: 0; max-width: 100%; }
+
+    &.is-cols {
+        display: block;
+        height: 100%;
+        column-count: 2;
+        column-gap: 1.6rem;
+
+        > * { break-inside: avoid; margin: 0 0 0.9rem; }
+    }
+}
+
+.kalq-mag-page.is-scroll .bk-flow { overflow-y: auto; margin-top: 0; }
+.kalq-mag-page.is-scroll .bk-flow.is-cols { overflow-x: auto; }
+
+// The type scale (book only)
+.bk-display { font-size: clamp(2rem, 5.2vmin, 3.6rem); line-height: 1.05; letter-spacing: -0.02em; font-weight: 400; }
+.bk-title { font-size: clamp(1.7rem, 3.8vmin, 2.6rem); line-height: 1.1; letter-spacing: -0.015em; font-weight: 400; }
+.bk-subtitle { font-size: clamp(1.3rem, 2.8vmin, 1.9rem); line-height: 1.2; font-weight: 400; }
+.bk-item { font-size: clamp(1.15rem, 2.2vmin, 1.4rem); line-height: 1.25; font-weight: 400; }
+.bk-lead { font-size: 1.15rem; line-height: 1.45; font-weight: 300; }
+.bk-eyebrow { font-size: 0.72rem; line-height: 1.3; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500; opacity: 0.65; }
+.bk-body { font-size: 1rem; line-height: 1.55; }
+.bk-small { font-size: 0.85rem; line-height: 1.5; opacity: 0.8; }
+.bk-figure { font-size: clamp(2.4rem, 6vmin, 4.5rem); line-height: 1; font-weight: 300; }
+.bk-display, .bk-title, .bk-subtitle, .bk-item, .bk-lead, .bk-eyebrow, .bk-body, .bk-small, .bk-figure { margin: 0; }
+
+.bk-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.bk-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.65rem 1.1rem;
+    border-radius: 999px;
+    background: var(--kalq-text, #101010);
+    color: var(--kalq-bg, #fff) !important;
+    font-size: 0.85rem;
+    text-decoration: none;
+
+    &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 2px; }
+}
+
+// Media slots: the picture or video, or the placeholder glyph while the slot is empty
+.bk-media {
     position: relative;
-    padding: var(--kalq-mag-top, 0px) var(--spine) 0; // clear of the way-back icon, like the pages
-    text-align: center;
+    overflow: hidden;
+    background: var(--line);
 
-    svg { width: min(100%, 26rem); }
-    p { margin-top: 1.25rem; font-size: 1.15rem; line-height: 1.45; }
-    .kalq-line { display: block; }
+    img, video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 }
+
+.bk-ph {
+    background: #1D4ED8 url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 70%22%3E%3Ccircle cx=%2261%22 cy=%2225%22 r=%2210%22 fill=%22%237DB3FF%22/%3E%3Cpath d=%22M24 62L48 19L72 62Z%22 fill=%22%23172E7A%22/%3E%3C/svg%3E") center 45% / auto 28% no-repeat;
+}
+
+.kalq-mag-page.is-media {
+    .bk-in { padding: 0; }
+    .bk-in > .bk-media { position: absolute; inset: 0; }
+    .bk-in.bk-stack { display: grid; grid-template-rows: 1fr 1fr; gap: 6px; }
+    .bk-in.bk-stack > .bk-media { position: relative; inset: auto; }
+}
+
+// One picture across the spread: each page shows its half
+.is-across-left .bk-media img, .is-across-left .bk-media video { width: 200%; left: 0; }
+.is-across-right .bk-media img, .is-across-right .bk-media video { width: 200%; left: -100%; }
+
+// Text set over a picture, on a soft shade
+.bk-over {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 4rem var(--side) var(--foot);
+    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.62));
+    color: #fff;
+
+    .bk-btn { background: #fff; color: #101010 !important; }
+    .bk-lead { max-width: 30ch; }
+}
+
+// D: the numbered list, number small and title large
+.bk-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+        display: grid;
+        grid-template-columns: 2.6rem 1fr;
+        align-items: baseline;
+        padding: 0.75rem 0;
+        border-top: 1px solid var(--line);
+
+        &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 2px; }
+    }
+}
+
+.bk-num { font-size: 0.78rem; letter-spacing: 0.08em; opacity: 0.6; font-variant-numeric: tabular-nums; }
+
+// E: a card, its picture above and its text at the foot
+.bk-card .bk-in { gap: 1.2rem; }
+.bk-card__media { flex: 1 1 auto; min-height: 38%; border-radius: 6px; } // the picture takes the room the text leaves
+.bk-card .bk-flow { gap: 0.7rem; }
+
+// F: questions as tabs, the answer facing them
+.bk-tabs { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+
+.bk-tab {
+    padding: 0.85rem 1.6rem 0.85rem 0;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-size: 1.05rem;
+    line-height: 1.35;
+    text-align: left;
+    cursor: pointer;
+    opacity: 0.6;
+
+    &[aria-selected="true"] { opacity: 1; font-weight: 500; }
+    &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 2px; }
+}
+
+.bk-answers .bk-answer { gap: 1rem; }
+.bk-answer[hidden] { display: none; }
+
+// About: the left page nearly empty, figures and the description low down; the statement centred
+.bk-figures {
+    display: flex;
+    gap: 2.2rem;
+    margin: 0 0 0.6rem;
+
+    dd { margin: 0.45rem 0 0; }
+}
+
+.bk-centre .bk-in { align-items: center; justify-content: center; text-align: center; }
+
+.bk-statement { margin: 0; max-width: 20ch; font-size: clamp(1.6rem, 4.2vmin, 2.7rem); line-height: 1.2; font-weight: 300; letter-spacing: -0.01em; }
+
+// Contents: the hub; every line a link to its spread
+.bk-contents {
+    .bk-in { gap: 1.8rem; }
+    .bk-flow { margin-top: 0; gap: 1.6rem; }
+}
+
+.bk-chapter .bk-eyebrow { margin-bottom: 0.5rem; }
+
+.bk-entries {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    a {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--line);
+        font-size: 1rem;
+        line-height: 1.35;
+        text-decoration: none;
+
+        &:hover .bk-entry__label { text-decoration: underline; text-underline-offset: 3px; }
+        &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 2px; }
+    }
+}
+
+.bk-entry__folio { flex-shrink: 0; font-size: 0.8rem; opacity: 0.6; font-variant-numeric: tabular-nums; }
+
+// G: the legal appendix, a technical section: grey, a fine grid, monospaced and dense
+.kalq-mag-page.is-tech {
+    --grid: rgba(128, 128, 128, 0.12);
+    background: color-mix(in srgb, var(--kalq-bg, #fff) 88%, var(--kalq-text, #101010) 12%);
+    background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 24px 24px;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+    .bk-flow { margin-top: 0; gap: 0.55rem; font-size: 0.78rem; line-height: 1.5; }
+    .bk-flow.is-cols { column-gap: 1.4rem; }
+    .bk-title { font-size: 1.1rem; letter-spacing: 0.02em; text-transform: uppercase; font-weight: 500; }
+    .bk-subtitle { margin-top: 0.7rem; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+    .bk-lead, .bk-body { font-size: 0.78rem; line-height: 1.5; font-weight: 400; }
+}
+
+.bk-code { padding-bottom: 0.45rem; border-bottom: 1px solid currentColor; font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.7; }
+
+// The page number: small, in the outer corner at the foot
+.bk-folio {
+    position: absolute;
+    bottom: 1.3rem;
+    z-index: 3;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+.kalq-mag-page[data-side="left"] .bk-folio { left: var(--outer); }
+.kalq-mag-page[data-side="right"] .bk-folio { right: var(--outer); }
+.kalq-mag-page.is-media .bk-folio, .kalq-mag-page:has(.bk-over) .bk-folio { color: #fff; opacity: 0.85; }
+
+// Covers: hard pages on the hero's video. Front: the brand mark and the way in. Back: brand, contacts, closing line.
+.kalq-mag-page.is-cover {
+    background: var(--kalq-dark, #101010);
+    color: #fff;
+
+    .bk-in { padding: var(--kalq-mag-top, 3rem) var(--side) 2.4rem; align-items: center; justify-content: center; text-align: center; }
+    .bk-cover__media { position: absolute; inset: 0; }
+}
+
+.bk-cover__shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.55)); }
+
+.bk-cover__mark { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3rem; width: 100%; }
+.bk-cover__title { margin: 0; width: min(78%, 24rem); }
+.kalq-mag-page.is-cover .bk-cover__title svg { display: block; width: 100%; height: auto; fill: currentColor; }
+
+.kalq-mag-page.is-back-cover .bk-in { justify-content: space-between; }
+.bk-back__name { position: relative; margin: 0; }
+.kalq-mag-page.is-cover .bk-back__name svg { display: block; width: 4.5rem; height: auto; fill: currentColor; }
+.bk-back__logo { position: relative; }
+.kalq-mag-page.is-cover .bk-back__logo svg { display: block; width: clamp(5rem, 22%, 8rem); height: auto; margin: 0 auto; stroke: currentColor; }
+.bk-back__end { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.9rem; max-width: 30rem; }
+.bk-back__closing { margin: 0; font-size: clamp(1.4rem, 3.4vmin, 2.1rem); line-height: 1.15; font-weight: 400; }
+.bk-back__end .bk-actions { justify-content: center; }
+.bk-back__end .bk-btn { padding: 0.5rem 0.9rem; background: rgba(255, 255, 255, 0.92); color: #101010 !important; font-size: 0.78rem; }
+.bk-back__plain { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem 1.1rem; margin: 0.2rem 0 0; font-size: 0.75rem; opacity: 0.85; }
+
+.kalq-magazine .kalq-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 // The front cover's way on: one arrow in a circle, a real "next page" button. On arrival its ring trembles twice and
 // sends out two soft ripples, then a small drawn hand taps it once; then it rests. Reduced motion: still, no hand.
 .kalq-mag-cue {
-    position: absolute;
-    right: 9%;
-    bottom: 17%;
+    position: relative;
     z-index: 2;
     width: 58px;
     height: 58px;
@@ -195,7 +359,7 @@
 
 .kalq-mag-page.is-cover .kalq-mag-cue__hand {
     position: absolute;
-    left: calc(50% - 19px); // the fingertip (23,4 of 48×58) a little below the circle's middle
+    left: calc(50% - 17px); // the fingertip (20,3 of 48×60) a little below the circle's middle
     top: calc(50% + 3px);
     width: 40px;
     opacity: 0;
@@ -268,9 +432,16 @@
     svg { display: block; width: 46px; height: auto; }
 }
 
-.kalq-magazine__tip {
-    padding: 0 0.9rem 0 0.3rem;
+.kalq-magazine__tip { // the drag hint's words, under the left page (the page numbers sit in the outer corners)
+    position: fixed;
+    bottom: 1.05rem;
+    z-index: 4;
+    margin: 0;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
     white-space: nowrap;
+    opacity: 0.75;
+    pointer-events: none;
 }
 
 // The welcome page beside the closed cover: a drawing, a short text, the way back to the web page. Under the book's
@@ -292,11 +463,11 @@
 .kalq-mag-welcome__body {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 1.4rem;
     width: 100%;
-    padding: 0 var(--spine-welcome, 2.5rem);
-    padding-right: calc(var(--kalq-mag-hinge, 0px) / 2 + 2.5rem);
+    padding: 0 calc(var(--kalq-mag-hinge, 0px) / 2 + 2.5rem);
+    text-align: center;
 }
 
 .kalq-mag-welcome__drawing {
@@ -339,58 +510,36 @@
     &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 3px; }
 }
 
-// The way back to the web page, as an icon where the header's book icon sits (the header is under the book)
-.kalq-magazine__exit {
+// The controls at the top left: Index (back to the contents), the way back to the web page, light or dark, the other
+// language. The header is under the book, so the book draws its own.
+.kalq-magazine__tools {
     position: fixed;
     top: 14px;
-    right: 14px;
-    z-index: 4;
+    left: 14px;
+    z-index: 5;
+    display: flex;
+    gap: 6px;
+}
+
+.kalq-magazine__tool {
     display: grid;
     place-items: center;
-    width: 34px;
+    min-width: 34px;
     height: 34px;
-    padding: 0;
+    padding: 0 0.8rem;
     border: 0;
-    border-radius: 50%;
+    border-radius: 999px;
     background: rgba(255, 255, 255, 0.86);
     color: #101010;
     box-shadow: 0 0 0 1px rgba(16, 16, 16, 0.12);
+    font: 500 0.78rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
     cursor: pointer;
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
 
+    &.is-exit, &.is-theme { width: 34px; padding: 0; }
     &:hover { background: #fff; }
     &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 2px; }
-}
-
-// Controls along the bottom (on two screens all on the left screen, clear of the hinge)
-.kalq-magazine__bar {
-    position: fixed;
-    left: 50%;
-    bottom: 1rem;
-    transform: translateX(-50%);
-    z-index: 3;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.35rem 0.5rem;
-    min-height: 40px;
-    border-radius: 999px;
-    background: rgba(16, 16, 16, 0.82);
-    color: #fff;
-    font: 500 0.8rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-}
-
-.kalq-magazine.is-spanned .kalq-magazine__bar {
-    left: calc(var(--seg-l, 50vw) / 2);
-}
-
-.kalq-magazine__status {
-    min-width: 6.5rem;
-    text-align: center;
-    opacity: 0.75;
 }
 
 // The header button that opens the book (tablets; two screens to reopen)

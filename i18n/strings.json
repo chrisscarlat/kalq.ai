@@ -287,5 +287,9 @@
     "legal.registerText": {
         "de": "Registergericht: [TODO]\nRegisternummer: [TODO]",
         "en": "Register court: [TODO]\nRegister number: [TODO]"
+    },
+    "home.platformText": {
+        "en": "A part enters as a STEP file and a drawing. Kalq turns it into features, process alternatives and a route on real machines.",
+        "de": "Ein Teil kommt als STEP-Datei und Zeichnung herein. Kalq macht daraus Features, Prozessalternativen und eine Route auf realen Maschinen."
     }
 }

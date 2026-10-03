@@ -12,7 +12,7 @@
     ],
     "functions": {
         "api/page.js": {
-            "includeFiles": "{index,platform,company,impressum,datenschutz}.html"
+            "includeFiles": "{index,platform,company,impressum,datenschutz,gate}.html"
         }
     }
 }

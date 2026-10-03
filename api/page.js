@@ -7,7 +7,7 @@ import { readCookie, verifyGate } from "../lib/gate-cookie.js";
 import { renderPage } from "../lib/render-page.js";
 import { isConfigured, rpc } from "../lib/supabase-admin.js";
 
-const FILES = { home: "index.html", platform: "platform.html", company: "company.html", impressum: "impressum.html", datenschutz: "datenschutz.html" };
+const FILES = { home: "index.html", platform: "platform.html", company: "company.html", impressum: "impressum.html", datenschutz: "datenschutz.html", gate: "gate.html" };
 const PUBLIC_PAGES = new Set(["impressum", "datenschutz"]);
 const templates = new Map(); // built HTML per page, read once per instance
 
@@ -25,8 +25,11 @@ export async function GET(request) {
     const page = new URL(request.url).searchParams.get("p");
     if (!FILES[page]) return new Response("Not found", { status: 404 });
 
+    // The gate itself: shown with 401 to anyone without the cookie (the middleware sends them here)
+    if (page === "gate") return html(await template("gate"), 401);
+
     const session = await verifyGate(readCookie(request.headers.get("cookie")), process.env.GATE_COOKIE_SECRET);
-    if (!session && !PUBLIC_PAGES.has(page)) return new Response("Gate", { status: 401 });
+    if (!session && !PUBLIC_PAGES.has(page)) return html(await template("gate"), 401);
 
     const built = await template(page);
     if (!isConfigured()) return html(built);

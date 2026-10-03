@@ -43,17 +43,8 @@ export default async function middleware(request) {
 
     if (session) return page ? renderPage(page, request) : next();
 
-    // Gate with status 401, so a Barba page transition from a public legal page falls back to a full page load
-    try {
-        const gate = await fetch(new URL("/gate.html", url));
-        if (gate.ok) {
-            return new Response(gate.body, {
-                status: 401,
-                headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" },
-            });
-        }
-    } catch (error) {
-        console.error("gate fetch failed", error);
-    }
-    return rewrite(new URL("/gate.html", request.url));
+    // The gate, with status 401 (api/page.js), so a Barba page transition from a public legal page falls back to a
+    // full page load. Read from the deployment's files, never fetched over HTTP: on a protected preview that fetch
+    // would get Vercel's login page instead of the gate.
+    return rewrite(new URL("/api/page?p=gate", request.url));
 }

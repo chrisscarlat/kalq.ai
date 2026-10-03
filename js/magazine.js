@@ -4,8 +4,10 @@
 // hinge, one page per screen); on a plain tablet a button in the header opens it.
 //   hard front cover: the hero; pages: the sections' own headings, paragraphs, lists, pictures and buttons, in order,
 //   never split (an element taller than a page makes that page scroll inside); hard back cover: the wordmark.
-//   turn: drag a page with a finger, arrow keys, Page Up/Down, Home/End, or the buttons; Esc or the close button
-//   returns to the page at the same place. Reduced motion: pages change without the turning animation.
+//   turn: on the front cover one "next page" button (a short tap hint plays on arrival); after it drag a page, tap a
+//   page's outer edge, or arrow keys, Page Up/Down, Home/End; the first time the second spread opens, a drawn hand
+//   drags a corner once (with the same hint as one line of text). Esc or the close button returns to the page at the
+//   same place. Reduced motion: pages change without the turning animation, and the hints are not animated.
 import { currentLang } from "./i18n.js";
 
 const PAGES_ON = new Set(["home", "platform", "company"]);
@@ -14,10 +16,19 @@ const tablet = window.matchMedia("(pointer: coarse) and (min-width: 600px) and (
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 const TEXT = {
-    de: { open: "Als Magazin lesen", close: "Als Webseite lesen", prev: "Vorherige Seite", next: "Nächste Seite", book: "Magazin", page: (n, of) => `Seite ${n} von ${of}` },
-    en: { open: "Read as a magazine", close: "Read as a web page", prev: "Previous page", next: "Next page", book: "Magazine", page: (n, of) => `Page ${n} of ${of}` },
+    de: { open: "Als Magazin lesen", close: "Als Webseite lesen", next: "Nächste Seite", drag: "Seite ziehen zum Umblättern", book: "Magazin", page: (n, of) => `Seite ${n} von ${of}` },
+    en: { open: "Read as a magazine", close: "Read as a web page", next: "Next page", drag: "Drag a page to turn it", book: "Magazine", page: (n, of) => `Page ${n} of ${of}` },
 };
 const t = (k) => TEXT[currentLang() === "en" ? "en" : "de"][k];
+
+// A small hand in the manner of a manual's drawings: white, outlined in black, the index finger pointing up (its tip
+// at 23,4 in the drawing). Decorative: the hints it shows are also real text or a labelled button.
+const HAND = '<svg viewBox="0 0 48 58" aria-hidden="true" focusable="false" fill="#fff" stroke="#111" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">'
+    + '<path d="M25 51.6V56h14v-4.4"/>'
+    + '<path d="M19.5 33V7.5a3.5 3.5 0 0 1 7 0V23a3.2 3.2 0 0 1 6.4 0v2a3.1 3.1 0 0 1 6.2 0v2.5a2.9 2.9 0 0 1 5.8 0V37c0 9-4.9 15-13.9 15H27c-5 0-8-2.5-11-6.5l-6.5-9a3.2 3.2 0 0 1 5.1-3.9L19.5 37z"/>'
+    + '<path d="M26.5 23v6M32.9 25v5M39.1 27.5v4.5M21.4 7a1.6 1.6 0 0 1 3.2 0" fill="none"/></svg>';
+const HAND_TIP = { x: 23 / 48, y: 4 / 58 }; // where the fingertip is, as a share of the drawing's width and height
+const DRAG_SEEN = "kalq-mag-drag-hint";
 
 let book = null; // { overlay, flip, pages, closedByUser }
 let closedByUser = false;
@@ -131,7 +142,62 @@ function cover(section, pageW, pageH, back) {
     text.className = "kalq-mag-cover__text";
     section?.querySelectorAll(".hero_title, .hero_slogan, h1, h2").forEach((el) => { if (!text.querySelector(el.tagName) && el.textContent.trim()) text.append(copyOf(el)); });
     p.append(text);
+    // the one way on from the cover: an arrow in a circle, a real button (the engine leaves buttons to themselves)
+    const cue = document.createElement("div");
+    cue.className = "kalq-mag-cue";
+    cue.innerHTML = '<span class="kalq-mag-cue__ripple" aria-hidden="true"></span><span class="kalq-mag-cue__ripple" aria-hidden="true"></span>'
+        + `<button type="button" class="kalq-mag-cue__btn" aria-label="${t("next")}" title="${t("next")}">`
+        + '<svg class="kalq-mag-cue__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h13M13 6.5l5.5 5.5-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
+        + `<span class="kalq-mag-cue__hand" aria-hidden="true">${HAND}</span>`;
+    p.append(cue);
     return p;
+}
+
+//=================================== Hints ===================================//
+// The box around the pages in view
+function shownBox(pages) {
+    const rects = pages.filter((p) => !p.inert && getComputedStyle(p).display !== "none").map((p) => p.getBoundingClientRect()).filter((r) => r.width);
+    if (!rects.length) return null;
+    return { left: Math.min(...rects.map((r) => r.left)), right: Math.max(...rects.map((r) => r.right)), top: Math.min(...rects.map((r) => r.top)), bottom: Math.max(...rects.map((r) => r.bottom)) };
+}
+
+// The first time the second spread opens: the hand takes the lower outer corner, drags it across and lets it fall
+// back, once; then it is gone. The same hint stays as a line of text while the spread is open.
+function dragHint(overlay, pages, pageW, tip) {
+    try { if (localStorage.getItem(DRAG_SEEN)) return; localStorage.setItem(DRAG_SEEN, "1"); } catch { /* no storage: show it this time */ }
+    tip.textContent = t("drag");
+    tip.hidden = false;
+    if (reducedMotion.matches) return;
+    // measured once the turned page has settled
+    requestAnimationFrame(() => requestAnimationFrame(() => { if (overlay.isConnected) dragHand(overlay, pages, pageW); }));
+}
+
+function dragHand(overlay, pages, pageW) {
+    const box = shownBox(pages);
+    if (!box) return;
+    const hint = document.createElement("div");
+    hint.className = "kalq-mag-drag";
+    hint.setAttribute("aria-hidden", "true");
+    hint.style.left = `${box.right}px`;
+    hint.style.top = `${box.bottom}px`;
+    hint.innerHTML = `<span class="kalq-mag-drag__fold"></span><span class="kalq-mag-drag__hand">${HAND}</span>`;
+    overlay.append(hint);
+    const fold = hint.firstElementChild, hand = hint.lastElementChild;
+    const size = Math.round(Math.min(pageW * 0.42, 220));
+    const hw = 46, hh = hw * 58 / 48;
+    const at = (s) => `translate(${-s - hw * HAND_TIP.x}px, ${-s - hh * HAND_TIP.y}px)`; // fingertip on the folded corner
+    const timing = { duration: 3000, delay: 350, easing: "cubic-bezier(.45,0,.25,1)", fill: "both" };
+    fold.animate([
+        { width: "0px", height: "0px", offset: 0 }, { width: "0px", height: "0px", offset: 0.18 },
+        { width: `${size}px`, height: `${size}px`, offset: 0.58 }, { width: `${size}px`, height: `${size}px`, offset: 0.72 },
+        { width: "0px", height: "0px", offset: 0.9 }, { width: "0px", height: "0px", offset: 1 },
+    ], timing);
+    hand.animate([
+        { transform: `${at(-40)}`, opacity: 0, offset: 0 }, { transform: at(0), opacity: 1, offset: 0.18 },
+        { transform: at(size), opacity: 1, offset: 0.58 }, { transform: at(size), opacity: 1, offset: 0.72 },
+        { transform: `${at(size)} translate(5px, -9px)`, opacity: 0, offset: 0.8 }, // lets go: lifts off where it is
+        { transform: `${at(size)} translate(5px, -9px)`, opacity: 0, offset: 1 },
+    ], timing).finished.then(() => hint.remove(), () => hint.remove());
 }
 
 //=================================== Open and close ===================================//
@@ -208,7 +274,7 @@ async function build({ auto = false } = {}) {
     });
     flip.loadFromHTML(pages);
 
-    // Controls: close, previous, next (for mouse and keyboard; fingers drag the pages)
+    // Controls: close and the page number; the cover's own button, dragging, the pages' edges and the keys turn pages
     const bar = document.createElement("div");
     bar.className = "kalq-magazine__bar";
     const button = (cls, label, fn, html) => {
@@ -221,20 +287,40 @@ async function build({ auto = false } = {}) {
         b.addEventListener("click", fn);
         return b;
     };
-    const prev = button("is-prev", t("prev"), () => flip.flipPrev(), "&larr;");
-    const next = button("is-next", t("next"), () => flip.flipNext(), "&rarr;");
     const status = document.createElement("span");
     status.className = "kalq-magazine__status";
     status.setAttribute("aria-live", "polite");
     const close = button("is-close", t("close"), () => closeMagazine(true), `<span>${t("close")}</span>`);
-    bar.append(close, prev, status, next);
+    const tip = document.createElement("span"); // the drag hint as words
+    tip.className = "kalq-magazine__tip";
+    tip.setAttribute("role", "status");
+    tip.hidden = true;
+    bar.append(close, status, tip);
     overlay.append(bar);
+    const cue = pages[0].querySelector(".kalq-mag-cue");
+    cue.querySelector("button").addEventListener("click", () => flip.flipNext());
+    cue.classList.add("is-play"); // the tap hint, once on arrival (CSS; none under reduced motion)
+
+    // A tap on a page's outer edge turns it (the engine itself turns pages tapped on a corner: then nothing more)
+    let down = null;
+    stage.addEventListener("pointerdown", (e) => { down = { x: e.clientX, y: e.clientY, time: Date.now() }; });
+    stage.addEventListener("pointerup", (e) => {
+        const tap = down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 10 && Date.now() - down.time < 500;
+        down = null;
+        if (!tap || e.target.closest("a, button, input, textarea, select, video[controls]")) return;
+        const box = shownBox(pages);
+        if (!box) return;
+        const edge = Math.max(40, pageW * 0.14);
+        const dir = e.clientX > box.right - edge ? 1 : e.clientX < box.left + edge ? -1 : 0;
+        if (!dir) return;
+        const at = flip.getCurrentPageIndex();
+        setTimeout(() => { if (flip.getState() === "read" && flip.getCurrentPageIndex() === at) (dir > 0 ? flip.flipNext() : flip.flipPrev()); }, 40);
+    });
 
     const update = () => {
         const i = flip.getCurrentPageIndex();
         status.textContent = t("page")(i + 1, pages.length);
-        prev.disabled = i <= 0;
-        next.disabled = i >= pages.length - 1;
+        if (i !== 1) tip.hidden = true;
         // only what is shown is reachable and playing
         pages.forEach((p) => {
             const shown = p.style.display !== "none" && p.closest(".stf__item, .stf__parent") && getComputedStyle(p).display !== "none";
@@ -242,7 +328,7 @@ async function build({ auto = false } = {}) {
             p.querySelectorAll("video").forEach((v) => (shown && !reducedMotion.matches ? v.play?.()?.catch(() => { }) : v.pause()));
         });
     };
-    flip.on("flip", () => { update(); overlay.querySelector(".kalq-mag-page:not([inert]) :is(h1, h2, h3, p)")?.closest(".kalq-mag-page")?.focus?.(); });
+    flip.on("flip", () => { update(); if (flip.getCurrentPageIndex() === 1) dragHint(overlay, pages, pageW, tip); overlay.querySelector(".kalq-mag-page:not([inert]) :is(h1, h2, h3, p)")?.closest(".kalq-mag-page")?.focus?.(); });
     flip.on("changeState", update);
     setTimeout(update, 50);
 
@@ -280,7 +366,7 @@ async function build({ auto = false } = {}) {
     document.documentElement.classList.add("kalq-magazine-open", "kalq-scroll-lock");
     book = { overlay, flip, pages, onKey, onTouch, returnFocus: document.activeElement };
     pages[0].tabIndex = -1;
-    overlay.querySelector(".kalq-magazine__btn.is-next").focus();
+    cue.querySelector("button").focus();
 }
 
 export function closeMagazine(byUser = false) {

@@ -17,7 +17,8 @@ const TEXT = {
 const lang = () => (currentLang() === "en" ? "en" : "de");
 const t = (key) => TEXT[lang()][key];
 
-// The preview devices, at their real CSS sizes; each frame is scaled down to the same height
+// The preview devices, at their real CSS sizes, all scaled by the same factor: a phone looks like a phone next to a
+// tablet. Each frame is a fixed window of the device's screen; a taller section scrolls inside it.
 const DEVICES = [
     { id: "phone", w: 390, h: 844, de: "Smartphone", en: "Phone" },
     { id: "folded", w: 344, h: 882, de: "Faltbar, zugeklappt", en: "Foldable, folded" },
@@ -28,7 +29,7 @@ const DEVICES = [
     { id: "laptop", w: 1440, h: 900, de: "Laptop", en: "Laptop" },
     { id: "large", w: 2560, h: 1440, de: "Großer Bildschirm", en: "Large screen" },
 ];
-const FRAME_HEIGHT = 250;
+const SCALE = 0.18;
 
 // Every version of every module, flat
 const ALL = Object.entries(MODULES).flatMap(([module, def]) => Object.entries(def.versions).map(([version, v]) => ({ module, version, def, v })));
@@ -41,8 +42,7 @@ function wireframe(wire, { large = false } = {}) {
         const light = [h, opt].includes("light");
         const fill = light ? "#fff" : BLUE;
         switch (kind) {
-            case "media": return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="1.5" fill="${BLUE}" fill-opacity=".18" stroke="${BLUE}" stroke-width=".5"/>`
-                + `<path d="M${x} ${y + h}L${x + w * 0.35} ${y + h * 0.55}L${x + w * 0.55} ${y + h * 0.75}L${x + w * 0.75} ${y + h * 0.45}L${x + w} ${y + h * 0.8}" fill="none" stroke="${BLUE}" stroke-width=".5" stroke-opacity=".6"/>`
+            case "media": return imageGlyph(x, y, w, h)
                 + (opt === "play" ? `<circle cx="${x + w / 2}" cy="${y + h / 2}" r="4" fill="${BLUE}"/><path d="M${x + w / 2 - 1.2} ${y + h / 2 - 2}l3.2 2-3.2 2z" fill="#fff"/>` : "");
             case "band": return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${BLUE}"/>`;
             case "heading": return `<rect x="${x}" y="${y}" width="${w}" height="3.2" rx="1" fill="${fill}"/>`;
@@ -55,6 +55,17 @@ function wireframe(wire, { large = false } = {}) {
         }
     }).join("");
     return `<svg viewBox="0 0 100 60" ${large ? "" : 'preserveAspectRatio="xMidYMid meet"'} aria-hidden="true" focusable="false"><rect width="100" height="60" fill="#fff"/>${parts}</svg>`;
+}
+
+// The one image placeholder, the same everywhere an image can go (also as CSS in collab.scss, .kalq-ph-media):
+// a dark blue block, a lighter blue sun behind a single darker blue mountain
+export const GLYPH = { block: "#1D4ED8", sun: "#7DB3FF", mountain: "#172E7A" };
+function imageGlyph(x, y, w, h) {
+    const s = Math.min(w, h * 1.6); // the motif keeps its shape in wide and tall boxes
+    const cx = x + w / 2, base = y + h * 0.82, top = base - s * 0.42;
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="1.2" fill="${GLYPH.block}"/>`
+        + `<circle cx="${cx + s * 0.13}" cy="${top + s * 0.06}" r="${s * 0.09}" fill="${GLYPH.sun}"/>`
+        + `<path d="M${cx - s * 0.26} ${base}L${cx - s * 0.02} ${top}L${cx + s * 0.24} ${base}Z" fill="${GLYPH.mountain}"/>`;
 }
 
 //=================================== Dialog ===================================//
@@ -149,13 +160,14 @@ function draw() {
 function devices(item) {
     const L = lang();
     return el("div", { className: "kalq-picker__devices" }, ...DEVICES.map((d) => {
-        const scale = FRAME_HEIGHT / d.h;
+        const scale = SCALE;
         const frame = el("div", { className: `kalq-device ${d.cls || ""}` });
         frame.style.width = `${d.w}px`;
         frame.style.height = `${d.h}px`;
         frame.style.transform = `scale(${scale})`;
         frame.setAttribute("aria-hidden", "true");
-        frame.inert = true;
+        // A picture to scroll through, nothing to click
+        frame.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); }, true);
         const node = renderModule({ id: "preview", module: item.module, version: item.version, state: "draft" },
             { doc: document, page: "preview", store: new Map(), lang: L, editor: true });
         if (node) {
@@ -166,7 +178,7 @@ function devices(item) {
         }
         const box = el("div", { className: "kalq-picker__device" });
         box.style.width = `${Math.round(d.w * scale)}px`;
-        box.style.height = `${FRAME_HEIGHT}px`;
+        box.style.height = `${Math.round(d.h * scale)}px`;
         box.append(frame);
         return el("figure", { className: "kalq-picker__device-wrap" }, box,
             el("figcaption", { textContent: `${d[L]} · ${d.w}px` }));

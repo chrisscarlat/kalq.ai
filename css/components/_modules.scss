@@ -323,9 +323,9 @@
     .kalq-m-media { border-radius: 20px; }
 }
 
-// Tablets in portrait
+// Tablets in portrait (side margins in proportion with the other classes, about 4.4% of the width)
 @container (min-width: 761px) and (max-width: 1024px) {
-    .kalq-m-inner { padding: 0 2rem; }
+    .kalq-m-inner { padding: 0 2.25rem; }
     .kalq-m-split .kalq-m-inner { grid-template-columns: 1fr 1.1fr; gap: 2.5rem; }
     .kalq-m-split__media { aspect-ratio: 4 / 5; }
     .kalq-m-faq.is-split .kalq-m-inner { grid-template-columns: 1fr; gap: 2.5rem; }

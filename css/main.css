@@ -1586,7 +1586,7 @@ footer #container .footer_bottom a {
 }
 @container (min-width: 761px) and (max-width: 1024px) {
   .kalq-m-inner {
-    padding: 0 2rem;
+    padding: 0 2.25rem;
   }
   .kalq-m-split .kalq-m-inner {
     grid-template-columns: 1fr 1.1fr;

@@ -17,7 +17,8 @@ const TEXT = {
         confirmSite: "Die gesamte Website auf diesen Stand zurücksetzen? Das lässt sich über die Versionen wieder rückgängig machen.",
         failed: "Das hat nicht geklappt.", initial: "Erster Inhalt der Website", edited: (w) => `Bearbeitet: ${w}`,
         restoredTo: (w, when) => `${w} wiederhergestellt auf ${when}`, system: "Kalq",
-        section: { "moved up": "Abschnitt nach oben", "moved down": "Abschnitt nach unten", duplicated: "Abschnitt dupliziert",
+        undo: "Rückgängig", redo: "Wiederholt",
+        section: { moved: "Abschnitt verschoben", "moved up": "Abschnitt nach oben", "moved down": "Abschnitt nach unten", duplicated: "Abschnitt dupliziert",
             removed: "Abschnitt entfernt", published: "Abschnitt veröffentlicht", "to draft": "Abschnitt zum Entwurf", inserted: "Abschnitt eingefügt" },
     },
     en: {
@@ -28,7 +29,8 @@ const TEXT = {
         confirmSite: "Reset the whole site to this version? You can undo it from the versions again.",
         failed: "That did not work.", initial: "Initial site content", edited: (w) => `Edited ${w}`,
         restoredTo: (w, when) => `Restored ${w} to ${when}`, system: "Kalq",
-        section: { "moved up": "Section moved up", "moved down": "Section moved down", duplicated: "Section duplicated",
+        undo: "Undone", redo: "Redone",
+        section: { moved: "Section moved", "moved up": "Section moved up", "moved down": "Section moved down", duplicated: "Section duplicated",
             removed: "Section removed", published: "Section published", "to draft": "Section set to draft", inserted: "Section inserted" },
     },
 };
@@ -65,7 +67,9 @@ function describe(batch) {
         return t("restoredTo")(what, fmt(restored[2]));
     }
     if (label.startsWith("Edited ")) return t("edited")(label.slice(7));
-    const section = label.match(/^Section (moved up|moved down|duplicated|removed|published|to draft|inserted): (.+)$/);
+    const step = label.match(/^Section (undo|redo): (.+)$/);
+    if (step) return `${t(step[1])}: ${describe({ ...batch, batch_label: `Section ${step[2]}` })}`;
+    const section = label.match(/^Section (moved up|moved down|moved|duplicated|removed|published|to draft|inserted): (.+)$/);
     if (section) return `${t("section")[section[1]]}: ${section[2]}`;
     return label || `${batch.row_count} ×`;
 }

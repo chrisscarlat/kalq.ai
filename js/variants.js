@@ -154,6 +154,12 @@ export function applyVariant(variant, { remember = false, preview = false } = {}
     applyHeroMark(variant);
     // Options: the panel menu and the liquid reveal over the hero (js/heroReveal.js reacts to kalq:look)
     root.classList.toggle("menu-panels", variant.menu_style === "panels");
+    // the library's navigations and footer (css/components/_nav.scss, _footer-library.scss)
+    ["minimal", "plain", "mega", "overlay"].forEach((m) => root.classList.toggle(`nav-${m}`, variant.menu_style === m));
+    root.classList.toggle("nav-bar", ["minimal", "plain", "mega"].includes(variant.menu_style));
+    root.classList.toggle("foot-harbor", variant.footer_style === "harbor");
+    root.classList.toggle("foot-wordmark", variant.footer_style === "harbor" && variant.footer_wordmark === true);
+    root.classList.toggle("foot-gradient", variant.footer_style === "harbor" && variant.footer_gradient === true);
     const reveal = ["hero", "all"].includes(variant.reveal) ? variant.reveal : variant.hero_reveal === true ? "hero" : "off";
     root.classList.toggle("reveal-hero", reveal === "hero");
     root.classList.toggle("reveal-all", reveal === "all");

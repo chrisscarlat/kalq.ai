@@ -20,7 +20,43 @@ lang_items = "\n".join(
                     <span class="lang__inner"><span class="lang__short"><span>{s}</span></span><span class="lang__full"><span>{f}</span></span></span>
                 </button>''' for c, s, f, n in LANGS)
 
-def head(title):
+# The navigation for the bar, mega and overlay menus (style variant: menu). Kalq's two existing menus (the four dots
+# and the panels) keep #site-menu below and never show this. Every link is a real link with its text; the second
+# copy of each label (for the roll-up hover) is drawn by CSS, so the text is there once.
+MODULE_KEYS = ["shouldCost", "supplierFit", "rfq", "machine", "mfgCost", "quote"]
+
+def roll(key, en, kkey):
+    # the label once; its rolling copy is drawn by CSS (::after, from data-label, kept in step by js/header.js)
+    return f'<span class="site-roll" data-label="{en}"><span data-i18n="{key}" data-kalq-key="{kkey}">{en}</span></span>'
+
+def mega_html():
+    items = "\n".join(
+        f'''                        <li><a class="site-mega__item" href="platform.html"><img src="{IMGS[i]}" alt="" width="48" height="48" loading="lazy"><span><span class="site-mega__title" data-i18n="module.{k}" data-kalq-key="site.nav.mega.{SLUGS[i]}.title">{MODULES[i][0]}</span><span class="site-mega__text" data-i18n="platform.{k}.lead" data-kalq-key="site.nav.mega.{SLUGS[i]}.text">{MODULES[i][2]}</span></span></a></li>'''
+        for i, k in enumerate(MODULE_KEYS))
+    return f'''
+                    <div class="site-mega" id="site-mega">
+                        <a class="site-mega__card" href="platform.html"><img src="{IMGS[3]}" alt="" loading="lazy"><span class="site-mega__card-title" data-i18n="nav.platform" data-kalq-key="site.nav.mega.card.title">Platform</span><span class="site-mega__card-text" data-i18n="home.platformText" data-kalq-key="site.nav.mega.card.text">A part enters as a STEP file and a drawing. Kalq turns it into features, process alternatives and a route on real machines.</span></a>
+                        <ul class="site-mega__items">
+{items}
+                        </ul>
+                    </div>'''
+
+def nav_html(public=False):
+    # the public legal pages (no gate) get the navigation without the mega panel: its copy stays behind the gate
+    mega_attrs = "" if public else ' aria-haspopup="true" aria-expanded="false" aria-controls="site-mega"'
+    return f'''        <nav class="site-nav" id="site-nav" aria-label="Main navigation" data-i18n-aria="aria.nav">
+            <ul class="site-nav__links">
+                <li><a class="site-nav__link" href="index.html">{roll("nav.home", "Home", "site.nav.home")}</a></li>
+                <li class="site-nav__mega">
+                    <a class="site-nav__link" href="platform.html"{mega_attrs}>{roll("nav.platform", "Platform", "site.nav.platform")}</a>
+{"" if public else mega_html()}                </li>
+                <li><a class="site-nav__link" href="company.html">{roll("nav.company", "Company", "site.nav.company")}</a></li>
+            </ul>
+            <a class="site-nav__cta kalq-btn-round" href="mailto:office@kalq.ai?subject=Kalq%20pilot"><span class="kalq-btn-round__text" data-i18n="nav.cta" data-kalq-key="site.nav.cta">Start a pilot</span><span class="kalq-btn-round__circle" aria-hidden="true"><span class="kalq-btn-round__arrow"><svg viewBox="0 0 16 16" focusable="false"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="kalq-btn-round__arrow is-next"><svg viewBox="0 0 16 16" focusable="false"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></a>
+            <button type="button" class="site-nav__close" aria-label="Close menu" data-i18n-aria="aria.menuClose"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+        </nav>'''
+
+def head(title, public=False):
     return f'''<!DOCTYPE html>
 <html lang="en">
 
@@ -77,6 +113,7 @@ def head(title):
             {MARK}
             <span class="site-logo__word"><span>{WORD}<span class="kalq-wordmark" aria-hidden="true">KALQ</span></span></span>
         </a>
+{nav_html(public)}
         <div class="site-header__right">
             <!-- Light and dark: a sun that morphs into a thin crescent moon (js/variants.js) -->
             <button type="button" class="mode-toggle" aria-pressed="false" aria-label="Dunkles Design">
@@ -97,6 +134,8 @@ def head(title):
                 <!-- one connected block: a bar, and three graded bars that unfold beneath it touching it and each other -->
                 <svg class="site-menu-toggle__panels" viewBox="0 0 24 24" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true"><g class="unit"><rect class="bar" x="4" y="10.25" width="16" height="3.5"/><rect class="drop drop-1" x="4" y="13.65" width="6.5" height="6.4"/><rect class="drop drop-2" x="10.4" y="13.65" width="5.4" height="4.9"/><rect class="drop drop-3" x="15.7" y="13.65" width="4.3" height="3.5"/></g></svg>
             </button>
+            <!-- The bar navigations' menu button (phones; the overlay at every width): two lines -->
+            <button type="button" class="site-nav-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu" data-i18n-aria="aria.menuOpen"><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
         </div>
     </header>
 
@@ -141,6 +180,33 @@ SOCIAL = f'''
                 </section>
 '''
 
+# The library's footer (old/KALQ_MODULE_LIBRARY_SPEC.md 1.4), shown instead of the classic one when the style says so
+# (html.footer-harbor). One <footer> either way: one contentinfo landmark. Empty lines (the address) render nothing.
+LINKEDIN = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9.5h3V19H5zM6.5 5a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5zM10.5 9.5h2.9v1.3h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.6V19h-3v-4.6c0-1.1-.02-2.5-1.52-2.5-1.52 0-1.76 1.19-1.76 2.42V19h-3z" fill="currentColor"/></svg>'
+FOOTER_HARBOR = f'''                    <div class="footer-harbor">
+                        <div class="footer-harbor__top">
+                            <div class="footer-harbor__contact">
+                                <h2 class="footer-harbor__heading" data-i18n="footer.contactHeading" data-kalq-key="site.footer2.heading">Contact</h2>
+                                <address class="footer-harbor__lines">
+                                    <span class="footer-harbor__address" data-kalq-key="site.footer2.address" data-kalq-format="lines"></span>
+                                    <a href="mailto:office@kalq.ai" data-kalq-key="site.footer2.email">office@kalq.ai</a>
+                                </address>
+                            </div>
+                            <nav class="footer-harbor__nav" aria-label="Footer links" data-i18n-aria="aria.footerNav">
+                                <ul>
+                                    <li><a href="index.html"><span class="site-roll" data-label="Home"><span data-i18n="nav.home" data-kalq-key="site.footer2.home">Home</span></span></a></li>
+                                    <li><a href="platform.html"><span class="site-roll" data-label="Platform"><span data-i18n="nav.platform" data-kalq-key="site.footer2.platform">Platform</span></span></a></li>
+                                    <li><a href="company.html"><span class="site-roll" data-label="Company"><span data-i18n="nav.company" data-kalq-key="site.footer2.company">Company</span></span></a></li>
+                                </ul>
+                            </nav>
+                            <ul class="footer-harbor__social">
+                                <li><a href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener">{LINKEDIN}<span class="kalq-sr">LinkedIn</span></a></li>
+                            </ul>
+                        </div>
+                        <p class="footer-harbor__legal"><span>© <span data-current-year>2026</span> Kalq</span><span aria-hidden="true">·</span><a href="impressum.html" data-i18n="footer.impressum" data-kalq-key="site.footer2.impressum">Legal notice</a><span aria-hidden="true">·</span><a href="datenschutz.html" data-i18n="footer.privacy" data-kalq-key="site.footer2.privacy">Privacy</a></p>
+                        <div class="footer-harbor__wordmark" aria-hidden="true">{WORD}</div>
+                    </div>'''
+
 FOOTER = '''
                 <!-- Footer -->
                 <footer>
@@ -172,6 +238,7 @@ FOOTER = '''
                             </p>
                         </div>
                     </div>
+''' + FOOTER_HARBOR + '''
                 </footer>
 '''
 
@@ -242,6 +309,8 @@ def localize(html, page, lang=None):
     html = re.sub(r'(<(\w+)[^>]*\sdata-i18n="([^"]+)"[^>]*>)(.*?)(</\2>)', fill, html, flags=re.S)
     html = re.sub(r'(aria-label=")[^"]*(" data-i18n-aria="([^"]+)")', lambda m: m.group(1) + escape(tr(m.group(3))) + m.group(2), html)
     html = re.sub(r'(data-i18n-marquee="social.marquee">)[^<]*', lambda m: m.group(1) + "&nbsp;" + " ".join([escape(tr("social.marquee"), quote=False)] * 60) + "&nbsp;", html)
+    # the roll-up copies of link labels (CSS ::after, data-label) in the page's language too
+    html = re.sub(r'(<span class="site-roll" data-label=")[^"]*("><span data-i18n="([^"]+)")', lambda m: m.group(1) + escape(tr(m.group(3), lang or DEFAULT_LANG)) + m.group(2), html)
     html = re.sub(r"<title>[^<]*</title>", f"<title>{escape(tr('title.' + page), quote=False)}</title>", html)
     html = html.replace(f'content="{DESC}"', f'content="{escape(tr("meta.description"))}"')
     return html.replace('<html lang="en">', f'<html lang="{DEFAULT_LANG}">', 1)
@@ -567,7 +636,7 @@ company = head("Kalq | Company") + '''                <!-- Header -->
 write("company.html", company)
 
 # ---------------- Legal ----------------
-impressum = head("Kalq | Legal notice") + '''                <!-- Impressum. TODO: fill in company data -->
+impressum = head("Kalq | Legal notice", public=True) + '''                <!-- Impressum. TODO: fill in company data -->
                 <section class="legal">
                     <div id="container">
                         <h2 data-kalq-key="impressum.header.title">Legal notice</h2>
@@ -602,7 +671,7 @@ impressum = head("Kalq | Legal notice") + '''                <!-- Impressum. TOD
 ''' + FOOTER + TAIL
 write("impressum.html", impressum)
 
-datenschutz = head("Kalq | Privacy policy") + '''                <!-- Datenschutz. TODO: insert privacy policy -->
+datenschutz = head("Kalq | Privacy policy", public=True) + '''                <!-- Datenschutz. TODO: insert privacy policy -->
                 <section class="legal">
                     <div id="container">
                         <h2 data-kalq-key="datenschutz.header.title">Privacy policy</h2>

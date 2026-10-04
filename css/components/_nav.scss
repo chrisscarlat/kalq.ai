@@ -1,0 +1,275 @@
+/* The library's navigations (old/KALQ_MODULE_LIBRARY_SPEC.md 1.2), chosen per style variant (js/variants.js sets the
+   class on <html>): nav-minimal (A, a bar with links and one button), nav-plain (B, links only), nav-mega (C, a bar
+   whose Platform link opens a panel), nav-overlay (D, a full-screen menu). Kalq's two existing menus (the four dots,
+   the panels) show none of this. Phones (to 690px): the bar menus move into a panel sliding in from the right. */
+
+.site-nav,
+.site-nav-toggle,
+.site-nav__close { display: none; }
+
+// The roll-up hover: the label rises out of sight while its copy (drawn from data-label) rises in from below
+.site-roll {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    line-height: 1.3;
+
+    > span { display: block; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+
+    &::after {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        top: 100%;
+        white-space: nowrap;
+        transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+}
+
+a:hover > .site-roll > span, a:focus-visible > .site-roll > span,
+a:hover > .site-roll::after, a:focus-visible > .site-roll::after { transform: translateY(-100%); }
+
+//=================================== The bars (A, B, C) ===================================//
+html.nav-bar {
+    .site-menu-toggle, #site-menu { display: none; }
+
+    .site-header { transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; }
+
+    // over the hero transparent; once the page has scrolled 60px, the page's own background
+    .site-header.is-scrolled {
+        background: var(--kalq-bg, #fff);
+        color: var(--kalq-text, #101010) !important;
+        box-shadow: 0 1px 0 color-mix(in srgb, var(--kalq-text, #101010) 10%, transparent);
+        mix-blend-mode: normal;
+    }
+
+    .site-nav {
+        display: flex;
+        align-items: center;
+        gap: 1.6rem;
+        margin: 0 1.6rem 0 auto;
+    }
+
+    .site-nav__links {
+        display: flex;
+        align-items: center;
+        gap: 1.8rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .site-nav__link {
+        color: inherit;
+        font-size: 0.95rem;
+        text-decoration: none;
+
+        &[aria-current="page"] { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+        &:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
+    }
+
+    .site-nav__cta {
+        padding: 0.28rem 0.28rem 0.28rem 1rem;
+        font-size: 0.9rem;
+
+        .kalq-btn-round__circle { width: 2rem; height: 2rem; }
+    }
+}
+
+// A: the links in the middle of the bar, the button at the right
+html.nav-minimal .site-nav__links { position: absolute; left: 50%; transform: translateX(-50%); }
+// B: links at the right, no button
+html.nav-plain .site-nav__cta { display: none; }
+
+// The button reads against the header: white over a dark hero, dark over a light one, the page's colours once scrolled
+html[data-header-tone="dark"] .site-header:not(.is-scrolled) .site-nav__cta { background: #fff; color: #101010; .kalq-btn-round__circle { background: #101010; color: #fff; } }
+html[data-header-tone="light"] .site-header:not(.is-scrolled) .site-nav__cta { background: #101010; color: #fff; .kalq-btn-round__circle { background: #fff; color: #101010; } }
+
+//=================================== C: the mega panel ===================================//
+.site-mega { display: none; }
+
+html.nav-mega {
+    .site-nav__mega { position: static; }
+
+    .site-nav__mega.is-open .site-mega {
+        position: fixed;
+        top: 5.2rem;
+        left: 50%;
+        display: grid;
+        grid-template-columns: 40% 1fr;
+        gap: 1.6rem;
+        width: min(75vw, 1120px);
+        padding: 1.4rem;
+        border-radius: 16px;
+        background: var(--kalq-bg, #fff);
+        color: var(--kalq-text, #101010);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+        transform: translateX(-50%);
+        animation: kalq-mega-in 0.25s ease both;
+    }
+}
+
+@keyframes kalq-mega-in { from { opacity: 0; transform: translate(-50%, -6px); } }
+
+.site-mega__card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    color: inherit;
+    text-decoration: none;
+
+    img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; }
+    &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 4px; border-radius: 10px; }
+}
+
+.site-mega__card-title { font-size: 1.25rem; }
+.site-mega__card-text, .site-mega__text { font-size: 0.85rem; line-height: 1.4; opacity: 0.7; }
+
+.site-mega__items {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-content: start;
+    gap: 0.4rem 1.2rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.site-mega__item {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    align-items: start;
+    gap: 0.8rem;
+    padding: 0.6rem;
+    border-radius: 10px;
+    color: inherit;
+    text-decoration: none;
+
+    img { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; }
+    > span { display: flex; flex-direction: column; gap: 0.2rem; }
+    &:hover, &:focus-visible { background: color-mix(in srgb, var(--kalq-text, #101010) 6%, transparent); outline: none; }
+    &:focus-visible { box-shadow: 0 0 0 2px var(--kalq-accent, #3b82f6); }
+}
+
+.site-mega__title { font-size: 0.95rem; font-weight: 500; }
+
+//=================================== The menu button and the panels ===================================//
+// Two lines; phones for the bars, every width for the overlay
+.site-nav-toggle {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+
+    span { position: absolute; left: 10px; right: 10px; height: 1.5px; background: currentColor; transition: transform 0.3s ease; }
+    span:first-child { top: 16px; }
+    span:last-child { top: 23px; }
+    &:focus-visible { outline: 1px solid currentColor; outline-offset: 2px; border-radius: 50%; }
+}
+
+.site-nav__close {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.4rem;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    padding: 0;
+    color: inherit;
+
+    svg { width: 22px; height: 22px; }
+    &:focus-visible { outline: 1px solid currentColor; outline-offset: 2px; border-radius: 50%; }
+}
+
+// Phones: the bars become a panel from the right; the mega panel a nested list under Platform
+@media (max-width: 690px) {
+    html.nav-bar {
+        .site-nav-toggle { display: block; }
+
+        .site-nav {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2rem;
+            width: min(86vw, 22rem);
+            margin: 0;
+            padding: 5.5rem 1.6rem 2rem;
+            overflow-y: auto;
+            background: var(--kalq-bg, #fff);
+            color: var(--kalq-text, #101010);
+            box-shadow: -20px 0 60px rgba(0, 0, 0, 0.18);
+            transform: translateX(105%);
+            visibility: hidden;
+            transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), visibility 0s 0.45s;
+        }
+
+        &.nav-open .site-nav { transform: none; visibility: visible; transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1); }
+        .site-nav__close { display: grid; }
+        .site-nav__links { position: static; flex-direction: column; align-items: flex-start; gap: 1.1rem; transform: none; }
+        .site-nav__link { font-size: 1.5rem; }
+        .site-nav__mega .site-mega,
+        .site-nav__mega.is-open .site-mega { position: static; display: block; width: auto; padding: 0.4rem 0 0 0.2rem; box-shadow: none; transform: none; animation: none; background: none; }
+        .site-mega__card { display: none; }
+        .site-mega__items { grid-template-columns: 1fr; }
+        .site-mega__item { grid-template-columns: 1fr; padding: 0.35rem 0; img, .site-mega__text { display: none; } }
+    }
+}
+
+//=================================== D: the overlay ===================================//
+html.nav-overlay {
+    .site-menu-toggle, #site-menu { display: none; }
+    .site-nav-toggle { display: block; }
+
+    .site-nav {
+        position: fixed;
+        inset: 0;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 2.4rem;
+        padding: 6rem 8vw;
+        background: var(--kalq-bg, #fff);
+        color: var(--kalq-text, #101010);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.35s ease, visibility 0s 0.35s;
+    }
+
+    &.nav-open .site-nav { opacity: 1; visibility: visible; transition: opacity 0.35s ease; }
+    .site-nav__close { display: grid; }
+    .site-nav__links { display: flex; flex-direction: column; gap: 0.3rem; margin: 0; padding: 0; list-style: none; }
+    .site-nav__link { color: inherit; font-size: clamp(2.4rem, 7vw, 6rem); line-height: 1.05; letter-spacing: -0.02em; text-decoration: none; &:focus-visible { outline: 2px solid currentColor; outline-offset: 6px; } }
+    .site-mega { display: none !important; }
+}
+
+// The page underneath does not scroll while a panel is open
+html.nav-open { overflow: hidden; }
+
+//=================================== Two screens ===================================//
+// Nothing on the hinge: the bars' links on the left screen (ending before the hinge), the button on the right one;
+// the mega panel within the right screen; the overlay's links on the left screen with its close button on the right
+@media (horizontal-viewport-segments: 2) {
+    html.nav-bar .site-nav__links { position: absolute; left: auto; right: calc(100% - var(--seg-l) + 2rem); transform: none; }
+
+    html.nav-mega .site-nav__mega.is-open .site-mega {
+        left: calc(var(--seg-l) + var(--seg-hinge) + 1rem);
+        width: calc(var(--seg-r) - 2rem);
+        grid-template-columns: 1fr;
+        transform: none;
+    }
+
+    html.nav-overlay .site-nav { padding-right: calc(var(--seg-r) + var(--seg-hinge) + 2rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .site-roll > span, .site-roll::after { transition: none; }
+    a:hover > .site-roll > span, a:focus-visible > .site-roll > span, a:hover > .site-roll::after, a:focus-visible > .site-roll::after { transform: none; }
+    html.nav-bar .site-nav, html.nav-overlay .site-nav { transition: none !important; }
+    .site-nav__mega.is-open .site-mega { animation: none !important; }
+}

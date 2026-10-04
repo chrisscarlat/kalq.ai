@@ -111,6 +111,15 @@ export function applyLayout({ doc, container, page, stored, editor = false, rend
         anchor = node;
     }
     if (store && editor) container.append(store);
+    // Every section can be linked to (#s-<id>); a hero's "next section" link points at the section after it
+    wanted.forEach((node, i) => {
+        if (!node.getAttribute("id")) node.setAttribute("id", `s-${node.getAttribute("data-section")}`);
+        node.querySelectorAll("[data-next-section]").forEach((a) => {
+            const after = wanted[i + 1];
+            if (after) a.setAttribute("href", `#${after.getAttribute("id") || `s-${after.getAttribute("data-section")}`}`);
+            else a.remove(); // nothing below: no arrow pointing nowhere
+        });
+    });
     return layout;
 }
 

@@ -1,0 +1,319 @@
+/* The module library (old/KALQ_MODULE_LIBRARY_SPEC.md), batch 1: the logo belt and the hero, and what they share:
+   the round arrow button and visually hidden text. Breakpoints: desktop from 1000px, tablet 691–999px, phone to 690px.
+   Every movement has a still, complete state under reduced motion. */
+
+// Text for screen readers and search engines only
+.kalq-sr {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+//=================================== Round arrow button (2.10) ===================================//
+// A pill with its text and a circle holding an arrow: on hover the arrow leaves up and to the right while a copy comes
+// in from the lower left, and the circle draws in a little
+.kalq-btn-round {
+    --ease: cubic-bezier(0.12, 0.75, 0.4, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.4rem 0.4rem 0.4rem 1.4rem;
+    border-radius: 999px;
+    background: var(--kalq-text, #101010);
+    color: var(--kalq-bg, #fff);
+    font-size: 1rem;
+    line-height: 1.2;
+    text-decoration: none;
+
+    &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 3px; }
+}
+
+.kalq-btn-round__circle {
+    position: relative;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.6rem;
+    height: 2.6rem;
+    overflow: hidden;
+    border-radius: 50%;
+    background: var(--kalq-bg, #fff);
+    color: var(--kalq-text, #101010);
+    transition: transform 0.55s var(--ease);
+}
+
+.kalq-btn-round__arrow {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    transition: transform 0.55s var(--ease);
+
+    svg { width: 1rem; height: 1rem; }
+    &.is-next { transform: translate(-130%, 130%); }
+}
+
+@media (hover: hover) {
+    .kalq-btn-round:hover {
+        .kalq-btn-round__circle { transform: scale(0.88); }
+        .kalq-btn-round__arrow { transform: translate(130%, -130%); }
+        .kalq-btn-round__arrow.is-next { transform: none; }
+    }
+}
+
+//=================================== Logo belt (1.1) ===================================//
+.kalq-m.kalq-m-belt { padding: clamp(2.5rem, 5cqi, 4.5rem) 0; }
+.kalq-m-belt .kalq-m-inner { position: relative; }
+.kalq-m-belt__label { text-align: center; }
+
+.kalq-m-belt__viewport {
+    overflow: hidden;
+    // the edges fade: clear at the very ends, full from 10 to 90 percent
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 10%, #000 90%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 10%, #000 90%, transparent 100%);
+}
+
+.kalq-m-belt__track {
+    display: flex;
+    width: max-content;
+    animation: kalq-belt 45s linear infinite;
+}
+
+.kalq-m-belt__list {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 3vw;
+    margin: 0;
+    padding: 0 1.5vw;
+    list-style: none;
+}
+
+.kalq-m-belt__item {
+    flex-shrink: 0;
+
+    a { display: block; border-radius: 4px; }
+    a:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 4px; }
+    img { display: block; width: auto; height: 2vw; }
+}
+
+@media (max-width: 1300px) { .kalq-m-belt__item img { height: 30px; } }
+@media (max-width: 690px) { .kalq-m-belt__item img { height: 20px; } }
+
+// Single tone: the logos take the text colour (light or dark, the page's or the section's own)
+.kalq-m-belt.is-mono .kalq-m-belt__item img { filter: brightness(0); opacity: 0.85; }
+[data-mode="dark"] .kalq-m-belt.is-mono:not([data-section-theme="light"]) .kalq-m-belt__item img,
+.kalq-m-belt.is-mono[data-section-theme="dark"] .kalq-m-belt__item img { filter: brightness(0) invert(1); }
+
+// Still: on hover, on focus, with the button, off screen
+.kalq-m-belt:hover .kalq-m-belt__track,
+.kalq-m-belt:focus-within .kalq-m-belt__track,
+.kalq-m-belt.is-paused .kalq-m-belt__track,
+.kalq-m-belt.is-offscreen .kalq-m-belt__track { animation-play-state: paused; }
+
+.kalq-m-belt__pause {
+    position: absolute;
+    right: 4rem;
+    bottom: -2.2rem;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    background: none;
+    color: inherit;
+    opacity: 0.55;
+    cursor: pointer;
+
+    svg { width: 12px; height: 12px; }
+    &:hover, &:focus-visible { opacity: 1; }
+    &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 2px; }
+    &[aria-pressed="true"] svg path { d: path("M5 3.5l7 4.5-7 4.5z"); fill: currentColor; } // play
+}
+
+@keyframes kalq-belt { to { transform: translateX(-50%); } }
+
+// Reduced motion, and while editing: a still centred row that wraps
+@mixin belt-still {
+    .kalq-m-belt__viewport { -webkit-mask-image: none; mask-image: none; }
+    .kalq-m-belt__track { width: auto; animation: none; justify-content: center; }
+    .kalq-m-belt__list { flex-wrap: wrap; justify-content: center; row-gap: 1.6rem; }
+    .kalq-m-belt__list.is-copy, .kalq-m-belt__pause { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) { .kalq-m-belt { @include belt-still; } }
+body.kalq-edit .kalq-m-belt {
+    @include belt-still;
+
+    .kalq-m-belt__item { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; width: 9rem; }
+    .kalq-m-belt__logo { width: 100%; height: 3rem; }
+    .kalq-m-belt__name { font-size: 0.8rem; }
+}
+
+//=================================== Hero (1.3) ===================================//
+.kalq-m.kalq-m-hero {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-height: 100svh;
+    padding: 0;
+    overflow: hidden;
+
+    &.has-media { background: #101010; color: #fff; }
+}
+
+.kalq-m-hero__media {
+    position: absolute;
+    inset: 0;
+
+    img, video { width: 100%; height: 100%; object-fit: cover; display: block; }
+}
+
+.kalq-m-hero__shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.6) 100%); }
+
+.kalq-m-hero__content {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 1.6rem 3rem;
+    padding-top: 8rem;
+    padding-bottom: 1.6rem;
+}
+
+.kalq-m .kalq-m-hero__title {
+    grid-column: 1;
+    max-width: 16ch;
+    margin: 0;
+    font-size: max(32px, 5vw);
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+}
+
+// One short title across the whole width (Harbor): its size from its own length (--chars, set by the render)
+.kalq-m-hero.is-fit .kalq-m-hero__title {
+    grid-column: 1 / -1;
+    max-width: none;
+    font-size: clamp(32px, calc((100cqi - 8rem) / (var(--chars, 10) * 0.56)), 34vh);
+    line-height: 0.92;
+    white-space: nowrap;
+}
+
+// The words rise in and come into focus, one after another
+.kalq-word { display: inline-block; }
+.kalq-m-hero.is-entering .kalq-word { animation: kalq-rise 1.2s cubic-bezier(0.25, 1, 0.5, 1) both; animation-delay: calc(var(--i, 0) * 70ms); }
+@keyframes kalq-rise { from { opacity: 0; transform: translateY(0.35em); filter: blur(10px); } }
+
+// The rotating word: the word itself stays in the h1 (hidden by colour); the turning word is drawn over it (::after)
+.kalq-m-hero__rot {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    color: transparent;
+    transition: width 0.32s cubic-bezier(0.25, 1, 0.5, 1);
+
+    &::after {
+        content: attr(data-word);
+        position: absolute;
+        left: 0;
+        top: 0;
+        color: var(--kalq-text, #101010);
+        white-space: nowrap;
+        transition: transform 0.32s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.32s ease;
+    }
+
+    &.is-out::after { transform: translateY(-100%); opacity: 0; }
+    &.is-in::after { transform: translateY(100%); opacity: 0; transition: none; }
+}
+
+.kalq-m-hero.has-media .kalq-m-hero__rot::after { color: #fff; }
+
+.kalq-m-hero__actions { grid-column: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 0.8rem 1.4rem; }
+.kalq-m-hero.has-media .kalq-btn-round { background: #fff; color: #101010; .kalq-btn-round__circle { background: #101010; color: #fff; } }
+.kalq-m-hero__button2 { color: inherit; text-decoration: underline; text-underline-offset: 4px; }
+
+// The glass card
+.kalq-m-hero__glass {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: end;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: 24rem;
+    padding: 0.75rem;
+    border-radius: 15px;
+    background: rgba(0, 0, 0, 0.43);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    color: #fff;
+
+    .kalq-m-hero__glass-media { flex: 0 0 33%; aspect-ratio: 1; overflow: hidden; border-radius: 10px; img { width: 100%; height: 100%; object-fit: cover; } }
+    p { margin: 0 0 0.6rem; font-size: 0.95rem; line-height: 1.4; }
+    a { color: inherit; font-size: 0.9rem; text-decoration: underline; text-underline-offset: 3px; }
+}
+
+// The bottom row: captions left, centre, right, and the way down
+.kalq-m-hero__row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto auto;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid currentColor;
+    border-top-color: color-mix(in srgb, currentColor 30%, transparent);
+}
+
+.kalq-m-hero__caption { margin: 0; font-size: 0.85rem; line-height: 1.4; opacity: 0.85; &.is-2 { text-align: center; } &.is-3 { text-align: right; } }
+
+.kalq-m-hero__next, .kalq-m-hero__pause {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+
+    svg { width: 18px; height: 18px; }
+    &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 2px; }
+}
+
+.kalq-m-hero__next { grid-column: 4; }
+.kalq-m-hero__pause { grid-column: 5; svg { width: 14px; height: 14px; } &[aria-pressed="true"] svg path { d: path("M5 3.5l7 4.5-7 4.5z"); fill: currentColor; } }
+
+// Tablet and phone: one column, the glass card under the buttons
+@media (max-width: 999px) {
+    .kalq-m-hero__content { grid-template-columns: 1fr; padding-left: 2rem; padding-right: 2rem; }
+    .kalq-m-hero__glass { grid-column: 1; grid-row: auto; }
+    .kalq-m-hero__row { grid-template-columns: 1fr auto auto; .kalq-m-hero__caption { grid-column: 1; text-align: left; } }
+}
+
+@media (max-width: 690px) {
+    .kalq-m-hero__content { padding: 6rem 1.25rem 1.25rem; }
+    .kalq-m.kalq-m-hero.is-fit .kalq-m-hero__title { white-space: normal; font-size: max(32px, 11vw); }
+}
+
+// Reduced motion: no rise, the real word in place of the turning list, a still video (its first frame)
+@media (prefers-reduced-motion: reduce) {
+    .kalq-m-hero.is-entering .kalq-word { animation: none; }
+    .kalq-m-hero__rot { color: inherit; &::after { content: none; } }
+    .kalq-btn-round__circle, .kalq-btn-round__arrow { transition: none; }
+}
+
+// Editing: everything in place and still, the option fields visible
+body.kalq-edit .kalq-m-hero {
+    .kalq-m-hero__words-field { grid-column: 1; margin: 0; font-size: 0.85rem; opacity: 0.8; }
+    .kalq-m-hero__edit-button { display: inline-flex; flex-direction: column; gap: 0.3rem; }
+}

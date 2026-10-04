@@ -21,6 +21,15 @@ const html = (body, status = 200) => new Response(body, {
     headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow" },
 });
 
+// The default style variant's navigation and footer, so the page arrives with them (the browser can switch later)
+async function defaultLook() {
+    const rows = await rpc("latest_content", { page: "variants" }).catch(() => []);
+    const variants = rows.filter((r) => r.block_key.startsWith("variant.")).map((r) => { try { return JSON.parse(r.content); } catch { return null; } })
+        .filter((v) => v && v.status === "published");
+    const v = variants.find((x) => x.is_default) || variants.sort((a, b) => (a.sort ?? 50) - (b.sort ?? 50) || String(a.letter).localeCompare(String(b.letter)))[0];
+    return v ? { menu_style: v.menu_style, footer_style: v.footer_style, footer_wordmark: v.footer_wordmark, footer_gradient: v.footer_gradient } : null;
+}
+
 export async function GET(request) {
     const page = new URL(request.url).searchParams.get("p");
     if (!FILES[page]) return new Response("Not found", { status: 404 });
@@ -34,8 +43,8 @@ export async function GET(request) {
     const built = await template(page);
     if (!isConfigured()) return html(built);
     try {
-        const rows = await rpc("latest_content", { page });
-        return html(renderPage(built, page, rows, { editor: session?.role === "editor" }));
+        const [rows, look] = await Promise.all([rpc("latest_content", { page }), defaultLook()]);
+        return html(renderPage(built, page, rows, { editor: session?.role === "editor", look }));
     } catch (error) {
         // The built page is always a working page: better than an error
         console.error("page render failed", page, error.message);

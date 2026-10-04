@@ -66,6 +66,16 @@ export const SECTIONS = {
 export const footerOf = (root) => {
     const f = $(root, "footer");
     if (!f) return null;
+    // The library footer, when the style shows it: contact on the back cover, the legal line small
+    const h = document.documentElement.classList.contains("foot-harbor") && $(f, ".footer-harbor");
+    if (h) {
+        const address = $(h, ".footer-harbor__address");
+        return {
+            closing: $(h, ".footer-harbor__heading"), sub: address?.textContent.trim() ? address : null,
+            buttons: [...$$(h, ".footer-harbor__lines a"), ...$$(h, ".footer-harbor__social a")],
+            links: $$(h, ".footer-harbor__legal a"), small: $(h, ".footer-harbor__legal > span"),
+        };
+    }
     return {
         closing: $(f, ".footer_heading h2"), sub: $(f, ".footer_sub"), buttons: $$(f, ".footer_btns_wrapper a"),
         links: $$(f, ".footer_bottom a"), small: $(f, ".footer_bottom span"),

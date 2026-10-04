@@ -20,6 +20,7 @@ const TEXT = {
         changed: "Die Seite wurde inzwischen geändert. In den Versionen wiederherstellen.", map: "Seitenaufbau", fixed: "Fixiert", footer: "Footer",
         themeChoose: "Darstellung wählen",
         failed: "Das hat nicht geklappt.", relogin: "Bitte melden Sie sich erneut an.", copyOf: "Kopie", section: "Abschnitt",
+        heroInserted: "Der neue Hero steht als Entwurf oben. Beim Veröffentlichen ersetzt er den bisherigen.",
         insert: "Modul hier einfügen", insertAfter: "Modul darunter einfügen", missing: (list) => `Erst ausfüllen: ${list}`,
         names: { header: "Hero", about: "Über Kalq", expertise: "Plattform-Liste", belief: "Haltung", social: "Social", "expertise-header": "Kopf",
             "expertise-header-img": "Bild", "expertise-container": "Karten", "about-header": "Kopf", "about-header-img": "Bild", "about-goals": "Ziele",
@@ -34,6 +35,7 @@ const TEXT = {
         changed: "The page has changed since. Restore it from Versions.", map: "Page outline", fixed: "Fixed", footer: "Footer",
         themeChoose: "Choose appearance",
         failed: "That did not work.", relogin: "Please log in again.", copyOf: "copy", section: "Section",
+        heroInserted: "The new hero is on top as a draft. Publishing it replaces the current one.",
         insert: "Insert a module here", insertAfter: "Insert a module below", missing: (list) => `Fill in first: ${list}`,
         names: { header: "Hero", about: "About Kalq", expertise: "Platform list", belief: "Belief", social: "Social", "expertise-header": "Header",
             "expertise-header-img": "Image", "expertise-container": "Cards", "about-header": "Header", "about-header-img": "Image", "about-goals": "Goals",
@@ -128,9 +130,11 @@ async function run(action) {
 // The top hero is fixed: first on the page, never moved, nothing goes above it. Only the built-in hero at the top
 // counts; a copy of it placed lower is a normal section. The footer is not a section: it always closes the page.
 const HERO_IDS = new Set(["header", "expertise-header", "about-header"]);
+// A hero from the module library counts as well (it always sits on top: one h1 per page)
+const isHeroEntry = (s) => !!s && ((s.module === "legacy" && !s.source && HERO_IDS.has(s.id)) || MODULES[s.module]?.category === "heroes");
 const isTopHero = (layout, id) => {
     const first = layout.sections[0];
-    return !!first && first.id === id && first.module === "legacy" && !first.source && HERO_IDS.has(first.id);
+    return !!first && first.id === id && isHeroEntry(first);
 };
 const firstMovable = (layout) => (layout.sections[0] && isTopHero(layout, layout.sections[0].id) ? 1 : 0);
 
@@ -169,6 +173,12 @@ const setState = (id, state) => run(async () => {
         if (missing.length) return collab.toast(t("missing")(missing.map((l) => l[lang()]).join(", ")), "error");
     }
     entry.state = state;
+    // A hero going live replaces the hero it was put above (one step: undo brings the old one back)
+    if (state === "live" && MODULES[entry.module]?.category === "heroes") {
+        const others = layout.sections.filter((s) => s !== entry && isHeroEntry(s));
+        layout.sections = layout.sections.filter((s) => !others.includes(s));
+        others.forEach((o) => { if (o.module === "legacy" && !o.source && !layout.removed.includes(o.id)) layout.removed.push(o.id); });
+    }
     await write(layout, `Section ${state === "live" ? "published" : "to draft"}: ${sectionName(entry)}`);
 });
 
@@ -258,8 +268,11 @@ export const insertModule = (index, module, version) => run(async () => {
     if (!MODULES[module]?.versions[version]) return;
     const layout = currentLayout();
     const entry = { id: newSectionId(), module, version, state: "draft" };
-    layout.sections.splice(Math.max(firstMovable(layout), Math.min(index, layout.sections.length)), 0, entry);
+    // A hero always goes on top, above the current one, as a draft; publishing it replaces the old one
+    const hero = MODULES[module].category === "heroes";
+    layout.sections.splice(hero ? 0 : Math.max(firstMovable(layout), Math.min(index, layout.sections.length)), 0, entry);
     await write(layout, `Section inserted: ${sectionName(entry)}`);
+    if (hero) collab.toast(t("heroInserted"));
     selected = entry.id;
     reveal(entry.id);
 });

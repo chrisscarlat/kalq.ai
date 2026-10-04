@@ -124,14 +124,125 @@ function setupScreen2(container) {
     });
 }
 
+//=================================== Logo belt ===================================//
+// The row drifts by CSS; here: the pause button, and still while off screen (no work for nothing)
+const en = () => document.documentElement.lang === "en";
+function setupBelt(belt) {
+    const pause = belt.querySelector(".kalq-m-belt__pause");
+    if (pause) {
+        pause.setAttribute("aria-label", en() ? "Pause the logos" : "Laufband anhalten");
+        if (!pause.dataset.ready) {
+            pause.dataset.ready = "true";
+            pause.addEventListener("click", () => {
+                const on = pause.getAttribute("aria-pressed") !== "true";
+                pause.setAttribute("aria-pressed", on);
+                belt.classList.toggle("is-paused", on);
+            });
+        }
+    }
+    if (!belt.dataset.watched && "IntersectionObserver" in window) {
+        belt.dataset.watched = "true";
+        new IntersectionObserver(([e]) => belt.classList.toggle("is-offscreen", !e.isIntersecting)).observe(belt);
+    }
+}
+
+//=================================== Hero ===================================//
+// The title rises in, word by word (the words stay the h1's own text, only wrapped); the rotating word turns every
+// 2.5 s; a video plays muted. One pause control stops all of it. Under reduced motion all is still and complete.
+function words(el) {
+    if (el.dataset.split) return;
+    el.dataset.split = "true";
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentElement.closest(".kalq-sr") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
+    const texts = [];
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) texts.push(n);
+    let i = 0;
+    texts.forEach((n) => {
+        const frag = document.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach((part) => {
+            if (!part) return;
+            if (/^\s+$/.test(part)) return frag.append(part);
+            const w = document.createElement("span");
+            w.className = "kalq-word";
+            w.style.setProperty("--i", i++);
+            w.textContent = part;
+            frag.append(w);
+        });
+        n.replaceWith(frag);
+    });
+}
+
+// The rotating word: the word in the title keeps its text (the h1 stays the sentence); what turns is drawn by CSS
+// over it (::after, from data-word), so no other word ever becomes part of the heading's text
+function rotate(title, hero) {
+    let list;
+    try { list = JSON.parse(title.dataset.rotate || "[]"); } catch { list = []; }
+    if (list.length < 2 || title.querySelector(".kalq-m-hero__rot") || reducedMotion.matches) return;
+    const word = [...title.querySelectorAll(".kalq-word")].find((w) => w.textContent.replace(/[^\p{L}\p{N}-]/gu, "") === list[0]);
+    if (!word) return;
+    // each word's own width, so the line closes up around the shorter ones (the width eases from one to the next)
+    const probe = document.createElement("span");
+    probe.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap";
+    title.append(probe);
+    const widths = list.map((w) => { probe.textContent = w; return Math.ceil(probe.getBoundingClientRect().width); });
+    probe.remove();
+    word.classList.add("kalq-m-hero__rot");
+    word.style.width = `${widths[0]}px`;
+    word.dataset.word = list[0];
+    let n = 0;
+    hero.rotateTimer = setInterval(() => {
+        if (hero.classList.contains("is-paused") || !word.isConnected) return;
+        word.classList.add("is-out");
+        setTimeout(() => {
+            n = (n + 1) % list.length;
+            word.dataset.word = list[n];
+            word.style.width = `${widths[n]}px`;
+            word.classList.remove("is-out");
+            word.classList.add("is-in");
+            requestAnimationFrame(() => requestAnimationFrame(() => word.classList.remove("is-in")));
+        }, 320);
+    }, 2500);
+}
+
+function setupHero(hero) {
+    const title = hero.querySelector(".kalq-m-hero__title");
+    if (!document.body.classList.contains("kalq-edit") && title && !hero.dataset.ready) {
+        hero.dataset.ready = "true";
+        if (!reducedMotion.matches) { words(title); hero.classList.add("is-entering"); }
+        else words(title);
+        rotate(title, hero);
+    }
+    const video = hero.querySelector(".kalq-m-hero__media video");
+    if (video) { video.muted = true; if (reducedMotion.matches) video.pause(); }
+    const pause = hero.querySelector(".kalq-m-hero__pause");
+    if (pause) {
+        pause.setAttribute("aria-label", en() ? "Pause the motion" : "Bewegung anhalten");
+        const still = reducedMotion.matches;
+        if (still) { pause.setAttribute("aria-pressed", "true"); hero.classList.add("is-paused"); }
+        if (!pause.dataset.ready) {
+            pause.dataset.ready = "true";
+            pause.addEventListener("click", () => {
+                const on = pause.getAttribute("aria-pressed") !== "true";
+                pause.setAttribute("aria-pressed", on);
+                hero.classList.toggle("is-paused", on);
+                if (video) on ? video.pause() : video.play?.()?.catch(() => { });
+            });
+        }
+    }
+    const next = hero.querySelector(".kalq-m-hero__next");
+    if (next) next.setAttribute("aria-label", en() ? "To the next section" : "Zum nächsten Abschnitt");
+}
+
 //=================================== Start ===================================//
 export function initModules(root = document) {
     const container = [...root.querySelectorAll('[data-barba="container"]')].pop();
     root.querySelectorAll(".kalq-m-faq").forEach(setupFaq);
+    root.querySelectorAll(".kalq-m-belt").forEach(setupBelt);
+    root.querySelectorAll(".kalq-m-hero").forEach(setupHero);
     root.querySelectorAll('[data-barba="container"] > section.expertise').forEach(setupListPanel);
     if (container) setupScreen2(container);
     if (!initModules.listening) {
         initModules.listening = true;
         spanned.addEventListener("change", () => initModules()); // the device folded or unfolded
+        document.addEventListener("kalq:language", () => initModules()); // the controls' labels
     }
 }

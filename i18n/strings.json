@@ -291,5 +291,21 @@
     "home.platformText": {
         "en": "A part enters as a STEP file and a drawing. Kalq turns it into features, process alternatives and a route on real machines.",
         "de": "Ein Teil kommt als STEP-Datei und Zeichnung herein. Kalq macht daraus Features, Prozessalternativen und eine Route auf realen Maschinen."
+    },
+    "nav.cta": {
+        "en": "Start a pilot",
+        "de": "Pilotprojekt starten"
+    },
+    "aria.nav": {
+        "en": "Main navigation",
+        "de": "Hauptnavigation"
+    },
+    "footer.contactHeading": {
+        "en": "Contact",
+        "de": "Kontakt"
+    },
+    "aria.footerNav": {
+        "en": "Footer links",
+        "de": "Footer-Links"
     }
 }

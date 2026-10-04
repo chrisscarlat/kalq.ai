@@ -1,0 +1,129 @@
+/* The library's footer (old/KALQ_MODULE_LIBRARY_SPEC.md 1.4): contact, the link row (roll-up hover), social links, the
+   legal line; optionally a large wordmark (decoration) and a slowly moving gradient behind it. Shown instead of the
+   classic footer when the style variant says so (html.foot-harbor). */
+
+.footer-harbor { display: none; }
+
+html.foot-harbor {
+    footer > #container { display: none; }
+
+    footer { position: relative; overflow: hidden; padding: 0; }
+
+    .footer-harbor {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+        padding: 5rem 4rem 2.2rem;
+    }
+}
+
+.footer-harbor__top {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr auto;
+    align-items: start;
+    gap: 2.5rem;
+}
+
+.footer-harbor__heading { margin: 0 0 1rem; font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 400; letter-spacing: -0.01em; }
+
+.footer-harbor__lines {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-style: normal;
+    font-size: 1.05rem;
+    line-height: 1.5;
+
+    a { color: inherit; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+}
+
+.footer-harbor__address:empty { display: none; }
+
+.footer-harbor__nav ul,
+.footer-harbor__social {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.footer-harbor__nav a { color: inherit; font-size: 1.15rem; text-decoration: none; &:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; } }
+
+.footer-harbor__social {
+    flex-direction: row;
+
+    a {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        border: 1px solid currentColor;
+        border-radius: 50%;
+        color: inherit;
+
+        svg { width: 18px; height: 18px; }
+        &:hover, &:focus-visible { background: currentColor; svg { color: var(--kalq-bg, #fff); } }
+        &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 2px; }
+    }
+}
+
+.footer-harbor__legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.9rem;
+    margin: 0;
+    padding-top: 1.4rem;
+    border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+    font-size: 0.85rem;
+    opacity: 0.8;
+
+    a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+}
+
+// The wordmark: decoration across the width (the company's name is text elsewhere in the footer)
+.footer-harbor__wordmark {
+    display: none;
+    margin-top: 0.5rem;
+    line-height: 0;
+
+    svg { display: block; width: 100%; height: auto; }
+}
+
+html.foot-wordmark .footer-harbor__wordmark { display: block; }
+
+// The moving gradient behind it (still under reduced motion)
+html.foot-gradient footer {
+    // built on the footer's own dark ground so its light text keeps its contrast
+    background: linear-gradient(120deg, var(--kalq-dark, #101010), color-mix(in srgb, var(--kalq-accent, #3b82f6) 28%, var(--kalq-dark, #101010)), var(--kalq-dark, #101010), color-mix(in srgb, var(--kalq-accent, #3b82f6) 16%, var(--kalq-dark, #101010)));
+    background-size: 300% 300%;
+    animation: kalq-footer-drift 24s ease-in-out infinite alternate;
+}
+
+@keyframes kalq-footer-drift { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+
+@media (prefers-reduced-motion: reduce) { html.foot-gradient footer { animation: none; } }
+
+// Tablet and phone
+@media (max-width: 999px) {
+    html.foot-harbor .footer-harbor { padding: 4rem 2rem 2rem; }
+    .footer-harbor__top { grid-template-columns: 1fr 1fr; }
+    .footer-harbor__social { grid-column: 1 / -1; }
+}
+
+@media (max-width: 690px) {
+    html.foot-harbor .footer-harbor { padding: 3.5rem 1.25rem 1.6rem; gap: 2.4rem; }
+    .footer-harbor__top { grid-template-columns: 1fr; gap: 2rem; }
+}
+
+// Two screens: contact on the left screen, links and social on the right; the legal line and the wordmark on the left
+@media (horizontal-viewport-segments: 2) {
+    html.foot-harbor .footer-harbor { padding: 4rem 0 2rem; }
+    .footer-harbor__top { grid-template-columns: var(--seg-l) var(--seg-r); column-gap: var(--seg-hinge); }
+    .footer-harbor__contact { padding: 0 2rem; }
+    .footer-harbor__nav, .footer-harbor__social { grid-column: 2; padding: 0 2rem; }
+    .footer-harbor__legal { max-width: calc(var(--seg-l) - 4rem); margin-left: 2rem; }
+    .footer-harbor__wordmark { width: calc(var(--seg-l) - 4rem); margin-left: 2rem; }
+}

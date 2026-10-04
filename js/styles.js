@@ -16,7 +16,8 @@ const TEXT = {
         fonts: "Schriften", heading: "Hauptschrift: Logo, H1 bis H3", body: "Zweitschrift: Unterzeilen, H4, H5, Text", builtIn: "Clash Grotesk (Standard)", google: "Google Fonts", upload: "Eigene woff2",
         family: "Schriftname", fontFile: "woff2-Datei", hero: "Hero-Video", images: "Bilder", imagesHint: "Leer lassen für das Standardbild.",
         upload: "Hochladen", clear: "Entfernen", duplicate: "Duplizieren", copyOf: (n) => `${n} (Kopie)`, inherited: "Standard",
-        builtInLogo: "Standard: Kalq-Logo", effects: "Effekte", reveal: "Flüssige Enthüllung (folgt der Maus)", revealOff: "Aus", revealHero: "Nur Hero", revealAll: "Hero und Bilder", menu: "Menü", menuDropdown: "Dropdown", menuPanels: "Panels",
+        builtInLogo: "Standard: Kalq-Logo", effects: "Effekte", reveal: "Flüssige Enthüllung (folgt der Maus)", revealOff: "Aus", revealHero: "Nur Hero", revealAll: "Hero und Bilder", menu: "Menü", menuDropdown: "Dropdown", menuPanels: "Panels", menuMinimal: "Leiste mit Button", menuPlain: "Leiste", menuMega: "Mega-Menü", menuOverlay: "Vollbild",
+        footer: "Footer", footerClassic: "Klassisch", footerHarbor: "Kontakt und Links", footerWordmark: "Großer Schriftzug", footerGradient: "Bewegter Verlauf",
         heroMark: "Mitte im Hero (Start)", heroMarkLogo: "Logo", heroMarkLine: "Linie", heroLine: "Form der Linie",
         lines: { back: "Diagonal \\", forward: "Diagonal /", vertical: "Senkrecht", horizontal: "Waagerecht", circle: "Kreis" }, loadFailed: "Die Stile konnten nicht geladen werden.",
         sitemap: "Seiten", replaceSlot: "Ersetzen", uploading: "Wird hochgeladen", spreadImages: "Auf alle Bildplätze übertragen", spreadHero: "Als Hero auf allen Seiten",
@@ -36,7 +37,8 @@ const TEXT = {
         fonts: "Fonts", heading: "Main font: logo, H1 to H3", body: "Secondary font: sub-lines, H4, H5, text", builtIn: "Clash Grotesk (default)", google: "Google Fonts", upload: "Own woff2",
         family: "Font name", fontFile: "woff2 file", hero: "Hero video", images: "Images", imagesHint: "Leave empty for the default image.",
         upload: "Upload", clear: "Remove", duplicate: "Duplicate", copyOf: (n) => `${n} (copy)`, inherited: "Default",
-        builtInLogo: "Default: Kalq logo", effects: "Effects", reveal: "Liquid reveal (follows the pointer)", revealOff: "Off", revealHero: "Hero only", revealAll: "Hero and images", menu: "Menu", menuDropdown: "Dropdown", menuPanels: "Panels",
+        builtInLogo: "Default: Kalq logo", effects: "Effects", reveal: "Liquid reveal (follows the pointer)", revealOff: "Off", revealHero: "Hero only", revealAll: "Hero and images", menu: "Menu", menuDropdown: "Dropdown", menuPanels: "Panels", menuMinimal: "Bar with button", menuPlain: "Bar", menuMega: "Mega menu", menuOverlay: "Fullscreen",
+        footer: "Footer", footerClassic: "Classic", footerHarbor: "Contact and links", footerWordmark: "Large wordmark", footerGradient: "Moving gradient",
         heroMark: "Centre of the hero (Home)", heroMarkLogo: "Logo", heroMarkLine: "Line", heroLine: "Line shape",
         lines: { back: "Diagonal \\", forward: "Diagonal /", vertical: "Vertical", horizontal: "Horizontal", circle: "Circle" }, loadFailed: "The styles could not be loaded.",
         sitemap: "Pages", replaceSlot: "Replace", uploading: "Uploading", spreadImages: "Copy to all image slots", spreadHero: "Use as hero on every page",
@@ -69,7 +71,10 @@ function normalize(v) {
         hero_mark: v.hero_mark === "logo" ? "logo" : "line",
         hero_line: ["back", "forward", "vertical", "horizontal", "circle"].includes(v.hero_line) ? v.hero_line : "back",
         reveal: ["off", "hero", "all"].includes(v.reveal) ? v.reveal : v.hero_reveal === true ? "hero" : "off",
-        menu_style: v.menu_style === "panels" ? "panels" : "dropdown",
+        menu_style: ["dropdown", "panels", "minimal", "plain", "mega", "overlay"].includes(v.menu_style) ? v.menu_style : "dropdown",
+        footer_style: v.footer_style === "harbor" ? "harbor" : "classic",
+        footer_wordmark: v.footer_wordmark === true,
+        footer_gradient: v.footer_gradient === true,
         colors: { ...DEFAULT_COLORS, ...(v.colors || {}) },
         fonts: { heading: font(v.fonts?.heading), body: font(v.fonts?.body) },
         hero_video: v.hero_video || "",
@@ -214,10 +219,24 @@ function effectsSection() {
         return box;
     };
     const reveal = seg([["off", t("revealOff")], ["hero", t("revealHero")], ["all", t("revealAll")]], draft.reveal, (v) => { draft.reveal = v; delete draft.hero_reveal; changed(); });
-    const menu = seg([["dropdown", t("menuDropdown")], ["panels", t("menuPanels")]], draft.menu_style, (v) => { draft.menu_style = v; changed(); });
+    const menu = seg([["dropdown", t("menuDropdown")], ["panels", t("menuPanels")], ["minimal", t("menuMinimal")], ["plain", t("menuPlain")], ["mega", t("menuMega")], ["overlay", t("menuOverlay")]],
+        draft.menu_style, (v) => { draft.menu_style = v; changed(); });
+    menu.classList.add("is-wrap");
+    // The footer for the whole site: the classic one, or the library's (contact, links, social, legal line), with an
+    // optional large wordmark and a slowly moving gradient behind it
+    const toggle = (key, label) => {
+        const b = el("button", { type: "button", className: "kalq-seg__item", textContent: label });
+        b.setAttribute("aria-pressed", draft[key] === true);
+        b.addEventListener("click", () => { draft[key] = !draft[key]; b.setAttribute("aria-pressed", draft[key]); changed(); });
+        return b;
+    };
+    const footer = seg([["classic", t("footerClassic")], ["harbor", t("footerHarbor")]], draft.footer_style, (v) => { draft.footer_style = v; extras.hidden = v !== "harbor"; changed(); });
+    const extras = el("div", { className: "kalq-seg", role: "group" }, toggle("footer_wordmark", t("footerWordmark")), toggle("footer_gradient", t("footerGradient")));
+    extras.hidden = draft.footer_style !== "harbor";
     return el("section", {}, el("h4", { textContent: t("effects") }),
         el("div", { className: "kalq-styles__field" }, el("span", { textContent: t("reveal") }), reveal),
-        el("div", { className: "kalq-styles__field" }, el("span", { textContent: t("menu") }), menu));
+        el("div", { className: "kalq-styles__field" }, el("span", { textContent: t("menu") }), menu),
+        el("div", { className: "kalq-styles__field" }, el("span", { textContent: t("footer") }), footer, extras));
 }
 
 // The site's own Kalq mark, for variants without their own logo

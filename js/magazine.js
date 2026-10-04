@@ -127,9 +127,21 @@ async function biggestPicture(roots) {
 const sectionKind = (s) => s.dataset.section in SECTIONS ? s.dataset.section
     : (s.classList[0] || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); // a copy keeps its class
 
-function moduleUnit(s, module, version) {
+function moduleUnit(s, module, version, ch) {
     const m = MODULES[module].magazine;
     const slot = (name) => s.querySelector(`[data-kalq-key$=".${name}"]`);
+    // the logo belt: its logos (the first copy of the row), each with its company's name
+    if (m.layout === "L") {
+        const logos = [...s.querySelectorAll(".kalq-m-belt__list:not(.is-copy) img")].map((img) => ({ url: img.getAttribute("src"), name: img.getAttribute("alt") || "" })).filter((x) => x.url && x.name);
+        return logos.length ? { layout: "L", title: s.querySelector(".kalq-m-belt__label"), logos, label: s.querySelector(".kalq-m-belt__label")?.textContent.trim() || logos.map((x) => x.name).slice(0, 3).join(", ") } : null;
+    }
+    // a hero: on the first page the book's cover; elsewhere its chapter's opener
+    if (m.cover) {
+        const title = s.querySelector(".kalq-m-hero__title");
+        const media = [mediaUrl(s.querySelector(".kalq-m-hero__media"))];
+        if (ch?.page === CHAPTERS[0].page) return { role: "cover", media, mark: title, statement: s.querySelector(".kalq-m-hero__caption") };
+        return { layout: "opener", statement: title, media };
+    }
     if (m.layout === "F") {
         const pairs = [...s.querySelectorAll(".kalq-m-faq__item")].map((it) => ({ q: it.querySelector(".kalq-m-faq__q"), a: it.querySelector(".kalq-m-faq__a") }))
             .filter((p) => p.q?.textContent.trim());
@@ -152,7 +164,7 @@ function unitsOf(root, ch, shared) {
         if (taken.has(s.dataset.section)) return;
         const [module, version] = (s.dataset.module || "").split(":");
         let made = null;
-        if (module && MODULES[module]?.magazine) made = moduleUnit(s, module, version);
+        if (module && MODULES[module]?.magazine) made = moduleUnit(s, module, version, ch);
         else if (SECTIONS[sectionKind(s)]) made = SECTIONS[sectionKind(s)](s, { next: sections[i + 1], chapter: ch });
         [made].flat().filter(Boolean).forEach((u) => {
             if (u.takes) taken.add(u.takes);

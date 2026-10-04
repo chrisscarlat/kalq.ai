@@ -115,5 +115,21 @@ export const STRINGS = {
     "legal.registerText": {
         "de": "Registergericht: [TODO]\nRegisternummer: [TODO]",
         "en": "Register court: [TODO]\nRegister number: [TODO]"
+    },
+    "nav.cta": {
+        "en": "Start a pilot",
+        "de": "Pilotprojekt starten"
+    },
+    "aria.nav": {
+        "en": "Main navigation",
+        "de": "Hauptnavigation"
+    },
+    "footer.contactHeading": {
+        "en": "Contact",
+        "de": "Kontakt"
+    },
+    "aria.footerNav": {
+        "en": "Footer links",
+        "de": "Footer-Links"
     }
 };

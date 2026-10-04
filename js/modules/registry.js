@@ -11,14 +11,15 @@ const SAFE_HREF = /^(https?:|mailto:|\/|#|[\w-]+\.html(#.*)?$)/i;
 const VIDEO_URL = /\.(mp4|webm|mov|m4v)(\?|#|$)/i;
 
 export const CATEGORIES = [
-    { id: "heroes", de: "Heroes", en: "Heroes", note: { de: "Wird pro Stil gewählt (Phase 4).", en: "Chosen per style (phase 4)." } },
-    { id: "navigation", de: "Navigation", en: "Navigation", note: { de: "Wird pro Stil gewählt (Phase 4).", en: "Chosen per style (phase 4)." } },
+    { id: "heroes", de: "Heroes", en: "Heroes", note: { de: "Ein Hero ersetzt den Hero oben auf der Seite: jede Seite hat genau einen.", en: "A hero replaces the hero at the top of the page: every page has exactly one." } },
+    { id: "navigation", de: "Navigation", en: "Navigation", note: { de: "Die Navigation wird im Stil gewählt (Stile: Menü), für alle Seiten.", en: "The navigation is chosen in the style (Styles: menu), for every page." } },
+    { id: "logos", de: "Logos", en: "Logos" },
     { id: "content", de: "Inhalt", en: "Content" },
     { id: "cards", de: "Karten", en: "Cards", note: { de: "Kommt in Phase 5.", en: "Coming in phase 5." } },
     { id: "cta", de: "Handlungsaufrufe", en: "Calls to action" },
     { id: "interaction", de: "Newsletter und Interaktion", en: "Newsletter and interaction", note: { de: "Kommt in Phase 6.", en: "Coming in phase 6." } },
     { id: "faq", de: "FAQ", en: "FAQs" },
-    { id: "footers", de: "Footer", en: "Footers", note: { de: "Wird pro Stil gewählt (Phase 3).", en: "Chosen per style (phase 3)." } },
+    { id: "footers", de: "Footer", en: "Footers", note: { de: "Der Footer wird im Stil gewählt (Stile: Footer), für die ganze Website.", en: "The footer is chosen in the style (Styles: footer), for the whole site." } },
 ];
 
 // Slot kinds: heading (h2), eyebrow, text (paragraphs), button (label) + link (address), media (image or video)
@@ -27,6 +28,7 @@ export const CATEGORIES = [
 //   spread's picture
 const L = (de, en) => ({ de, en });
 const FAQ_ITEMS = 6;
+const LOGOS = 12;
 
 export const MODULES = {
     "content.split": {
@@ -87,6 +89,56 @@ export const MODULES = {
         },
         magazine: { layout: "A", order: "text-media", media: "media2" }, // the text facing its picture for two screens
         render: renderCtaBand,
+    },
+    "logos.belt": {
+        category: "logos",
+        name: L("Logo-Laufband", "Logo belt"),
+        keywords: "logos partner kunden clients belt ticker band laufband",
+        slots: {
+            label: { kind: "eyebrow", label: L("Kleine Überschrift über der Reihe", "Small label above the row") },
+            ...Object.fromEntries(Array.from({ length: LOGOS }, (_, i) => [
+                [`logo${i + 1}`, { kind: "media", label: L(`Logo ${i + 1}`, `Logo ${i + 1}`), required: i === 0 }],
+                [`name${i + 1}`, { kind: "text", label: L(`Firmenname ${i + 1} (auch der Alternativtext)`, `Company name ${i + 1} (also the alt text)`), required: i === 0 }],
+                [`link${i + 1}`, { kind: "link", label: L(`Link ${i + 1} (optional)`, `Link ${i + 1} (optional)`) }],
+            ]).flat()),
+        },
+        versions: {
+            original: { name: L("Logos in Originalfarben", "Logos in their own colours"),
+                wire: [["eyebrow", 40, 18, 20], ...[6, 24, 42, 60, 78].map((x) => ["band", x, 28, 14, 8])] },
+            mono: { name: L("Logos einfarbig (folgt Hell/Dunkel)", "Logos in one tone (follows light/dark)"),
+                wire: [["eyebrow", 40, 18, 20], ...[6, 24, 42, 60, 78].map((x) => ["rule", x, 32, 14])] },
+        },
+        magazine: { layout: "L" },
+        render: renderBelt,
+    },
+    "hero.harbor": {
+        category: "heroes",
+        name: L("Hero", "Hero"),
+        keywords: "hero header titel title start bild video glas glass",
+        slots: {
+            heading: { kind: "heading", label: L("Titel der Seite (die eine Überschrift h1)", "The page's title (its one h1)"), required: true },
+            words: { kind: "text", label: L("Wechselndes Wort (optional): das erste steht im Titel, weitere je eine Zeile", "Rotating word (optional): the first is in the title, others one per line") },
+            media: { kind: "media", label: L("Hintergrund: Bild oder Video (optional)", "Background: image or video (optional)") },
+            button: { kind: "button", label: L("Button-Text", "Button label") },
+            link: { kind: "link", label: L("Button-Link", "Button link") },
+            button2: { kind: "button", label: L("Zweiter Button (optional)", "Second button (optional)") },
+            link2: { kind: "link", label: L("Zweiter Button-Link", "Second button link") },
+            glass_media: { kind: "media", label: L("Glas-Karte: Bild (optional)", "Glass card: image (optional)") },
+            glass_text: { kind: "text", label: L("Glas-Karte: eine Zeile", "Glass card: one line") },
+            glass_button: { kind: "button", label: L("Glas-Karte: Button-Text", "Glass card: button label") },
+            glass_link: { kind: "link", label: L("Glas-Karte: Button-Link", "Glass card: button link") },
+            caption1: { kind: "text", label: L("Unten links (optional)", "Bottom left (optional)") },
+            caption2: { kind: "text", label: L("Unten Mitte (optional)", "Bottom centre (optional)") },
+            caption3: { kind: "text", label: L("Unten rechts (optional)", "Bottom right (optional)") },
+        },
+        versions: {
+            fit: { name: L("Titel füllt die Breite", "Title fills the width"),
+                wire: [["band", 0, 0, 100, 60], ["heading", 4, 36, 92, "light"], ["heading", 4, 42, 92, "light"], ["button", 4, 50, 16, "light"], ["line", 70, 55, 24, "light"]] },
+            standard: { name: L("Titel in großer Schrift", "Title in large type"),
+                wire: [["band", 0, 0, 100, 60], ["heading", 4, 40, 56, "light"], ["line", 4, 46, 40, "light"], ["button", 4, 51, 16, "light"], ["media", 70, 30, 24, 22]] },
+        },
+        magazine: { layout: "opener", cover: true },
+        render: renderHero,
     },
     "faq.single": {
         category: "faq",
@@ -278,6 +330,172 @@ export function fillScreen2(container, doc) {
         else el.setAttribute("alt", ""), el.setAttribute("loading", "lazy");
         box.append(el);
     });
+}
+
+// Logo belt: one row of logos drifting slowly to the left, seamless (a second, hidden copy follows the first), the
+// edges fading out. Each logo is an image named by its company (the alt text), a link when it has one. A logo shows
+// only with both its image and its name. Pauses on hover, on focus and with its button; still when off screen and
+// under reduced motion (a centred row that wraps). Editors see every slot, still.
+const plain = (html) => (html || "").replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").trim();
+const hrefOf = (ctx, slot) => { const h = plain(textOf(ctx, slot)); return SAFE_HREF.test(h) ? h : null; };
+
+function renderBelt(ctx) {
+    const s = section(ctx, `kalq-m-belt is-${ctx.entry.version === "mono" ? "mono" : "original"}`);
+    const inner = ctx.doc.createElement("div");
+    inner.className = "kalq-m-inner";
+    append(inner, slotEl(ctx, "label", "p", { className: "kalq-m-eyebrow kalq-m-belt__label" }));
+    const list = ctx.doc.createElement("ul");
+    list.className = "kalq-m-belt__list";
+    let empty = 0;
+    for (let i = 1; i <= LOGOS; i++) {
+        const url = mediaOf(ctx, `logo${i}`), name = plain(textOf(ctx, `name${i}`));
+        const li = ctx.doc.createElement("li");
+        li.className = "kalq-m-belt__item";
+        if (ctx.editor) {
+            if (!url && !name && ++empty > 2) continue; // the filled ones and two empty ones to fill next
+            append(li, mediaEl(ctx, `logo${i}`, "kalq-m-belt__logo"), slotEl(ctx, `name${i}`, "span", { className: "kalq-m-belt__name" }),
+                slotEl(ctx, `link${i}`, "span", { className: "kalq-m-link-field" }));
+            list.append(li);
+            continue;
+        }
+        if (!url || !name) continue;
+        const img = ctx.doc.createElement("img");
+        img.setAttribute("src", url);
+        img.setAttribute("alt", name);
+        img.setAttribute("loading", "lazy");
+        img.setAttribute("decoding", "async");
+        const href = hrefOf(ctx, `link${i}`);
+        if (href) { const a = ctx.doc.createElement("a"); a.setAttribute("href", href); a.append(img); li.append(a); } else li.append(img);
+        list.append(li);
+    }
+    if (!list.children.length) return ctx.editor ? append(s, append(inner, list)) : null;
+    const viewport = ctx.doc.createElement("div");
+    viewport.className = "kalq-m-belt__viewport";
+    const track = ctx.doc.createElement("div");
+    track.className = "kalq-m-belt__track";
+    track.append(list);
+    if (!ctx.editor) {
+        // the copy that makes the loop seamless: a picture of the first, out of reach
+        const copy = list.cloneNode(true);
+        copy.classList.add("is-copy");
+        copy.setAttribute("aria-hidden", "true");
+        copy.setAttribute("inert", "");
+        copy.querySelectorAll("img").forEach((img) => img.setAttribute("alt", ""));
+        copy.querySelectorAll("a").forEach((a) => a.setAttribute("tabindex", "-1"));
+        track.append(copy);
+        const pause = ctx.doc.createElement("button");
+        pause.setAttribute("type", "button");
+        pause.className = "kalq-m-belt__pause";
+        pause.setAttribute("aria-pressed", "false");
+        pause.setAttribute("aria-label", ctx.lang === "en" ? "Pause the logos" : "Laufband anhalten");
+        pause.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5 3.5v9M11 3.5v9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+        viewport.append(track);
+        append(inner, viewport, pause);
+    } else append(inner, append(viewport, track));
+    return append(s, inner);
+}
+
+// Hero: the page's one h1, at least a screen tall, its content at the foot. Behind: an image, a video (muted, looping,
+// with a pause control) or the section's colour, with a soft shade for legibility. Options by content: a rotating
+// word (the first word stays in the h1, the others are listed there as hidden text), a glass card (image, a line, a
+// button), a row of up to three captions with a link to the next section, up to two buttons (the first the round
+// arrow button). The title rises in word by word (js/moduleBehaviour.js); everything is still under reduced motion.
+function linkButton(ctx, labelSlot, linkSlot, className) {
+    const label = textOf(ctx, labelSlot);
+    const href = hrefOf(ctx, linkSlot);
+    if (!ctx.editor) {
+        if (!label || !href) return null;
+        const a = ctx.doc.createElement("a");
+        a.className = className;
+        a.setAttribute("href", href);
+        const text = ctx.doc.createElement("span");
+        text.className = "kalq-btn-round__text";
+        renderBlock(text, label);
+        a.append(text);
+        if (className.includes("kalq-btn-round")) a.append(roundArrow(ctx));
+        return a;
+    }
+    const wrap = ctx.doc.createElement("span");
+    wrap.className = "kalq-m-hero__edit-button";
+    append(wrap, slotEl(ctx, labelSlot, "span", { className }), slotEl(ctx, linkSlot, "span", { className: "kalq-m-link-field" }));
+    return wrap;
+}
+
+function roundArrow(ctx) {
+    const c = ctx.doc.createElement("span");
+    c.className = "kalq-btn-round__circle";
+    c.setAttribute("aria-hidden", "true");
+    const arrow = '<svg viewBox="0 0 16 16" focusable="false"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    c.innerHTML = `<span class="kalq-btn-round__arrow">${arrow}</span><span class="kalq-btn-round__arrow is-next">${arrow}</span>`;
+    return c;
+}
+
+function renderHero(ctx) {
+    const fit = ctx.entry.version === "fit";
+    const s = section(ctx, `kalq-m-hero is-${fit ? "fit" : "standard"}`);
+    const media = mediaEl(ctx, "media", "kalq-m-hero__media");
+    if (media) {
+        media.setAttribute("aria-hidden", "true");
+        const shade = ctx.doc.createElement("div");
+        shade.className = "kalq-m-hero__shade";
+        shade.setAttribute("aria-hidden", "true");
+        append(s, media, shade);
+        s.classList.add("has-media");
+    }
+    const inner = ctx.doc.createElement("div");
+    inner.className = "kalq-m-inner kalq-m-hero__content";
+    // the h1: the sentence (its own block, edited in place) and, after it, the rotating word's others as hidden text
+    const sentence = slotEl(ctx, "heading", "span", { className: "kalq-m-hero__sentence" });
+    const title = sentence ? append(Object.assign(ctx.doc.createElement("h1"), { className: "kalq-m-hero__title" }), sentence) : null;
+    // one short title across the width: its size follows its length (css: --chars)
+    if (title && fit) title.setAttribute("style", `--chars: ${Math.max(4, Math.min(40, plain(textOf(ctx, "heading")).length || 10))}`);
+    const words = plain(textOf(ctx, "words")).split(/\n|<br>|,/).map((w) => w.trim()).filter(Boolean);
+    if (title && words.length > 1 && !ctx.editor) {
+        // the first word is in the title; the others named once, for machines, as hidden text (js turns them)
+        title.setAttribute("data-rotate", JSON.stringify(words.slice(0, 8)));
+        const alts = ctx.doc.createElement("span");
+        alts.className = "kalq-sr kalq-m-hero__alts";
+        alts.textContent = ` (${words.slice(1, 8).join(", ")})`;
+        title.append(alts);
+    }
+    const actions = ctx.doc.createElement("div");
+    actions.className = "kalq-m-hero__actions";
+    append(actions, linkButton(ctx, "button", "link", "kalq-btn-round"), linkButton(ctx, "button2", "link2", "kalq-m-hero__button2"));
+    append(inner, title, ctx.editor ? slotEl(ctx, "words", "p", { className: "kalq-m-hero__words-field" }) : null, actions.children.length ? actions : null);
+    // the glass card
+    const glassMedia = mediaEl(ctx, "glass_media", "kalq-m-hero__glass-media");
+    const glassText = slotEl(ctx, "glass_text", "p", { className: "kalq-m-hero__glass-text" });
+    const glassButton = linkButton(ctx, "glass_button", "glass_link", "kalq-m-hero__glass-button");
+    if (glassMedia || glassText || glassButton) {
+        const glass = ctx.doc.createElement("aside");
+        glass.className = "kalq-m-hero__glass";
+        if (glassMedia) glassMedia.querySelector("img")?.setAttribute("alt", plain(textOf(ctx, "glass_text")) || "");
+        append(glass, glassMedia, append(ctx.doc.createElement("div"), glassText, glassButton));
+        inner.append(glass);
+    }
+    // the bottom row: captions and the way to the next section (its href set by js/layout.js)
+    const row = ctx.doc.createElement("div");
+    row.className = "kalq-m-hero__row";
+    [1, 2, 3].forEach((n) => append(row, slotEl(ctx, `caption${n}`, "p", { className: `kalq-m-hero__caption is-${n}` })));
+    const next = ctx.doc.createElement("a");
+    next.className = "kalq-m-hero__next";
+    next.setAttribute("href", "#main");
+    next.setAttribute("data-next-section", "");
+    next.setAttribute("aria-label", ctx.lang === "en" ? "To the next section" : "Zum nächsten Abschnitt");
+    next.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v15M6 13l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    row.append(next);
+    // the pause control, when something moves on its own (a video, a rotating word)
+    if (!ctx.editor && (s.querySelector("video") || (title && title.hasAttribute("data-rotate")))) {
+        const pause = ctx.doc.createElement("button");
+        pause.setAttribute("type", "button");
+        pause.className = "kalq-m-hero__pause";
+        pause.setAttribute("aria-pressed", "false");
+        pause.setAttribute("aria-label", ctx.lang === "en" ? "Pause the motion" : "Bewegung anhalten");
+        pause.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5 3.5v9M11 3.5v9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+        row.append(pause);
+    }
+    inner.append(row);
+    return append(s, inner);
 }
 
 // Real headings and buttons: each question is a <button> that opens its answer (works as plain text without JS:

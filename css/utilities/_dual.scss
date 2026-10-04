@@ -15,6 +15,39 @@
 
 // Page builder modules
 @mixin modules-two-screens {
+    // Logo belt: the row runs on the left screen only, never across the hinge
+    .kalq-m.kalq-m-belt .kalq-m-inner { display: block; max-width: var(--seg-l); margin: 0; padding: 0 2rem; } // not the two-column grid
+    .kalq-m.kalq-m-belt .kalq-m-belt__pause { right: 2rem; }
+
+    // Hero: its picture behind both screens; title and buttons on the left screen, the glass card on the right; of the
+    // bottom row, the first caption on the left, the others and the controls on the right
+    .kalq-m.kalq-m-hero .kalq-m-hero__content {
+        grid-template-columns: var(--seg-l) var(--seg-r);
+        column-gap: var(--seg-hinge);
+        max-width: none;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .kalq-m.kalq-m-hero .kalq-m-hero__title,
+    .kalq-m.kalq-m-hero.is-fit .kalq-m-hero__title {
+        grid-column: 1;
+        max-width: calc(var(--seg-l) - 4rem);
+        margin-left: 2rem;
+        white-space: normal;
+        font-size: clamp(2.2rem, calc(var(--seg-l) * 0.09), 4.2rem);
+    }
+    .kalq-m.kalq-m-hero .kalq-m-hero__actions { grid-column: 1; margin-left: 2rem; }
+    .kalq-m.kalq-m-hero .kalq-m-hero__glass { grid-column: 2; grid-row: 1 / span 2; margin: 0 2rem; }
+    .kalq-m.kalq-m-hero .kalq-m-hero__row {
+        grid-template-columns: var(--seg-l) var(--seg-r);
+        column-gap: var(--seg-hinge);
+        border-top: 0;
+
+        > * { grid-column: 2; justify-self: start; margin-left: 2rem; }
+        > .is-1 { grid-column: 1; }
+    }
+    .kalq-m.kalq-m-hero .kalq-m-hero__row { grid-auto-flow: row dense; }
+
     .kalq-m {
         padding: 0;
     }

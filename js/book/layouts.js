@@ -11,7 +11,7 @@ const VIDEO = /\.(mp4|webm|mov|m4v)(\?|#|$)/i;
 const STRIP = ["id", "data-kalq-key", "data-kalq-type", "data-i18n", "data-i18n-marquee", "data-i18n-aria", "data-kalq-format",
     "contenteditable", "style", "data-kalq-animated", "data-kalq-final", "tabindex", "aria-controls", "aria-expanded",
     "aria-selected", "aria-labelledby", "role", "hidden", "data-section", "data-section-builtin", "data-module", "class"];
-const KEEP_CLASS = new Set(["kalq-line"]);
+const KEEP_CLASS = new Set(["kalq-line", "kalq-sr"]); // line breaks of a title; text only for readers and machines
 
 const div = (cls) => Object.assign(document.createElement("div"), { className: cls });
 
@@ -215,6 +215,28 @@ export const LAYOUTS = {
             select((j + tabs.length) % tabs.length, true);
         });
         return [qs, answers];
+    },
+    // Logos: a still grid over the spread, each logo with its company's name
+    L: (u) => {
+        const grid = (list) => {
+            const ul = document.createElement("ul");
+            ul.className = "bk-logos";
+            list.forEach((x) => {
+                const li = document.createElement("li");
+                const img = document.createElement("img");
+                img.src = x.url;
+                img.alt = x.name;
+                img.decoding = "async";
+                li.append(img, Object.assign(document.createElement("span"), { className: "bk-logos__name", textContent: x.name }));
+                ul.append(li);
+            });
+            return ul;
+        };
+        const half = Math.ceil(u.logos.length / 2);
+        return [
+            textPage([u.title && textOf(u.title, "p", "bk-eyebrow"), grid(u.logos.slice(0, half))], "bk-logopage"),
+            textPage([grid(u.logos.slice(half))], "bk-logopage"),
+        ];
     },
     // Technical text (the legal appendix): a quieter, denser setting that flows over as many pages as it needs
     G: (u) => {

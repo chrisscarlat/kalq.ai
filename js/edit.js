@@ -37,7 +37,7 @@ let locks = new Map(); // key -> person editing it
 const keyOf = (node) => node.dataset.kalqKey;
 const typeOf = (node) => node.dataset.kalqType || "text";
 const pageOf = (key) => (key.startsWith("site.") ? "site" : collab.page);
-const isTranslated = (node) => node.hasAttribute("data-i18n") || node.hasAttribute("data-i18n-marquee");
+const isTranslated = (node) => node.hasAttribute("data-i18n") || node.hasAttribute("data-i18n-marquee") || node.hasAttribute("data-kalq-lang");
 const label = (key) => `Edited ${key.split(".").slice(1).join(" ")}`;
 
 // The saved form of some rendered HTML, to tell whether an edit changed anything

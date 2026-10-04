@@ -15,7 +15,7 @@ const BASE_CATEGORIES = [
     { id: "content", de: "Inhalt", en: "Content" },
     { id: "cards", de: "Karten", en: "Cards" },
     { id: "cta", de: "Handlungsaufrufe", en: "Calls to action" },
-    { id: "interaction", de: "Newsletter und Interaktion", en: "Newsletter and interaction", note: { de: "Formulare sind bis zum Supabase-Upgrade deaktiviert.", en: "Forms stay disabled until the Supabase upgrade." } },
+    { id: "interaction", de: "Kontakt und Anfrage", en: "Contact and inquiry" },
     { id: "faq", de: "FAQ", en: "FAQs" },
     { id: "footers", de: "Footer", en: "Footers", note: { de: "Der Footer wird im Stil gewählt (Stile: Footer), für die ganze Website.", en: "The footer is chosen in the style (Styles: footer), for the whole site." } },
 ];
@@ -446,9 +446,9 @@ export function renderModule(entry, ctx) {
 export function missingRequired(entry, page, store) {
     const def = MODULES[entry.module];
     if (!def) return [];
-    return Object.entries(def.slots).filter(([slot, s]) => {
+    return [...Object.entries(def.slots).filter(([slot, s]) => {
         if (!s.required) return false;
         const e = store(`${page}.${entry.id}.${slot}`);
         return !e || (s.kind === "media" ? !e.media : e.de == null && e.en == null);
-    }).map(([slot, s]) => s.label);
+    }).map(([slot, s]) => s.label), ...(def.missing ? def.missing(entry, page, store) : [])]; // the module's own checks (e.g. the chat's questions)
 }

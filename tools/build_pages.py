@@ -293,7 +293,7 @@ MODULES = [
      "Margin logic, pricing and quote output, with every result feeding back into better estimates."),
 ]
 
-SKIP = ("title.", "meta.", "aria.", "social.marquee", "form.")  # form.*: labels of the library's forms, rendered by js/modules/library.js
+SKIP = ("title.", "meta.", "aria.", "social.marquee")
 
 def to_html(text, fmt):
     """Line blocks: one line per \\n. Paragraph blocks: paragraphs split by a blank line."""

@@ -40,6 +40,12 @@ export function applyLanguage(code = current) {
         else if (el.dataset.kalqFormat) renderBlock(el, textToHtml(t(el.dataset.i18n), el.dataset.kalqFormat));
         else el.textContent = t(el.dataset.i18n);
     });
+    // Blocks written per language (the inquiry chat's words): this language, else the other one
+    document.querySelectorAll("[data-kalq-lang][data-kalq-key]").forEach(el => {
+        if (el.isContentEditable) return;
+        const edited = editedContent(el.dataset.kalqKey, current) ?? editedContent(el.dataset.kalqKey, current === "en" ? "de" : "en");
+        if (edited != null) renderBlock(el, edited);
+    });
     document.querySelectorAll("[data-i18n-aria]").forEach(el => el.setAttribute("aria-label", t(el.dataset.i18nAria)));
     document.querySelectorAll("[data-i18n-marquee]").forEach(el => {
         const edited = el.dataset.kalqKey && editedContent(el.dataset.kalqKey, current);

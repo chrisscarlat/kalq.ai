@@ -2771,143 +2771,6 @@ body.kalq-edit .kalq-m-hero .kalq-m-range {
   color: #101010;
 }
 
-.kalq-m-form__set {
-  display: grid;
-  gap: 1.1rem;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  min-width: 0;
-}
-
-.kalq-m-form__row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.1rem;
-}
-
-.kalq-m-form__field {
-  display: grid;
-  gap: 0.45rem;
-}
-
-.kalq-m-form__label {
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-.kalq-m-form__req {
-  font-weight: 400;
-  opacity: 0.6;
-}
-.kalq-m-form__req::before {
-  content: "(";
-}
-.kalq-m-form__req::after {
-  content: ")";
-}
-
-.kalq-m-form__input {
-  width: 100%;
-  min-height: 3rem;
-  padding: 0.75rem 1rem;
-  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
-  border-radius: 10px;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-}
-.kalq-m-form__input:focus-visible {
-  outline: 2px solid var(--kalq-accent, #3b82f6);
-  outline-offset: 1px;
-}
-
-.kalq-m-form__group {
-  display: grid;
-  gap: 0.6rem;
-  margin: 0.4rem 0 0;
-  padding: 0;
-  border: 0;
-}
-.kalq-m-form__group legend {
-  margin-bottom: 0.6rem;
-  padding: 0;
-}
-
-.kalq-m-form__check {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-.kalq-m-form__check input {
-  width: 1.1rem;
-  height: 1.1rem;
-  accent-color: var(--kalq-text, #101010);
-}
-
-.kalq-m-form__submit {
-  justify-self: start;
-  border: 0;
-  cursor: pointer;
-}
-
-.kalq-m-form__set[disabled] {
-  opacity: 0.55;
-}
-.kalq-m-form__set[disabled] .kalq-m-form__submit {
-  cursor: not-allowed;
-}
-
-.kalq-m-form__note {
-  margin-top: 1rem;
-  padding: 0.7rem 0.9rem;
-  border-radius: 10px;
-  background: rgba(29, 78, 216, 0.1);
-  color: #1D4ED8;
-  font-size: 0.85rem;
-  line-height: 1.45;
-}
-
-.kalq-m-news__box {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: clamp(2rem, 5cqi, 5rem);
-  align-items: center;
-}
-
-.kalq-m-news__icon {
-  width: 3rem;
-  height: 3rem;
-  margin-bottom: 1.2rem;
-  border-radius: 10px;
-  background: none;
-}
-.kalq-m-news__icon img {
-  object-fit: contain;
-}
-
-.kalq-m-news__heading {
-  font-size: clamp(1.8rem, 3.6cqi, 3rem);
-  font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: -0.015em;
-}
-
-.kalq-m-news__form .kalq-m-form__set {
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
-}
-
-.kalq-m-news.is-hidden-label .kalq-m-form__set {
-  align-items: center;
-}
-
-.kalq-m-news__proof {
-  margin-top: 1rem;
-  font-size: 0.9rem;
-  opacity: 0.75;
-}
-
 .kalq-m-contact .kalq-m-inner {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
@@ -2952,15 +2815,12 @@ body.kalq-edit .kalq-m-hero .kalq-m-range {
 }
 
 @container (max-width: 999px) {
-  .kalq-m-news__box, .kalq-m-contact .kalq-m-inner {
+  .kalq-m-contact .kalq-m-inner {
     grid-template-columns: 1fr;
   }
 }
 @container (max-width: 690px) {
-  .kalq-m-form__row, .kalq-m-news__form .kalq-m-form__set {
-    grid-template-columns: 1fr;
-  }
-  .kalq-m-news .kalq-m-inner, .kalq-m-contact .kalq-m-inner {
+  .kalq-m-contact .kalq-m-inner {
     padding: 0 1.25rem;
   }
 }
@@ -3934,6 +3794,508 @@ a.kalq-m-grid__card:focus-visible {
   }
   [data-depth], [data-depth] img {
     translate: none !important;
+  }
+}
+.kalq-m-chat .kalq-m-inner {
+  display: grid;
+  justify-items: center;
+}
+
+.kalq-m-chat.has-intro .kalq-m-inner {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+  justify-items: stretch;
+  align-items: center;
+  gap: clamp(2.5rem, 6cqi, 7rem);
+}
+
+.kalq-m-chat__window {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 460px;
+  min-height: 520px;
+  border: 1px solid color-mix(in srgb, var(--kalq-text, #101010) 10%, transparent);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--kalq-bg, #fff) 85%, transparent);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  color: var(--kalq-text, #101010);
+  font-size: 0.9rem;
+}
+
+.kalq-m-chat__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.kalq-m-chat__title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.kalq-m-chat__langs {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 8px;
+  background: color-mix(in srgb, currentColor 5%, transparent);
+}
+
+.kalq-m-chat__lang {
+  padding: 0.25rem 0.55rem;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  color: color-mix(in srgb, currentColor 55%, transparent);
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.kalq-m-chat__lang[aria-pressed=true] {
+  background: var(--kalq-text, #101010);
+  color: var(--kalq-bg, #fff);
+}
+.kalq-m-chat__lang:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 1px;
+}
+
+.kalq-m-chat__log {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem 1rem;
+}
+
+.kalq-m-chat__msg {
+  display: flex;
+  gap: 0.6rem;
+  max-width: 92%;
+  animation: kalq-chat-in 0.3s ease both;
+}
+
+.kalq-m-chat__msg.is-bot {
+  align-self: flex-start;
+}
+
+.kalq-m-chat__msg.is-user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+@keyframes kalq-chat-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.kalq-m-chat__avatar {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border: 2px solid color-mix(in srgb, currentColor 10%, transparent);
+  border-radius: 50%;
+}
+
+.kalq-m-chat__bubble {
+  min-width: 0;
+  padding: 0.65rem 0.9rem;
+  border-radius: 16px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.kalq-m-chat__bubble p {
+  margin: 0;
+}
+.kalq-m-chat__bubble p + p {
+  margin-top: 0.5rem;
+}
+
+.is-bot > .kalq-m-chat__bubble {
+  background: color-mix(in srgb, currentColor 6%, transparent);
+}
+
+.is-user > .kalq-m-chat__bubble {
+  background: var(--kalq-text, #101010);
+  color: var(--kalq-bg, #fff);
+}
+
+.kalq-m-chat__name {
+  font-weight: 600;
+}
+
+.kalq-m-chat__typing {
+  letter-spacing: 0.2em;
+  animation: kalq-typing 1s ease-in-out infinite;
+}
+
+@keyframes kalq-typing {
+  50% {
+    opacity: 0.35;
+  }
+}
+.kalq-m-chat__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.kalq-m-chat__chip {
+  padding: 0.55rem 0.9rem;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-radius: 20px;
+  background: var(--kalq-bg, #fff);
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.kalq-m-chat__chip:hover, .kalq-m-chat__chip:focus-visible {
+  border-color: currentColor;
+  background: color-mix(in srgb, currentColor 5%, var(--kalq-bg, #fff));
+}
+.kalq-m-chat__chip:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 2px;
+}
+
+.kalq-m-chat__script {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0 1rem 1rem 3.6rem;
+  list-style: decimal;
+}
+
+.kalq-m-chat__ask {
+  margin: 0;
+  font-weight: 500;
+}
+
+.kalq-m-chat__choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.kalq-m-chat__choices li {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-radius: 20px;
+  font-size: 0.8rem;
+}
+
+.kalq-m-chat.is-live .kalq-m-chat__script {
+  display: none;
+}
+
+.kalq-m-chat__finish {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0 1rem 1rem;
+}
+.kalq-m-chat__finish[hidden] {
+  display: none;
+}
+
+.kalq-m-chat__msg .kalq-m-chat__finish {
+  padding: 0.75rem 0 0;
+}
+
+.kalq-m-chat:not(.is-live) .kalq-m-chat__summary-title, .kalq-m-chat:not(.is-live) .kalq-m-chat__summary {
+  display: none;
+}
+
+.kalq-m-chat__summary-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.kalq-m-chat__summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.3rem 0.8rem;
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+  border-radius: 10px;
+  background: var(--kalq-bg, #fff);
+  font-size: 0.82rem;
+}
+.kalq-m-chat__summary dt {
+  opacity: 0.65;
+}
+.kalq-m-chat__summary dd {
+  margin: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.kalq-m-chat__send {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.kalq-m-chat__go {
+  flex: 1 1 10rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+}
+.kalq-m-chat__go.is-wa {
+  background: #1c7c43;
+}
+.kalq-m-chat__go.is-mail {
+  background: var(--kalq-text, #101010);
+  color: var(--kalq-bg, #fff);
+}
+.kalq-m-chat__go:hover {
+  filter: brightness(1.1);
+}
+.kalq-m-chat__go:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 2px;
+}
+
+.kalq-m-chat__note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  opacity: 0.65;
+}
+
+.kalq-m-chat__bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+}
+.kalq-m-chat__bar[hidden] {
+  display: none;
+}
+
+.kalq-m-chat__input, .kalq-m-chat__cc {
+  min-width: 0;
+  padding: 0.7rem 1rem;
+  border: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--kalq-bg, #fff) 60%, transparent);
+  color: inherit;
+  font: inherit;
+}
+.kalq-m-chat__input:focus-visible, .kalq-m-chat__cc:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+
+.kalq-m-chat__input {
+  flex: 1;
+}
+
+.kalq-m-chat__cc {
+  flex: 0 0 auto;
+  padding-right: 0.6rem;
+}
+.kalq-m-chat__cc[hidden] {
+  display: none;
+}
+
+.kalq-m-chat__sendbtn {
+  padding: 0.7rem 1.2rem;
+  border: 0;
+  border-radius: 24px;
+  background: var(--kalq-text, #101010);
+  color: var(--kalq-bg, #fff);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.kalq-m-chat__sendbtn:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 2px;
+}
+
+.kalq-m-chat__tools, .kalq-m-chat__add, .kalq-m-chat__settings, .kalq-m-chat__choices-field {
+  display: none;
+}
+
+body.kalq-edit .kalq-m-chat .kalq-m-chat__script {
+  padding-left: 1rem;
+  list-style: none;
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__q {
+  padding: 0.75rem;
+  border: 1px dashed color-mix(in srgb, currentColor 25%, transparent);
+  border-radius: 12px;
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__num {
+  margin-right: auto;
+  font-weight: 600;
+  opacity: 0.7;
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__kinds {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 8px;
+  background: color-mix(in srgb, currentColor 6%, transparent);
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__tool {
+  min-width: 28px;
+  padding: 0.25rem 0.55rem;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__tool[aria-pressed=true] {
+  background: #1D4ED8;
+  color: #fff;
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__tool:hover {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__choices-field {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__add {
+  display: block;
+  margin: 0 1rem 1rem;
+  padding: 0.6rem;
+  border: 1px dashed #1D4ED8;
+  border-radius: 10px;
+  background: none;
+  color: #1D4ED8;
+  font: inherit;
+  cursor: pointer;
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__add:disabled {
+  opacity: 0.4;
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__settings {
+  display: grid;
+  gap: 0.7rem;
+  padding: 1rem;
+  border-top: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+  font-size: 0.8rem;
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__switch {
+  justify-self: start;
+  padding: 0.4rem 0.8rem 0.4rem 2.6rem;
+  position: relative;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 6%, transparent);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__switch::before {
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  top: 50%;
+  width: 1.6rem;
+  height: 0.9rem;
+  border-radius: 1rem;
+  background: color-mix(in srgb, currentColor 25%, transparent);
+  transform: translateY(-50%);
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__switch::after {
+  content: "";
+  position: absolute;
+  left: 0.6rem;
+  top: 50%;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: #fff;
+  transform: translateY(-50%);
+  transition: left 0.2s ease;
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__switch[aria-pressed=true]::before {
+  background: #1D4ED8;
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__switch[aria-pressed=true]::after {
+  left: 1.3rem;
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__setting {
+  display: grid;
+  gap: 0.25rem;
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__setting > span:first-child {
+  opacity: 0.7;
+}
+body.kalq-edit .kalq-m-chat .kalq-m-chat__value {
+  display: block;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, currentColor 5%, transparent);
+}
+
+@container (max-width: 999px) {
+  .kalq-m-chat.has-intro .kalq-m-inner {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .kalq-m-chat__intro {
+    justify-self: stretch;
+  }
+}
+@container (max-width: 690px) {
+  .kalq-m-chat .kalq-m-inner {
+    padding: 0 1rem;
+  }
+  .kalq-m-chat__window {
+    min-height: 460px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kalq-m-chat__msg {
+    animation: none;
+  }
+  .kalq-m-chat__typing {
+    animation: none;
+  }
+  .kalq-m-chat__chip {
+    transition: none;
   }
 }
 .kalq-m-alt-field,
@@ -6789,21 +7151,38 @@ html.foot-gradient footer {
     margin-right: 2rem;
     grid-row: 1;
   }
-  .kalq-m.kalq-m-news .kalq-m-news__box, .kalq-m.kalq-m-contact .kalq-m-inner {
+  .kalq-m.kalq-m-chat .kalq-m-inner, .kalq-m.kalq-m-chat.has-intro .kalq-m-inner {
+    grid-template-columns: var(--seg-l) var(--seg-r);
+    column-gap: var(--seg-hinge);
+    max-width: none;
+    padding: 0;
+    align-items: center;
+    min-height: var(--seg-h);
+    justify-items: stretch;
+  }
+  .kalq-m.kalq-m-chat .kalq-m-chat__intro {
+    grid-column: 1;
+    padding: 0 2rem;
+  }
+  .kalq-m.kalq-m-chat .kalq-m-chat__window {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
+    max-width: calc(var(--seg-r) - 3rem);
+    margin: 2rem 0;
+  }
+  .kalq-m.kalq-m-contact .kalq-m-inner {
     align-items: center;
     min-height: var(--seg-h);
     gap: 0 var(--seg-hinge);
   }
-  .kalq-m.kalq-m-news .kalq-m-news__text, .kalq-m.kalq-m-contact .kalq-m-contact__left {
+  .kalq-m.kalq-m-contact .kalq-m-contact__left {
     grid-column: 1;
     padding: 0 2rem;
   }
-  .kalq-m.kalq-m-news .kalq-m-news__side, .kalq-m.kalq-m-contact .kalq-m-contact__right {
+  .kalq-m.kalq-m-contact .kalq-m-contact__right {
     grid-column: 2;
     padding: 0 2rem;
-  }
-  .kalq-m.kalq-m-news .kalq-m-news__form .kalq-m-form__set {
-    grid-template-columns: 1fr;
   }
   .kalq-m.kalq-m-quotes .kalq-m-inner {
     align-items: center;
@@ -7522,21 +7901,38 @@ html.foot-gradient footer {
   margin-right: 2rem;
   grid-row: 1;
 }
-.kalq-device.is-span-h .kalq-m.kalq-m-news .kalq-m-news__box, .kalq-device.is-span-h .kalq-m.kalq-m-contact .kalq-m-inner {
+.kalq-device.is-span-h .kalq-m.kalq-m-chat .kalq-m-inner, .kalq-device.is-span-h .kalq-m.kalq-m-chat.has-intro .kalq-m-inner {
+  grid-template-columns: var(--seg-l) var(--seg-r);
+  column-gap: var(--seg-hinge);
+  max-width: none;
+  padding: 0;
+  align-items: center;
+  min-height: var(--seg-h);
+  justify-items: stretch;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-chat .kalq-m-chat__intro {
+  grid-column: 1;
+  padding: 0 2rem;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-chat .kalq-m-chat__window {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
+  max-width: calc(var(--seg-r) - 3rem);
+  margin: 2rem 0;
+}
+.kalq-device.is-span-h .kalq-m.kalq-m-contact .kalq-m-inner {
   align-items: center;
   min-height: var(--seg-h);
   gap: 0 var(--seg-hinge);
 }
-.kalq-device.is-span-h .kalq-m.kalq-m-news .kalq-m-news__text, .kalq-device.is-span-h .kalq-m.kalq-m-contact .kalq-m-contact__left {
+.kalq-device.is-span-h .kalq-m.kalq-m-contact .kalq-m-contact__left {
   grid-column: 1;
   padding: 0 2rem;
 }
-.kalq-device.is-span-h .kalq-m.kalq-m-news .kalq-m-news__side, .kalq-device.is-span-h .kalq-m.kalq-m-contact .kalq-m-contact__right {
+.kalq-device.is-span-h .kalq-m.kalq-m-contact .kalq-m-contact__right {
   grid-column: 2;
   padding: 0 2rem;
-}
-.kalq-device.is-span-h .kalq-m.kalq-m-news .kalq-m-news__form .kalq-m-form__set {
-  grid-template-columns: 1fr;
 }
 .kalq-device.is-span-h .kalq-m.kalq-m-quotes .kalq-m-inner {
   align-items: center;

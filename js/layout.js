@@ -82,7 +82,9 @@ export function applyLayout({ doc, container, page, stored, editor = false, rend
         if (entry.state === "draft" && !editor) continue;
         let node = current.get(entry.id);
         // A section already on the page is reused unless it has to change kind (a module whose version changed)
-        if (node && entry.module !== "legacy" && (fresh || node.getAttribute("data-module") !== `${entry.module}:${entry.version || ""}`)) node = null;
+        // (or whose options changed: a chat's questions)
+        const opts = entry.opts ? JSON.stringify(entry.opts) : "";
+        if (node && entry.module !== "legacy" && (fresh || node.getAttribute("data-module") !== `${entry.module}:${entry.version || ""}` || (node.getAttribute("data-opts") || "") !== opts)) node = null;
         if (!node) {
             if (entry.module === "legacy" && !entry.source) node = templates.get(entry.id)?.cloneNode(true);
             else if (entry.module === "legacy") node = copySection(templates.get(entry.source), page, entry.id);
@@ -90,6 +92,7 @@ export function applyLayout({ doc, container, page, stored, editor = false, rend
         }
         if (!node) continue;
         node.setAttribute("data-section", entry.id);
+        if (entry.module !== "legacy") { if (entry.opts) node.setAttribute("data-opts", JSON.stringify(entry.opts)); else node.removeAttribute("data-opts"); }
         if (entry.state === "draft") node.setAttribute("data-section-state", "draft");
         else node.removeAttribute("data-section-state");
         // light or dark regardless of the site toggle; no attribute: follows the page

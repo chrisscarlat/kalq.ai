@@ -7,7 +7,7 @@
 // have a description (alt), decorative ones are hidden. Motion is visitor-only (editors edit still text) and set up by
 // js/moduleBehaviour.js from data-reveal, never under reduced motion. magazine.unit(section, kit) turns the rendered
 // section into the book's unit (js/magazine.js), so the book carries every text the page has.
-import { L, append, altField, editorField, el, mediaEl, mediaOf, picture, plain, rangeEl, rangeOf, section, slotEl, hrefOf, textOf, roundArrow } from "./kit.js";
+import { L, append, altField, editorField, el, keyOf, mediaEl, mediaOf, picture, plain, rangeEl, rangeOf, section, slotEl, hrefOf, textOf, roundArrow } from "./kit.js";
 
 const SERVICES = 6;
 const PLANS = 4;
@@ -226,115 +226,14 @@ function renderCtaSentence(ctx) {
 }
 
 
-//=================================== Forms (2.7, 2.8) ===================================//
-// Not live until the Supabase upgrade: visitors see the form disabled (nothing is sent anywhere); editors also see a
-// note saying so. Field labels are the interface's own words (the same keys in i18n/strings.json switch them with the
-// language); every field has its label.
-const FORM_TEXT = {
-    "form.email": { de: "E-Mail-Adresse", en: "Email address" },
-    "form.subscribe": { de: "Abonnieren", en: "Subscribe" },
-    "form.firstName": { de: "Vorname", en: "First name" },
-    "form.lastName": { de: "Nachname", en: "Last name" },
-    "form.emailShort": { de: "E-Mail", en: "Email" },
-    "form.phone": { de: "Telefon", en: "Phone" },
-    "form.required": { de: "Pflichtfeld", en: "required" },
-    "form.send": { de: "Senden", en: "Send" },
-};
-const word = (ctx, key) => FORM_TEXT[key][ctx.lang === "en" ? "en" : "de"];
-const tagged = (ctx, tag, cls, key) => { const n = el(ctx, tag, cls, word(ctx, key)); n.setAttribute("data-i18n", key); return n; };
-
-function formNote(ctx) {
-    if (!ctx.editor) return null;
-    return el(ctx, "p", "kalq-m-form__note", ctx.lang === "en"
-        ? "This form is not live yet: it opens with the Supabase upgrade. Until then visitors see it disabled and nothing is sent."
-        : "Dieses Formular ist noch nicht aktiv: Es wird mit dem Supabase-Upgrade freigeschaltet. Bis dahin sehen Besucher es deaktiviert, und nichts wird gesendet.");
-}
-
-// One labelled field; label from an editor slot (with the interface word as fallback) or the interface word
-function field(ctx, { id, type = "text", key, autocomplete, required = false, hideLabel = false }) {
-    const wrap = el(ctx, "div", "kalq-m-form__field");
-    const label = el(ctx, "label", hideLabel ? "kalq-sr" : "kalq-m-form__label");
-    label.setAttribute("for", id);
-    label.append(tagged(ctx, "span", "", key));
-    if (required) { const r = tagged(ctx, "span", "kalq-m-form__req", "form.required"); label.append(" ", r); }
-    const input = el(ctx, "input", "kalq-m-form__input");
-    input.setAttribute("id", id);
-    input.setAttribute("name", id.split("-").pop());
-    input.setAttribute("type", type);
-    if (autocomplete) input.setAttribute("autocomplete", autocomplete);
-    if (required) input.setAttribute("required", "");
-    return append(wrap, label, input);
-}
-
-function formShell(ctx, cls) {
-    const form = el(ctx, "form", `kalq-m-form ${cls}`);
-    form.setAttribute("novalidate", "");
-    form.setAttribute("data-kalq-form", "inactive"); // js/moduleBehaviour.js: never submits
-    const set = el(ctx, "fieldset", "kalq-m-form__set");
-    set.setAttribute("disabled", "");
-    form.append(set);
-    return { form, set };
-}
-
-function submit(ctx, slot, key) {
-    const b = el(ctx, "button", "kalq-m-button kalq-m-form__submit");
-    b.setAttribute("type", "submit");
-    const own = slotEl(ctx, slot, "span", {});
-    b.append(own || tagged(ctx, "span", "", key));
-    return b;
-}
-
-// 2.7 Newsletter box: optional small icon, heading, text, one email field, the button; a line of proof only with a
-// number the editor typed
-function renderNewsletter(ctx) {
-    const s = section(ctx, `kalq-m-news is-${ctx.entry.version === "hidden-label" ? "hidden-label" : "visible-label"}`);
-    const i = inner(ctx, "kalq-m-news__box");
-    const icon = mediaEl(ctx, "icon", "kalq-m-news__icon");
-    if (icon) icon.setAttribute("aria-hidden", "true");
-    const { form, set } = formShell(ctx, "kalq-m-news__form");
-    append(set, field(ctx, { id: `${ctx.id}-email`, type: "email", key: "form.email", autocomplete: "email", required: true, hideLabel: ctx.entry.version === "hidden-label" }), submit(ctx, "button", "form.subscribe"));
-    append(i, append(el(ctx, "div", "kalq-m-news__text"), icon, slotEl(ctx, "heading", "h2", { className: "kalq-m-news__heading" }),
-        slotEl(ctx, "text", "div", { className: "kalq-m-text", format: "paragraphs" })),
-        append(el(ctx, "div", "kalq-m-news__side"), form, slotEl(ctx, "proof", "p", { className: "kalq-m-news__proof" }), formNote(ctx)));
-    return append(s, i);
-}
-
-// 2.8 Contact section: the form on the left (first and last name, email required, phone, interests as checkboxes,
-// send); on the right a label, the email address large as a link, and social links as large words
+//=================================== Contact (2.8, without a form) ===================================//
+// A heading on one side; on the other a label, the email address large as a link and the networks as large words.
+// There are no forms on the site: an inquiry goes through the chat (interaction.inquiry), sent from the visitor's own
+// mail or WhatsApp.
 function renderContact(ctx) {
     const s = section(ctx, "kalq-m-contact");
     const i = inner(ctx);
-    const { form, set } = formShell(ctx, "kalq-m-contact__form");
-    const names = append(el(ctx, "div", "kalq-m-form__row"),
-        field(ctx, { id: `${ctx.id}-first`, key: "form.firstName", autocomplete: "given-name" }),
-        field(ctx, { id: `${ctx.id}-last`, key: "form.lastName", autocomplete: "family-name" }));
-    append(set, names, field(ctx, { id: `${ctx.id}-email`, type: "email", key: "form.emailShort", autocomplete: "email", required: true }),
-        field(ctx, { id: `${ctx.id}-phone`, type: "tel", key: "form.phone", autocomplete: "tel" }));
-    // the interests: the editor's options, one per line, each a checkbox with its own label
-    const options = (textOf(ctx, "interests") || "").split(/<br\s*\/?>|\n|<\/p>\s*<p>/i).map(plain).filter(Boolean).slice(0, 8);
-    if (options.length || ctx.editor) {
-        const group = el(ctx, "fieldset", "kalq-m-form__group");
-        const legend = el(ctx, "legend", "kalq-m-form__label");
-        legend.append(slotEl(ctx, "interest_label", "span", {}) || "");
-        group.append(legend);
-        if (ctx.editor) group.append(slotEl(ctx, "interests", "div", { className: "kalq-m-form__options-field", format: "lines" }));
-        else options.forEach((o, n) => {
-            const id = `${ctx.id}-interest-${n + 1}`;
-            const row = el(ctx, "div", "kalq-m-form__check");
-            const box = el(ctx, "input");
-            box.setAttribute("type", "checkbox");
-            box.setAttribute("id", id);
-            box.setAttribute("name", "interest");
-            box.setAttribute("value", o);
-            const label = el(ctx, "label", "", o);
-            label.setAttribute("for", id);
-            group.append(append(row, box, label));
-        });
-        if (legend.textContent.trim() || ctx.editor) set.append(group);
-    }
-    set.append(submit(ctx, "button", "form.send"));
-    const left = append(el(ctx, "div", "kalq-m-contact__left"), head(ctx), form, formNote(ctx));
-    // the right side
+    const left = append(el(ctx, "div", "kalq-m-contact__left"), head(ctx), slotEl(ctx, "text", "div", { className: "kalq-m-text", format: "paragraphs" }));
     const right = el(ctx, "div", "kalq-m-contact__right");
     append(right, slotEl(ctx, "label", "p", { className: "kalq-m-eyebrow" }));
     const email = plain(textOf(ctx, "email"));
@@ -357,10 +256,154 @@ function renderContact(ctx) {
         socials.append(append(el(ctx, "li"), a));
     }
     append(right, socials.children.length ? socials : null);
-    append(i, left, right.children.length ? right : null);
+    if (!right.children.length && !ctx.editor) return null;
+    append(i, left.children.length ? left : null, right);
     return append(s, i);
 }
 
+//=================================== The inquiry chat ===================================//
+// The project inquiry as a short conversation (ported from the Project Inquiry chat of scar.lat): the avatar and a
+// greeting, then the editor's questions one at a time (tap choices or a short text), optionally the visitor's contact
+// details, then a summary and two links that open the visitor's own WhatsApp or mail, filled in. Nothing is sent to
+// or stored by Kalq; the visitor's progress stays in their own browser so they can pick up where they left off.
+// The questions live on the section's layout entry (opts.items: id and kind, in order), so adding, moving, deleting
+// and changing a question is one undo step; each question's words are its own blocks (q_<id>, c_<id>: the choices,
+// one per line), in each language. In the HTML: every question and its choices as text (a list); the conversation
+// itself is played by js/moduleBehaviour.js (setupChat), still under reduced motion.
+export const CHAT_MAX = 12;
+export const CHAT_WORDS = {
+    de: {
+        title: "Projektanfrage", choice: "Auswahl", text: "Kurztext", question: (n) => `Frage ${n}`, add: "Frage hinzufügen", up: "Nach oben", down: "Nach unten", remove: "Frage entfernen",
+        contact: "Kontaktdaten am Ende abfragen", whatsapp: "WhatsApp-Nummer, an die gesendet wird (mit Ländervorwahl, z. B. +49 170 1234567)", email: "E-Mail-Adresse, an die gesendet wird",
+        greeting: "Begrüßung", name: "Name unter dem Bild (auch seine Beschreibung)", qph: "Frage", cph: "Antworten zum Antippen, eine pro Zeile",
+        contactAsk: ["Wie heißen Sie?", "Ihre E-Mail-Adresse?", "Ihre Telefonnummer?", "Ihr LinkedIn-Profil?"],
+        contactLabels: ["Name", "E-Mail", "Telefon", "LinkedIn"],
+        sendWa: "Per WhatsApp senden", sendMail: "Per E-Mail senden", summary: "Ihre Anfrage", note: "Nichts wird bei uns gespeichert: Sie senden die Anfrage selbst, per WhatsApp oder E-Mail.",
+    },
+    en: {
+        title: "Project inquiry", choice: "Choices", text: "Short text", question: (n) => `Question ${n}`, add: "Add a question", up: "Move up", down: "Move down", remove: "Remove question",
+        contact: "Ask for contact details at the end", whatsapp: "WhatsApp number to send to (with country code, e.g. +49 170 1234567)", email: "Email address to send to",
+        greeting: "Greeting", name: "Name under the picture (also its description)", qph: "Question", cph: "Answers to tap, one per line",
+        contactAsk: ["What is your name?", "Your email address?", "Your phone number?", "Your LinkedIn profile?"],
+        contactLabels: ["Name", "Email", "Phone", "LinkedIn"],
+        sendWa: "Send via WhatsApp", sendMail: "Send by email", summary: "Your inquiry", note: "Nothing is stored on our side: you send the inquiry yourself, by WhatsApp or email.",
+    },
+};
+const chatWords = (lang) => CHAT_WORDS[lang === "en" ? "en" : "de"];
+export const chatItems = (entry) => (Array.isArray(entry?.opts?.items) ? entry.opts.items.filter((x) => x && /^[a-z0-9]{1,12}$/.test(x.id) && ["choice", "text"].includes(x.kind)).slice(0, CHAT_MAX) : []);
+export const chatContact = (entry) => entry?.opts?.contact !== false; // on unless switched off
+const choicesOf = (ctx, id) => (textOf(ctx, `c_${id}`) || "").split(/<br\s*\/?>|\n|<\/p>\s*<p>/i).map(plain).filter(Boolean).slice(0, 8);
+const phoneDigits = (raw) => plain(raw).replace(/[^\d+]/g, "").replace(/^00/, "+").replace(/(?!^)\+/g, "");
+
+// A text block in each language (the chat's own words are edited per language)
+const langSlot = (ctx, slot, tag, opts = {}) => { const n = slotEl(ctx, slot, tag, opts); n?.setAttribute("data-kalq-lang", ""); return n; };
+
+// Editors' controls for one question: its kind, moving it, removing it (js/sections.js does the action, one undo step)
+function chatTools(ctx, item, n, count, w) {
+    const bar = el(ctx, "div", "kalq-m-chat__tools");
+    const btn = (action, label, text, extra = {}) => {
+        const b = el(ctx, "button", `kalq-m-chat__tool is-${action}`, text);
+        b.setAttribute("type", "button");
+        b.setAttribute("data-chat-action", action);
+        b.setAttribute("data-chat-id", item.id);
+        b.setAttribute("aria-label", label);
+        Object.entries(extra).forEach(([k, v]) => b.setAttribute(k, v));
+        return b;
+    };
+    const kinds = el(ctx, "span", "kalq-m-chat__kinds");
+    kinds.setAttribute("role", "group");
+    ["choice", "text"].forEach((k) => { const b = btn(`kind-${k}`, w[k], w[k], { "aria-pressed": String(item.kind === k) }); b.removeAttribute("aria-label"); kinds.append(b); });
+    append(bar, el(ctx, "span", "kalq-m-chat__num", w.question(n)), kinds,
+        n > 1 ? btn("up", w.up, "↑") : null, n < count ? btn("down", w.down, "↓") : null, btn("remove", w.remove, "×"));
+    return bar;
+}
+
+function renderInquiry(ctx) {
+    const w = chatWords(ctx.lang);
+    const items = chatItems(ctx.entry);
+    const contact = chatContact(ctx.entry);
+    const s = section(ctx, "kalq-m-chat");
+    if (!ctx.editor) s.setAttribute("data-chat", "");
+    const i = inner(ctx);
+    const intro = append(el(ctx, "div", "kalq-m-chat__intro"), head(ctx), slotEl(ctx, "text", "div", { className: "kalq-m-text", format: "paragraphs" }));
+    if (intro.children.length) s.classList.add("has-intro");
+
+    const win = el(ctx, "div", "kalq-m-chat__window");
+    const top = el(ctx, "div", "kalq-m-chat__head");
+    const title = langSlot(ctx, "title", "h3", { className: "kalq-m-chat__title" }) || el(ctx, "h3", "kalq-m-chat__title", w.title);
+    const langs = el(ctx, "div", "kalq-m-chat__langs");
+    langs.setAttribute("role", "group");
+    ["de", "en"].forEach((l) => { const b = el(ctx, "button", "kalq-m-chat__lang", l.toUpperCase()); b.setAttribute("type", "button"); b.setAttribute("data-lang", l); b.setAttribute("lang", l); b.setAttribute("aria-pressed", String(ctx.lang === l)); langs.append(b); });
+    append(top, title, langs);
+
+    // the greeting, from the avatar
+    const name = plain(textOf(ctx, "name"));
+    const avatar = mediaEl(ctx, "avatar", "kalq-m-chat__avatar", { alt: name });
+    const greet = append(el(ctx, "div", "kalq-m-chat__msg is-bot is-greeting"), avatar,
+        append(el(ctx, "div", "kalq-m-chat__bubble"), ctx.editor ? slotEl(ctx, "name", "p", { className: "kalq-m-chat__name" }) : null,
+            langSlot(ctx, "greeting", "div", { className: "kalq-m-chat__greeting", format: "paragraphs" })));
+    const log = append(el(ctx, "div", "kalq-m-chat__log"), greet);
+
+    // the questions, in order, as text: the conversation asks them one at a time
+    const script = el(ctx, "ol", "kalq-m-chat__script");
+    items.forEach((item, k) => {
+        const li = el(ctx, "li", `kalq-m-chat__q is-${item.kind}`);
+        li.setAttribute("data-q", item.id);
+        li.setAttribute("data-kind", item.kind);
+        if (ctx.editor) li.append(chatTools(ctx, item, k + 1, items.length, w));
+        const q = langSlot(ctx, `q_${item.id}`, "p", { className: "kalq-m-chat__ask", label: L(`${CHAT_WORDS.de.qph} ${k + 1}`, `${CHAT_WORDS.en.qph} ${k + 1}`) });
+        if (!q) return; // visitors: a question without words is not asked
+        li.append(q);
+        if (item.kind === "choice") {
+            if (ctx.editor) li.append(langSlot(ctx, `c_${item.id}`, "div", { className: "kalq-m-chat__choices-field", format: "lines", label: L(CHAT_WORDS.de.cph, CHAT_WORDS.en.cph) }));
+            else {
+                const list = choicesOf(ctx, item.id);
+                if (!list.length) return; // a choice question needs its choices
+                const ul = el(ctx, "ul", "kalq-m-chat__choices");
+                ul.setAttribute("data-choices", keyOf(ctx, `c_${item.id}`)); // rebuilt in the other language (js/moduleBehaviour.js)
+                list.forEach((c) => ul.append(el(ctx, "li", "", c)));
+                li.append(ul);
+            }
+        }
+        script.append(li);
+    });
+    // the contact details, asked at the end (when switched on)
+    if (contact && !ctx.editor) w.contactAsk.forEach((ask, k) => {
+        const li = el(ctx, "li", "kalq-m-chat__q is-contact");
+        li.setAttribute("data-q", ["name", "email", "phone", "linkedin"][k]);
+        li.setAttribute("data-kind", "contact");
+        li.append(el(ctx, "p", "kalq-m-chat__ask", ask));
+        script.append(li);
+    });
+
+    // the end: a summary (filled in as the visitor answers) and the two ways to send it
+    const wa = phoneDigits(textOf(ctx, "whatsapp")), mail = plain(textOf(ctx, "email"));
+    const send = el(ctx, "div", "kalq-m-chat__send");
+    if (!ctx.editor) {
+        if (/^\+?\d{6,15}$/.test(wa)) { const a = el(ctx, "a", "kalq-m-chat__go is-wa", w.sendWa); a.setAttribute("href", `https://wa.me/${wa.replace("+", "")}`); a.setAttribute("target", "_blank"); a.setAttribute("rel", "noopener"); send.append(a); }
+        if (/^[^\s@]+@[^\s@]+$/.test(mail)) { const a = el(ctx, "a", "kalq-m-chat__go is-mail", w.sendMail); a.setAttribute("href", `mailto:${mail}`); send.append(a); }
+    }
+    const finish = append(el(ctx, "div", "kalq-m-chat__finish"), el(ctx, "h4", "kalq-m-chat__summary-title", w.summary), el(ctx, "dl", "kalq-m-chat__summary"),
+        send.children.length ? send : null, el(ctx, "p", "kalq-m-chat__note", w.note));
+
+    if (ctx.editor) {
+        const add = el(ctx, "button", "kalq-m-chat__add", `+ ${w.add}`);
+        add.setAttribute("type", "button");
+        add.setAttribute("data-chat-action", "add");
+        if (items.length >= CHAT_MAX) add.setAttribute("disabled", "");
+        const sw = el(ctx, "button", "kalq-m-chat__switch", w.contact);
+        sw.setAttribute("type", "button");
+        sw.setAttribute("data-chat-action", "contact");
+        sw.setAttribute("aria-pressed", String(contact));
+        const settings = append(el(ctx, "div", "kalq-m-chat__settings"), sw,
+            append(el(ctx, "label", "kalq-m-chat__setting"), el(ctx, "span", "", w.whatsapp), slotEl(ctx, "whatsapp", "span", { className: "kalq-m-chat__value" })),
+            append(el(ctx, "label", "kalq-m-chat__setting"), el(ctx, "span", "", w.email), slotEl(ctx, "email", "span", { className: "kalq-m-chat__value" })));
+        append(win, top, log, script, add, settings);
+    } else append(win, top, log, script, finish);
+    if (!ctx.editor && !items.length && !textOf(ctx, "greeting")) return null;
+    append(i, intro.children.length ? intro : null, win);
+    return append(s, i);
+}
 
 //=================================== Testimonials (2.12, 2.13) ===================================//
 const QUOTES = 6;
@@ -803,40 +846,15 @@ export const LIBRARY = {
         },
         render: renderCtaSentence,
     },
-    "interaction.newsletter": {
-        category: "interaction",
-        name: L("Newsletter", "Newsletter box"),
-        keywords: "newsletter abonnieren subscribe email form formular",
-        slots: {
-            heading: { kind: "heading", label: L("Überschrift", "Heading"), required: true },
-            text: { kind: "text", label: L("Text (optional)", "Text (optional)") },
-            button: { kind: "button", label: L("Button-Text (sonst: Abonnieren)", "Button label (otherwise: Subscribe)") },
-            proof: { kind: "text", label: L("Zeile mit echter Zahl, z. B. 1.200 Leser (optional; nur echte Zahlen)", "Line with a real number, e.g. 1,200 readers (optional; real numbers only)") },
-            icon: { kind: "media", label: L("Kleines Symbol (optional)", "Small icon (optional)") },
-        },
-        versions: {
-            "visible-label": { name: L("Mit sichtbarer Feldbeschriftung", "With a visible field label"),
-                wire: [["heading", 8, 18, 34], ["line", 8, 25, 30], ["eyebrow", 54, 16, 14], ["rule", 54, 24, 26], ["button", 82, 21, 12]] },
-            "hidden-label": { name: L("Kompakt (Beschriftung nur für Screenreader)", "Compact (label for screen readers only)"),
-                wire: [["heading", 8, 18, 34], ["line", 8, 25, 30], ["rule", 54, 24, 26], ["button", 82, 21, 12]] },
-        },
-        magazine: {
-            layout: "B",
-            unit: (s, k) => ({ layout: "B", title: s.querySelector(".kalq-m-news__heading"), body: [...k.parasOf(s.querySelector(".kalq-m-news__text .kalq-m-text")), ...k.parasOf(s.querySelector(".kalq-m-news__proof"))] }),
-        },
-        render: renderNewsletter,
-    },
     "interaction.contact": {
         category: "interaction",
-        name: L("Kontakt mit Formular", "Contact section"),
-        keywords: "contact kontakt form formular email phone telefon",
+        name: L("Kontakt", "Contact"),
+        keywords: "contact kontakt email e-mail linkedin social netzwerke",
         slots: {
             eyebrow: { kind: "eyebrow", label: L("Kleine Überschrift", "Eyebrow") },
             heading: { kind: "heading", label: L("Überschrift", "Heading") },
-            interest_label: { kind: "eyebrow", label: L("Frage über den Auswahlfeldern, z. B. Woran sind Sie interessiert?", "Question above the checkboxes, e.g. What are you interested in?") },
-            interests: { kind: "text", label: L("Auswahlmöglichkeiten, eine pro Zeile", "Options, one per line") },
-            button: { kind: "button", label: L("Button-Text (sonst: Senden)", "Button label (otherwise: Send)") },
-            label: { kind: "eyebrow", label: L("Etikett rechts, z. B. Schreiben Sie uns", "Label on the right, e.g. Write to us") },
+            text: { kind: "text", label: L("Text (optional)", "Text (optional)") },
+            label: { kind: "eyebrow", label: L("Etikett, z. B. Schreiben Sie uns", "Label, e.g. Write to us") },
             email: { kind: "text", label: L("E-Mail-Adresse (groß, als Link)", "Email address (large, as a link)"), required: true },
             ...items(4, (n) => [
                 [`social${n}`, { kind: "button", label: L(`Netzwerk ${n}, z. B. LinkedIn`, `Network ${n}, e.g. LinkedIn`) }],
@@ -844,17 +862,58 @@ export const LIBRARY = {
             ]),
         },
         versions: {
-            "form-left": { name: L("Formular links, Kontakt rechts", "Form left, contact right"),
-                wire: [["heading", 6, 8, 30], ["rule", 6, 18, 18], ["rule", 26, 18, 18], ["rule", 6, 25, 38], ["rule", 6, 32, 38], ["line", 6, 39, 20], ["button", 6, 46, 12],
-                    ["eyebrow", 56, 14, 14], ["heading", 56, 20, 36], ["line", 56, 32, 16, "bold"], ["line", 56, 37, 14, "bold"]] },
+            split: { name: L("Überschrift links, Kontakt rechts", "Heading left, contact right"),
+                wire: [["heading", 6, 14, 30], ["line", 6, 22, 26], ["eyebrow", 56, 14, 14], ["heading", 56, 20, 36], ["line", 56, 32, 16, "bold"], ["line", 56, 37, 14, "bold"]] },
         },
         magazine: {
             layout: "B",
             unit: (s, k) => ({ layout: "B", eyebrow: s.querySelector(".kalq-m-contact__left .kalq-m-eyebrow"), title: s.querySelector(".kalq-m-contact__left .kalq-m-heading"),
-                lead: s.querySelector(".kalq-m-contact__right .kalq-m-eyebrow"),
+                lead: s.querySelector(".kalq-m-contact__right .kalq-m-eyebrow"), body: k.parasOf(s.querySelector(".kalq-m-contact__left .kalq-m-text")),
                 actions: [...s.querySelectorAll("a.kalq-m-contact__email, a.kalq-m-contact__word")] }),
         },
         render: renderContact,
+    },
+    "interaction.inquiry": {
+        category: "interaction",
+        name: L("Anfrage im Chat", "Inquiry chat"),
+        keywords: "chat anfrage inquiry project projekt fragen questions whatsapp email kontakt contact",
+        slots: {
+            eyebrow: { kind: "eyebrow", label: L("Kleine Überschrift (optional)", "Eyebrow (optional)") },
+            heading: { kind: "heading", label: L("Überschrift neben dem Chat (optional)", "Heading beside the chat (optional)") },
+            text: { kind: "text", label: L("Text neben dem Chat (optional)", "Text beside the chat (optional)") },
+            title: { kind: "eyebrow", label: L("Titel des Chats (sonst: Projektanfrage)", "Chat title (otherwise: Project inquiry)") },
+            avatar: { kind: "media", label: L("Bild der Person (rund)", "Picture of the person (round)") },
+            name: { kind: "button", label: L(CHAT_WORDS.de.name, CHAT_WORDS.en.name) },
+            greeting: { kind: "text", label: L(CHAT_WORDS.de.greeting, CHAT_WORDS.en.greeting), required: true },
+            whatsapp: { kind: "button", label: L(CHAT_WORDS.de.whatsapp, CHAT_WORDS.en.whatsapp) },
+            email: { kind: "button", label: L(CHAT_WORDS.de.email, CHAT_WORDS.en.email) },
+        },
+        versions: {
+            chat: { name: L("Chat mit Fragen zum Antippen", "Chat with questions to tap"),
+                wire: [["heading", 6, 18, 28], ["line", 6, 25, 24], ["band", 50, 6, 44, 50], ["media", 53, 12, 5, 5], ["line", 60, 13, 26, "light"], ["line", 60, 17, 20, "light"],
+                    ["button", 60, 24, 10, "light"], ["button", 72, 24, 12, "light"], ["line", 74, 33, 16, "light"], ["button", 60, 46, 30, "light"]] },
+        },
+        // a new chat starts with one question of each kind, its words to fill in
+        initialOpts: () => ({ items: [{ id: Math.random().toString(36).slice(2, 8), kind: "choice" }, { id: Math.random().toString(36).slice(2, 8), kind: "text" }], contact: true }),
+        // it can go live once it has a greeting, at least one question with words, and somewhere to send to
+        missing: (entry, page, get) => {
+            const out = [];
+            const has = (slot) => { const e = get(`${page}.${entry.id}.${slot}`); return e && (e.de || e.en); };
+            if (!chatItems(entry).some((it) => has(`q_${it.id}`))) out.push(L("eine Frage", "a question"));
+            if (!has("whatsapp") && !has("email")) out.push(L("WhatsApp-Nummer oder E-Mail-Adresse", "WhatsApp number or email address"));
+            return out;
+        },
+        magazine: {
+            layout: "B",
+            unit: (s, k) => ({ layout: "B", eyebrow: s.querySelector(".kalq-m-chat__intro .kalq-m-eyebrow"),
+                title: s.querySelector(".kalq-m-chat__intro .kalq-m-heading") || s.querySelector(".kalq-m-chat__title"),
+                lead: s.querySelector(".kalq-m-chat__greeting p"),
+                body: [...k.parasOf(s.querySelector(".kalq-m-chat__intro .kalq-m-text")), ...[...s.querySelectorAll(".kalq-m-chat__script > li:not(.is-contact)")].flatMap((li, n) => [
+                    k.textOf(li.querySelector(".kalq-m-chat__ask"), "h3", "bk-item", `${n + 1}. `),
+                    li.querySelector(".kalq-m-chat__choices") ? Object.assign(document.createElement("p"), { className: "bk-small", textContent: [...li.querySelectorAll(".kalq-m-chat__choices li")].map((c) => c.textContent.trim()).join(" · ") }) : null]).filter(Boolean)],
+                actions: [...s.querySelectorAll(".kalq-m-chat__send a")] }),
+        },
+        render: renderInquiry,
     },
     "testimonials.slider": {
         category: "testimonials",

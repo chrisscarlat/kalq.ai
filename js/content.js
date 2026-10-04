@@ -116,7 +116,7 @@ const currentContainer = () => { const all = document.querySelectorAll('[data-ba
 export function applyStoredLayout(container = currentContainer()) {
     const page = container?.dataset.page;
     if (!page) return null;
-    const sig = (s) => s.dataset.section + (s.dataset.sectionState || "") + (s.dataset.sectionTheme || "");
+    const sig = (s) => s.dataset.section + (s.dataset.sectionState || "") + (s.dataset.sectionTheme || "") + (s.dataset.opts || "");
     const before = [...container.querySelectorAll(":scope > section[data-section]")].map(sig).join();
     const editor = !!container.querySelector(":scope > template.kalq-sections");
     const modules = (entry, doc) => renderModule(entry, { doc, page, store, lang: currentLang(), editor });

@@ -175,37 +175,5 @@ export const STRINGS = {
     "home.platformText": {
         "en": "A part enters as a STEP file and a drawing. Kalq turns it into features, process alternatives and a route on real machines.",
         "de": "Ein Teil kommt als STEP-Datei und Zeichnung herein. Kalq macht daraus Features, Prozessalternativen und eine Route auf realen Maschinen."
-    },
-    "form.email": {
-        "en": "Email address",
-        "de": "E-Mail-Adresse"
-    },
-    "form.subscribe": {
-        "en": "Subscribe",
-        "de": "Abonnieren"
-    },
-    "form.firstName": {
-        "en": "First name",
-        "de": "Vorname"
-    },
-    "form.lastName": {
-        "en": "Last name",
-        "de": "Nachname"
-    },
-    "form.emailShort": {
-        "en": "Email",
-        "de": "E-Mail"
-    },
-    "form.phone": {
-        "en": "Phone",
-        "de": "Telefon"
-    },
-    "form.required": {
-        "en": "required",
-        "de": "Pflichtfeld"
-    },
-    "form.send": {
-        "en": "Send",
-        "de": "Senden"
     }
 };

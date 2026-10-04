@@ -4526,6 +4526,7 @@ body.kalq-edit .kalq-m-pricing__features.is-edit {
 }
 
 .kalq-ss__progress {
+  display: none;
   height: 2px;
   background: color-mix(in srgb, var(--kalq-text, #101010) 15%, transparent);
 }
@@ -4534,7 +4535,7 @@ body.kalq-edit .kalq-m-pricing__features.is-edit {
   display: block;
   height: 100%;
   background: var(--kalq-text, #101010);
-  transform: scaleX(1);
+  transform: scaleX(0);
   transform-origin: left center;
 }
 
@@ -4650,20 +4651,16 @@ body.kalq-edit .kalq-m-pricing__features.is-edit {
   grid-column: 1;
   grid-row: 4;
 }
+.kalq-ss.is-pinned .kalq-ss__progress {
+  display: block;
+}
 .kalq-ss.is-pinned .kalq-ss__visual {
   grid-column: 2;
   grid-row: 1/-1;
-  align-self: stretch;
-}
-.kalq-ss.is-pinned .kalq-ss__poster, .kalq-ss.is-pinned .kalq-ss__video {
-  height: 100%;
-  aspect-ratio: auto;
+  align-self: center;
 }
 .kalq-ss.is-pinned .kalq-ss__title {
   font-size: clamp(2rem, 3.6cqi, 3.4rem);
-}
-.kalq-ss.is-pinned .kalq-ss__bar {
-  transform: scaleX(0);
 }
 .kalq-ss.is-pinned .kalq-ss__step {
   gap: 0;
@@ -7977,7 +7974,7 @@ body:has(.kalq-toolbar) .kalq-cookie {
     margin: 0 2rem;
   }
   .kalq-m.kalq-ss.is-pinned .kalq-ss__visual {
-    align-self: stretch;
+    align-self: center;
     grid-row: 1/-1;
   }
   .kalq-m.kalq-m-belt .kalq-m-inner {
@@ -8748,7 +8745,7 @@ body:has(.kalq-toolbar) .kalq-cookie {
   margin: 0 2rem;
 }
 .kalq-device.is-span-h .kalq-m.kalq-ss.is-pinned .kalq-ss__visual {
-  align-self: stretch;
+  align-self: center;
   grid-row: 1/-1;
 }
 .kalq-device.is-span-h .kalq-m.kalq-m-belt .kalq-m-inner {

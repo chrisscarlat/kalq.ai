@@ -32,8 +32,9 @@
 .kalq-ss__poster, .kalq-ss__video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
 .kalq-ss__video { display: none; } // shown only while it scrubs
 
-.kalq-ss__progress { height: 2px; background: color-mix(in srgb, var(--kalq-text, #101010) 15%, transparent); }
-.kalq-ss__bar { display: block; height: 100%; background: var(--kalq-text, #101010); transform: scaleX(1); transform-origin: left center; } // static: all of it
+// the progress bar belongs to the pinned story only (decoration, aria-hidden)
+.kalq-ss__progress { display: none; height: 2px; background: color-mix(in srgb, var(--kalq-text, #101010) 15%, transparent); }
+.kalq-ss__bar { display: block; height: 100%; background: var(--kalq-text, #101010); transform: scaleX(0); transform-origin: left center; }
 
 .kalq-ss__steps { display: grid; gap: 1.6rem; margin: 0; padding: 0; list-style: none; counter-reset: none; }
 .kalq-ss__step { display: grid; gap: 0.5rem; padding-top: 1.2rem; border-top: 1px solid color-mix(in srgb, var(--kalq-text, #101010) 15%, transparent); scroll-margin-top: 6rem; }
@@ -77,11 +78,11 @@
     .kalq-ss__progress { grid-column: 1; grid-row: 2; }
     .kalq-ss__steps { grid-column: 1; grid-row: 3; align-content: start; gap: 0; overflow: hidden; }
     .kalq-ss__end { grid-column: 1; grid-row: 4; }
-    .kalq-ss__visual { grid-column: 2; grid-row: 1 / -1; align-self: stretch; }
-    .kalq-ss__poster, .kalq-ss__video { height: 100%; aspect-ratio: auto; }
+    .kalq-ss__progress { display: block; }
+    // the visual keeps its 16:9 shape, centred beside the steps (never cropped)
+    .kalq-ss__visual { grid-column: 2; grid-row: 1 / -1; align-self: center; }
     .kalq-ss__title { font-size: clamp(2rem, 3.6cqi, 3.4rem); }
 
-    .kalq-ss__bar { transform: scaleX(0); } // the script follows the scroll
     .kalq-ss__step { gap: 0; padding: 0.9rem 0 0; border-top-color: color-mix(in srgb, var(--kalq-text, #101010) 12%, transparent); }
 
     // the others show their label; the active one opens to its heading and sentence (visual only)
@@ -143,5 +144,5 @@ body.kalq-edit .kalq-ss {
     }
     .kalq-m.kalq-ss .kalq-ss__head, .kalq-m.kalq-ss .kalq-ss__progress, .kalq-m.kalq-ss .kalq-ss__steps, .kalq-m.kalq-ss .kalq-ss__end { grid-column: 1; margin: 0 2rem; }
     .kalq-m.kalq-ss .kalq-ss__visual { grid-column: 2; grid-row: 1 / span 4; align-self: start; margin: 0 2rem; }
-    .kalq-m.kalq-ss.is-pinned .kalq-ss__visual { align-self: stretch; grid-row: 1 / -1; }
+    .kalq-m.kalq-ss.is-pinned .kalq-ss__visual { align-self: center; grid-row: 1 / -1; }
 }

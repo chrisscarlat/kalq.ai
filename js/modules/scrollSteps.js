@@ -252,7 +252,7 @@ function start(sec, state) {
     const bar = sec.querySelector(".kalq-ss__bar");
     sec.classList.add("is-pinned");
     if (video) { sec.classList.add("is-scrub"); video.preload = "auto"; video.muted = true; video.pause(); video.load(); }
-    let target = 0, shown = 0;
+    let shown = 0, progress = 0;
     const times = () => {
         const d = video && Number.isFinite(video.duration) ? video.duration : 0;
         const own = steps.map((li) => parseFloat(li.dataset.time));
@@ -277,16 +277,23 @@ function start(sec, state) {
             const i = Math.min(n - 1, Math.floor(p * n));
             setActive(i);
             if (bar) bar.style.transform = `scaleX(${p})`;
-            if (video) {
-                const { d, at } = times();
-                if (d) { const local = p * n - i; const to = i + 1 < n ? at[i + 1] : d; target = Math.min(d - 0.05, at[i] + local * (to - at[i])); }
-            }
+            progress = p;
         },
     });
     setActive(0);
-    // the video follows the target smoothly, frame by frame (it is never played)
+    // where the video should be for a scroll position: through each step's start time, the last step to the end
+    const targetAt = (p) => {
+        const { d, at } = times();
+        if (!d) return 0;
+        const i = Math.min(n - 1, Math.floor(p * n));
+        const to = i + 1 < n ? at[i + 1] : d;
+        return Math.min(d - 0.05, at[i] + (p * n - i) * (to - at[i]));
+    };
+    // the video follows smoothly, frame by frame (it is never played); from the last scroll position, so it also
+    // finds its place once the video has loaded
     const tick = () => {
-        if (video && video.readyState >= 1 && Math.abs(target - shown) > 0.01) {
+        const target = video && video.readyState >= 1 ? targetAt(progress) : 0;
+        if (video && video.readyState >= 1 && !video.seeking && Math.abs(target - shown) > 0.01) { // one seek at a time
             shown += (target - shown) * 0.3;
             video.currentTime = shown;
         }

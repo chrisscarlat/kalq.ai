@@ -307,5 +307,37 @@
     "aria.footerNav": {
         "en": "Footer links",
         "de": "Footer-Links"
+    },
+    "form.email": {
+        "en": "Email address",
+        "de": "E-Mail-Adresse"
+    },
+    "form.subscribe": {
+        "en": "Subscribe",
+        "de": "Abonnieren"
+    },
+    "form.firstName": {
+        "en": "First name",
+        "de": "Vorname"
+    },
+    "form.lastName": {
+        "en": "Last name",
+        "de": "Nachname"
+    },
+    "form.emailShort": {
+        "en": "Email",
+        "de": "E-Mail"
+    },
+    "form.phone": {
+        "en": "Phone",
+        "de": "Telefon"
+    },
+    "form.required": {
+        "en": "required",
+        "de": "Pflichtfeld"
+    },
+    "form.send": {
+        "en": "Send",
+        "de": "Senden"
     }
 }

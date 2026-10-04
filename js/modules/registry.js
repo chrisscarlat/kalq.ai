@@ -5,28 +5,28 @@
 // Every slot is a block "<page>.<sectionId>.<slot>" (text per language, or one image/video for both).
 // A placeholder is a slot without any revision: editors see a labelled empty block, the public page never gets it.
 // Placeholder labels name the kind of content ("Frage", "Antwort"); they never invent claims, numbers or quotes.
-import { renderBlock } from "../blocks.js";
+import { LIBRARY, LIBRARY_CATEGORIES } from "./library.js";
+import { L, append, buttonEl, linkButton, mediaEl, mediaOf, plain, rangeEl, rangeOf, section, slotEl, hrefOf, textOf } from "./kit.js";
 
-const SAFE_HREF = /^(https?:|mailto:|\/|#|[\w-]+\.html(#.*)?$)/i;
-const VIDEO_URL = /\.(mp4|webm|mov|m4v)(\?|#|$)/i;
-
-export const CATEGORIES = [
+const BASE_CATEGORIES = [
     { id: "heroes", de: "Heroes", en: "Heroes", note: { de: "Ein Hero ersetzt den Hero oben auf der Seite: jede Seite hat genau einen.", en: "A hero replaces the hero at the top of the page: every page has exactly one." } },
     { id: "navigation", de: "Navigation", en: "Navigation", note: { de: "Die Navigation wird im Stil gewählt (Stile: Menü), für alle Seiten.", en: "The navigation is chosen in the style (Styles: menu), for every page." } },
     { id: "logos", de: "Logos", en: "Logos" },
     { id: "content", de: "Inhalt", en: "Content" },
-    { id: "cards", de: "Karten", en: "Cards", note: { de: "Kommt in Phase 5.", en: "Coming in phase 5." } },
+    { id: "cards", de: "Karten", en: "Cards" },
     { id: "cta", de: "Handlungsaufrufe", en: "Calls to action" },
-    { id: "interaction", de: "Newsletter und Interaktion", en: "Newsletter and interaction", note: { de: "Kommt in Phase 6.", en: "Coming in phase 6." } },
+    { id: "interaction", de: "Newsletter und Interaktion", en: "Newsletter and interaction", note: { de: "Formulare sind bis zum Supabase-Upgrade deaktiviert.", en: "Forms stay disabled until the Supabase upgrade." } },
     { id: "faq", de: "FAQ", en: "FAQs" },
     { id: "footers", de: "Footer", en: "Footers", note: { de: "Der Footer wird im Stil gewählt (Stile: Footer), für die ganze Website.", en: "The footer is chosen in the style (Styles: footer), for the whole site." } },
 ];
+// the library's categories, each after its anchor
+export const CATEGORIES = BASE_CATEGORIES.flatMap((c) => [c, ...LIBRARY_CATEGORIES.filter((x) => x.after === c.id)]);
 
-// Slot kinds: heading (h2), eyebrow, text (paragraphs), button (label) + link (address), media (image or video)
+// Slot kinds: heading (h2), eyebrow, text (paragraphs), button (label) + link (address), media (image or video),
+// range (a number setting with a slider in edit mode), alt (a picture's description, its alt text)
 // magazine: how the module reads as a spread in the magazine (js/book/layouts.js), like its versions for the page:
 //   layout A (picture | text, order per version), C (picture across), F (questions | answer); media: which slot is the
 //   spread's picture
-const L = (de, en) => ({ de, en });
 const FAQ_ITEMS = 6;
 const LOGOS = 12;
 
@@ -119,6 +119,7 @@ export const MODULES = {
             heading: { kind: "heading", label: L("Titel der Seite (die eine Überschrift h1)", "The page's title (its one h1)"), required: true },
             words: { kind: "text", label: L("Wechselndes Wort (optional): das erste steht im Titel, weitere je eine Zeile", "Rotating word (optional): the first is in the title, others one per line") },
             media: { kind: "media", label: L("Hintergrund: Bild oder Video (optional)", "Background: image or video (optional)") },
+            shade: { kind: "range", label: L("Abdunkelung über Bild oder Video", "Darkening over the image or video"), min: 0, max: 100, step: 5, initial: 60, unit: "%" },
             button: { kind: "button", label: L("Button-Text", "Button label") },
             link: { kind: "link", label: L("Button-Link", "Button link") },
             button2: { kind: "button", label: L("Zweiter Button (optional)", "Second button (optional)") },
@@ -162,103 +163,11 @@ export const MODULES = {
     },
 };
 
+Object.assign(MODULES, LIBRARY); // batch 2 (js/modules/library.js)
+
 export const moduleVersion = (module, version) => MODULES[module]?.versions[version] ? MODULES[module].versions[version] : null;
 
 //=================================== Rendering ===================================//
-// ctx: { doc, page, id, entry, store (key -> {type, de, en, media}), lang, editor }
-const keyOf = (ctx, slot) => `${ctx.page}.${ctx.id}.${slot}`;
-
-function textOf(ctx, slot) {
-    const e = ctx.store.get(keyOf(ctx, slot));
-    if (!e) return null;
-    return e[ctx.lang] ?? e.de ?? e.en ?? null;
-}
-
-const mediaOf = (ctx, slot) => ctx.store.get(keyOf(ctx, slot))?.media || null;
-
-// A slot's element: filled from its block, or for editors an empty placeholder with its label; for the public page
-// an empty slot is left out (null)
-function slotEl(ctx, slot, tag, { className = "", format } = {}) {
-    const def = MODULES[ctx.entry.module].slots[slot];
-    const html = textOf(ctx, slot);
-    if (html == null && !ctx.editor) return null;
-    const el = ctx.doc.createElement(tag);
-    if (className) el.className = className;
-    el.setAttribute("data-kalq-key", keyOf(ctx, slot));
-    if (format) el.setAttribute("data-kalq-format", format);
-    if (html != null) renderBlock(el, html);
-    else placeholder(el, def);
-    return el;
-}
-
-function placeholder(el, def) {
-    el.classList.add("kalq-ph");
-    el.setAttribute("data-ph-de", def.label.de);
-    el.setAttribute("data-ph-en", def.label.en);
-}
-
-function mediaEl(ctx, slot, className) {
-    const url = mediaOf(ctx, slot);
-    const def = MODULES[ctx.entry.module].slots[slot];
-    if (!url && !ctx.editor) return null;
-    const box = ctx.doc.createElement("div");
-    box.className = `${className} kalq-m-media`;
-    let el;
-    if (!url) {
-        el = ctx.doc.createElement("div");
-        placeholder(el, def);
-        el.classList.add("kalq-ph-media");
-    } else if (VIDEO_URL.test(url)) {
-        el = ctx.doc.createElement("video");
-        ["muted", "loop", "playsinline", "autoplay"].forEach((a) => el.setAttribute(a, ""));
-        el.setAttribute("aria-hidden", "true");
-        el.setAttribute("src", url);
-    } else {
-        el = ctx.doc.createElement("img");
-        el.setAttribute("src", url);
-        el.setAttribute("alt", "");
-        el.setAttribute("loading", "lazy");
-    }
-    el.setAttribute("data-kalq-key", keyOf(ctx, slot));
-    el.setAttribute("data-kalq-type", "image");
-    box.append(el);
-    return box;
-}
-
-// A button: a real link when it has a label and a safe address. Editors get the address as an editable field.
-function buttonEl(ctx, className = "kalq-m-button") {
-    const wrap = ctx.doc.createElement("div");
-    wrap.className = "kalq-m-actions";
-    const label = textOf(ctx, "button");
-    const href = (textOf(ctx, "link") || "").replace(/<[^>]+>/g, "").trim();
-    if (!ctx.editor) {
-        if (!label || !SAFE_HREF.test(href)) return null;
-        const a = ctx.doc.createElement("a");
-        a.className = className;
-        a.setAttribute("href", href);
-        renderBlock(a, label);
-        wrap.append(a);
-        return wrap;
-    }
-    const a = ctx.doc.createElement("span");
-    a.className = className;
-    a.setAttribute("data-kalq-key", keyOf(ctx, "button"));
-    if (label != null) renderBlock(a, label); else placeholder(a, MODULES[ctx.entry.module].slots.button);
-    wrap.append(a);
-    const link = slotEl(ctx, "link", "span", { className: "kalq-m-link-field" });
-    if (link) wrap.append(link);
-    return wrap;
-}
-
-function section(ctx, className) {
-    const s = ctx.doc.createElement("section");
-    s.className = `kalq-m ${className}`;
-    s.setAttribute("data-module", `${ctx.entry.module}:${ctx.entry.version || ""}`);
-    return s;
-}
-
-const append = (parent, ...nodes) => { nodes.forEach((n) => n && parent.append(n)); return parent; };
-
 function renderSplit(ctx) {
     const s = section(ctx, `kalq-m-split is-${ctx.entry.version === "text-left" ? "text-left" : "image-left"}`);
     const inner = ctx.doc.createElement("div");
@@ -336,9 +245,6 @@ export function fillScreen2(container, doc) {
 // edges fading out. Each logo is an image named by its company (the alt text), a link when it has one. A logo shows
 // only with both its image and its name. Pauses on hover, on focus and with its button; still when off screen and
 // under reduced motion (a centred row that wraps). Editors see every slot, still.
-const plain = (html) => (html || "").replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").trim();
-const hrefOf = (ctx, slot) => { const h = plain(textOf(ctx, slot)); return SAFE_HREF.test(h) ? h : null; };
-
 function renderBelt(ctx) {
     const s = section(ctx, `kalq-m-belt is-${ctx.entry.version === "mono" ? "mono" : "original"}`);
     const inner = ctx.doc.createElement("div");
@@ -400,36 +306,6 @@ function renderBelt(ctx) {
 // word (the first word stays in the h1, the others are listed there as hidden text), a glass card (image, a line, a
 // button), a row of up to three captions with a link to the next section, up to two buttons (the first the round
 // arrow button). The title rises in word by word (js/moduleBehaviour.js); everything is still under reduced motion.
-function linkButton(ctx, labelSlot, linkSlot, className) {
-    const label = textOf(ctx, labelSlot);
-    const href = hrefOf(ctx, linkSlot);
-    if (!ctx.editor) {
-        if (!label || !href) return null;
-        const a = ctx.doc.createElement("a");
-        a.className = className;
-        a.setAttribute("href", href);
-        const text = ctx.doc.createElement("span");
-        text.className = "kalq-btn-round__text";
-        renderBlock(text, label);
-        a.append(text);
-        if (className.includes("kalq-btn-round")) a.append(roundArrow(ctx));
-        return a;
-    }
-    const wrap = ctx.doc.createElement("span");
-    wrap.className = "kalq-m-hero__edit-button";
-    append(wrap, slotEl(ctx, labelSlot, "span", { className }), slotEl(ctx, linkSlot, "span", { className: "kalq-m-link-field" }));
-    return wrap;
-}
-
-function roundArrow(ctx) {
-    const c = ctx.doc.createElement("span");
-    c.className = "kalq-btn-round__circle";
-    c.setAttribute("aria-hidden", "true");
-    const arrow = '<svg viewBox="0 0 16 16" focusable="false"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    c.innerHTML = `<span class="kalq-btn-round__arrow">${arrow}</span><span class="kalq-btn-round__arrow is-next">${arrow}</span>`;
-    return c;
-}
-
 function renderHero(ctx) {
     const fit = ctx.entry.version === "fit";
     const s = section(ctx, `kalq-m-hero is-${fit ? "fit" : "standard"}`);
@@ -439,6 +315,7 @@ function renderHero(ctx) {
         const shade = ctx.doc.createElement("div");
         shade.className = "kalq-m-hero__shade";
         shade.setAttribute("aria-hidden", "true");
+        shade.setAttribute("style", `opacity: ${rangeOf(ctx, "shade") / 100}`);
         append(s, media, shade);
         s.classList.add("has-media");
     }
@@ -461,7 +338,8 @@ function renderHero(ctx) {
     const actions = ctx.doc.createElement("div");
     actions.className = "kalq-m-hero__actions";
     append(actions, linkButton(ctx, "button", "link", "kalq-btn-round"), linkButton(ctx, "button2", "link2", "kalq-m-hero__button2"));
-    append(inner, title, ctx.editor ? slotEl(ctx, "words", "p", { className: "kalq-m-hero__words-field" }) : null, actions.children.length ? actions : null);
+    append(inner, title, ctx.editor ? slotEl(ctx, "words", "p", { className: "kalq-m-hero__words-field" }) : null, actions.children.length ? actions : null,
+        ctx.editor && media ? rangeEl(ctx, "shade", ".kalq-m-hero__shade") : null);
     // the glass card
     const glassMedia = mediaEl(ctx, "glass_media", "kalq-m-hero__glass-media");
     const glassText = slotEl(ctx, "glass_text", "p", { className: "kalq-m-hero__glass-text" });
@@ -535,6 +413,15 @@ function renderFaq(ctx) {
         list.append(item);
     }
     append(inner, head, list);
+    // FAQPage structured data, for the questions visibly on this page (visitors' page only; drafts never reach it)
+    if (!ctx.editor && list.children.length) {
+        const ld = ctx.doc.createElement("script");
+        ld.setAttribute("type", "application/ld+json");
+        ld.textContent = JSON.stringify({ "@context": "https://schema.org", "@type": "FAQPage",
+            mainEntity: [...list.querySelectorAll(".kalq-m-faq__item")].map((it) => ({ "@type": "Question", name: it.querySelector(".kalq-m-faq__q").textContent.trim(),
+                acceptedAnswer: { "@type": "Answer", text: it.querySelector(".kalq-m-faq__a")?.textContent.replace(/\s+/g, " ").trim() || "" } })) }).replace(/</g, "\\u003c");
+        inner.append(ld);
+    }
     return append(s, inner);
 }
 
@@ -543,7 +430,7 @@ function renderFaq(ctx) {
 // so they can still move or remove it. Its stored entry and blocks stay untouched either way.
 export function renderModule(entry, ctx) {
     const def = MODULES[entry.module];
-    if (def?.versions[entry.version]) return def.render({ ...ctx, entry, id: entry.id });
+    if (def?.versions[entry.version]) return def.render({ ...ctx, entry, def, id: entry.id });
     if (!ctx.editor) return null;
     const stub = ctx.doc.createElement("section");
     stub.className = "kalq-m-unknown";

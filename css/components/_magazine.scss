@@ -284,6 +284,57 @@
 .bk-logos__name { font-size: 0.75rem; opacity: 0.65; }
 .bk-logopage .bk-flow { gap: 1.6rem; }
 
+// S: figures, each large with its label above and its context below
+.bk-stats {
+    display: grid;
+    gap: 1.8rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li { display: flex; flex-direction: column; gap: 0.5rem; }
+    .bk-body { max-width: 22rem; opacity: 0.8; }
+}
+
+.bk-statpage .bk-flow { gap: 1.6rem; }
+
+// P: plans side by side, each a quiet bordered column
+.bk-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1rem; }
+.bk-plan {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1.1rem;
+    border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+    border-radius: 10px;
+
+    .bk-figure { font-size: clamp(1.6rem, 3.6vmin, 2.4rem); }
+    .bk-actions { margin-top: 0.2rem; }
+}
+.bk-plan__list { display: grid; gap: 0.3rem; margin: 0; padding-left: 1.1rem; font-size: 0.9rem; line-height: 1.45; }
+.bk-planpage .bk-flow { gap: 1.4rem; }
+
+// Q: a quote to a page, the person beneath
+.bk-quote { margin: 0; .bk-subtitle { line-height: 1.35; } }
+.bk-who { display: flex; align-items: center; gap: 0.8rem; }
+.bk-who__photo { flex: 0 0 auto; width: 3rem; height: 3rem; border-radius: 50%; }
+.bk-quotepage .bk-flow { gap: 1.4rem; }
+
+// R: cards in a grid, picture above, label, title, short text
+.bk-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    gap: 1.4rem 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li { display: flex; flex-direction: column; gap: 0.35rem; }
+    .bk-item a { color: inherit; text-decoration: none; }
+}
+.bk-cards__media { aspect-ratio: 4 / 3; border-radius: 8px; margin-bottom: 0.3rem; }
+.bk-cardpage .bk-flow { gap: 1.4rem; }
+
 // G: the legal appendix: the site's own typography, set a little denser, on a very light warm grey with generous
 // margins: a quiet shift from the editorial pages
 .kalq-mag-page.is-tech {

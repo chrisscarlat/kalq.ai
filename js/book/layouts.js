@@ -5,6 +5,9 @@
 //   B       statement | text                         C  one picture across both pages, title left, caption right
 //   D       picture with title, text, button | list   E  two cards facing each other
 //   F       questions | the selected answer          G  technical text flowing over as many spreads as it needs
+//   L       logos in a grid                          S  figures, half on each page
+//   P       plans side by side                       Q  quotes, one to a page
+//   R       cards in a grid over the spread
 // Text sits at the foot of its page; if it is longer than the page it sets in two columns, then carries on over a
 // following spread. One type scale by role (book only): display, title, subtitle, item, lead, eyebrow, body, figure.
 const VIDEO = /\.(mp4|webm|mov|m4v)(\?|#|$)/i;
@@ -236,6 +239,79 @@ export const LAYOUTS = {
         return [
             textPage([u.title && textOf(u.title, "p", "bk-eyebrow"), grid(u.logos.slice(0, half))], "bk-logopage"),
             textPage([grid(u.logos.slice(half))], "bk-logopage"),
+        ];
+    },
+    // Figures: the title on the left page with the first half, the rest facing it; each figure large, its label
+    // small above, its context below
+    S: (u) => {
+        const list = (part) => {
+            const ul = document.createElement("ul");
+            ul.className = "bk-stats";
+            part.forEach((x) => {
+                const li = document.createElement("li");
+                [x.label && textOf(x.label, "p", "bk-eyebrow"), textOf(x.figure, "p", "bk-figure"), x.context && textOf(x.context, "p", "bk-body")].filter(Boolean).forEach((n) => li.append(n));
+                ul.append(li);
+            });
+            return ul;
+        };
+        const half = Math.ceil(u.stats.length / 2);
+        return [
+            textPage([u.eyebrow && textOf(u.eyebrow, "p", "bk-eyebrow"), u.title && textOf(u.title, "h2", "bk-title"), list(u.stats.slice(0, half))], "bk-statpage"),
+            textPage([list(u.stats.slice(half))], "bk-statpage"),
+        ];
+    },
+    // Plans side by side over one spread: name, badge, description, price, button, what is included
+    P: (u) => {
+        const plan = (p) => {
+            const box = div("bk-plan");
+            [p.badge && textOf(p.badge, "p", "bk-eyebrow"), textOf(p.name, "h3", "bk-subtitle"), ...parasOf(p.desc), p.price && textOf(p.price, "p", "bk-figure"),
+                p.action && actions([p.action]), p.features && u.includes && textOf(u.includes, "p", "bk-eyebrow"), p.features && textOf(p.features, "ul", "bk-plan__list")]
+                .filter(Boolean).forEach((n) => box.append(n));
+            return box;
+        };
+        const half = Math.ceil(u.plans.length / 2);
+        const group = (part) => { const g = div("bk-plans"); part.forEach((p) => g.append(plan(p))); return g; };
+        return [
+            textPage([u.eyebrow && textOf(u.eyebrow, "p", "bk-eyebrow"), u.title && textOf(u.title, "h2", "bk-title"), group(u.plans.slice(0, half))], "bk-planpage"),
+            textPage([group(u.plans.slice(half))], "bk-planpage"),
+        ];
+    },
+    // Quotes: one to a page, large, the small portrait, name and role beneath (the title before the first)
+    Q: (u) => u.quotes.map((q, i) => {
+        const p = page("bk-quotepage");
+        const flow = div("bk-flow");
+        const who = div("bk-who");
+        if (q.photo) who.append(mediaBox(q.photo, { cls: "bk-who__photo" }));
+        const names = div("bk-who__names");
+        [q.name && textOf(q.name, "p", "bk-item"), q.role && textOf(q.role, "p", "bk-small")].filter(Boolean).forEach((n) => names.append(n));
+        who.append(names);
+        const quote = document.createElement("blockquote");
+        quote.className = "bk-quote";
+        quote.append(textOf(q.text, "p", "bk-subtitle"));
+        [i === 0 && u.eyebrow && textOf(u.eyebrow, "p", "bk-eyebrow"), i === 0 && u.title && textOf(u.title, "h2", "bk-title"), quote, who].filter(Boolean).forEach((n) => flow.append(n));
+        p.inner.append(flow);
+        return p;
+    }),
+    // Cards in a grid over the spread: the heading and the first half on the left page, the rest facing; each card its
+    // picture, label, title, short text (a link where the card is one)
+    R: (u) => {
+        const grid = (part) => {
+            const ul = document.createElement("ul");
+            ul.className = "bk-cards";
+            part.forEach((c) => {
+                const li = document.createElement("li");
+                li.append(mediaBox(c.media, { cls: "bk-cards__media" }));
+                const title = textOf(c.title, "h3", "bk-item");
+                if (title && c.href) { const a = document.createElement("a"); a.href = c.href; a.append(...title.childNodes); title.append(a); }
+                [c.eyebrow && textOf(c.eyebrow, "p", "bk-eyebrow"), title, c.lead && textOf(c.lead, "p", "bk-small"), c.meta && textOf(c.meta, "p", "bk-small")].filter(Boolean).forEach((n) => li.append(n));
+                ul.append(li);
+            });
+            return ul;
+        };
+        const half = Math.ceil(u.cards.length / 2);
+        return [
+            textPage([u.eyebrow && textOf(u.eyebrow, "p", "bk-eyebrow"), u.title && textOf(u.title, "h2", "bk-title"), grid(u.cards.slice(0, half))], "bk-cardpage"),
+            textPage([grid(u.cards.slice(half)), u.actions?.length ? actions(u.actions) : null], "bk-cardpage"),
         ];
     },
     // Technical text (the legal appendix): a quieter, denser setting that flows over as many pages as it needs

@@ -155,6 +155,31 @@ async function stopEditing(keep) {
     }
 }
 
+//=================================== Settings ===================================//
+// A module's number setting (a slider in edit mode): shown while dragging, saved for both languages on release
+function onSettingInput(e) {
+    const input = e.target.closest?.("input[data-kalq-setting]");
+    if (!input) return;
+    const value = `${input.value}${input.dataset.kalqUnit || ""}`;
+    const out = input.parentElement.querySelector("output");
+    if (out) out.textContent = value;
+    const target = input.dataset.kalqTarget ? input.closest("section")?.querySelector(input.dataset.kalqTarget) : null;
+    if (target) target.style.opacity = String(input.value / 100);
+}
+
+async function onSettingChange(e) {
+    const input = e.target.closest?.("input[data-kalq-setting]");
+    if (!input || !on) return;
+    const key = input.dataset.kalqSetting;
+    if (locks.has(key)) return collab.toast(t("locked")(locks.get(key).name), "error");
+    try {
+        await save(key, "text", ["de", "en"], String(input.value));
+        collab.toast(t("saved"));
+    } catch (error) {
+        fail(error);
+    }
+}
+
 //=================================== Media ===================================//
 // The slot element can be swapped (image <-> video), so always look it up by key
 const slot = (key) => document.querySelector(`[data-kalq-key="${CSS.escape(key)}"]`);
@@ -291,6 +316,8 @@ export async function initEditing(api) {
     collab.addTool(button, 10);
 
     document.addEventListener("click", onClick, true); // capture: before links and Barba
+    document.addEventListener("input", onSettingInput);
+    document.addEventListener("change", onSettingChange);
     document.addEventListener("kalq:language", () => { labelButton(); replaceButtons(); });
     collab.on("key:e", () => button.click());
     collab.on("escape", () => { if (on) setMode(false); });

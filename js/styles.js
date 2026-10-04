@@ -485,7 +485,7 @@ function renderPanel() {
     }));
     // A new variant starts from the default one (A: today's look)
     const create = el("button", { type: "button", className: "kalq-btn", textContent: `+ ${t("create")}` });
-    create.addEventListener("click", () => { const base = variants.find((v) => v.is_default) || variants[0]; createFrom(base || normalize({ letter: "A" }), null); });
+    create.addEventListener("click", () => { const base = variants.find((v) => v.is_default) || variants[0]; createFrom(base || normalize({ letter: "A" }), null, { menu_style: "minimal" }); });
     root.querySelector(".kalq-styles__variants").replaceChildren(list, create);
 
     const settings = root.querySelector(".kalq-styles__settings");
@@ -524,13 +524,14 @@ function renderPanel() {
     historySection(history);
 }
 
-// New draft from an existing variant: same look, next free letter, never the default
-async function createFrom(source, name) {
+// New draft from an existing variant: same look, next free letter, never the default. A new style (not a duplicate)
+// starts with menu A, the minimal bar (old/KALQ_MODULE_LIBRARY_SPEC.md 1.2)
+async function createFrom(source, name, overrides = {}) {
     const free = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").find((l) => !variants.some((v) => v.letter === l));
     if (!free) return;
     const { id, updated_at, ...data } = normalize(clone(source));
     try {
-        const { variant } = await api({ action: "save", data: { ...data, letter: free, name: name || `Variant ${free}`, status: "draft", is_default: false, sort: Math.max(0, ...variants.map((v) => v.sort || 0)) + 1 } });
+        const { variant } = await api({ action: "save", data: { ...data, ...overrides, letter: free, name: name || `Variant ${free}`, status: "draft", is_default: false, sort: Math.max(0, ...variants.map((v) => v.sort || 0)) + 1 } });
         selectedId = variant.id;
         await after();
         // Stored as a draft until saved; the switch starts on, so Save puts it live

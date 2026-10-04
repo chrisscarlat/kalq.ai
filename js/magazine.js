@@ -127,8 +127,15 @@ async function biggestPicture(roots) {
 const sectionKind = (s) => s.dataset.section in SECTIONS ? s.dataset.section
     : (s.classList[0] || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); // a copy keeps its class
 
+// What a library module's own unit builder gets (js/modules/library.js magazine.unit): copies of the page's text
+const UNIT_KIT = {
+    parasOf, mediaUrl,
+    textOf: (src, tag, cls, prefix) => { const t = textOf(src, tag, cls); if (t && prefix) t.prepend(prefix); return t; },
+};
+
 function moduleUnit(s, module, version, ch) {
     const m = MODULES[module].magazine;
+    if (m.unit) return m.unit(s, { ...UNIT_KIT, version, chapter: ch });
     const slot = (name) => s.querySelector(`[data-kalq-key$=".${name}"]`);
     // the logo belt: its logos (the first copy of the row), each with its company's name
     if (m.layout === "L") {

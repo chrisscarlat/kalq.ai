@@ -30,12 +30,13 @@ def roll(key, en, kkey):
     return f'<span class="site-roll" data-label="{en}"><span data-i18n="{key}" data-kalq-key="{kkey}">{en}</span></span>'
 
 def mega_html():
+    # no stock pictures: each image is an empty slot showing the placeholder glyph until a Kalq picture is set
     items = "\n".join(
-        f'''                        <li><a class="site-mega__item" href="platform.html"><img src="{IMGS[i]}" alt="" width="48" height="48" loading="lazy"><span><span class="site-mega__title" data-i18n="module.{k}" data-kalq-key="site.nav.mega.{SLUGS[i]}.title">{MODULES[i][0]}</span><span class="site-mega__text" data-i18n="platform.{k}.lead" data-kalq-key="site.nav.mega.{SLUGS[i]}.text">{MODULES[i][2]}</span></span></a></li>'''
+        f'''                        <li><a class="site-mega__item" href="platform.html"><span class="kalq-media-slot site-mega__thumb" data-kalq-key="site.nav.mega.{SLUGS[i]}.image" data-kalq-type="image"></span><span><span class="site-mega__title" data-i18n="module.{k}" data-kalq-key="site.nav.mega.{SLUGS[i]}.title">{MODULES[i][0]}</span><span class="site-mega__text" data-i18n="platform.{k}.lead" data-kalq-key="site.nav.mega.{SLUGS[i]}.text">{MODULES[i][2]}</span></span></a></li>'''
         for i, k in enumerate(MODULE_KEYS))
     return f'''
                     <div class="site-mega" id="site-mega">
-                        <a class="site-mega__card" href="platform.html"><img src="{IMGS[3]}" alt="" loading="lazy"><span class="site-mega__card-title" data-i18n="nav.platform" data-kalq-key="site.nav.mega.card.title">Platform</span><span class="site-mega__card-text" data-i18n="home.platformText" data-kalq-key="site.nav.mega.card.text">A part enters as a STEP file and a drawing. Kalq turns it into features, process alternatives and a route on real machines.</span></a>
+                        <a class="site-mega__card" href="platform.html"><span class="kalq-media-slot site-mega__media" data-kalq-key="site.nav.mega.card.image" data-kalq-type="image"></span><span class="site-mega__card-title" data-i18n="nav.platform" data-kalq-key="site.nav.mega.card.title">Platform</span><span class="site-mega__card-text" data-i18n="home.platformText" data-kalq-key="site.nav.mega.card.text">A part enters as a STEP file and a drawing. Kalq turns it into features, process alternatives and a route on real machines.</span></a>
                         <ul class="site-mega__items">
 {items}
                         </ul>
@@ -292,7 +293,7 @@ MODULES = [
      "Margin logic, pricing and quote output, with every result feeding back into better estimates."),
 ]
 
-SKIP = ("title.", "meta.", "aria.", "social.marquee")
+SKIP = ("title.", "meta.", "aria.", "social.marquee", "form.")  # form.*: labels of the library's forms, rendered by js/modules/library.js
 
 def to_html(text, fmt):
     """Line blocks: one line per \\n. Paragraph blocks: paragraphs split by a blank line."""

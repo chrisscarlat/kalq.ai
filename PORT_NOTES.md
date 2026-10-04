@@ -166,3 +166,97 @@ in `renderPanel` are self-contained. `cookieSection` needs certil.com's content 
 of Kalq's. `js/stylePreview.js` ports as it is; its drawings follow Kalq's six menu styles and two footers, so
 certil.com redraws any style it does not have. The editor language is one constant (`EDITOR_LANG` in
 `js/i18n.js`).
+
+---
+
+## 3. Scroll story (media.scroll-steps)
+
+A scroll story: a pinned visual (a video scrubbed by the scroll, or an image), a thin progress bar, and an ordered
+list of steps where the active one opens. One unit for the port to certil.com.
+
+### Module id
+
+`media.scroll-steps` (registry category `media`). One version: `pinned`.
+
+### GSAP
+
+GSAP **3.12.5** with ScrollTrigger 3.12.5, the version certil.com has vendored. The module adds no library: it uses
+the page's global `gsap` and `ScrollTrigger`. Kalq loads them from cdnjs (`gsap/3.12.5/gsap.min.js`,
+`gsap/3.12.5/ScrollTrigger.min.js`); certil.com loads its vendored copies. Without them the module stays static.
+
+### Files
+
+Created (the module itself):
+
+| File | What it is |
+| --- | --- |
+| `js/modules/scrollSteps.js` | The registry entry (`SCROLL_STEPS`), its category, the template (`render`, shared by server and browser), the book unit, and the behaviour (`setupScrollSteps`). |
+| `css/components/_scroll-steps.scss` | The one style block, including the two-screen mixin `scroll-steps-two-screens`. |
+
+Kalq's pattern has no separate template file: a module's markup is its `render(ctx)` function in the same file.
+
+Touched (one line or one small block each, so the module is wired in):
+
+| File | Change |
+| --- | --- |
+| `js/modules/registry.js` | Imports `SCROLL_STEPS` and its category; `Object.assign(MODULES, SCROLL_STEPS)`. |
+| `js/moduleBehaviour.js` | Imports and calls `setupScrollSteps` for `.kalq-ss[data-scroll-steps]`. |
+| `css/components/_components.scss` | `@import "scroll-steps"`. |
+| `css/utilities/_dual.scss` | `@include scroll-steps-two-screens` (two-screen devices and the picker's two-screen preview). |
+| `js/sections.js` | Generic item actions (`data-items-action`: add, up, down, remove, visibility) for any module with `itemsEditor`; each one undo step. |
+| `js/edit.js` | Opt-in upload hint and size warning for a media slot (`data-kalq-upload-hint`, `data-kalq-upload-warn`). |
+| `middleware.js` | `js/modules/scrollSteps.js` is public, like the registry that imports it (the legal pages load the registry). |
+| `css/main.css` | Compiled. |
+
+### What the editor sets
+
+Section heading (h2, required), intro line, steps (2 to 8, default 4; each: label, heading, one or two sentences,
+start time in the video in seconds), the visual (MP4 video or an image; optional WebM of the same video; poster
+image; one-sentence description), closing line, button text and link, visibility (public / private space only).
+
+### Dependencies on Kalq internals
+
+- **Render helpers** from `js/modules/kit.js`: `L, append, el, mediaEl, mediaOf, plain, section, slotEl, hrefOf,
+  textOf, editorField` (and through it `renderBlock` from `js/blocks.js`). certil.com needs equivalents or a copy.
+- **Render context** `ctx = { doc, page, id, entry, def, store, lang, editor }`; content keys are
+  `<page>.<sectionId>.<slot>`, text per language, media as `{ media: url }`.
+- **Section entry options**: the steps live in `entry.opts.items` (`[{ id }]`, in order) and the visibility in
+  `entry.opts.visibility`. Each step's words are blocks `label_<id>`, `heading_<id>`, `text_<id>`, `time_<id>`.
+- **Editor**: placeholders (`kalq-ph`, styled in `css/collab.scss`), media replace buttons (`js/edit.js`
+  `replaceButtons`), the item actions in `js/sections.js`, the go-live check `def.missing` (used by
+  `missingRequired` in the registry), `def.initialOpts` (used by `insertModule`).
+- **Base styles**: `.kalq-m` / `.kalq-m-inner` (container queries, padding) from `css/components/_modules.scss`;
+  `.kalq-sr` (visually hidden) from `css/components/_library.scss`; colour tokens `--kalq-bg`, `--kalq-text`,
+  `--kalq-accent`; two-screen variables `--seg-l`, `--seg-r`, `--seg-hinge`.
+- **Scrolling**: Kalq scrolls through smooth-scrollbar (`window.Scrollbar`, `.scrollbar-container`) with a
+  ScrollTrigger scroller proxy. The module uses `pinType: "transform"` and `Scrollbar.scrollTo` when it finds it;
+  otherwise `pinType: "fixed"` and `window.scrollTo`. certil.com without smooth-scrollbar takes the second path.
+- **Book mode**: `magazine.unit` returns a unit for Kalq's magazine layout `A` (`js/book/layouts.js`).
+- **Own storage**: `OWN_STORAGE` in `scrollSteps.js` accepts site paths and Kalq's Supabase bucket
+  (`https://<project>.supabase.co/storage/v1/object/public/site-media/...`).
+
+### What certil.com will need to change
+
+1. `OWN_STORAGE` in `js/modules/scrollSteps.js`: certil.com's own storage rule.
+2. **Visibility**: Kalq has no private space, so the setting is stored (`opts.visibility`) but not enforced here.
+   certil.com must hide the section from the public page when it is `"private"`.
+3. The render helpers and base styles listed above, or certil.com's equivalents. Class names use the `kalq-ss`
+   prefix (`kalq-m` for the module base); rename if certil.com uses its own prefix.
+4. The colour tokens `--kalq-bg`, `--kalq-text`, `--kalq-accent`, or certil.com's tokens.
+5. The editor wiring (item actions, upload hint and size warning, placeholders) in certil.com's editor.
+6. The script calls `setupScrollSteps(section)` for each `.kalq-ss[data-scroll-steps]` after the page's content is
+   in place, and again after a page transition.
+7. **Inline styles at runtime only**: the markup has no `style` attribute and no inline script. While pinned,
+   ScrollTrigger sets the pin's position and the script sets the progress bar's `transform`.
+8. The upload hint and the 8 MB warning text live in the module's `UI` words. The editor shows them in English (`EDITOR_LANG`).
+
+### Behaviour summary
+
+- **Wide screens (768px and up), motion allowed, GSAP present:** the section pins for `steps × 0.8` viewport
+  heights. The scroll position sets the active step (`aria-current="step"`, open), fills the progress bar and
+  scrubs the video through each step's start time. The video never plays on its own; it seeks one frame at a time.
+- **Reduced motion, no JavaScript, under 768px:** not pinned, not scrubbed. The poster once (the video is not
+  loaded), then every step open.
+- **Book mode:** every step open, the poster instead of the video.
+- **Reading order in the HTML:** h2, intro, the `<ol>` (each item an h3 with the label and heading, then a `<p>`),
+  closing line, button, then the visual with its description as visually hidden text.

@@ -46,8 +46,17 @@ const t = (key) => TEXT[lang()][key];
 let collab;
 let busy = false;
 let selected = null; // id of the selected section
-const undoStack = []; // { page, before, after, label }: this session's layout actions
-const redoStack = [];
+// This visit's layout actions, per page: { page, before, after, label }. Kept in the tab's session storage, so a
+// reload or a page change in between does not lose them (the database keeps every version anyway: Versions).
+const HISTORY_KEY = "kalq-section-history";
+const HISTORY_MAX = 60;
+const stored = (() => { try { return JSON.parse(sessionStorage.getItem(HISTORY_KEY)) || {}; } catch { return {}; } })();
+const undoStack = Array.isArray(stored.undo) ? stored.undo : [];
+const redoStack = Array.isArray(stored.redo) ? stored.redo : [];
+function saveHistory() {
+    if (undoStack.length > HISTORY_MAX) undoStack.splice(0, undoStack.length - HISTORY_MAX);
+    try { sessionStorage.setItem(HISTORY_KEY, JSON.stringify({ undo: undoStack, redo: redoStack })); } catch { /* storage full or off: memory only */ }
+}
 
 const container = () => { const all = document.querySelectorAll('[data-barba="container"]'); return all[all.length - 1] || null; };
 const pageName = () => container()?.dataset.page;
@@ -92,12 +101,15 @@ async function write(layout, label, extra = [], { record = true } = {}) {
         .map((r) => ({ ...r, author_id: session.user.id, batch_id: batch, batch_scope: "page", batch_label: label }));
     const { error } = await collab.sb.from("revisions").insert(rows);
     if (error) throw error;
-    setLocalContent(key, null, content, "layout");
-    extra.forEach((r) => setLocalContent(r.key, r.lang, r.content, r.type));
-    applyStoredLayout();
-    collab.broadcast("content", { keys: [key], color: collab.me.color });
-    if (record) { undoStack.push({ page, before, after: content, label }); redoStack.length = 0; }
+    // stored: from here on the action is in the history, whatever happens while the page catches up
+    if (record) { undoStack.push({ page, before, after: content, label }); redoStack.length = 0; saveHistory(); }
     updateUndoButtons();
+    try {
+        setLocalContent(key, null, content, "layout");
+        extra.forEach((r) => setLocalContent(r.key, r.lang, r.content, r.type));
+        applyStoredLayout();
+    } catch (error) { console.error("section: saved, but the page did not update", error); } // the next refresh shows it
+    collab.broadcast("content", { keys: [key], color: collab.me.color });
 }
 
 async function run(action) {
@@ -225,6 +237,7 @@ const undo = () => run(async () => {
     await write(parseLayout(last.before), `Section undo: ${last.label.replace(/^Section /, "")}`, [], { record: false });
     undoStack.splice(undoStack.lastIndexOf(last), 1);
     redoStack.push(last);
+    saveHistory();
     updateUndoButtons();
 });
 
@@ -236,6 +249,7 @@ const redo = () => run(async () => {
     await write(parseLayout(next.after), `Section redo: ${next.label.replace(/^Section /, "")}`, [], { record: false });
     redoStack.splice(redoStack.lastIndexOf(next), 1);
     undoStack.push(next);
+    saveHistory();
     updateUndoButtons();
 });
 

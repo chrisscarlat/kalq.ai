@@ -710,6 +710,26 @@ async function build({ auto = false, at = null } = {}) {
     // A tap on a page's outer edge turns it (the engine itself turns pages tapped on a corner: then nothing more)
     let down = null;
     stage.addEventListener("pointerdown", (e) => { down = { x: e.clientX, y: e.clientY, time: Date.now() }; });
+    // A finger or mouse dragging a page: the live links and controls step aside at once, so only the pages' own
+    // copies show, turning with them (the engine does not report every drag as a change of state); back on settling
+    let dragging = false;
+    stage.addEventListener("pointermove", (e) => {
+        if (!down || dragging || Math.hypot(e.clientX - down.x, e.clientY - down.y) < 6) return;
+        dragging = true;
+        linkLayer.replaceChildren();
+        live.hidden = true;
+        overlay.querySelectorAll(".kalq-mag-page > .bk-controls").forEach((c) => { c.style.visibility = ""; });
+    });
+    // let go: the page turns or falls back, and the engine may not say when it is done; look until it is at rest
+    const dragEnded = () => {
+        if (!dragging) return;
+        dragging = false;
+        let tries = 0;
+        const rest = () => { if (flip.getState() === "read" || ++tries > 40) update(); else setTimeout(rest, 80); };
+        setTimeout(rest, 60);
+    };
+    stage.addEventListener("pointerup", dragEnded);
+    stage.addEventListener("pointercancel", dragEnded);
     stage.addEventListener("pointerup", (e) => {
         const tap = down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 10 && Date.now() - down.time < 500;
         down = null;
@@ -749,7 +769,7 @@ async function build({ auto = false, at = null } = {}) {
     // Settled: the live controls over the copy on the page in view, the masthead's logo drawn once; turning: the
     // copies turn with their pages and the live set steps aside
     const settle = () => {
-        const read = flip.getState() === "read";
+        const read = flip.getState() === "read" && !dragging; // a page in the hand is never settled
         const shown = pages.filter((p) => !p.inert && p.offsetWidth);
         ["cover", "index"].forEach((a) => {
             const b = live.querySelector(`[data-bk-action="${a}"]`);

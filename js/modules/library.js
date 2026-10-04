@@ -274,7 +274,7 @@ export const CHAT_MAX = 12;
 export const CHAT_WORDS = {
     de: {
         title: "Projektanfrage", choice: "Auswahl", text: "Kurztext", question: (n) => `Frage ${n}`, add: "Frage hinzufügen", up: "Nach oben", down: "Nach unten", remove: "Frage entfernen",
-        contact: "Kontaktdaten am Ende abfragen", whatsapp: "WhatsApp-Nummer, an die gesendet wird (mit Ländervorwahl, z. B. +49 170 1234567)", email: "E-Mail-Adresse, an die gesendet wird",
+        contact: "Kontaktdaten am Ende abfragen", waMissing: "Ohne Nummer ist „Per WhatsApp senden“ ausgeblendet. Nummer hier eintragen (mit Ländervorwahl).", mailMissing: "Ohne Adresse ist „Per E-Mail senden“ ausgeblendet.", whatsapp: "WhatsApp-Nummer, an die gesendet wird (mit Ländervorwahl, z. B. +49 170 1234567)", email: "E-Mail-Adresse, an die gesendet wird",
         greeting: "Begrüßung", name: "Name unter dem Bild (auch seine Beschreibung)", qph: "Frage", cph: "Antworten zum Antippen, eine pro Zeile",
         contactAsk: ["Wie heißen Sie?", "Ihre E-Mail-Adresse?", "Ihre Telefonnummer?", "Ihr LinkedIn-Profil?"],
         contactLabels: ["Name", "E-Mail", "Telefon", "LinkedIn"],
@@ -282,7 +282,7 @@ export const CHAT_WORDS = {
     },
     en: {
         title: "Project inquiry", choice: "Choices", text: "Short text", question: (n) => `Question ${n}`, add: "Add a question", up: "Move up", down: "Move down", remove: "Remove question",
-        contact: "Ask for contact details at the end", whatsapp: "WhatsApp number to send to (with country code, e.g. +49 170 1234567)", email: "Email address to send to",
+        contact: "Ask for contact details at the end", waMissing: "Without a number, \"Send via WhatsApp\" is hidden. Enter the number here (with country code).", mailMissing: "Without an address, \"Send by email\" is hidden.", whatsapp: "WhatsApp number to send to (with country code, e.g. +49 170 1234567)", email: "Email address to send to",
         greeting: "Greeting", name: "Name under the picture (also its description)", qph: "Question", cph: "Answers to tap, one per line",
         contactAsk: ["What is your name?", "Your email address?", "Your phone number?", "Your LinkedIn profile?"],
         contactLabels: ["Name", "Email", "Phone", "LinkedIn"],
@@ -396,8 +396,10 @@ function renderInquiry(ctx) {
         sw.setAttribute("data-chat-action", "contact");
         sw.setAttribute("aria-pressed", String(contact));
         const settings = append(el(ctx, "div", "kalq-m-chat__settings"), sw,
-            append(el(ctx, "label", "kalq-m-chat__setting"), el(ctx, "span", "", w.whatsapp), slotEl(ctx, "whatsapp", "span", { className: "kalq-m-chat__value" })),
-            append(el(ctx, "label", "kalq-m-chat__setting"), el(ctx, "span", "", w.email), slotEl(ctx, "email", "span", { className: "kalq-m-chat__value" })));
+            append(el(ctx, "label", "kalq-m-chat__setting"), el(ctx, "span", "", w.whatsapp), slotEl(ctx, "whatsapp", "span", { className: "kalq-m-chat__value" }),
+                /^\+?\d{6,15}$/.test(wa) ? null : el(ctx, "span", "kalq-m-chat__missing", w.waMissing)),
+            append(el(ctx, "label", "kalq-m-chat__setting"), el(ctx, "span", "", w.email), slotEl(ctx, "email", "span", { className: "kalq-m-chat__value" }),
+                /^[^\s@]+@[^\s@]+$/.test(mail) ? null : el(ctx, "span", "kalq-m-chat__missing", w.mailMissing)));
         append(win, top, log, script, add, settings);
     } else append(win, top, log, script, finish);
     if (!ctx.editor && !items.length && !textOf(ctx, "greeting")) return null;

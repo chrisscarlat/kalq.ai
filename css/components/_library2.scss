@@ -642,10 +642,13 @@ a.kalq-m-grid__card:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f
 .kalq-m-chat__summary-title { margin: 0; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.7; }
 .kalq-m-chat__summary { display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 0.8rem; margin: 0; padding: 0.75rem; border: 1px solid color-mix(in srgb, currentColor 15%, transparent); border-radius: 10px; background: var(--kalq-bg, #fff); font-size: 0.82rem;
     dt { opacity: 0.65; } dd { margin: 0; font-weight: 500; overflow-wrap: anywhere; } }
-.kalq-m-chat__send { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+// the two ways to send, side by side at every width (a long label wraps inside its button)
+.kalq-m-chat__send { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 0.5rem; }
 .kalq-m-chat__go {
-    flex: 1 1 10rem;
-    padding: 0.75rem 1rem;
+    display: grid;
+    place-items: center;
+    padding: 0.7rem 0.6rem;
+    line-height: 1.25;
     border-radius: 10px;
     color: #fff;
     font-size: 0.85rem;
@@ -709,6 +712,7 @@ body.kalq-edit .kalq-m-chat {
         &::after { content: ""; position: absolute; left: 0.6rem; top: 50%; width: 0.7rem; height: 0.7rem; border-radius: 50%; background: #fff; transform: translateY(-50%); transition: left 0.2s ease; }
         &[aria-pressed="true"]::before { background: #1D4ED8; } &[aria-pressed="true"]::after { left: 1.3rem; } }
     .kalq-m-chat__setting { display: grid; gap: 0.25rem; > span:first-child { opacity: 0.7; } }
+    .kalq-m-chat__missing { color: #b45309; font-size: 0.75rem; }
     .kalq-m-chat__value { display: block; padding: 0.4rem 0.6rem; border-radius: 8px; background: color-mix(in srgb, currentColor 5%, transparent); }
 }
 

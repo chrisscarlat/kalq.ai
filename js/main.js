@@ -9,7 +9,17 @@ import { initVariants, refreshHeroMark } from "./variants.js";
 import { initHeroTone } from "./heroTone.js";
 import { initHeroReveal } from "./heroReveal.js";
 import { initModules } from "./moduleBehaviour.js";
-import { initMagazine } from "./magazine.js";
+
+// The magazine (the book of the gated pages) is loaded only on those pages: the public legal pages are seen without
+// the gate cookie, and js/magazine.js is gated (it carries the site's copy). Loaded once, on the first gated page.
+const PUBLIC_PAGES = new Set(["impressum", "datenschutz"]);
+const currentPage = () => [...document.querySelectorAll('[data-barba="container"]')].pop()?.dataset.page;
+let magazine = null;
+function initMagazine() {
+    if (PUBLIC_PAGES.has(currentPage())) return;
+    magazine ||= import("./magazine.js");
+    magazine.then((m) => m.initMagazine()).catch((error) => { magazine = null; console.error("magazine", error); });
+}
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 

@@ -4458,6 +4458,356 @@ body.kalq-edit .kalq-m-pricing__features.is-edit {
     transition: none !important;
   }
 }
+/* media.scroll-steps (js/modules/scrollSteps.js): a scroll story. One style block, meant to travel with the module.
+   Default (no JavaScript, reduced motion, below 768px): a static story: heading, intro, the poster once, then every
+   step open, the closing line and the button. .is-pinned (set by the script on wide screens with motion allowed): the
+   section stays in place while the steps advance; only the active step is open; .is-scrub: the video is shown and
+   follows the scroll. Collapsing is visual only (height and opacity): every heading and sentence stays in the page.
+   Colours from the site's tokens, so it follows light and dark. */
+.kalq-ss__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.5rem, 3cqi, 2.5rem);
+}
+
+.kalq-ss__head {
+  order: 1;
+}
+
+.kalq-ss__visual {
+  order: 2;
+}
+
+.kalq-ss__progress {
+  order: 3;
+}
+
+.kalq-ss__steps {
+  order: 4;
+}
+
+.kalq-ss__end {
+  order: 5;
+}
+
+.kalq-ss__title {
+  max-width: 20ch;
+  font-size: clamp(2.2rem, 5cqi, 4.2rem);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.kalq-ss__intro {
+  max-width: 40rem;
+  margin-top: 1rem;
+  font-size: clamp(1.05rem, 1.4cqi, 1.25rem);
+  line-height: 1.55;
+  opacity: 0.8;
+}
+
+.kalq-ss__visual {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--kalq-text, #101010) 6%, transparent);
+}
+
+.kalq-ss__poster, .kalq-ss__video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+}
+
+.kalq-ss__video {
+  display: none;
+}
+
+.kalq-ss__progress {
+  height: 2px;
+  background: color-mix(in srgb, var(--kalq-text, #101010) 15%, transparent);
+}
+
+.kalq-ss__bar {
+  display: block;
+  height: 100%;
+  background: var(--kalq-text, #101010);
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+.kalq-ss__steps {
+  display: grid;
+  gap: 1.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+
+.kalq-ss__step {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid color-mix(in srgb, var(--kalq-text, #101010) 15%, transparent);
+  scroll-margin-top: 6rem;
+}
+
+.kalq-ss__step-title {
+  margin: 0;
+  font-size: clamp(1.25rem, 2cqi, 1.6rem);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.kalq-ss__link {
+  display: grid;
+  gap: 0.35rem;
+  color: inherit;
+  text-decoration: none;
+}
+.kalq-ss__link:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.kalq-ss__label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.kalq-ss__text {
+  max-width: 34rem;
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
+.kalq-ss__end {
+  display: grid;
+  justify-items: start;
+  gap: 1.2rem;
+}
+
+.kalq-ss__closing {
+  max-width: 34rem;
+  margin: 0;
+  font-size: clamp(1.1rem, 1.6cqi, 1.35rem);
+  line-height: 1.5;
+}
+
+.kalq-ss__button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.85rem 1.5rem;
+  border-radius: 999px;
+  background: var(--kalq-text, #101010);
+  color: var(--kalq-bg, #fff);
+  font-weight: 500;
+  text-decoration: none;
+}
+.kalq-ss__button:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 3px;
+}
+
+.kalq-ss.is-pinned {
+  padding: 0;
+}
+.kalq-ss.is-pinned .kalq-ss__inner {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+  grid-template-rows: auto auto 1fr auto;
+  column-gap: clamp(2rem, 5cqi, 6rem);
+  row-gap: 1.4rem;
+  height: 100vh;
+  height: 100svh;
+  padding-top: clamp(5rem, 10vh, 7rem);
+  padding-bottom: clamp(2rem, 5vh, 3.5rem);
+}
+.kalq-ss.is-pinned .kalq-ss__head {
+  grid-column: 1;
+  grid-row: 1;
+}
+.kalq-ss.is-pinned .kalq-ss__progress {
+  grid-column: 1;
+  grid-row: 2;
+}
+.kalq-ss.is-pinned .kalq-ss__steps {
+  grid-column: 1;
+  grid-row: 3;
+  align-content: start;
+  gap: 0;
+  overflow: hidden;
+}
+.kalq-ss.is-pinned .kalq-ss__end {
+  grid-column: 1;
+  grid-row: 4;
+}
+.kalq-ss.is-pinned .kalq-ss__visual {
+  grid-column: 2;
+  grid-row: 1/-1;
+  align-self: stretch;
+}
+.kalq-ss.is-pinned .kalq-ss__poster, .kalq-ss.is-pinned .kalq-ss__video {
+  height: 100%;
+  aspect-ratio: auto;
+}
+.kalq-ss.is-pinned .kalq-ss__title {
+  font-size: clamp(2rem, 3.6cqi, 3.4rem);
+}
+.kalq-ss.is-pinned .kalq-ss__bar {
+  transform: scaleX(0);
+}
+.kalq-ss.is-pinned .kalq-ss__step {
+  gap: 0;
+  padding: 0.9rem 0 0;
+  border-top-color: color-mix(in srgb, var(--kalq-text, #101010) 12%, transparent);
+}
+.kalq-ss.is-pinned .kalq-ss__heading, .kalq-ss.is-pinned .kalq-ss__text {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
+}
+.kalq-ss.is-pinned .kalq-ss__step-title {
+  font-size: 1rem;
+}
+.kalq-ss.is-pinned .kalq-ss__label {
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+.kalq-ss.is-pinned .kalq-ss__step.is-active .kalq-ss__label {
+  opacity: 1;
+}
+.kalq-ss.is-pinned .kalq-ss__step.is-active .kalq-ss__heading {
+  max-height: 8rem;
+  opacity: 1;
+  font-size: clamp(1.3rem, 2cqi, 1.7rem);
+}
+.kalq-ss.is-pinned .kalq-ss__step.is-active .kalq-ss__text {
+  max-height: 12rem;
+  opacity: 0.8;
+  margin-top: 0.5rem;
+  padding-bottom: 0.9rem;
+}
+
+.kalq-ss.is-scrub .kalq-ss__video {
+  display: block;
+}
+.kalq-ss.is-scrub .kalq-ss__poster {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kalq-ss.is-pinned .kalq-ss__heading, .kalq-ss.is-pinned .kalq-ss__text, .kalq-ss.is-pinned .kalq-ss__label {
+    transition: none;
+  }
+}
+.kalq-ss__tools, .kalq-ss__add, .kalq-ss__visibility, .kalq-ss__time, .kalq-ss__description-field, .kalq-ss__refused {
+  display: none;
+}
+
+.kalq-ss__button-edit {
+  margin: 0;
+}
+
+body.kalq-edit .kalq-ss .kalq-ss__tools {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+}
+body.kalq-edit .kalq-ss .kalq-ss__num {
+  margin-right: auto;
+  font-weight: 600;
+  opacity: 0.7;
+}
+body.kalq-edit .kalq-ss .kalq-ss__tool {
+  min-width: 28px;
+  padding: 0.2rem 0.5rem;
+  border: 0;
+  border-radius: 6px;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+body.kalq-edit .kalq-ss .kalq-ss__tool:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+body.kalq-edit .kalq-ss .kalq-ss__time {
+  display: block;
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+body.kalq-edit .kalq-ss .kalq-ss__add {
+  display: block;
+  order: 4;
+  justify-self: start;
+  padding: 0.5rem 0.9rem;
+  border: 1px dashed #1D4ED8;
+  border-radius: 10px;
+  background: none;
+  color: #1D4ED8;
+  font: inherit;
+  cursor: pointer;
+}
+body.kalq-edit .kalq-ss .kalq-ss__add:disabled {
+  opacity: 0.4;
+}
+body.kalq-edit .kalq-ss .kalq-ss__visibility {
+  display: block;
+  order: 6;
+  justify-self: start;
+  padding: 0.4rem 0.8rem;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+body.kalq-edit .kalq-ss .kalq-ss__visual {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+  padding: 0.6rem;
+  overflow: visible;
+}
+body.kalq-edit .kalq-ss .kalq-ss__media {
+  aspect-ratio: 16/9;
+  border-radius: 10px;
+}
+body.kalq-edit .kalq-ss .kalq-ss__description-field {
+  display: block;
+  grid-column: 1/-1;
+  margin: 0;
+  font-size: 0.85rem;
+}
+body.kalq-edit .kalq-ss .kalq-ss__refused {
+  display: block;
+  grid-column: 1/-1;
+  margin: 0;
+  color: #b45309;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 767px) {
+  .kalq-ss .kalq-m-inner {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
 /* The library's navigations (old/KALQ_MODULE_LIBRARY_SPEC.md 1.2), chosen per style variant (js/variants.js sets the
    class on <html>): nav-minimal (A, a bar with links and one button), nav-plain (B, links only), nav-mega (C, a bar
    whose Platform link opens a panel), nav-overlay (D, a full-screen menu). Kalq's two existing menus (the four dots,
@@ -7609,6 +7959,27 @@ body:has(.kalq-toolbar) .kalq-cookie {
     font-size: clamp(2rem, var(--seg-l) * 0.07, 3.4rem);
     text-align: left;
   }
+  .kalq-m.kalq-ss .kalq-ss__inner, .kalq-m.kalq-ss.is-pinned .kalq-ss__inner {
+    grid-template-columns: var(--seg-l) var(--seg-r);
+    column-gap: var(--seg-hinge);
+    max-width: none;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .kalq-m.kalq-ss .kalq-ss__head, .kalq-m.kalq-ss .kalq-ss__progress, .kalq-m.kalq-ss .kalq-ss__steps, .kalq-m.kalq-ss .kalq-ss__end {
+    grid-column: 1;
+    margin: 0 2rem;
+  }
+  .kalq-m.kalq-ss .kalq-ss__visual {
+    grid-column: 2;
+    grid-row: 1/span 4;
+    align-self: start;
+    margin: 0 2rem;
+  }
+  .kalq-m.kalq-ss.is-pinned .kalq-ss__visual {
+    align-self: stretch;
+    grid-row: 1/-1;
+  }
   .kalq-m.kalq-m-belt .kalq-m-inner {
     display: block;
     max-width: var(--seg-l);
@@ -8358,6 +8729,27 @@ body:has(.kalq-toolbar) .kalq-cookie {
   margin: 0 2rem;
   font-size: clamp(2rem, var(--seg-l) * 0.07, 3.4rem);
   text-align: left;
+}
+.kalq-device.is-span-h .kalq-m.kalq-ss .kalq-ss__inner, .kalq-device.is-span-h .kalq-m.kalq-ss.is-pinned .kalq-ss__inner {
+  grid-template-columns: var(--seg-l) var(--seg-r);
+  column-gap: var(--seg-hinge);
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+.kalq-device.is-span-h .kalq-m.kalq-ss .kalq-ss__head, .kalq-device.is-span-h .kalq-m.kalq-ss .kalq-ss__progress, .kalq-device.is-span-h .kalq-m.kalq-ss .kalq-ss__steps, .kalq-device.is-span-h .kalq-m.kalq-ss .kalq-ss__end {
+  grid-column: 1;
+  margin: 0 2rem;
+}
+.kalq-device.is-span-h .kalq-m.kalq-ss .kalq-ss__visual {
+  grid-column: 2;
+  grid-row: 1/span 4;
+  align-self: start;
+  margin: 0 2rem;
+}
+.kalq-device.is-span-h .kalq-m.kalq-ss.is-pinned .kalq-ss__visual {
+  align-self: stretch;
+  grid-row: 1/-1;
 }
 .kalq-device.is-span-h .kalq-m.kalq-m-belt .kalq-m-inner {
   display: block;

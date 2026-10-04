@@ -17,7 +17,7 @@ const PUBLIC = [
     /^\/css\/(gate|main|collab)\.css$/,
     /^\/js\/(gate|logoAnimation|main|header|i18n|strings-public|content|blocks|layout|moduleBehaviour|variants|collab|expertiseHoverimg|verticleLine|heroTone|heroReveal|cookieBar)\.js$/,
     /^\/lib\/svg-sanitize\.js$/, // style variant logos are sanitised in the browser too
-    /^\/js\/modules\/(registry|kit|library)\.js$/, // modules on the legal pages render in the browser too (registry imports the other two)
+    /^\/js\/modules\/(registry|kit|library|scrollSteps)\.js$/, // modules on the legal pages render in the browser too (registry imports the others)
 ];
 
 // Pages are rendered on the server (api/page.js) from the built HTML, the layout and the newest content

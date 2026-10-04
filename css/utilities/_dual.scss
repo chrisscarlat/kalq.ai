@@ -16,6 +16,7 @@
 // Page builder modules
 @mixin modules-two-screens {
     @include library2-two-screens; // batch 2 modules (css/components/_library2.scss)
+    @include scroll-steps-two-screens; // media.scroll-steps (css/components/_scroll-steps.scss)
 
     // Logo belt: the row runs on the left screen only, never across the hinge
     .kalq-m.kalq-m-belt .kalq-m-inner { display: block; max-width: var(--seg-l); margin: 0; padding: 0 2rem; } // not the two-column grid

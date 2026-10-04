@@ -6,6 +6,7 @@
 // A placeholder is a slot without any revision: editors see a labelled empty block, the public page never gets it.
 // Placeholder labels name the kind of content ("Frage", "Antwort"); they never invent claims, numbers or quotes.
 import { LIBRARY, LIBRARY_CATEGORIES } from "./library.js";
+import { SCROLL_STEPS, SCROLL_STEPS_CATEGORY } from "./scrollSteps.js";
 import { L, append, buttonEl, linkButton, mediaEl, mediaOf, plain, rangeEl, rangeOf, section, slotEl, hrefOf, textOf } from "./kit.js";
 
 const BASE_CATEGORIES = [
@@ -20,7 +21,7 @@ const BASE_CATEGORIES = [
     { id: "footers", de: "Footer", en: "Footers", note: { de: "Der Footer wird im Stil gewählt (Stile: Footer), für die ganze Website.", en: "The footer is chosen in the style (Styles: footer), for the whole site." } },
 ];
 // the library's categories, each after its anchor
-export const CATEGORIES = BASE_CATEGORIES.flatMap((c) => [c, ...LIBRARY_CATEGORIES.filter((x) => x.after === c.id)]);
+export const CATEGORIES = BASE_CATEGORIES.flatMap((c) => [c, ...[...LIBRARY_CATEGORIES, SCROLL_STEPS_CATEGORY].filter((x) => x.after === c.id)]);
 
 // Slot kinds: heading (h2), eyebrow, text (paragraphs), button (label) + link (address), media (image or video),
 // range (a number setting with a slider in edit mode), alt (a picture's description, its alt text)
@@ -164,6 +165,7 @@ export const MODULES = {
 };
 
 Object.assign(MODULES, LIBRARY); // batch 2 (js/modules/library.js)
+Object.assign(MODULES, SCROLL_STEPS); // media.scroll-steps (js/modules/scrollSteps.js)
 
 export const moduleVersion = (module, version) => MODULES[module]?.versions[version] ? MODULES[module].versions[version] : null;
 

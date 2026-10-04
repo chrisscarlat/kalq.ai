@@ -226,6 +226,11 @@ async function setSlot(key, url) {
 
 function pickFile(key, btn) {
     if (locks.has(key)) return collab.toast(t("locked")(locks.get(key).name), "error");
+    // a slot may say what to upload (data-kalq-upload-hint) and when a file is too large to be good (a warning only)
+    const target = slot(key);
+    const hint = target?.dataset.kalqUploadHint;
+    const warnAt = Number(target?.dataset.kalqUploadWarn) || 0;
+    if (hint) collab.toast(hint);
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ACCEPT;
@@ -233,6 +238,7 @@ function pickFile(key, btn) {
         const file = input.files[0];
         if (!file) return;
         if (file.size > MAX_BYTES) return collab.toast(t("tooLarge"), "error");
+        if (warnAt && file.size > warnAt) collab.toast(target.dataset.kalqUploadWarnText || t("tooLarge"), "error"); // warned, still uploaded
         btn.disabled = true;
         btn.textContent = t("uploading");
         collab.setLock(key);

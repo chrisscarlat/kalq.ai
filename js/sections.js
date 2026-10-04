@@ -268,7 +268,38 @@ const chatAction = (id, action, qid) => run(async () => {
     await write(layout, `Section chat ${label}: ${sectionName(entry)}`);
 });
 
+// A module's list of items edited in the panel (its definition says itemsEditor: { min, max, make }): add, move,
+// remove; and its visibility setting. Stored in the section's entry: one history entry each.
+const itemsAction = (id, action, itemId) => run(async () => {
+    const layout = currentLayout();
+    const entry = layout.sections.find((s) => s.id === id);
+    const cfg = entry && MODULES[entry.module]?.itemsEditor;
+    if (!cfg) return;
+    const opts = { ...(entry.opts || {}) };
+    const items = [...(opts.items || [])];
+    const i = items.findIndex((x) => x.id === itemId);
+    let label;
+    if (action === "add" && items.length < cfg.max) { items.push(cfg.make()); label = "item added"; }
+    else if (action === "remove" && i >= 0 && items.length > cfg.min) { items.splice(i, 1); label = "item removed"; }
+    else if ((action === "up" && i > 0) || (action === "down" && i >= 0 && i < items.length - 1)) {
+        const j = action === "up" ? i - 1 : i + 1;
+        [items[i], items[j]] = [items[j], items[i]];
+        label = `item moved ${action}`;
+    } else if (action === "visibility") { opts.visibility = opts.visibility === "private" ? "public" : "private"; label = `visibility ${opts.visibility}`; }
+    else return;
+    entry.opts = { ...opts, items };
+    await write(layout, `Section ${label}: ${sectionName(entry)}`);
+});
+
 function onChatAction(e) {
+    const it = e.target.closest?.("[data-items-action]");
+    if (it && editing()) {
+        const sec = it.closest("section[data-section]");
+        if (!sec) return;
+        e.preventDefault();
+        e.stopPropagation();
+        return itemsAction(sec.dataset.section, it.dataset.itemsAction, it.dataset.itemsId);
+    }
     const b = e.target.closest?.("[data-chat-action]");
     if (!b || !editing()) return;
     const sec = b.closest("section[data-section]");

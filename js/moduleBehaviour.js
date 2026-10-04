@@ -8,6 +8,7 @@
 import { fillScreen2 } from "./modules/registry.js";
 import { CHAT_WORDS } from "./modules/library.js";
 import { storedEntry } from "./content.js";
+import { setupScrollSteps } from "./modules/scrollSteps.js";
 
 const spanned = window.matchMedia("(horizontal-viewport-segments: 2)");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -847,6 +848,7 @@ export function initModules(root = document) {
     }
     setupDepth();
     root.querySelectorAll(".kalq-m-chat[data-chat]").forEach(setupChat);
+    root.querySelectorAll(".kalq-ss[data-scroll-steps]").forEach(setupScrollSteps);
     root.querySelectorAll('[data-barba="container"] > section.expertise').forEach(setupListPanel);
     if (container) setupScreen2(container);
     if (!initModules.listening) {

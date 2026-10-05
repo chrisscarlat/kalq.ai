@@ -35,8 +35,9 @@ const TEXT = {
         tabs: { images: "Bilder", logos: "Logos", menu: "Menü", navigation: "Navigation", notifications: "Benachrichtigungen", look: "Farben und Schrift" },
         tabTitles: { images: "Hero-Video, die Bildplätze aller Seiten und die Enthüllung über den Bildern", logos: "Das Logo der Variante und was in der Mitte des Heros steht",
             menu: "Wie das Hauptmenü aussieht und sich öffnet", navigation: "Der Footer: Kontakt, Links und Schriftzug am Ende jeder Seite",
-            notifications: "Der Cookie-Hinweis unten auf jeder Seite. Gilt für die ganze Website, in jeder Variante gleich.", look: "Die Farben und Schriften der Variante" },
+            notifications: "Der Cookie-Hinweis unten auf jeder Seite. Gilt für die ganze Website, in jeder Variante gleich.", look: "Die Stile: hinzufügen, wechseln, Name und Status; die Farben und Schriften des gewählten Stils" },
         wirePreview: "Vorschau", wireMenu: (n) => `Vorschau: Menü ${n}`, wireFooter: (n) => `Vorschau: Footer ${n}`, wireCookie: (n) => `Vorschau: Cookie-Hinweis, ${n}`,
+        styles: "Stile", editing: "Bearbeitet:", stylesOpen: "Stile hinzufügen, wechseln und bearbeiten",
         tabsLabel: "Bereiche", cookieMode: "Art", cookieNotice: "Hinweis", cookieConsent: "Einwilligung",
         cookieNoticeHint: "Es werden keine Daten erhoben: eine Zeile ohne Buttons, nach 5 Sekunden verschwindet sie von selbst.",
         cookieConsentHint: "Es werden Daten erhoben: mit Akzeptieren und Ablehnen; bleibt, bis gewählt wird. Optionales lädt erst nach Akzeptieren.",
@@ -66,8 +67,9 @@ const TEXT = {
         tabs: { images: "Images", logos: "Logos", menu: "Menu", navigation: "Navigation", notifications: "Notifications", look: "Colours & fonts" },
         tabTitles: { images: "Hero video, the image slots of every page and the reveal over the images", logos: "The variant's logo and what sits in the middle of the hero",
             menu: "How the main menu looks and opens", navigation: "The footer: contact, links and wordmark at the end of every page",
-            notifications: "The cookie notice at the bottom of every page. For the whole site, the same in every variant.", look: "The variant's colours and fonts" },
+            notifications: "The cookie notice at the bottom of every page. For the whole site, the same in every variant.", look: "The styles: add, switch, name and status; the colours and fonts of the selected style" },
         wirePreview: "Preview", wireMenu: (n) => `Preview: menu ${n}`, wireFooter: (n) => `Preview: footer ${n}`, wireCookie: (n) => `Preview: cookie notice, ${n}`,
+        styles: "Styles", editing: "Editing:", stylesOpen: "Add, switch and edit styles",
         tabsLabel: "Sections", cookieMode: "Kind", cookieNotice: "Notice", cookieConsent: "Consent",
         cookieNoticeHint: "No data is collected: one line, no buttons; after 5 seconds it goes by itself.",
         cookieConsentHint: "Data is collected: with Accept and Deny; it stays until one is chosen. Optional content loads only after Accept.",
@@ -583,13 +585,22 @@ function renderPanel() {
         return b;
     }));
     // A new variant starts from the default one (A: today's look)
-    const create = el("button", { type: "button", className: "kalq-btn", textContent: `+ ${t("create")}` });
+    const create = el("button", { type: "button", className: "kalq-btn kalq-styles__create", textContent: `+ ${t("create")}` });
     create.addEventListener("click", () => { const base = variants.find((v) => v.is_default) || variants[0]; createFrom(base || normalize({ letter: "A" }), null, { menu_style: "minimal" }); });
-    root.querySelector(".kalq-styles__variants").replaceChildren(list, create);
+    // The head names the style being edited; a click opens its editor (Colours & fonts: the styles, add, switch, edit)
+    const current = variants.find((v) => v.id === selectedId);
+    const chip = current ? el("button", { type: "button", className: "kalq-styles__current", title: t("stylesOpen") },
+        el("span", { className: "kalq-styles__letter", textContent: current.letter }), el("span", { textContent: `${t("editing")} ${current.name || ""}` })) : null;
+    if (chip) {
+        chip.style.setProperty("--dot", current.colors?.accent || "#3b82f6");
+        chip.addEventListener("click", () => { activeTab = "look"; render(); root.querySelector("#kalq-styles-tab-look")?.focus(); });
+    }
+    root.querySelector(".kalq-styles__variants").replaceChildren(...(chip ? [chip] : []));
 
     const settings = root.querySelector(".kalq-styles__settings");
     const map = root.querySelector(".kalq-styles__map");
-    if (!draft) { settings.replaceChildren(); map.replaceChildren(); return; }
+    // no style yet: the editor still offers to make the first one
+    if (!draft) { settings.replaceChildren(el("section", { className: "kalq-styles__styles" }, el("h4", { textContent: t("styles") }), list, create)); map.replaceChildren(); return; }
 
     const history = el("section", { className: "kalq-styles__history" });
     const save = el("button", { type: "button", className: "kalq-btn kalq-btn--primary kalq-btn--save", textContent: t("save") });
@@ -620,7 +631,9 @@ function renderPanel() {
         menu: () => [menuSection()],
         navigation: () => [footerSection()],
         notifications: () => [cookieSection()],
-        look: () => [colorSection(), el("section", {}, el("h4", { textContent: t("fonts") }), fontRow("heading"), fontRow("body"))],
+        // the style editor: every style (switch by a click), a new one, this one's letter, name and switches; then its look
+        look: () => [el("section", { className: "kalq-styles__styles" }, el("h4", { textContent: t("styles") }), list, create, headerSection()),
+            colorSection(), el("section", {}, el("h4", { textContent: t("fonts") }), fontRow("heading"), fontRow("body"))],
     };
     const ids = Object.keys(SECTIONS);
     if (!ids.includes(activeTab)) activeTab = "images";
@@ -650,7 +663,7 @@ function renderPanel() {
     panel.setAttribute("role", "tabpanel");
     panel.setAttribute("aria-labelledby", `kalq-styles-tab-${activeTab}`);
 
-    settings.replaceChildren(headerSection(), tablist, panel, history,
+    settings.replaceChildren(tablist, panel, history,
         el("div", { className: "kalq-styles__actions" },
             el("div", { className: "kalq-styles__actions-view" }, preview, peek, dup),
             el("div", { className: "kalq-styles__actions-main" }, del, unsaved, save)),

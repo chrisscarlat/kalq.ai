@@ -1246,6 +1246,32 @@ $pin-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
     gap: 0.4rem;
 }
 
+// Colours & fonts: the style editor first (every style, a new one, this one's letter, name and switches)
+.kalq-styles__styles {
+    .kalq-styles__list { margin-bottom: 0.6rem; }
+    .kalq-styles__card { min-width: 0; max-width: 100%; }
+    .kalq-styles__create { margin-bottom: 0.2rem; }
+}
+
+// The head: the style being edited, opening its editor
+.kalq-styles__current {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.75rem 0.3rem 0.3rem;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    background: none;
+    color: #fff;
+    font: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+
+    .kalq-styles__letter { grid-row: auto; width: 24px; height: 24px; font-size: 0.75rem; }
+    &:hover { border-color: rgba(255, 255, 255, 0.4); }
+    &:focus-visible { outline: 2px solid #3B82F6; outline-offset: 2px; }
+}
+
 .kalq-styles__card {
     display: grid;
     grid-template-columns: auto 1fr;

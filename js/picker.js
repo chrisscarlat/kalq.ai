@@ -17,27 +17,35 @@ const TEXT = {
 const lang = () => EDITOR_LANG;
 const t = (key) => TEXT[lang()][key];
 
-// The preview devices at their real physical sizes next to each other: each frame renders the device's CSS viewport
-// (w × h) and is shrunk to the size of its actual screen (device pixels ÷ pixel density, from the maker's specs),
-// times one common factor. So a phone is as small next to a laptop as it is on a desk. Each frame is a fixed window
-// of the device's screen; a taller section scrolls inside it.
-// Device pixels and ppi: apple.com/iphone-18-pro/specs, apple.com/iphone-duo/specs, Apple's tech specs of iPhone 13
-// mini, iPad Air 11", MacBook Air 13" (M1) and Studio Display, Microsoft's Surface Duo specs. The CSS viewports of the
-// iPhone Duo and 18 Pro / Pro Max are their device pixels ÷ 3; Apple has not published them yet (derived).
-const DEVICES = [
-    { id: "iphone-13-mini", w: 375, h: 812, px: [1080, 2340], ppi: 476, phone: true, de: "iPhone 13 mini", en: "iPhone 13 mini" },
-    { id: "iphone-duo-folded", w: 466, h: 678, px: [1398, 2034], ppi: 460, phone: true, derived: true, de: "iPhone Duo, zugeklappt", en: "iPhone Duo, folded" },
-    { id: "iphone-duo-unfolded", w: 626, h: 890, px: [1878, 2670], ppi: 430, phone: true, derived: true, de: "iPhone Duo, aufgeklappt", en: "iPhone Duo, unfolded" },
-    { id: "iphone-18-pro", w: 402, h: 874, px: [1206, 2622], ppi: 460, phone: true, derived: true, de: "iPhone 18 Pro", en: "iPhone 18 Pro" },
-    { id: "iphone-18-pro-max", w: 440, h: 956, px: [1320, 2868], ppi: 460, phone: true, derived: true, de: "iPhone 18 Pro Max", en: "iPhone 18 Pro Max" },
-    { id: "spanned", w: 1114, h: 705, hinge: 28, px: [2700, 1800], ppi: 401, cls: "is-span-h", de: "Surface Duo, aufgeklappt", en: "Surface Duo, spanned" },
-    { id: "tablet-p", w: 820, h: 1180, px: [1640, 2360], ppi: 264, de: "iPad Air 11″, hochkant", en: "iPad Air 11″, portrait" },
-    { id: "tablet-l", w: 1180, h: 820, px: [2360, 1640], ppi: 264, de: "iPad Air 11″, quer", en: "iPad Air 11″, landscape" },
-    { id: "laptop", w: 1440, h: 900, px: [2560, 1600], ppi: 227, de: "MacBook Air 13″", en: "MacBook Air 13″" },
-    { id: "large", w: 2560, h: 1440, px: [5120, 2880], ppi: 218, de: "Studio Display 27″", en: "Studio Display 27″" },
+// The preview devices: three groups, in this order. Each renders the device's CSS viewport (w × h) inside a frame drawn
+// from the real product: body, bezel, the screen's corner radius, the camera cut-out, and for the laptop and the
+// display their base and stand. Measurements in CSS px (points) of the screen, from the makers' dimensions: phones
+// at a device pixel ratio of 3; iPhone 18 Pro / Pro Max and the iPhone Duo are derived from Apple's published
+// device pixels ÷ 3 (marked "derived").
+// Two screens: a preset only says where its viewport segments are (segments: side by side or stacked, and the gap).
+// The frame sets the same variables a real two-screen browser reports (--seg-l, --seg-r, --seg-hinge, --seg-h, or the
+// stacked --seg-t, --seg-b), and the page's CSS reads only those, never a brand: a Surface Duo, a Samsung or a
+// Huawei foldable lays out the same way as the iPhone Duo here.
+export const DEVICE_GROUPS = [
+    { id: "phones", de: "Telefone", en: "Phones", devices: [
+        { id: "iphone-13-mini", w: 375, h: 812, dpr: 3, body: [418, 856], radius: 44, island: "notch", de: "iPhone 13 mini", en: "iPhone 13 mini" },
+        { id: "iphone-18-pro", w: 402, h: 874, dpr: 3, body: [434, 906], radius: 62, island: "pill", derived: true, de: "iPhone 18 Pro", en: "iPhone 18 Pro" },
+        { id: "iphone-18-pro-max", w: 440, h: 956, dpr: 3, body: [471, 987], radius: 62, island: "pill", derived: true, de: "iPhone 18 Pro Max", en: "iPhone 18 Pro Max" },
+    ] },
+    { id: "fold", de: "Faltbar", en: "Fold", devices: [
+        { id: "iphone-duo-folded", w: 466, h: 678, dpr: 3, body: [494, 706], radius: 46, island: "pill", derived: true, de: "iPhone Duo, zugeklappt", en: "iPhone Duo folded" },
+        { id: "iphone-duo-vertical", w: 626, h: 890, dpr: 3, body: [650, 914], radius: 40, segments: "side", gap: 0, derived: true, de: "iPhone Duo, senkrecht", en: "iPhone Duo vertical" },
+        { id: "iphone-duo-horizontal", w: 890, h: 626, dpr: 3, body: [914, 650], radius: 40, segments: "stacked", gap: 0, derived: true, de: "iPhone Duo, waagerecht", en: "iPhone Duo horizontal" },
+    ] },
+    { id: "desktop", de: "Desktop", en: "Desktop", devices: [
+        { id: "macbook-air-13", w: 1470, h: 956, dpr: 2, kind: "laptop", bezel: [24, 30, 24, 24], radius: 12, de: "MacBook Air 13″", en: "MacBook Air 13″" },
+        { id: "studio-display-27", w: 2560, h: 1440, dpr: 2, kind: "display", bezel: [52, 52, 52, 52], radius: 0, de: "Studio Display 27″", en: "Studio Display 27″" },
+    ] },
 ];
-const PX_PER_INCH = 18; // the common factor: one inch of real screen is 18 pixels here
-const scaleOf = (d) => (d.px[0] / d.ppi) * PX_PER_INCH / d.w;
+const DEVICES = DEVICE_GROUPS.flatMap((g) => g.devices);
+const DEVICE_KEY = "kalq-picker-device"; // the last chosen preset, per browser
+const savedDevice = () => { try { return localStorage.getItem(DEVICE_KEY); } catch { return null; } };
+let deviceId = DEVICES.some((d) => d.id === savedDevice()) ? savedDevice() : "iphone-18-pro";
 
 // Every version of every module, flat
 const ALL = Object.entries(MODULES).flatMap(([module, def]) => Object.entries(def.versions).map(([version, v]) => ({ module, version, def, v })));
@@ -164,78 +172,124 @@ function draw() {
     detail(list[state.index]);
 }
 
-// The module itself, rendered with empty placeholders (drawn as blue shapes), in a frame of each device's width
+// The module itself, rendered with empty placeholders (drawn as blue shapes), on the chosen device: the frame centred
+// near the top of a black stage, the device list on the right (grouped, scrolls when it overflows)
+function deviceScreen(item, d) {
+    const L = lang();
+    const screen = el("div", { className: `kalq-device${d.segments === "side" ? " is-span-h" : d.segments === "stacked" ? " is-span-v" : ""}` });
+    screen.style.width = `${d.w}px`;
+    screen.style.height = `${d.h}px`;
+    if (d.segments === "side") { // two screens side by side: the variables css/utilities/_dual.scss reads from a real device
+        const one = (d.w - d.gap) / 2;
+        Object.entries({ "--seg-l": one, "--seg-r": one, "--seg-hinge": d.gap, "--seg-h": d.h }).forEach(([k, v]) => screen.style.setProperty(k, `${v}px`));
+    } else if (d.segments === "stacked") { // two screens stacked: a top and a bottom segment, the gap between them
+        const one = (d.h - d.gap) / 2;
+        Object.entries({ "--seg-t": one, "--seg-b": one, "--seg-hinge": d.gap, "--seg-w": d.w }).forEach(([k, v]) => screen.style.setProperty(k, `${v}px`));
+    }
+    screen.setAttribute("aria-hidden", "true");
+    screen.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); }, true); // a picture, nothing to click
+    const node = renderModule({ id: "preview", module: item.module, version: item.version, state: "draft" },
+        { doc: document, page: "preview", store: new Map(), lang: L, editor: true });
+    if (node) {
+        // A picture of the module, not a section: nothing in it may look like page content to the rest of the code
+        [node, ...node.querySelectorAll("[data-kalq-key], [data-kalq-type], [data-module], [id]")].forEach((n) =>
+            ["data-kalq-key", "data-kalq-type", "data-module", "id"].forEach((a) => n.removeAttribute(a)));
+        screen.append(node);
+    }
+    return screen;
+}
+
+// The device as drawn: its outer size in screen points, and where the screen sits in it
+function deviceGeometry(d) {
+    if (d.kind === "laptop" || d.kind === "display") {
+        const [top, right, bottom, left] = d.bezel;
+        const lid = { w: d.w + left + right, h: d.h + top + bottom };
+        const base = d.kind === "laptop" ? { w: Math.round(lid.w * 1.1), h: Math.round(lid.w * 0.03) } : { w: Math.round(lid.w * 0.42), h: Math.round(lid.w * 0.24) }; // the display: its stand, one bent aluminium plate
+        return { w: Math.max(lid.w, base.w), h: lid.h + base.h, lid, base, inset: { top, left } };
+    }
+    const [bw, bh] = d.body;
+    return { w: bw, h: bh, inset: { top: (bh - d.h) / 2, left: (bw - d.w) / 2 } };
+}
+
 function devices(item) {
     const L = lang();
-    const row = el("div", { className: "kalq-picker__devices" }, ...DEVICES.map((d) => {
-        const scale = scaleOf(d);
-        const frame = el("div", { className: `kalq-device ${d.cls || ""}` });
-        frame.style.width = `${d.w}px`;
-        frame.style.height = `${d.h}px`;
-        frame.style.transform = `scale(${scale})`;
-        if (d.hinge) { // two screens: the same variables css/utilities/_dual.scss reads from a real device
-            const screen = (d.w - d.hinge) / 2;
-            frame.style.setProperty("--seg-l", `${screen}px`);
-            frame.style.setProperty("--seg-r", `${screen}px`);
-            frame.style.setProperty("--seg-hinge", `${d.hinge}px`);
-            frame.style.setProperty("--seg-h", `${d.h}px`);
+    const stage = el("div", { className: "kalq-picker__stage" });
+    const draw = () => {
+        const d = DEVICES.find((x) => x.id === deviceId) || DEVICES[0];
+        const g = deviceGeometry(d);
+        const body = el("div", { className: `kalq-frame is-${d.kind || (d.segments ? "fold" : "phone")}` });
+        body.style.setProperty("--w", `${g.w}px`);
+        body.style.setProperty("--h", `${g.h}px`);
+        const screenBox = el("div", { className: "kalq-frame__screen" }, deviceScreen(item, d));
+        Object.assign(screenBox.style, { width: `${d.w}px`, height: `${d.h}px`, borderRadius: `${d.radius}px` });
+        if (d.kind) {
+            const lid = el("div", { className: "kalq-frame__lid" }, screenBox);
+            Object.assign(lid.style, { width: `${g.lid.w}px`, height: `${g.lid.h}px`, paddingTop: `${g.inset.top}px`, paddingLeft: `${g.inset.left}px`, borderRadius: d.kind === "laptop" ? "34px 34px 10px 10px" : "18px" });
+            if (d.kind === "laptop") lid.append(el("span", { className: "kalq-frame__notch" }));
+            const base = el("div", { className: "kalq-frame__base" });
+            Object.assign(base.style, { width: `${g.base.w}px`, height: `${g.base.h}px` });
+            body.append(lid, base);
+        } else {
+            Object.assign(body.style, { width: `${g.w}px`, height: `${g.h}px`, borderRadius: `${d.radius + Math.round((g.w - d.w) / 2)}px` });
+            screenBox.style.position = "absolute";
+            screenBox.style.top = `${g.inset.top}px`;
+            screenBox.style.left = `${g.inset.left}px`;
+            body.append(screenBox);
+            if (d.island) screenBox.append(el("span", { className: `kalq-frame__cam is-${d.island}` }));
+            if (d.segments) screenBox.append(el("span", { className: `kalq-frame__crease is-${d.segments}` }));
         }
-        frame.setAttribute("aria-hidden", "true");
-        // A picture to scroll through, nothing to click
-        frame.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); }, true);
-        const node = renderModule({ id: "preview", module: item.module, version: item.version, state: "draft" },
-            { doc: document, page: "preview", store: new Map(), lang: L, editor: true });
-        if (node) {
-            // A picture of the module, not a section: nothing in it may look like page content to the rest of the code
-            [node, ...node.querySelectorAll("[data-kalq-key], [data-kalq-type], [data-module], [id]")].forEach((n) =>
-                ["data-kalq-key", "data-kalq-type", "data-module", "id"].forEach((a) => n.removeAttribute(a)));
-            frame.append(node);
-        }
-        const box = el("div", { className: "kalq-picker__device" });
-        box.style.width = `${Math.round(d.w * scale)}px`;
-        box.style.height = `${Math.round(d.h * scale)}px`;
-        box.append(frame);
-        if (d.phone) { // rounded like the real screen's corners, at this device's scale
-            box.classList.add("is-phone");
-            box.style.borderRadius = `${Math.round(d.w * 0.13 * scale)}px`;
-        }
-        // the model, and below it small its resolution in device pixels; the CSS viewport on hover
-        const size = el("span", { className: "kalq-picker__device-size", textContent: `${d.px[0]} × ${d.px[1]} px` });
-        size.title = `${t("viewport")}: ${d.w} × ${d.h}` + (d.derived ? ` (${t("derived")})` : "");
-        return el("figure", { className: "kalq-picker__device-wrap" }, box,
-            el("figcaption", {}, el("span", { className: "kalq-picker__device-name", textContent: d[L] }), size));
-    }));
-    // The row scrolls by itself while the pointer is near either end (hovering or dragging), and by dragging it with a
-    // mouse; touch, trackpad and the arrow keys scroll it as usual. No visible scrollbar.
-    row.tabIndex = 0;
-    row.setAttribute("aria-label", t("devices"));
-    let speed = 0, raf = 0, drag = null;
-    const EDGE = 72;
-    const tick = () => { raf = 0; if (!speed) return; row.scrollLeft += speed; raf = requestAnimationFrame(tick); };
-    const steer = (x) => {
-        const r = row.getBoundingClientRect();
-        const left = x - r.left, right = r.right - x;
-        speed = left < EDGE ? -Math.ceil((EDGE - left) / 6) : right < EDGE ? Math.ceil((EDGE - right) / 6) : 0;
-        if (speed && !raf) raf = requestAnimationFrame(tick);
+        // scale the whole device to the stage: near the top, centred, room below
+        const fit = () => {
+            // the stage is as tall as the picker's visible detail area, so scrolled to it, all of it is in view
+            const view = root.querySelector(".kalq-picker__detail")?.clientHeight || 0;
+            if (view > 360) { stage.style.height = `${view}px`; list.style.height = `${view}px`; }
+            // the device takes at most 78% of that height: near the top, with open space below for the caption and air
+            const room = { w: stage.clientWidth - 64, h: Math.max(240, stage.clientHeight * 0.78 - 28) };
+            const k = Math.min(room.w / g.w, room.h / g.h, 1);
+            body.style.transform = `scale(${k})`;
+            holder.style.width = `${Math.round(g.w * k)}px`;
+            holder.style.height = `${Math.round(g.h * k)}px`;
+        };
+        const holder = el("div", { className: "kalq-frame__holder" }, body);
+        const caption = el("p", { className: "kalq-picker__device-caption" }, el("span", { className: "kalq-picker__device-name", textContent: d[L] }),
+            el("span", { className: "kalq-picker__device-size", textContent: `${d.w} × ${d.h} · ${d.dpr}×${d.derived ? ` · ${t("derived")}` : ""}` }));
+        stage.replaceChildren(holder, caption);
+        requestAnimationFrame(fit);
+        stage._fit = fit;
     };
-    row.addEventListener("pointermove", (e) => {
-        if (e.pointerType === "touch") return; // fingers scroll it natively
-        if (drag) { row.scrollLeft = drag.left - (e.clientX - drag.x); }
-        steer(e.clientX);
+    // the list: three labelled groups; a radio group with the arrow keys
+    const list = el("div", { className: "kalq-picker__device-list", role: "radiogroup" });
+    list.setAttribute("aria-label", t("devices"));
+    const buttons = [];
+    DEVICE_GROUPS.forEach((group) => {
+        list.append(el("p", { className: "kalq-picker__device-group", textContent: group[L] }));
+        group.devices.forEach((d) => {
+            const b = el("button", { type: "button", className: "kalq-picker__device-pick", textContent: d[L] });
+            b.setAttribute("role", "radio");
+            b.dataset.device = d.id;
+            b.addEventListener("click", () => choose(d.id, true));
+            buttons.push(b);
+            list.append(b);
+        });
     });
-    row.addEventListener("pointerleave", () => { speed = 0; });
-    row.addEventListener("pointerdown", (e) => { if (e.pointerType === "mouse") { drag = { x: e.clientX, left: row.scrollLeft }; row.setPointerCapture(e.pointerId); } });
-    const end = () => { drag = null; speed = 0; };
-    row.addEventListener("pointerup", end);
-    row.addEventListener("pointercancel", end);
-    row.addEventListener("keydown", (e) => {
-        const step = { ArrowRight: 160, ArrowLeft: -160, End: Infinity, Home: -Infinity }[e.key];
-        if (step === undefined) return;
+    const choose = (id, focus) => {
+        deviceId = id;
+        try { localStorage.setItem(DEVICE_KEY, id); } catch { /* remembered for this visit only */ }
+        buttons.forEach((b) => { const on = b.dataset.device === id; b.setAttribute("aria-checked", String(on)); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); });
+        draw();
+    };
+    list.addEventListener("keydown", (e) => {
+        const step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+        if (!step) return;
         e.preventDefault();
         e.stopPropagation();
-        row.scrollLeft = Number.isFinite(step) ? row.scrollLeft + step : step > 0 ? row.scrollWidth : 0;
+        const i = DEVICES.findIndex((d) => d.id === deviceId);
+        choose(DEVICES[(i + step + DEVICES.length) % DEVICES.length].id, true);
     });
-    return row;
+    const area = el("div", { className: "kalq-picker__adapt" }, stage, list);
+    choose(deviceId, false);
+    new ResizeObserver(() => stage._fit?.()).observe(stage);
+    return area;
 }
 
 function detail(item) {

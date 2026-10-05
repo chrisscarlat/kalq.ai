@@ -1,11 +1,15 @@
 // Styles panel (admins only): create and edit style variants. Colours with pickers and hex fields, fonts (built-in,
 // Google Fonts or an uploaded woff2), logo as SVG file or pasted code (sanitised, previewed on dark and light),
 // hero video and per-image replacements uploaded to Supabase Storage. Draft or published, one default, every save
-// is a version that can be restored.
+// is a version that can be restored. The settings are in tabs, each with a small title saying what it controls:
+// Images, Logos, Menu, Navigation, Notifications (the cookie bar: site-wide blocks, saved on their own), Colours and
+// fonts.
 import { sanitizeSvg } from "../lib/svg-sanitize.js";
 import { currentLang } from "./i18n.js";
 import { progressLine, showDone, uploadMedia } from "./upload.js";
 import { applyVariant, endPreview, getActive, loadVariants, logoNode } from "./variants.js";
+import { setLocalContent, storedEntry } from "./content.js";
+import { COOKIE_KEYS, applyCookieSettings, previewCookieBar } from "./cookieBar.js";
 
 const TEXT = {
     de: {
@@ -27,6 +31,15 @@ const TEXT = {
         peek: "Seite ansehen", unsaved: "Nicht gespeichert",
         pages: { home: "Start", platform: "Plattform", company: "Unternehmen", impressum: "Impressum", datenschutz: "Datenschutz" }, preview: "Vorschau", endPreview: "Vorschau beenden", save: "Speichern", remove: "Löschen",
         history: "Versionen", restore: "Wiederherstellen", saved: "Gespeichert", failed: "Speichern fehlgeschlagen", confirmDelete: "Diese Variante löschen? Sie bleibt in den Versionen.",
+        tabs: { images: "Bilder", logos: "Logos", menu: "Menü", navigation: "Navigation", notifications: "Benachrichtigungen", look: "Farben und Schrift" },
+        tabTitles: { images: "Hero-Video, die Bildplätze aller Seiten und die Enthüllung über den Bildern", logos: "Das Logo der Variante und was in der Mitte des Heros steht",
+            menu: "Wie das Hauptmenü aussieht und sich öffnet", navigation: "Der Footer: Kontakt, Links und Schriftzug am Ende jeder Seite",
+            notifications: "Der Cookie-Hinweis unten auf jeder Seite. Gilt für die ganze Website, in jeder Variante gleich.", look: "Die Farben und Schriften der Variante" },
+        tabsLabel: "Bereiche", cookieMode: "Art", cookieNotice: "Hinweis", cookieConsent: "Einwilligung",
+        cookieNoticeHint: "Es werden keine Daten erhoben: eine Zeile ohne Buttons, nach 5 Sekunden verschwindet sie von selbst.",
+        cookieConsentHint: "Es werden Daten erhoben: mit Akzeptieren und Ablehnen; bleibt, bis gewählt wird. Optionales lädt erst nach Akzeptieren.",
+        cookieTextNotice: "Text des Hinweises", cookieTextConsent: "Text der Einwilligung", lang_de: "Deutsch", lang_en: "Englisch",
+        cookiePreview: "Vorschau zeigen", cookieSave: "Hinweis speichern", cookieSaved: "Cookie-Hinweis gespeichert", cookieEmpty: "Bitte beide Sprachen ausfüllen.",
         errors: { letter_taken: "Dieser Buchstabe ist vergeben.", default_must_be_published: "Die Standard-Variante muss veröffentlicht sein.", choose_another_default: "Erst eine andere Variante zum Standard machen.", default_cannot_be_deleted: "Die Standard-Variante kann nicht gelöscht werden." },
     },
     en: {
@@ -48,6 +61,15 @@ const TEXT = {
         peek: "View page", unsaved: "Not saved",
         pages: { home: "Home", platform: "Platform", company: "Company", impressum: "Legal notice", datenschutz: "Privacy" }, preview: "Preview", endPreview: "End preview", save: "Save", remove: "Delete",
         history: "Versions", restore: "Restore", saved: "Saved", failed: "Could not save", confirmDelete: "Delete this variant? It stays in the versions.",
+        tabs: { images: "Images", logos: "Logos", menu: "Menu", navigation: "Navigation", notifications: "Notifications", look: "Colours and fonts" },
+        tabTitles: { images: "Hero video, the image slots of every page and the reveal over the images", logos: "The variant's logo and what sits in the middle of the hero",
+            menu: "How the main menu looks and opens", navigation: "The footer: contact, links and wordmark at the end of every page",
+            notifications: "The cookie notice at the bottom of every page. For the whole site, the same in every variant.", look: "The variant's colours and fonts" },
+        tabsLabel: "Sections", cookieMode: "Kind", cookieNotice: "Notice", cookieConsent: "Consent",
+        cookieNoticeHint: "No data is collected: one line, no buttons; after 5 seconds it goes by itself.",
+        cookieConsentHint: "Data is collected: with Accept and Deny; it stays until one is chosen. Optional content loads only after Accept.",
+        cookieTextNotice: "Notice text", cookieTextConsent: "Consent text", lang_de: "German", lang_en: "English",
+        cookiePreview: "Show preview", cookieSave: "Save notice", cookieSaved: "Cookie notice saved", cookieEmpty: "Please fill in both languages.",
         errors: { letter_taken: "That letter is taken.", default_must_be_published: "The default variant must be published.", choose_another_default: "Make another variant the default first.", default_cannot_be_deleted: "The default variant cannot be deleted." },
     },
 };
@@ -56,6 +78,7 @@ const COLORS = ["bg", "text", "accent", "light", "dark"];
 const GOOGLE_SUGGESTIONS = ["Inter", "Space Grotesk", "Manrope", "DM Sans", "Sora", "Outfit", "Archivo", "IBM Plex Sans", "Work Sans", "Syne", "Playfair Display", "Fraunces", "Instrument Serif", "JetBrains Mono"];
 
 let collab, button, root, data = null, variants = [], slots = [], defaults = {}, selectedId = null, draft = null, previewOn = false;
+let activeTab = "images"; // the settings tab shown (kept while the panel is open)
 const DEFAULT_HERO = "assets/video-hero-6mb-low.mp4";
 const DEFAULT_COLORS = { bg: "#ffffff", text: "#101010", accent: "#3b82f6", light: "#ffffff", dark: "#101010" };
 
@@ -205,25 +228,36 @@ function heroMarkSection() {
     return el("section", {}, el("h4", { textContent: t("heroMark") }), mode, shapeField);
 }
 
-// Effects: the liquid reveal (off, hero, hero and images) and the menu style
-function effectsSection() {
-    const seg = (items, current, onPick) => {
-        const box = el("div", { className: "kalq-seg", role: "group" });
-        items.forEach(([value, label]) => {
-            const b = el("button", { type: "button", className: "kalq-seg__item", textContent: label });
-            b.dataset.value = value;
-            b.setAttribute("aria-pressed", value === current);
-            b.addEventListener("click", () => { onPick(value); box.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); });
-            box.append(b);
-        });
-        return box;
-    };
+// A row of choices, one pressed
+function seg(items, current, onPick) {
+    const box = el("div", { className: "kalq-seg", role: "group" });
+    items.forEach(([value, label]) => {
+        const b = el("button", { type: "button", className: "kalq-seg__item", textContent: label });
+        b.dataset.value = value;
+        b.setAttribute("aria-pressed", value === current);
+        b.addEventListener("click", () => { onPick(value); box.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); });
+        box.append(b);
+    });
+    return box;
+}
+
+// Images: the liquid reveal over the hero and images (off, hero, hero and images)
+function revealSection() {
     const reveal = seg([["off", t("revealOff")], ["hero", t("revealHero")], ["all", t("revealAll")]], draft.reveal, (v) => { draft.reveal = v; delete draft.hero_reveal; changed(); });
+    return el("section", {}, el("h4", { textContent: t("effects") }), el("div", { className: "kalq-styles__field" }, el("span", { textContent: t("reveal") }), reveal));
+}
+
+// Menu: the main menu's style
+function menuSection() {
     const menu = seg([["dropdown", t("menuDropdown")], ["panels", t("menuPanels")], ["minimal", t("menuMinimal")], ["plain", t("menuPlain")], ["mega", t("menuMega")], ["overlay", t("menuOverlay")]],
         draft.menu_style, (v) => { draft.menu_style = v; changed(); });
     menu.classList.add("is-wrap");
-    // The footer for the whole site: the classic one, or the library's (contact, links, social, legal line), with an
-    // optional large wordmark and a slowly moving gradient behind it
+    return el("section", {}, el("h4", { textContent: t("menu") }), menu);
+}
+
+// Navigation: the footer for the whole site, the classic one or the library's (contact, links, social, legal line),
+// with an optional large wordmark and a slowly moving gradient behind it
+function footerSection() {
     const toggle = (key, label) => {
         const b = el("button", { type: "button", className: "kalq-seg__item", textContent: label });
         b.setAttribute("aria-pressed", draft[key] === true);
@@ -233,10 +267,72 @@ function effectsSection() {
     const footer = seg([["classic", t("footerClassic")], ["harbor", t("footerHarbor")]], draft.footer_style, (v) => { draft.footer_style = v; extras.hidden = v !== "harbor"; changed(); });
     const extras = el("div", { className: "kalq-seg", role: "group" }, toggle("footer_wordmark", t("footerWordmark")), toggle("footer_gradient", t("footerGradient")));
     extras.hidden = draft.footer_style !== "harbor";
-    return el("section", {}, el("h4", { textContent: t("effects") }),
-        el("div", { className: "kalq-styles__field" }, el("span", { textContent: t("reveal") }), reveal),
-        el("div", { className: "kalq-styles__field" }, el("span", { textContent: t("menu") }), menu),
-        el("div", { className: "kalq-styles__field" }, el("span", { textContent: t("footer") }), footer, extras));
+    return el("section", {}, el("h4", { textContent: t("footer") }), footer, extras);
+}
+
+// Notifications: the cookie bar. Not part of a variant: its mode and texts are site blocks (js/cookieBar.js), saved
+// here on their own, as a version like any edited text; the server writes them into every page.
+let cookieDraft = null;
+function cookieSection() {
+    const plainOf = (key, lang) => { const e = storedEntry(key); return String((e && (e[lang] ?? (lang === "de" ? e.en : e.de))) || "").replace(/<[^>]+>/g, "").trim(); };
+    const bar = document.querySelector(".kalq-cookie");
+    const builtIn = (mode, lang) => bar?.querySelector(`.kalq-cookie__text[data-for="${mode}"] [lang="${lang}"]`)?.textContent.trim() || "";
+    if (!cookieDraft) {
+        cookieDraft = { mode: plainOf(COOKIE_KEYS.mode, "de") === "consent" ? "consent" : "notice", texts: {} };
+        ["notice", "consent"].forEach((m) => ["de", "en"].forEach((l) => { cookieDraft.texts[`${m}.${l}`] = plainOf(COOKIE_KEYS[m], l) || builtIn(m, l); }));
+    }
+    const hint = el("p", { className: "kalq-styles__inherited" });
+    const showHint = () => { hint.textContent = cookieDraft.mode === "consent" ? t("cookieConsentHint") : t("cookieNoticeHint"); };
+    const mode = seg([["notice", t("cookieNotice")], ["consent", t("cookieConsent")]], cookieDraft.mode, (v) => { cookieDraft.mode = v; showHint(); });
+    showHint();
+    const text = (m, l) => {
+        const id = `kalq-cookie-${m}-${l}`;
+        const area = el("textarea", { id, className: "kalq-styles__prose", rows: 2, maxLength: 200, value: cookieDraft.texts[`${m}.${l}`] || "", spellcheck: true });
+        area.addEventListener("input", () => { cookieDraft.texts[`${m}.${l}`] = area.value; });
+        area.addEventListener("keydown", (e) => e.stopPropagation());
+        return el("label", { className: "kalq-styles__field", htmlFor: id }, el("span", { textContent: `${t(m === "notice" ? "cookieTextNotice" : "cookieTextConsent")} · ${t(`lang_${l}`)}` }), area);
+    };
+    // the page's bar shows what is set here (before saving too)
+    const toPage = () => applyCookieSettings(document, (key) => {
+        if (key === COOKIE_KEYS.mode) return { de: cookieDraft.mode, en: cookieDraft.mode };
+        const m = key === COOKIE_KEYS.notice ? "notice" : "consent";
+        return { de: cookieDraft.texts[`${m}.de`], en: cookieDraft.texts[`${m}.en`] };
+    });
+    const preview = el("button", { type: "button", className: "kalq-btn", textContent: t("cookiePreview") });
+    preview.addEventListener("click", () => { toPage(); minimize(); previewCookieBar(); });
+    const save = el("button", { type: "button", className: "kalq-btn kalq-btn--primary", textContent: t("cookieSave") });
+    save.addEventListener("click", async () => {
+        const m = cookieDraft.mode;
+        if (!cookieDraft.texts[`${m}.de`]?.trim() || !cookieDraft.texts[`${m}.en`]?.trim()) return collab.toast(t("cookieEmpty"), "error");
+        save.disabled = true;
+        try { await saveCookieBlocks(); toPage(); collab.toast(t("cookieSaved")); }
+        catch (error) { console.error("cookie", error); collab.toast(t("failed"), "error"); }
+        finally { save.disabled = false; }
+    });
+    return el("section", {}, el("h4", { textContent: t("tabs").notifications }),
+        el("div", { className: "kalq-styles__field" }, el("span", { textContent: t("cookieMode") }), mode), hint,
+        text("notice", "de"), text("notice", "en"), text("consent", "de"), text("consent", "en"),
+        el("div", { className: "kalq-styles__cookie-actions" }, preview, save));
+}
+
+// One batch of site blocks: the mode (both languages alike) and the two texts per language
+async function saveCookieBlocks() {
+    const { data } = await collab.sb.auth.getSession();
+    const session = data?.session;
+    if (!session) throw new Error("relogin");
+    const rows = [
+        ...["de", "en"].map((lang) => ({ key: COOKIE_KEYS.mode, lang, content: cookieDraft.mode })),
+        ...["notice", "consent"].flatMap((m) => ["de", "en"].map((lang) => ({ key: COOKIE_KEYS[m], lang, content: cookieDraft.texts[`${m}.${lang}`].trim() }))),
+    ].filter((r) => r.content);
+    const keys = [...new Set(rows.map((r) => r.key))];
+    const { error: blockError } = await collab.sb.from("blocks").upsert(keys.map((key) => ({ key, page: "site", type: "text" })), { onConflict: "key", ignoreDuplicates: true });
+    if (blockError) throw blockError;
+    const batch = crypto.randomUUID();
+    const { error } = await collab.sb.from("revisions").insert(rows.map((r) => ({ block_key: r.key, page: "site", lang: r.lang, content: r.content, author_id: session.user.id,
+        batch_id: batch, batch_scope: "site", batch_label: "Edited cookie notice" })));
+    if (error) throw error;
+    rows.forEach((r) => setLocalContent(r.key, r.lang, r.content, "text"));
+    collab.broadcast("content", { keys, color: collab.me.color });
 }
 
 // The site's own Kalq mark, for variants without their own logo
@@ -514,13 +610,52 @@ function renderPanel() {
     const unsaved = el("span", { className: "kalq-styles__dirty", textContent: t("unsaved") });
     unsaved.hidden = !dirty;
 
-    settings.replaceChildren(headerSection(), effectsSection(), logoSection(), heroMarkSection(), colorSection(), el("section", {}, el("h4", { textContent: t("fonts") }), fontRow("heading"), fontRow("body")),
-        fillAllSection(), history,
+    // The tabs: each with a small title saying what it controls; the page map belongs to Images
+    const SECTIONS = {
+        images: () => [fillAllSection(), revealSection()],
+        logos: () => [logoSection(), heroMarkSection()],
+        menu: () => [menuSection()],
+        navigation: () => [footerSection()],
+        notifications: () => [cookieSection()],
+        look: () => [colorSection(), el("section", {}, el("h4", { textContent: t("fonts") }), fontRow("heading"), fontRow("body"))],
+    };
+    const ids = Object.keys(SECTIONS);
+    if (!ids.includes(activeTab)) activeTab = "images";
+    const tablist = el("div", { className: "kalq-styles__tabs", role: "tablist" });
+    tablist.setAttribute("aria-label", t("tabsLabel"));
+    ids.forEach((id) => {
+        const tab = el("button", { type: "button", className: "kalq-styles__tab", id: `kalq-styles-tab-${id}`, textContent: t("tabs")[id] });
+        tab.setAttribute("role", "tab");
+        tab.setAttribute("aria-selected", id === activeTab);
+        tab.setAttribute("aria-controls", "kalq-styles-tabpanel");
+        tab.tabIndex = id === activeTab ? 0 : -1;
+        tab.addEventListener("click", () => { activeTab = id; render(); root.querySelector(`#kalq-styles-tab-${id}`)?.focus(); });
+        tablist.append(tab);
+    });
+    tablist.addEventListener("keydown", (e) => {
+        const i = ids.indexOf(activeTab);
+        const j = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: ids.length - 1 }[e.key];
+        if (j === undefined) return;
+        e.preventDefault();
+        e.stopPropagation();
+        activeTab = ids[(j + ids.length) % ids.length];
+        render();
+        root.querySelector(`#kalq-styles-tab-${activeTab}`)?.focus();
+    });
+    const panel = el("div", { className: "kalq-styles__tabpanel", id: "kalq-styles-tabpanel" },
+        el("p", { className: "kalq-styles__tabtitle", textContent: t("tabTitles")[activeTab] }), ...SECTIONS[activeTab]());
+    panel.setAttribute("role", "tabpanel");
+    panel.setAttribute("aria-labelledby", `kalq-styles-tab-${activeTab}`);
+
+    settings.replaceChildren(headerSection(), tablist, panel, history,
         el("div", { className: "kalq-styles__actions" },
             el("div", { className: "kalq-styles__actions-view" }, preview, peek, dup),
             el("div", { className: "kalq-styles__actions-main" }, del, unsaved, save)),
         el("datalist", { id: "kalq-google-fonts" }, ...GOOGLE_SUGGESTIONS.map((f) => el("option", { value: f }))));
-    map.replaceChildren(el("h4", { textContent: t("sitemap") }), sitemapNode());
+    // the page map (every image slot) shows beside the Images tab
+    root.querySelector(".kalq-styles__content").classList.toggle("is-single", activeTab !== "images");
+    if (activeTab === "images") map.replaceChildren(el("h4", { textContent: t("sitemap") }), sitemapNode());
+    else map.replaceChildren();
     historySection(history);
 }
 
@@ -552,7 +687,7 @@ function setOpen(open, { keepPreview = false } = {}) {
     root.toggleAttribute("inert", !open);
     document.documentElement.classList.toggle("kalq-scroll-lock", open); // the page stays put underneath
     button.setAttribute("aria-pressed", open);
-    if (open && !wasMinimized) refresh();
+    if (open && !wasMinimized) { cookieDraft = null; refresh(); }
     else if (open) render();
     else if (previewOn && !keepPreview) togglePreview(false);
 }

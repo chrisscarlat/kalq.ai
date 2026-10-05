@@ -887,6 +887,74 @@ html.kalq-magazine-open .kalq-switcher {
   padding: 0.2rem 1.2rem 1.2rem;
 }
 
+.kalq-styles__tabs {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.6rem -1rem 0;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: inherit;
+  background-color: rgba(20, 20, 20, 0.96);
+}
+
+.kalq-styles__tab {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: none;
+  color: rgba(255, 255, 255, 0.75);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.kalq-styles__tab:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.kalq-styles__tab[aria-selected=true] {
+  background: #fff;
+  border-color: #fff;
+  color: #101010;
+}
+.kalq-styles__tab:focus-visible {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+.kalq-styles__tabtitle {
+  margin: 0.9rem 0 0.2rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.kalq-styles__content.is-single {
+  grid-template-columns: minmax(0, 560px);
+}
+.kalq-styles__content.is-single .kalq-styles__settings {
+  border-right: 0;
+}
+.kalq-styles__content.is-single .kalq-styles__map {
+  display: none;
+}
+
+.kalq-styles textarea.kalq-styles__prose {
+  font-family: inherit;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.kalq-styles__cookie-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+
 .kalq-styles__dirty {
   margin-right: auto;
   align-self: center;

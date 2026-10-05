@@ -74,7 +74,13 @@ async function cycleVariantLogos() {
         layer.dataset.variant = v.letter;
         const clean = v.logo_svg ? sanitizeSvg(v.logo_svg) : "";
         const doc = clean ? new DOMParser().parseFromString(clean, "image/svg+xml") : null;
-        if (doc && !doc.querySelector("parsererror")) layer.append(document.importNode(doc.documentElement, true));
+        if (doc && !doc.querySelector("parsererror")) {
+            const svg = doc.documentElement;
+            // without a viewBox the logo could not be fitted into the square: its own width and height give one
+            const w = parseFloat(svg.getAttribute("width")), h = parseFloat(svg.getAttribute("height"));
+            if (!svg.hasAttribute("viewBox") && w > 0 && h > 0) svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+            layer.append(document.importNode(svg, true));
+        }
         else {
             const copy = base.querySelector("svg").cloneNode(true); // keeps the gate_mark size
             copy.style.color = v.colors?.accent || "#fff";

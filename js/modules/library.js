@@ -264,7 +264,8 @@ function renderContact(ctx) {
 //=================================== The inquiry chat ===================================//
 // The project inquiry as a short conversation (ported from the Project Inquiry chat of scar.lat): the avatar and a
 // greeting, then the editor's questions one at a time (tap choices or a short text), optionally the visitor's contact
-// details, then a summary and two links that open the visitor's own WhatsApp or mail, filled in. Nothing is sent to
+// details, then a summary and a link for each destination the editor set (WhatsApp, Telegram, Threema, SMS, email)
+// that opens the visitor's own app, filled in. Nothing is sent to
 // or stored by Kalq; the visitor's progress stays in their own browser so they can pick up where they left off.
 // The questions live on the section's layout entry (opts.items: id and kind, in order), so adding, moving, deleting
 // and changing a question is one undo step; each question's words are its own blocks (q_<id>, c_<id>: the choices,
@@ -274,19 +275,33 @@ export const CHAT_MAX = 12;
 export const CHAT_WORDS = {
     de: {
         title: "Projektanfrage", choice: "Auswahl", text: "Kurztext", question: (n) => `Frage ${n}`, add: "Frage hinzufügen", up: "Nach oben", down: "Nach unten", remove: "Frage entfernen",
-        contact: "Kontaktdaten am Ende abfragen", waMissing: "Ohne Nummer ist „Per WhatsApp senden“ ausgeblendet. Nummer hier eintragen (mit Ländervorwahl).", mailMissing: "Ohne Adresse ist „Per E-Mail senden“ ausgeblendet.", whatsapp: "WhatsApp-Nummer, an die gesendet wird (mit Ländervorwahl, z. B. +49 170 1234567)", email: "E-Mail-Adresse, an die gesendet wird",
-        greeting: "Begrüßung", name: "Name unter dem Bild (auch seine Beschreibung)", qph: "Frage", cph: "Antworten zum Antippen, eine pro Zeile",
+        contact: "Kontaktdaten am Ende abfragen",
+        dest: { whatsapp: "WhatsApp: Nummer mit Ländervorwahl, z. B. +49 170 1234567", telegram: "Telegram: Benutzername (z. B. @kalq) oder Nummer mit Ländervorwahl",
+            threema: "Threema: ID (8 Zeichen)", sms: "SMS: Nummer mit Ländervorwahl", email: "E-Mail-Adresse" },
+        send: { whatsapp: "Per WhatsApp senden", telegram: "Per Telegram senden", threema: "Per Threema senden", sms: "Per SMS senden", email: "Per E-Mail senden" },
+        destMissing: (label) => `Leer: „${label}“ ist ausgeblendet.`, destInvalid: "Das passt nicht: der Button bleibt ausgeblendet.",
+        noDest: "Noch kein Ziel eingetragen. Ohne Ziel kann niemand die Anfrage senden, und der Chat lässt sich nicht veröffentlichen.",
+        destTitle: "Wohin gesendet wird: jeder Button erscheint nur, wenn sein Ziel eingetragen ist",
+        avatar: "Bild der Person (rund, aus dem Kalq-Speicher hochladen)", avatarRefused: "Diese Adresse ist nicht aus dem Kalq-Speicher und wird nicht gezeigt. Bitte das Bild hochladen.",
+        greeting: "Begrüßung", name: "Name der Person (über der Begrüßung)", qph: "Frage", cph: "Antworten zum Antippen, eine pro Zeile",
         contactAsk: ["Wie heißen Sie?", "Ihre E-Mail-Adresse?", "Ihre Telefonnummer?", "Ihr LinkedIn-Profil?"],
         contactLabels: ["Name", "E-Mail", "Telefon", "LinkedIn"],
-        sendWa: "Per WhatsApp senden", sendMail: "Per E-Mail senden", summary: "Ihre Anfrage", note: "Nichts wird bei uns gespeichert: Sie senden die Anfrage selbst, per WhatsApp oder E-Mail.",
+        summary: "Ihre Anfrage", note: "Nichts wird bei uns gespeichert: Sie senden die Anfrage selbst, aus Ihrer eigenen App.",
     },
     en: {
         title: "Project inquiry", choice: "Choices", text: "Short text", question: (n) => `Question ${n}`, add: "Add a question", up: "Move up", down: "Move down", remove: "Remove question",
-        contact: "Ask for contact details at the end", waMissing: "Without a number, \"Send via WhatsApp\" is hidden. Enter the number here (with country code).", mailMissing: "Without an address, \"Send by email\" is hidden.", whatsapp: "WhatsApp number to send to (with country code, e.g. +49 170 1234567)", email: "Email address to send to",
-        greeting: "Greeting", name: "Name under the picture (also its description)", qph: "Question", cph: "Answers to tap, one per line",
+        contact: "Ask for contact details at the end",
+        dest: { whatsapp: "WhatsApp: number with country code, e.g. +49 170 1234567", telegram: "Telegram: username (e.g. @kalq) or number with country code",
+            threema: "Threema: ID (8 characters)", sms: "SMS: number with country code", email: "Email address" },
+        send: { whatsapp: "Send via WhatsApp", telegram: "Send via Telegram", threema: "Send via Threema", sms: "Send by SMS", email: "Send by email" },
+        destMissing: (label) => `Empty: "${label}" is hidden.`, destInvalid: "That does not fit: the button stays hidden.",
+        noDest: "No destination yet. Without one nobody can send the inquiry, and the chat cannot be published.",
+        destTitle: "Where it is sent: each button appears only when its destination is set",
+        avatar: "Picture of the person (round, upload to Kalq storage)", avatarRefused: "This address is not from Kalq's storage and is not shown. Please upload the picture.",
+        greeting: "Greeting", name: "Name of the person (above the greeting)", qph: "Question", cph: "Answers to tap, one per line",
         contactAsk: ["What is your name?", "Your email address?", "Your phone number?", "Your LinkedIn profile?"],
         contactLabels: ["Name", "Email", "Phone", "LinkedIn"],
-        sendWa: "Send via WhatsApp", sendMail: "Send by email", summary: "Your inquiry", note: "Nothing is stored on our side: you send the inquiry yourself, by WhatsApp or email.",
+        summary: "Your inquiry", note: "Nothing is stored on our side: you send the inquiry yourself, from your own app.",
     },
 };
 const chatWords = (lang) => CHAT_WORDS[lang === "en" ? "en" : "de"];
@@ -294,6 +309,39 @@ export const chatItems = (entry) => (Array.isArray(entry?.opts?.items) ? entry.o
 export const chatContact = (entry) => entry?.opts?.contact !== false; // on unless switched off
 const choicesOf = (ctx, id) => (textOf(ctx, `c_${id}`) || "").split(/<br\s*\/?>|\n|<\/p>\s*<p>/i).map(plain).filter(Boolean).slice(0, 8);
 const phoneDigits = (raw) => plain(raw).replace(/[^\d+]/g, "").replace(/^00/, "+").replace(/(?!^)\+/g, "");
+
+// Where the inquiry can be sent: each destination is one editor field; its button shows only with a valid value.
+// href: the link without the inquiry; param: how the script adds it ("text", "body", "mailto", or none)
+const tgOf = (raw) => {
+    const v = plain(raw).replace(/^https?:\/\/t\.me\//i, "");
+    const user = v.replace(/^@/, "");
+    if (/^[A-Za-z][A-Za-z0-9_]{4,31}$/.test(user)) return { href: `https://t.me/${user}`, param: "text" };
+    const d = phoneDigits(v);
+    return /^\+\d{6,15}$/.test(d) ? { href: `https://t.me/${d}`, param: "" } : null; // a number opens the chat; the text cannot be put in
+};
+export const CHAT_DESTS = [
+    { id: "whatsapp", to: (v) => { const d = phoneDigits(v); return /^\+?\d{6,15}$/.test(d) ? { href: `https://wa.me/${d.replace("+", "")}`, param: "text", blank: true } : null; } },
+    { id: "telegram", to: (v) => { const t = tgOf(v); return t ? { ...t, blank: true } : null; } },
+    { id: "threema", to: (v) => { const id = plain(v).toUpperCase(); return /^[A-Z0-9*]{8}$/.test(id) ? { href: `https://threema.id/${id}`, param: "text", blank: true } : null; } },
+    { id: "sms", to: (v) => { const d = phoneDigits(v); return /^\+\d{6,15}$/.test(d) ? { href: `sms:${d}`, param: "body" } : null; } },
+    { id: "email", to: (v) => { const m = plain(v); return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m) ? { href: `mailto:${m}`, param: "mailto" } : null; } },
+];
+const destOf = (ctx, d) => (plain(textOf(ctx, d.id)) ? d.to(textOf(ctx, d.id)) : null);
+
+// The avatar: only from Kalq's own storage (a site path, or the project's storage bucket); anything else is refused
+const OWN_STORAGE = /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/site-media\/[^?#\s]+$/i;
+export const isOwnMedia = (url) => typeof url === "string" && url !== "" && ((!/^[a-z][a-z0-9+.-]*:|^\/\//i.test(url) && !/\.\.\//.test(url)) || OWN_STORAGE.test(url));
+// Without a picture: Kalq's placeholder glyph (the one image placeholder: a blue ground, a light sun, a dark mountain), round
+const GLYPH_SVG = '<svg viewBox="0 0 36 36" aria-hidden="true" focusable="false"><circle cx="18" cy="18" r="18" fill="#1D4ED8"/><circle cx="21.5" cy="13" r="3.2" fill="#7DB3FF"/><path d="M9 27L17 14L25 27Z" fill="#172E7A"/></svg>';
+function avatarNode(ctx) {
+    const url = mediaOf(ctx, "avatar");
+    if (ctx.editor) return mediaEl(ctx, "avatar", "kalq-m-chat__avatar", { alt: "" });
+    const box = el(ctx, "span", "kalq-m-chat__avatar");
+    box.setAttribute("aria-hidden", "true"); // decorative: the name and greeting say who it is
+    if (url && isOwnMedia(url)) { const img = el(ctx, "img"); img.setAttribute("src", url); img.setAttribute("alt", ""); img.setAttribute("loading", "lazy"); box.append(img); }
+    else { box.classList.add("is-glyph"); box.innerHTML = GLYPH_SVG; }
+    return box;
+}
 
 // A text block in each language (the chat's own words are edited per language)
 const langSlot = (ctx, slot, tag, opts = {}) => { const n = slotEl(ctx, slot, tag, opts); n?.setAttribute("data-kalq-lang", ""); return n; };
@@ -330,17 +378,18 @@ function renderInquiry(ctx) {
 
     const win = el(ctx, "div", "kalq-m-chat__window");
     const top = el(ctx, "div", "kalq-m-chat__head");
-    const title = langSlot(ctx, "title", "h3", { className: "kalq-m-chat__title" }) || el(ctx, "h3", "kalq-m-chat__title", w.title);
+    // one h2 for the section: the heading beside the chat if there is one, else the chat's title
+    const titleTag = intro.querySelector("h2") ? "p" : "h2";
+    const title = langSlot(ctx, "title", titleTag, { className: "kalq-m-chat__title" }) || el(ctx, titleTag, "kalq-m-chat__title", w.title);
     const langs = el(ctx, "div", "kalq-m-chat__langs");
     langs.setAttribute("role", "group");
     ["de", "en"].forEach((l) => { const b = el(ctx, "button", "kalq-m-chat__lang", l.toUpperCase()); b.setAttribute("type", "button"); b.setAttribute("data-lang", l); b.setAttribute("lang", l); b.setAttribute("aria-pressed", String(ctx.lang === l)); langs.append(b); });
     append(top, title, langs);
 
     // the greeting, from the avatar
-    const name = plain(textOf(ctx, "name"));
-    const avatar = mediaEl(ctx, "avatar", "kalq-m-chat__avatar", { alt: name });
+    const avatar = avatarNode(ctx);
     const greet = append(el(ctx, "div", "kalq-m-chat__msg is-bot is-greeting"), avatar,
-        append(el(ctx, "div", "kalq-m-chat__bubble"), ctx.editor ? slotEl(ctx, "name", "p", { className: "kalq-m-chat__name" }) : null,
+        append(el(ctx, "div", "kalq-m-chat__bubble"), slotEl(ctx, "name", "p", { className: "kalq-m-chat__name" }),
             langSlot(ctx, "greeting", "div", { className: "kalq-m-chat__greeting", format: "paragraphs" })));
     const log = append(el(ctx, "div", "kalq-m-chat__log"), greet);
 
@@ -351,7 +400,7 @@ function renderInquiry(ctx) {
         li.setAttribute("data-q", item.id);
         li.setAttribute("data-kind", item.kind);
         if (ctx.editor) li.append(chatTools(ctx, item, k + 1, items.length, w));
-        const q = langSlot(ctx, `q_${item.id}`, "p", { className: "kalq-m-chat__ask", label: L(`${CHAT_WORDS.de.qph} ${k + 1}`, `${CHAT_WORDS.en.qph} ${k + 1}`) });
+        const q = langSlot(ctx, `q_${item.id}`, "h3", { className: "kalq-m-chat__ask", label: L(`${CHAT_WORDS.de.qph} ${k + 1}`, `${CHAT_WORDS.en.qph} ${k + 1}`) });
         if (!q) return; // visitors: a question without words is not asked
         li.append(q);
         if (item.kind === "choice") {
@@ -372,18 +421,23 @@ function renderInquiry(ctx) {
         const li = el(ctx, "li", "kalq-m-chat__q is-contact");
         li.setAttribute("data-q", ["name", "email", "phone", "linkedin"][k]);
         li.setAttribute("data-kind", "contact");
-        li.append(el(ctx, "p", "kalq-m-chat__ask", ask));
+        li.append(el(ctx, "h3", "kalq-m-chat__ask", ask));
         script.append(li);
     });
 
-    // the end: a summary (filled in as the visitor answers) and the two ways to send it
-    const wa = phoneDigits(textOf(ctx, "whatsapp")), mail = plain(textOf(ctx, "email"));
+    // the end: a summary (filled in as the visitor answers) and a link for each destination the editor set
     const send = el(ctx, "div", "kalq-m-chat__send");
-    if (!ctx.editor) {
-        if (/^\+?\d{6,15}$/.test(wa)) { const a = el(ctx, "a", "kalq-m-chat__go is-wa", w.sendWa); a.setAttribute("href", `https://wa.me/${wa.replace("+", "")}`); a.setAttribute("target", "_blank"); a.setAttribute("rel", "noopener"); send.append(a); }
-        if (/^[^\s@]+@[^\s@]+$/.test(mail)) { const a = el(ctx, "a", "kalq-m-chat__go is-mail", w.sendMail); a.setAttribute("href", `mailto:${mail}`); send.append(a); }
-    }
-    const finish = append(el(ctx, "div", "kalq-m-chat__finish"), el(ctx, "h4", "kalq-m-chat__summary-title", w.summary), el(ctx, "dl", "kalq-m-chat__summary"),
+    if (!ctx.editor) CHAT_DESTS.forEach((d) => {
+        const to = destOf(ctx, d);
+        if (!to) return; // not set (or not valid): no button
+        const a = el(ctx, "a", `kalq-m-chat__go is-${d.id}`, w.send[d.id]);
+        a.setAttribute("href", to.href);
+        a.setAttribute("data-dest", d.id);
+        if (to.param) a.setAttribute("data-param", to.param);
+        if (to.blank) { a.setAttribute("target", "_blank"); a.setAttribute("rel", "noopener"); }
+        send.append(a);
+    });
+    const finish = append(el(ctx, "div", "kalq-m-chat__finish"), el(ctx, "h3", "kalq-m-chat__summary-title", w.summary), el(ctx, "dl", "kalq-m-chat__summary"),
         send.children.length ? send : null, el(ctx, "p", "kalq-m-chat__note", w.note));
 
     if (ctx.editor) {
@@ -395,11 +449,18 @@ function renderInquiry(ctx) {
         sw.setAttribute("type", "button");
         sw.setAttribute("data-chat-action", "contact");
         sw.setAttribute("aria-pressed", String(contact));
-        const settings = append(el(ctx, "div", "kalq-m-chat__settings"), sw,
-            append(el(ctx, "label", "kalq-m-chat__setting"), el(ctx, "span", "", w.whatsapp), slotEl(ctx, "whatsapp", "span", { className: "kalq-m-chat__value" }),
-                /^\+?\d{6,15}$/.test(wa) ? null : el(ctx, "span", "kalq-m-chat__missing", w.waMissing)),
-            append(el(ctx, "label", "kalq-m-chat__setting"), el(ctx, "span", "", w.email), slotEl(ctx, "email", "span", { className: "kalq-m-chat__value" }),
-                /^[^\s@]+@[^\s@]+$/.test(mail) ? null : el(ctx, "span", "kalq-m-chat__missing", w.mailMissing)));
+        const avatarUrl = mediaOf(ctx, "avatar");
+        const avatarField = append(el(ctx, "div", "kalq-m-chat__setting is-avatar"), el(ctx, "span", "", w.avatar), mediaEl(ctx, "avatar", "kalq-m-chat__avatar-field", { alt: "" }),
+            avatarUrl && !isOwnMedia(avatarUrl) ? el(ctx, "span", "kalq-m-chat__missing", w.avatarRefused) : null);
+        const dests = CHAT_DESTS.map((d) => {
+            const raw = plain(textOf(ctx, d.id));
+            const note = !raw ? w.destMissing(w.send[d.id]) : !d.to(raw) ? w.destInvalid : null;
+            return append(el(ctx, "label", "kalq-m-chat__setting"), el(ctx, "span", "", w.dest[d.id]), slotEl(ctx, d.id, "span", { className: "kalq-m-chat__value" }),
+                note ? el(ctx, "span", "kalq-m-chat__missing", note) : null);
+        });
+        const none = !CHAT_DESTS.some((d) => destOf(ctx, d));
+        const settings = append(el(ctx, "div", "kalq-m-chat__settings"), avatarField, sw,
+            el(ctx, "p", "kalq-m-chat__settings-title", w.destTitle), none ? el(ctx, "p", "kalq-m-chat__nodest", w.noDest) : null, ...dests);
         append(win, top, log, script, add, settings);
     } else append(win, top, log, script, finish);
     if (!ctx.editor && !items.length && !textOf(ctx, "greeting")) return null;
@@ -884,11 +945,10 @@ export const LIBRARY = {
             heading: { kind: "heading", label: L("Überschrift neben dem Chat (optional)", "Heading beside the chat (optional)") },
             text: { kind: "text", label: L("Text neben dem Chat (optional)", "Text beside the chat (optional)") },
             title: { kind: "eyebrow", label: L("Titel des Chats (sonst: Projektanfrage)", "Chat title (otherwise: Project inquiry)") },
-            avatar: { kind: "media", label: L("Bild der Person (rund)", "Picture of the person (round)") },
+            avatar: { kind: "media", label: L(CHAT_WORDS.de.avatar, CHAT_WORDS.en.avatar) },
             name: { kind: "button", label: L(CHAT_WORDS.de.name, CHAT_WORDS.en.name) },
             greeting: { kind: "text", label: L(CHAT_WORDS.de.greeting, CHAT_WORDS.en.greeting), required: true },
-            whatsapp: { kind: "button", label: L(CHAT_WORDS.de.whatsapp, CHAT_WORDS.en.whatsapp) },
-            email: { kind: "button", label: L(CHAT_WORDS.de.email, CHAT_WORDS.en.email) },
+            ...Object.fromEntries(CHAT_DESTS.map((d) => [d.id, { kind: "button", label: L(CHAT_WORDS.de.dest[d.id], CHAT_WORDS.en.dest[d.id]) }])),
         },
         versions: {
             chat: { name: L("Chat mit Fragen zum Antippen", "Chat with questions to tap"),
@@ -902,7 +962,8 @@ export const LIBRARY = {
             const out = [];
             const has = (slot) => { const e = get(`${page}.${entry.id}.${slot}`); return e && (e.de || e.en); };
             if (!chatItems(entry).some((it) => has(`q_${it.id}`))) out.push(L("eine Frage", "a question"));
-            if (!has("whatsapp") && !has("email")) out.push(L("WhatsApp-Nummer oder E-Mail-Adresse", "WhatsApp number or email address"));
+            const value = (slot) => { const e = get(`${page}.${entry.id}.${slot}`); return e ? (e.de ?? e.en) : null; };
+            if (!CHAT_DESTS.some((d) => value(d.id) && d.to(value(d.id)))) out.push(L("ein Ziel zum Senden (WhatsApp, Telegram, Threema, SMS oder E-Mail)", "a destination to send to (WhatsApp, Telegram, Threema, SMS or email)"));
             return out;
         },
         magazine: {

@@ -752,9 +752,13 @@ function setupChat(sec) {
         const title = sec.querySelector(".kalq-m-chat__title")?.textContent.trim() || w.title;
         const body = `${title}\n\n${lines.join("\n")}`;
         const name = st.answers.name;
-        const wa = finish.querySelector(".is-wa"), mail = finish.querySelector(".is-mail");
-        if (wa) wa.href = `${wa.href.split("?")[0]}?text=${encodeURIComponent(body)}`;
-        if (mail) mail.href = `${mail.href.split("?")[0]}?subject=${encodeURIComponent(name ? `${title}: ${name}` : title)}&body=${encodeURIComponent(body)}`;
+        // each destination's link with the inquiry in it (as far as that app takes a text: data-param)
+        finish.querySelectorAll(".kalq-m-chat__go").forEach((a) => {
+            const base = a.getAttribute("href").split("?")[0];
+            const param = a.dataset.param;
+            if (param === "mailto") a.href = `${base}?subject=${encodeURIComponent(name ? `${title}: ${name}` : title)}&body=${encodeURIComponent(body)}`;
+            else if (param) a.href = `${base}?${param}=${encodeURIComponent(body)}`;
+        });
         st.done = true;
         save();
         const m = await bot([para(ui().thanks)], instant);
@@ -820,9 +824,7 @@ function relabelChat(sec) {
     sec.querySelector(".kalq-m-chat__langs")?.setAttribute("aria-label", u.langs);
     sec.querySelectorAll(".kalq-m-chat__lang").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === chatLang())));
     const w = chatText();
-    const wa = sec.querySelector(".kalq-m-chat__go.is-wa"), mail = sec.querySelector(".kalq-m-chat__go.is-mail");
-    if (wa) wa.textContent = w.sendWa;
-    if (mail) mail.textContent = w.sendMail;
+    sec.querySelectorAll(".kalq-m-chat__go[data-dest]").forEach((a) => { if (w.send[a.dataset.dest]) a.textContent = w.send[a.dataset.dest]; });
     const t = sec.querySelector(".kalq-m-chat__summary-title");
     if (t) t.textContent = w.summary;
     const note = sec.querySelector(".kalq-m-chat__note");

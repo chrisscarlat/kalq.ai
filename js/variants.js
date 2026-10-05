@@ -239,7 +239,7 @@ function placeSwitcher() {
     const logo = document.querySelector(".site-logo");
     if (!switcher || !logo) return;
     const r = logo.getBoundingClientRect();
-    switcher.style.transform = `translate(${Math.round(r.right + 14)}px, ${Math.round(r.top + r.height / 2)}px) translateY(-50%)`;
+    switcher.style.transform = `translate(${Math.round(r.right + 30)}px, ${Math.round(r.top + r.height / 2)}px) translateY(-50%)`; // clear of the logo, its own thing
 }
 
 function renderSwitcher() {
@@ -265,7 +265,6 @@ function renderSwitcher() {
         dot.title = `${v.letter} · ${v.name || ""}`.trim();
         dot.setAttribute("aria-label", `Style ${v.letter}${v.name ? `, ${v.name}` : ""}`);
         dot.setAttribute("aria-pressed", current?.id === v.id);
-        dot.style.setProperty("--dot", v.colors?.accent || "#3b82f6");
         dot.addEventListener("click", () => applyVariant(v, { remember: true }));
         return dot;
     }));

@@ -245,52 +245,105 @@
     }
 }
 
-/* Style switcher next to the logo, outside the blended header so the dots show their real accent colours */
+/* Style switcher next to the logo: delicate. The active style is just its letter; the others are small points. Hovering a
+   point grows it into a bigger point, which then turns into its letter, while the active letter falls back to a point.
+   One colour, no fill, no stroke: white, and with the header's tone (js/heroTone.js) white or black like the logo;
+   without a tone it inverts over the page like the header does. */
 .kalq-switcher {
     position: fixed;
     top: 0;
     left: 0;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 2px;
     z-index: 31;
+    --ink: #fff; // the one colour: the letters and the points
+    color: var(--ink);
+    mix-blend-mode: difference;
+    transition: color 0.3s ease;
 
     &[hidden] {
         display: none;
     }
 }
 
+html[data-header-tone] .kalq-switcher { mix-blend-mode: normal; }
+html[data-header-tone="light"] .kalq-switcher { --ink: #000; }
+
 .kalq-switcher__dot {
-    width: 10px;
-    height: 10px;
+    position: relative;
+    width: 16px; // the hit area; what shows is the point or the letter in it
+    height: 24px;
     padding: 0;
     display: grid;
     place-items: center;
-    border: 1.5px solid rgba(255, 255, 255, 0.85);
-    border-radius: 50%;
-    background: var(--dot);
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
-    color: transparent;
-    font: 600 0px/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+    border: 0;
+    background: none;
+    color: transparent; // the letter, hidden while it is a point
+    font: 500 13px/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: 0;
     cursor: pointer;
-    transition: width 0.25s ease, height 0.25s ease, font-size 0.25s ease, color 0.2s ease;
+    transition: color 0.18s ease;
 
-    // Active dot shows its letter, the others on hover or keyboard focus
-    &[aria-pressed="true"],
-    &:hover,
-    &:focus-visible {
-        width: 22px;
-        height: 22px;
-        font-size: 11px;
-        color: #fff;
-        text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-        outline: none;
+    // the point
+    &::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 4px;
+        height: 4px;
+        margin: -2px 0 0 -2px;
+        border-radius: 50%;
+        background: var(--ink); // the button's own colour is transparent while it is a point
+        transition: transform 0.22s ease, opacity 0.18s ease;
     }
+
+    &:focus-visible { outline: 1px solid var(--ink); outline-offset: 2px; border-radius: 4px; }
+}
+
+// the active style: its letter, no point
+.kalq-switcher__dot[aria-pressed="true"] {
+    color: var(--ink);
+
+    &::before { opacity: 0; transform: scale(0); }
+}
+
+// hovering (or focusing) another: it grows into a big point, then becomes its letter; the active one is a point again
+.kalq-switcher:is(:hover, :focus-within) .kalq-switcher__dot[aria-pressed="true"]:not(:hover, :focus-visible) {
+    color: transparent;
+
+    &::before { opacity: 1; transform: none; }
+}
+
+.kalq-switcher__dot:not([aria-pressed="true"]):is(:hover, :focus-visible) {
+    animation: kalq-switch-letter 0.42s ease forwards;
+
+    &::before { animation: kalq-switch-point 0.42s ease forwards; }
+}
+
+@keyframes kalq-switch-point {
+    0% { transform: scale(1); opacity: 1; }
+    45% { transform: scale(2.4); opacity: 1; }
+    75%, 100% { transform: scale(0.2); opacity: 0; }
+}
+
+@keyframes kalq-switch-letter {
+    0%, 50% { color: transparent; }
+    100% { color: var(--ink); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .kalq-switcher__dot {
+    .kalq-switcher__dot,
+    .kalq-switcher__dot::before {
         transition: none;
+        animation: none !important;
+    }
+
+    .kalq-switcher__dot:not([aria-pressed="true"]):is(:hover, :focus-visible) {
+        color: var(--ink);
+
+        &::before { opacity: 0; }
     }
 }
 

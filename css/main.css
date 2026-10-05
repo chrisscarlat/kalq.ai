@@ -704,47 +704,124 @@ section[data-tone=light] :is(.hero_layer, #container):has(> .block) {
   filter: brightness(0) invert(1);
 }
 
-/* Style switcher next to the logo, outside the blended header so the dots show their real accent colours */
+/* Style switcher next to the logo: delicate. The active style is just its letter; the others are small points. Hovering a
+   point grows it into a bigger point, which then turns into its letter, while the active letter falls back to a point.
+   One colour, no fill, no stroke: white, and with the header's tone (js/heroTone.js) white or black like the logo;
+   without a tone it inverts over the page like the header does. */
 .kalq-switcher {
   position: fixed;
   top: 0;
   left: 0;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
   z-index: 31;
+  --ink: #fff;
+  color: var(--ink);
+  mix-blend-mode: difference;
+  transition: color 0.3s ease;
 }
 .kalq-switcher[hidden] {
   display: none;
 }
 
+html[data-header-tone] .kalq-switcher {
+  mix-blend-mode: normal;
+}
+
+html[data-header-tone=light] .kalq-switcher {
+  --ink: #000;
+}
+
 .kalq-switcher__dot {
-  width: 10px;
-  height: 10px;
+  position: relative;
+  width: 16px;
+  height: 24px;
   padding: 0;
   display: grid;
   place-items: center;
-  border: 1.5px solid rgba(255, 255, 255, 0.85);
-  border-radius: 50%;
-  background: var(--dot);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+  border: 0;
+  background: none;
   color: transparent;
-  font: 600 0px/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+  font: 500 13px/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: 0;
   cursor: pointer;
-  transition: width 0.25s ease, height 0.25s ease, font-size 0.25s ease, color 0.2s ease;
+  transition: color 0.18s ease;
 }
-.kalq-switcher__dot[aria-pressed=true], .kalq-switcher__dot:hover, .kalq-switcher__dot:focus-visible {
-  width: 22px;
-  height: 22px;
-  font-size: 11px;
-  color: #fff;
-  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-  outline: none;
+.kalq-switcher__dot::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+  border-radius: 50%;
+  background: var(--ink);
+  transition: transform 0.22s ease, opacity 0.18s ease;
+}
+.kalq-switcher__dot:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
+.kalq-switcher__dot[aria-pressed=true] {
+  color: var(--ink);
+}
+.kalq-switcher__dot[aria-pressed=true]::before {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.kalq-switcher:is(:hover, :focus-within) .kalq-switcher__dot[aria-pressed=true]:not(:hover, :focus-visible) {
+  color: transparent;
+}
+.kalq-switcher:is(:hover, :focus-within) .kalq-switcher__dot[aria-pressed=true]:not(:hover, :focus-visible)::before {
+  opacity: 1;
+  transform: none;
+}
+
+.kalq-switcher__dot:not([aria-pressed=true]):is(:hover, :focus-visible) {
+  animation: kalq-switch-letter 0.42s ease forwards;
+}
+.kalq-switcher__dot:not([aria-pressed=true]):is(:hover, :focus-visible)::before {
+  animation: kalq-switch-point 0.42s ease forwards;
+}
+
+@keyframes kalq-switch-point {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  45% {
+    transform: scale(2.4);
+    opacity: 1;
+  }
+  75%, 100% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+}
+@keyframes kalq-switch-letter {
+  0%, 50% {
+    color: transparent;
+  }
+  100% {
+    color: var(--ink);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  .kalq-switcher__dot {
+  .kalq-switcher__dot,
+  .kalq-switcher__dot::before {
     transition: none;
+    animation: none !important;
+  }
+  .kalq-switcher__dot:not([aria-pressed=true]):is(:hover, :focus-visible) {
+    color: var(--ink);
+  }
+  .kalq-switcher__dot:not([aria-pressed=true]):is(:hover, :focus-visible)::before {
+    opacity: 0;
   }
 }
 /* Light and dark toggle: sun, morphing into a thin crescent moon (the bite circle slides over a larger disc) */

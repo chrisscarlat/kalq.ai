@@ -1,6 +1,6 @@
 // GET ?page=home: newest content per block and language for a page, plus the shared site blocks.
 // Needs the gate cookie, except for the public legal pages.
-import { readCookie, verifyGate } from "../lib/gate-cookie.js";
+import { readCookie, verifyGate } from "../lib/gate-token.js";
 import { json } from "../lib/http.js";
 import { isConfigured, rpc } from "../lib/supabase-admin.js";
 import { layoutKey, parseLayout, sectionPrefix } from "../js/layout.js";

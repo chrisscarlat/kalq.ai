@@ -1,6 +1,6 @@
 // POST { access_token }: finishes a Google or LinkedIn login.
 // Only allowed domains or invited emails become editors and get the gate cookie.
-import { gateCookieHeader, signGate } from "../lib/gate-cookie.js";
+import { gateCookieHeader, signGate } from "../lib/gate-token.js";
 import { json, readJson } from "../lib/http.js";
 import { colorFromUid } from "../lib/identity.js";
 import { getUser, isConfigured, rpc, updateAppMetadata } from "../lib/supabase-admin.js";

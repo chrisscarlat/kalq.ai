@@ -2,7 +2,7 @@
 // Also returns the realtime channel key: channels are named presence:<page>:<key>, so only people
 // through the gate can find them (guests have no Supabase account, so the channels cannot be private).
 import { createHmac } from "node:crypto";
-import { readCookie, verifyGate } from "../lib/gate-cookie.js";
+import { readCookie, verifyGate } from "../lib/gate-token.js";
 import { json } from "../lib/http.js";
 import { colorFromUid, identityFromHash } from "../lib/identity.js";
 import { isAdmin } from "../lib/admin.js";

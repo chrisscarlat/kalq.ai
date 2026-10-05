@@ -244,20 +244,20 @@ FOOTER = '''
 '''
 
 
-# The cookie bar (js/cookieBar.js, css/components/_cookie-bar.scss): notice or consent, as set in the design panel
+# The bottom bar, "dontpanic" (js/dontpanic.js, css/components/_dontpanic.scss): notice or consent, as set in the design panel
 # (site.cookie.* blocks; the server writes them in, api/page.js). Both modes' texts, in both languages, are in the
 # HTML; the stylesheet shows the current mode's in the page's language. Outside the page container: a page change
 # does not touch it.
-COOKIE = '''    <!-- COOKIE BAR: notice (shown once) or consent (until Accept or Deny); js/cookieBar.js -->
-    <div class="kalq-cookie" data-mode="notice" role="status" aria-live="polite" hidden>
-        <svg class="kalq-cookie__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#fff" fill-rule="evenodd" d="M12 2.5a9.5 9.5 0 1 0 9.4 10.9 3 3 0 0 1-3.6-3.4 3 3 0 0 1-3.4-3.6A3 3 0 0 1 12 2.5zM6.9 9.4a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0-2.6 0z M8.1 15.4a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0z M13.5 14.2a1.1 1.1 0 1 0 2.2 0a1.1 1.1 0 1 0-2.2 0z M15.5 17.6a0.9 0.9 0 1 0 1.8 0a0.9 0.9 0 1 0-1.8 0z M11.6 6.6a0.7 0.7 0 1 0 1.4 0a0.7 0.7 0 1 0-1.4 0z"/><circle cx="19.4" cy="4.4" r="0.9" fill="#fff"/><circle cx="21.7" cy="7.4" r="0.6" fill="#fff"/><circle cx="16.9" cy="2.4" r="0.55" fill="#fff"/></svg>
-        <p class="kalq-cookie__text" data-for="notice"><span lang="de">Diese Seite verwendet nur technisch notwendige Cookies. Keine Tracker, keine Analyse.</span><span lang="en">This site uses only strictly necessary cookies. No tracking, no analytics.</span></p>
-        <p class="kalq-cookie__text" data-for="consent"><span lang="de">Diese Seite möchte zusätzlich optionale Cookies verwenden. Sie entscheiden.</span><span lang="en">This site would like to use optional cookies as well. You decide.</span></p>
-        <div class="kalq-cookie__actions">
-            <button type="button" class="kalq-cookie__accept"><span lang="de">Akzeptieren</span><span lang="en">Accept</span></button>
-            <button type="button" class="kalq-cookie__deny"><span lang="de">Ablehnen</span><span lang="en">Deny</span></button>
+DONTPANIC = '''    <!-- dontpanic bar: tell (shown once) or ask (until Accept or Deny); js/dontpanic.js -->
+    <div class="dontpanic-bar" data-mode="tell" role="status" aria-live="polite" hidden>
+        <svg class="dontpanic-bar__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#fff" fill-rule="evenodd" d="M12 2.5a9.5 9.5 0 1 0 9.4 10.9 3 3 0 0 1-3.6-3.4 3 3 0 0 1-3.4-3.6A3 3 0 0 1 12 2.5zM6.9 9.4a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0-2.6 0z M8.1 15.4a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0z M13.5 14.2a1.1 1.1 0 1 0 2.2 0a1.1 1.1 0 1 0-2.2 0z M15.5 17.6a0.9 0.9 0 1 0 1.8 0a0.9 0.9 0 1 0-1.8 0z M11.6 6.6a0.7 0.7 0 1 0 1.4 0a0.7 0.7 0 1 0-1.4 0z"/><circle cx="19.4" cy="4.4" r="0.9" fill="#fff"/><circle cx="21.7" cy="7.4" r="0.6" fill="#fff"/><circle cx="16.9" cy="2.4" r="0.55" fill="#fff"/></svg>
+        <p class="dontpanic-bar__text" data-for="tell"><span lang="de">Diese Seite verwendet nur technisch notwendige Cookies. Keine Tracker, keine Analyse.</span><span lang="en">This site uses only strictly necessary cookies. No tracking, no analytics.</span></p>
+        <p class="dontpanic-bar__text" data-for="ask"><span lang="de">Diese Seite möchte zusätzlich optionale Cookies verwenden. Sie entscheiden.</span><span lang="en">This site would like to use optional cookies as well. You decide.</span></p>
+        <div class="dontpanic-bar__actions">
+            <button type="button" class="dontpanic-bar__accept"><span lang="de">Akzeptieren</span><span lang="en">Accept</span></button>
+            <button type="button" class="dontpanic-bar__deny"><span lang="de">Ablehnen</span><span lang="en">Deny</span></button>
         </div>
-        <span class="kalq-cookie__line" aria-hidden="true"></span>
+        <span class="dontpanic-bar__line" aria-hidden="true"></span>
     </div>
 '''
 
@@ -265,7 +265,7 @@ TAIL = '''            </div>
         </div>
     </div>
 
-''' + COOKIE + '''
+''' + DONTPANIC + '''
     <!---------- SCRIPTS ---------->
     <!-- BARBA -->
     <script src="https://unpkg.com/@barba/core"></script>
@@ -280,7 +280,7 @@ TAIL = '''            </div>
     <!-- COLLABORATION: presence, cursors, toolbar -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
     <script src="js/collab.js" type="module"></script>
-    <script src="js/cookieBar.js" type="module"></script>
+    <script src="js/dontpanic.js" type="module"></script>
 </body>
 
 </html>
@@ -758,11 +758,11 @@ gate_html = f"""<!DOCTYPE html>
         </p>
     </main>
 
-{COOKIE}
+{DONTPANIC}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
     <script src="/js/gate.js" type="module"></script>
-    <script src="/js/cookieBar.js" type="module"></script>
+    <script src="/js/dontpanic.js" type="module"></script>
 </body>
 
 </html>

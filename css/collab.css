@@ -972,7 +972,7 @@ html.kalq-magazine-open .kalq-switcher {
   line-height: 1.45;
 }
 
-.kalq-styles__cookie-actions {
+.kalq-styles__note-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -3573,7 +3573,7 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video)) {
   fill: currentColor;
 }
 
-.kalq-wire__cookie {
+.kalq-wire__note {
   position: absolute;
   left: 0;
   right: 0;
@@ -3589,11 +3589,11 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video)) {
   border-radius: 999px;
   background: #000;
 }
-.kalq-wire__cookie .is-cookie-text {
+.kalq-wire__note .is-note-text {
   height: 5px;
 }
 
-.kalq-wire__cookie-icon {
+.kalq-wire__note-icon {
   order: -2;
   flex: 0 0 auto;
   display: block;
@@ -3602,13 +3602,13 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video)) {
   color: #fff;
 }
 
-.kalq-wire__cookie-actions {
+.kalq-wire__note-actions {
   order: -1;
   display: flex;
   gap: 5px;
 }
 
-.kalq-wire__cookie-line {
+.kalq-wire__note-line {
   width: 26px;
   height: 2px;
   border-radius: 2px;
@@ -3616,21 +3616,21 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video)) {
   transform-origin: right center;
 }
 
-.kalq-wire__cookie .kalq-wire__pill {
+.kalq-wire__note .kalq-wire__pill {
   justify-content: center;
   width: 42px;
   height: 16px;
   padding: 0 6px;
 }
-.kalq-wire__cookie .kalq-wire__pill.is-deny {
+.kalq-wire__note .kalq-wire__pill.is-deny {
   background: transparent;
   border: 1.5px solid rgba(255, 255, 255, 0.55);
 }
-.kalq-wire__cookie .kalq-wire__pill.is-deny .kalq-wire__txt {
+.kalq-wire__note .kalq-wire__pill.is-deny .kalq-wire__txt {
   background: #fff;
 }
 
-.kalq-wire__cookie.is-consent .kalq-wire__cookie-line {
+.kalq-wire__note.is-ask .kalq-wire__note-line {
   animation: kalq-wire-line 6s linear infinite;
 }
 
@@ -3642,16 +3642,16 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video)) {
     transform: scaleX(0);
   }
 }
-.kalq-wire__cookie.is-notice {
+.kalq-wire__note.is-tell {
   animation: kalq-wire-notice 8s var(--ease) infinite;
 }
-.kalq-wire__cookie.is-notice .kalq-wire__cookie-line {
+.kalq-wire__note.is-tell .kalq-wire__note-line {
   animation: kalq-wire-notice-line 8s linear infinite;
 }
-.kalq-wire__cookie.is-notice > :not(.kalq-wire__cookie-icon) {
+.kalq-wire__note.is-tell > :not(.kalq-wire__note-icon) {
   animation: kalq-wire-notice-fade 8s ease infinite;
 }
-.kalq-wire__cookie.is-notice .kalq-wire__cookie-icon {
+.kalq-wire__note.is-tell .kalq-wire__note-icon {
   animation: kalq-wire-notice-icon 8s ease infinite;
 }
 
@@ -3702,8 +3702,8 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video)) {
   }
 }
 .kalq-wire.is-still *,
-.kalq-wire__cookie.is-still,
-.kalq-wire__cookie.is-still * {
+.kalq-wire__note.is-still,
+.kalq-wire__note.is-still * {
   transition: none !important;
   animation: none !important;
 }

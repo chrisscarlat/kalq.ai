@@ -2,7 +2,7 @@
 //   GET  ?page=home&scope=page|site     batches newest first, with authors
 //   GET  ?page=home&preview=<batch>      the page right after that batch
 //   POST { batch_id, scope, page }       restore (block | page | site), author from the gate cookie
-import { readCookie, verifyGate } from "../lib/gate-cookie.js";
+import { readCookie, verifyGate } from "../lib/gate-token.js";
 import { json, readJson } from "../lib/http.js";
 import { isConfigured, rpc, select } from "../lib/supabase-admin.js";
 

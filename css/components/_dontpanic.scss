@@ -1,10 +1,10 @@
-/* The cookie bar (js/cookieBar.js): a black pill at the bottom centre with a white cookie, one line of white text and
-   a thin white line on the right that runs out over 5 seconds. data-mode="notice": no buttons, it folds into its
-   cookie and goes when the line has run out. data-mode="consent": Accept and Deny on its left, it stays until one is
+/* The cookie bar (js/dontpanic.js): a black pill at the bottom centre with a white cookie, one line of white text and
+   a thin white line on the right that runs out over 5 seconds. data-mode="tell": no buttons, it folds into its
+   cookie and goes when the line has run out. data-mode="ask": Accept and Deny on its left, it stays until one is
    chosen. Under reduced motion: a fade, the line still. The current mode's sentence in the page's language shows; the
    others stay in the HTML, not displayed. Only the buttons take a click. One style block for the port (PORT_NOTES.md). */
 
-.kalq-cookie {
+.dontpanic-bar {
     position: fixed;
     left: 0;
     right: 0;
@@ -40,28 +40,28 @@
         transition: width 0.5s cubic-bezier(0.65, 0, 0.35, 1), height 0.5s cubic-bezier(0.65, 0, 0.35, 1), left 0.5s cubic-bezier(0.65, 0, 0.35, 1),
             padding 0.5s cubic-bezier(0.65, 0, 0.35, 1), transform 0.45s ease, opacity 0.45s ease;
 
-        > :not(.kalq-cookie__icon) { opacity: 0; transition: opacity 0.18s ease; }
+        > :not(.dontpanic-bar__icon) { opacity: 0; transition: opacity 0.18s ease; }
     }
     &.is-gone { opacity: 0; transform: scale(0.2); }
-    &.is-gone .kalq-cookie__icon { transform: rotate(-120deg) scale(0.6); }
+    &.is-gone .dontpanic-bar__icon { transform: rotate(-120deg) scale(0.6); }
 }
 
 // visual order: the cookie, (Accept, Deny), the sentence, the line; the reading order keeps the sentence first
-.kalq-cookie__icon { order: -2; flex: 0 0 auto; display: block; width: 20px; height: 20px; transition: transform 0.45s ease; }
-.kalq-cookie__actions { order: -1; display: none; flex: 0 0 auto; gap: 6px; }
-.kalq-cookie__text { margin: 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kalq-cookie__line { flex: 0 0 auto; width: 36px; height: 2px; border-radius: 2px; background: #fff; transform-origin: right center; }
+.dontpanic-bar__icon { order: -2; flex: 0 0 auto; display: block; width: 20px; height: 20px; transition: transform 0.45s ease; }
+.dontpanic-bar__actions { order: -1; display: none; flex: 0 0 auto; gap: 6px; }
+.dontpanic-bar__text { margin: 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dontpanic-bar__line { flex: 0 0 auto; width: 36px; height: 2px; border-radius: 2px; background: #fff; transform-origin: right center; }
 
 // the mode: its own sentence; Accept and Deny only when asking for consent
-.kalq-cookie[data-mode="notice"] .kalq-cookie__text[data-for="consent"],
-.kalq-cookie[data-mode="consent"] .kalq-cookie__text[data-for="notice"] { display: none; }
-.kalq-cookie[data-mode="consent"] .kalq-cookie__actions { display: flex; }
+.dontpanic-bar[data-mode="tell"] .dontpanic-bar__text[data-for="ask"],
+.dontpanic-bar[data-mode="ask"] .dontpanic-bar__text[data-for="tell"] { display: none; }
+.dontpanic-bar[data-mode="ask"] .dontpanic-bar__actions { display: flex; }
 
 // the page's language
-html:not([lang^="en"]) .kalq-cookie [lang="en"],
-html[lang^="en"] .kalq-cookie [lang="de"] { display: none; }
+html:not([lang^="en"]) .dontpanic-bar [lang="en"],
+html[lang^="en"] .dontpanic-bar [lang="de"] { display: none; }
 
-.kalq-cookie__accept, .kalq-cookie__deny {
+.dontpanic-bar__accept, .dontpanic-bar__deny {
     padding: 5px 12px;
     border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 999px;
@@ -77,26 +77,26 @@ html[lang^="en"] .kalq-cookie [lang="de"] { display: none; }
     &:hover { background: rgba(255, 255, 255, 0.14); }
     &:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 }
-.kalq-cookie__accept { background: #fff; color: #000; border-color: #fff; &:hover { background: rgba(255, 255, 255, 0.85); } }
+.dontpanic-bar__accept { background: #fff; color: #000; border-color: #fff; &:hover { background: rgba(255, 255, 255, 0.85); } }
 
 // the line runs out over 5 seconds (in consent mode it runs out and the bar stays)
-.kalq-cookie.is-run .kalq-cookie__line { animation: kalq-cookie-line 5s linear forwards; }
-@keyframes kalq-cookie-line { to { transform: scaleX(0); } }
+.dontpanic-bar.is-run .dontpanic-bar__line { animation: dontpanic-bar-line 5s linear forwards; }
+@keyframes dontpanic-bar-line { to { transform: scaleX(0); } }
 
 // with the editors' and guests' toolbar at the bottom centre: the bar sits above it
-body:has(.kalq-toolbar) .kalq-cookie { bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
+body:has(.kalq-toolbar) .dontpanic-bar { bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
 
 // a narrow screen: the sentence may wrap rather than be cut
 @media (max-width: 560px) {
-    .kalq-cookie { gap: 10px; padding: 9px 14px; border-radius: 20px; font-size: 12.5px; }
-    .kalq-cookie__text { white-space: normal; }
-    .kalq-cookie__line { width: 22px; }
-    .kalq-cookie[data-mode="consent"] { flex-wrap: wrap; }
+    .dontpanic-bar { gap: 10px; padding: 9px 14px; border-radius: 20px; font-size: 12.5px; }
+    .dontpanic-bar__text { white-space: normal; }
+    .dontpanic-bar__line { width: 22px; }
+    .dontpanic-bar[data-mode="ask"] { flex-wrap: wrap; }
 }
 
 // reduced motion: no slide, no fold, no running line: a fade in and out
 @media (prefers-reduced-motion: reduce) {
-    .kalq-cookie, .kalq-cookie.is-in, .kalq-cookie.is-out { transform: none; transition: opacity 0.4s ease; }
-    .kalq-cookie.is-run .kalq-cookie__line { animation: none; }
+    .dontpanic-bar, .dontpanic-bar.is-in, .dontpanic-bar.is-out { transform: none; transition: opacity 0.4s ease; }
+    .dontpanic-bar.is-run .dontpanic-bar__line { animation: none; }
 }
-.kalq-cookie.is-still.is-run .kalq-cookie__line { animation: none; }
+.dontpanic-bar.is-still.is-run .dontpanic-bar__line { animation: none; }

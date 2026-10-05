@@ -7,7 +7,7 @@
 //   POST { action: "restore", id, batch_id }  admins: back to that version
 //   POST { action: "vote", id }               everyone through the gate: toggle own vote
 import { randomUUID } from "node:crypto";
-import { readCookie, verifyGate } from "../lib/gate-cookie.js";
+import { readCookie, verifyGate } from "../lib/gate-token.js";
 import { json, readJson } from "../lib/http.js";
 import { isAdmin } from "../lib/admin.js";
 import { insert, isConfigured, remove, rpc, select, supabaseUrl } from "../lib/supabase-admin.js";

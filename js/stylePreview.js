@@ -112,11 +112,11 @@ export function footerPreview({ style, wordmark, gradient }, label) {
 }
 
 //=================================== Cookie bar ===================================//
-export function cookiePreview(mode, label) {
-    const icon = document.querySelector(".kalq-cookie__icon")?.cloneNode(true) || h("span", "kalq-wire__circle");
-    icon.classList?.add("kalq-wire__cookie-icon");
-    const actions = mode === "consent" ? h("span", "kalq-wire__cookie-actions", h("span", "kalq-wire__pill is-accept", bar("70%")), h("span", "kalq-wire__pill is-deny", bar("70%"))) : null;
-    const pillBar = h("div", `kalq-wire__cookie is-${mode}${still() ? " is-still" : ""}`, icon, actions, bar("120px", "is-cookie-text"), h("span", "kalq-wire__cookie-line"));
+export function dontpanicPreview(mode, label) {
+    const icon = document.querySelector(".dontpanic-bar__icon")?.cloneNode(true) || h("span", "kalq-wire__circle");
+    icon.classList?.add("kalq-wire__note-icon");
+    const actions = mode === "consent" ? h("span", "kalq-wire__note-actions", h("span", "kalq-wire__pill is-accept", bar("70%")), h("span", "kalq-wire__pill is-deny", bar("70%"))) : null;
+    const pillBar = h("div", `kalq-wire__note is-${mode === "consent" ? "ask" : "tell"}${still() ? " is-still" : ""}`, icon, actions, bar("120px", "is-note-text"), h("span", "kalq-wire__note-line"));
     const page = h("div", "kalq-wire__page is-cookie", h("div", "kalq-wire__head", logo(), h("span", "kalq-wire__right", ...tools(), dots())), hero(), body(2), pillBar);
     return browser(page, label);
 }

@@ -1,6 +1,6 @@
 // POST { email }: editors invite a colleague. Adds the email to `invites` (so the signup hook lets it in) and
 // sends a Supabase invite email; the invited person can also just log in with Google or LinkedIn.
-import { readCookie, verifyGate } from "../lib/gate-cookie.js";
+import { readCookie, verifyGate } from "../lib/gate-token.js";
 import { json, readJson } from "../lib/http.js";
 import { isConfigured, supabaseUrl, upsert } from "../lib/supabase-admin.js";
 

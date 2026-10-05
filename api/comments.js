@@ -3,7 +3,7 @@
 //   GET   ?page=home                       threads of a page plus the people who wrote them
 //   POST  { page, block_key | anchor_selector, x_pct, y_pct, parent_id?, body }
 //   PATCH { id, resolved }                  editors, or the comment's author
-import { readCookie, verifyGate } from "../lib/gate-cookie.js";
+import { readCookie, verifyGate } from "../lib/gate-token.js";
 import { json, readJson } from "../lib/http.js";
 import { count, insertReturning, isConfigured, patch, select } from "../lib/supabase-admin.js";
 

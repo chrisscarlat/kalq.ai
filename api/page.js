@@ -3,7 +3,7 @@
 // the current page. Gated like the static pages, except the public legal pages.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { readCookie, verifyGate } from "../lib/gate-cookie.js";
+import { readCookie, verifyGate } from "../lib/gate-token.js";
 import { renderGate, renderPage } from "../lib/render-page.js";
 import { isConfigured, rpc } from "../lib/supabase-admin.js";
 

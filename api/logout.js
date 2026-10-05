@@ -1,5 +1,5 @@
 // POST: clears the gate cookie. The browser signs out of Supabase before calling this.
-import { clearGateCookieHeader } from "../lib/gate-cookie.js";
+import { clearGateCookieHeader } from "../lib/gate-token.js";
 import { json } from "../lib/http.js";
 
 export function POST() {

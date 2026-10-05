@@ -5,17 +5,18 @@
 //   consent (data collected): Accept and Deny on its left; the line runs out but the bar stays until one is chosen.
 //           Nothing non-essential loads before Accept. The choice is kept; Accept reloads the page with it.
 // The mode and the texts are site blocks (site.cookie.mode, site.cookie.notice, site.cookie.consent), set in the
-// design panel (Notifications). The server writes them into the page (applyCookieSettings, shared with the browser:
+// design panel (Notifications). The server writes them into the page (applyNoteSettings, shared with the browser:
 // no browser globals at the top level), so the bar's text is the page's own HTML. One unit for the port
-// (PORT_NOTES.md): this file, css/components/_cookie-bar.scss and the markup in the page shell.
+// (PORT_NOTES.md): this file, css/components/_dontpanic.scss and the markup in the page shell.
 //
-// Non-essential content waits in the page as <script type="text/plain" data-consent src|…> or
-// <template data-consent>…</template>; after Accept they run (and window.kalqConsent.granted is true).
+// Non-essential content waits in the page as <script type="text/plain" data-optional src|…> or
+// <template data-optional>…</template>; after Accept they run (and window.kalqOptional.granted is true).
 
-export const COOKIE_KEYS = { mode: "site.cookie.mode", notice: "site.cookie.notice", consent: "site.cookie.consent" };
-export const MODES = ["notice", "consent"];
-const SEEN = "kalq-cookie-notice"; // localStorage: the notice was shown
-const CHOICE = "kalq-cookie-consent"; // localStorage: "granted" or "denied"
+export const NOTE_KEYS = { mode: "site.cookie.mode", notice: "site.cookie.notice", consent: "site.cookie.consent" };
+export const MODES = ["notice", "consent"]; // the stored values
+const PAGE = { notice: "tell", consent: "ask" }; // what the page's markup says (data-mode, data-for)
+const SEEN = "kalq-dontpanic-seen"; // localStorage: the bar in tell mode was shown
+const CHOICE = "kalq-dontpanic-choice"; // localStorage: "granted" or "denied"
 const SHOW_MS = 5000;
 const LABEL = { de: "Cookies", en: "Cookies" };
 
@@ -23,17 +24,17 @@ const plain = (html) => String(html ?? "").replace(/<br\s*\/?>/gi, " ").replace(
 
 // Write the stored settings into a document's bar (the server for every page, the browser after an edit).
 // get(key) returns a stored entry ({ de, en }) or null; a missing text keeps the HTML's default.
-export function applyCookieSettings(doc, get) {
-    const bar = doc.querySelector(".kalq-cookie");
+export function applyNoteSettings(doc, get) {
+    const bar = doc.querySelector(".dontpanic-bar");
     if (!bar) return null;
-    const modeEntry = get(COOKIE_KEYS.mode);
+    const modeEntry = get(NOTE_KEYS.mode);
     const mode = MODES.includes(plain(modeEntry?.de ?? modeEntry?.en)) ? plain(modeEntry.de ?? modeEntry.en) : "notice";
-    bar.setAttribute("data-mode", mode);
+    bar.setAttribute("data-mode", PAGE[mode]);
     ["notice", "consent"].forEach((m) => {
-        const entry = get(COOKIE_KEYS[m]);
+        const entry = get(NOTE_KEYS[m]);
         if (!entry) return;
         ["de", "en"].forEach((lang) => {
-            const span = bar.querySelector(`.kalq-cookie__text[data-for="${m}"] [lang="${lang}"]`);
+            const span = bar.querySelector(`.dontpanic-bar__text[data-for="${PAGE[m]}"] [lang="${lang}"]`);
             const text = plain(entry[lang]);
             if (span && text) span.textContent = text;
         });
@@ -56,28 +57,28 @@ const after = (el, prop, ms) => new Promise((resolve) => {
     setTimeout(() => { el.removeEventListener("transitionend", done); resolve(); }, ms);
 });
 
-// Run what waited for consent: <script type="text/plain" data-consent> and <template data-consent>
+// Run what waited for consent: <script type="text/plain" data-optional> and <template data-optional>
 function runOptional(doc = document) {
-    doc.querySelectorAll('script[type="text/plain"][data-consent]').forEach((old) => {
+    doc.querySelectorAll('script[type="text/plain"][data-optional]').forEach((old) => {
         const s = doc.createElement("script");
-        [...old.attributes].forEach((a) => { if (a.name !== "type" && a.name !== "data-consent") s.setAttribute(a.name, a.value); });
+        [...old.attributes].forEach((a) => { if (a.name !== "type" && a.name !== "data-optional") s.setAttribute(a.name, a.value); });
         if (old.dataset.type) s.type = old.dataset.type;
         s.textContent = old.textContent;
         old.replaceWith(s);
     });
-    doc.querySelectorAll("template[data-consent]").forEach((t) => t.replaceWith(t.content.cloneNode(true)));
+    doc.querySelectorAll("template[data-optional]").forEach((t) => t.replaceWith(t.content.cloneNode(true)));
 }
 
 let shown = null; // the bar being shown, and how it leaves
 
 function show(bar, { preview = false } = {}) {
-    const mode = bar.dataset.mode === "consent" ? "consent" : "notice";
+    const mode = bar.dataset.mode === "ask" ? "consent" : "notice";
     const calm = still();
     bar.classList.toggle("is-still", calm);
     bar.classList.remove("is-in", "is-out", "is-folding", "is-gone", "is-run");
     bar.hidden = false;
     // the live region is on the page already: putting its sentence back in now has it announced, politely
-    const text = bar.querySelector(`.kalq-cookie__text[data-for="${mode}"]`);
+    const text = bar.querySelector(`.dontpanic-bar__text[data-for="${PAGE[mode]}"]`);
     const parent = text?.parentNode, next = text?.nextSibling;
     text?.remove();
     requestAnimationFrame(() => {
@@ -95,7 +96,7 @@ function show(bar, { preview = false } = {}) {
             await after(bar, "opacity", 800);
         } else {
             // the pill folds into its cookie where the cookie sits, then the cookie shrinks away
-            const icon = bar.querySelector(".kalq-cookie__icon");
+            const icon = bar.querySelector(".dontpanic-bar__icon");
             const box = bar.getBoundingClientRect();
             const iconW = icon ? icon.getBoundingClientRect().width : 0;
             const size = Math.round(iconW + 26);
@@ -116,7 +117,7 @@ function show(bar, { preview = false } = {}) {
     shown = { bar, leave };
     if (mode === "notice") {
         // the line runs out (held still under reduced motion), then the notice goes
-        const line = bar.querySelector(".kalq-cookie__line");
+        const line = bar.querySelector(".dontpanic-bar__line");
         if (!calm && line) line.addEventListener("animationend", leave, { once: true });
         setTimeout(leave, SHOW_MS + 400);
     }
@@ -127,17 +128,17 @@ function show(bar, { preview = false } = {}) {
             if (granted) location.reload(); // with the choice, what waited for it loads
             else leave();
         };
-        bar.querySelector(".kalq-cookie__accept").onclick = () => choose(true);
-        bar.querySelector(".kalq-cookie__deny").onclick = () => choose(false);
+        bar.querySelector(".dontpanic-bar__accept").onclick = () => choose(true);
+        bar.querySelector(".dontpanic-bar__deny").onclick = () => choose(false);
     }
 }
 
-export function initCookieBar(doc = document) {
-    const bar = doc.querySelector(".kalq-cookie");
-    const mode = bar?.dataset.mode === "consent" ? "consent" : "notice";
+export function initDontPanic(doc = document) {
+    const bar = doc.querySelector(".dontpanic-bar");
+    const mode = bar?.dataset.mode === "ask" ? "consent" : "notice";
     const choice = read(CHOICE);
     const granted = mode === "consent" && choice === "granted";
-    window.kalqConsent = { mode, granted, choice: mode === "consent" ? choice : null };
+    window.kalqOptional = { mode, granted, choice: mode === "consent" ? choice : null };
     if (granted) runOptional(doc);
     if (!bar || bar.dataset.ready) return;
     bar.dataset.ready = "true";
@@ -149,14 +150,14 @@ export function initCookieBar(doc = document) {
 }
 
 // The design panel: show the bar now in its current mode and text, storing nothing
-export function previewCookieBar(doc = document) {
-    const bar = doc.querySelector(".kalq-cookie");
+export function previewDontPanic(doc = document) {
+    const bar = doc.querySelector(".dontpanic-bar");
     if (!bar) return;
     if (shown) { shown.bar.hidden = true; shown = null; }
     show(bar, { preview: true });
 }
 
 if (typeof document !== "undefined" && typeof window !== "undefined") {
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => initCookieBar());
-    else initCookieBar();
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => initDontPanic());
+    else initDontPanic();
 }

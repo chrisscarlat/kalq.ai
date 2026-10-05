@@ -1,7 +1,7 @@
 // POST { code }: guest entry with the access code. Guests need no account.
 // Checks the code in constant time, rate limits per hashed IP, gives the guest an animal and sets the gate cookie.
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
-import { gateCookieHeader, signGate } from "../lib/gate-cookie.js";
+import { gateCookieHeader, signGate } from "../lib/gate-token.js";
 import { clientIp, json, readJson } from "../lib/http.js";
 import { identityFromHash } from "../lib/identity.js";
 import { count, insert, isConfigured, select } from "../lib/supabase-admin.js";

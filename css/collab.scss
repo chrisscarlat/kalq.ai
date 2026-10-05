@@ -1048,7 +1048,7 @@ $pin-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
 // a sentence to edit (not code): the panel's own font
 .kalq-styles textarea.kalq-styles__prose { font-family: inherit; font-size: 0.85rem; line-height: 1.45; }
 
-.kalq-styles__cookie-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.8rem; }
+.kalq-styles__note-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.8rem; }
 
 .kalq-styles__dirty {
     margin-right: auto;
@@ -3606,7 +3606,7 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video)) {
 }
 
 // Cookie bar: the black pill at the bottom centre, its cookie, the line running out; in consent mode Accept and Deny
-.kalq-wire__cookie {
+.kalq-wire__note {
     position: absolute;
     left: 0;
     right: 0;
@@ -3622,14 +3622,14 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video)) {
     border-radius: 999px;
     background: #000;
 
-    .is-cookie-text { height: 5px; }
+    .is-note-text { height: 5px; }
 }
 
-.kalq-wire__cookie-icon { order: -2; flex: 0 0 auto; display: block; width: 16px; height: 16px; color: #fff; }
-.kalq-wire__cookie-actions { order: -1; display: flex; gap: 5px; }
-.kalq-wire__cookie-line { width: 26px; height: 2px; border-radius: 2px; background: #fff; transform-origin: right center; }
+.kalq-wire__note-icon { order: -2; flex: 0 0 auto; display: block; width: 16px; height: 16px; color: #fff; }
+.kalq-wire__note-actions { order: -1; display: flex; gap: 5px; }
+.kalq-wire__note-line { width: 26px; height: 2px; border-radius: 2px; background: #fff; transform-origin: right center; }
 
-.kalq-wire__cookie .kalq-wire__pill {
+.kalq-wire__note .kalq-wire__pill {
     justify-content: center;
     width: 42px;
     height: 16px;
@@ -3639,16 +3639,16 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video)) {
 }
 
 // consent: the line runs out and the bar stays (once more every few seconds, for the preview)
-.kalq-wire__cookie.is-consent .kalq-wire__cookie-line { animation: kalq-wire-line 6s linear infinite; }
+.kalq-wire__note.is-ask .kalq-wire__note-line { animation: kalq-wire-line 6s linear infinite; }
 @keyframes kalq-wire-line { 0% { transform: none; } 84%, 100% { transform: scaleX(0); } }
 
 // notice: it rises, the line runs out, the pill folds into its cookie and the cookie shrinks away; then again
-.kalq-wire__cookie.is-notice {
+.kalq-wire__note.is-tell {
     animation: kalq-wire-notice 8s var(--ease) infinite;
 
-    .kalq-wire__cookie-line { animation: kalq-wire-notice-line 8s linear infinite; }
-    > :not(.kalq-wire__cookie-icon) { animation: kalq-wire-notice-fade 8s ease infinite; }
-    .kalq-wire__cookie-icon { animation: kalq-wire-notice-icon 8s ease infinite; }
+    .kalq-wire__note-line { animation: kalq-wire-notice-line 8s linear infinite; }
+    > :not(.kalq-wire__note-icon) { animation: kalq-wire-notice-fade 8s ease infinite; }
+    .kalq-wire__note-icon { animation: kalq-wire-notice-icon 8s ease infinite; }
 }
 
 @keyframes kalq-wire-notice {
@@ -3664,8 +3664,8 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video)) {
 
 // reduced motion: the open state, still; the cookie bar shown, its line full
 .kalq-wire.is-still *,
-.kalq-wire__cookie.is-still,
-.kalq-wire__cookie.is-still * { transition: none !important; animation: none !important; }
+.kalq-wire__note.is-still,
+.kalq-wire__note.is-still * { transition: none !important; animation: none !important; }
 
 @media (prefers-reduced-motion: reduce) {
     .kalq-wire *,

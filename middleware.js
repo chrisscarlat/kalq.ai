@@ -1,7 +1,7 @@
 // Vercel Routing Middleware: the temporary full-site gate.
 // Every request needs a valid signed kalq_gate cookie, otherwise the gate page is shown.
 import { next, rewrite } from "@vercel/functions";
-import { readCookie, safeNext, verifyGate } from "./lib/gate-cookie.js";
+import { readCookie, safeNext, verifyGate } from "./lib/gate-token.js";
 
 // Public without a cookie: the gate and its files, the API, and what the legal pages need (styles, scripts).
 // The legal pages themselves are public too, see PUBLIC_PAGES below.
@@ -15,7 +15,7 @@ const PUBLIC = [
     /^\/favicon\.ico$/,
     /^\/robots\.txt$/,
     /^\/css\/(gate|main|collab)\.css$/,
-    /^\/js\/(gate|logoAnimation|main|header|i18n|strings-public|content|blocks|layout|moduleBehaviour|variants|collab|expertiseHoverimg|verticleLine|heroTone|heroReveal|cookieBar)\.js$/,
+    /^\/js\/(gate|logoAnimation|main|header|i18n|strings-public|content|blocks|layout|moduleBehaviour|variants|collab|expertiseHoverimg|verticleLine|heroTone|heroReveal|dontpanic)\.js$/,
     /^\/lib\/svg-sanitize\.js$/, // style variant logos are sanitised in the browser too
     /^\/js\/modules\/(registry|kit|library|scrollSteps)\.js$/, // modules on the legal pages render in the browser too (registry imports the others)
 ];

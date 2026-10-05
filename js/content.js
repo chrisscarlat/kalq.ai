@@ -63,10 +63,11 @@ export function setMedia(el, url) {
         section?.classList.add("has-media");
         return;
     }
-    // <img> or <video> in the page: same kind updates, other kind replaces the element
+    // <img> or <video> in the page: same kind updates; anything else (the other kind, or an empty module slot's
+    // placeholder, a <div>) is replaced by the right element. A <div> given a src shows nothing.
     if (!url || currentUrl(el) === url) return;
     const wantVideo = isVideoUrl(url);
-    if (wantVideo === (el.tagName === "VIDEO")) {
+    if (el.tagName === (wantVideo ? "VIDEO" : "IMG")) {
         const source = el.querySelector("source");
         if (source) { source.setAttribute("src", url); el.load(); el.play?.()?.catch(() => { }); }
         else el.setAttribute("src", url);
@@ -78,6 +79,10 @@ export function setMedia(el, url) {
 // A style variant can replace any image or the hero video (js/variants.js); null keeps the page's own
 let mediaOverride = () => null;
 export const setMediaOverride = (fn) => { mediaOverride = fn; };
+export const styleMediaFor = (key) => mediaOverride(key); // the active style's replacement for a slot, or null
+// Edit mode shows the page's own media: what is edited and uploaded there, whatever the active style replaces
+let pageMediaOnly = false;
+export const setPageMediaOnly = (on) => { pageMediaOnly = !!on; };
 
 // What a media slot showed in the HTML, so switching back to a variant without a replacement restores it
 const defaultUrl = (el) => (isHolder(el) ? "" : el.getAttribute("data-image") ?? currentUrl(el) ?? "");
@@ -91,7 +96,7 @@ export function applyDirect(root) {
 
         if (type === "image" || type === "video") {
             if (el.dataset.kalqDefault === undefined) el.dataset.kalqDefault = defaultUrl(el);
-            const url = mediaOverride(key) || (entry && "media" in entry ? entry.media : el.dataset.kalqDefault);
+            const url = (!pageMediaOnly && mediaOverride(key)) || (entry && "media" in entry ? entry.media : el.dataset.kalqDefault);
             setMedia(el, url || "");
         } else if (!entry) {
             return;

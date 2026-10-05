@@ -53,7 +53,6 @@ export function logoAnimation(svg = document.querySelector(".site-logo__mark"), 
     if (!svg || svg.dataset.animated) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     svg.dataset.animated = "true";
-    svg.style.overflow = "visible";
 
     const lines = {};
     svg.querySelectorAll("line[data-ray]").forEach(line => { lines[line.dataset.ray] = line; });
@@ -79,18 +78,29 @@ export function logoAnimation(svg = document.querySelector(".site-logo__mark"), 
         return [CENTER + x * p, CENTER + y * p, p];
     };
 
+    // The drawing stays inside the mark's own square (it never runs over the wordmark beside it): when the 3D turn
+    // brings rays nearer and larger than the square, the whole frame is scaled down about the centre to fit
     const render = () => {
-        Object.keys(lines).forEach(ray => {
-            const [x1, y1, p1] = project(ray, t[ray].a);
-            const [x2, y2, p2] = project(ray, t[ray].b);
+        const ends = Object.keys(lines).map(ray => [ray, project(ray, t[ray].a), project(ray, t[ray].b)]);
+        let reach = 0;
+        ends.forEach(([, [x1, y1, p1], [x2, y2, p2]]) => {
+            // a butt-capped stroke: its corners stand out by half its width, across the line
+            const len = Math.hypot(x2 - x1, y2 - y1) || 1;
+            const half = (STROKE * ((p1 + p2) / 2) ** 2) / 2;
+            const hx = half * Math.abs(y2 - y1) / len, hy = half * Math.abs(x2 - x1) / len;
+            reach = Math.max(reach, Math.abs(x1 - CENTER) + hx, Math.abs(x2 - CENTER) + hx, Math.abs(y1 - CENTER) + hy, Math.abs(y2 - CENTER) + hy);
+        });
+        const fit = reach > CENTER ? CENTER / reach : 1;
+        const at = v => CENTER + (v - CENTER) * fit;
+        ends.forEach(([ray, [x1, y1, p1], [x2, y2, p2]]) => {
             const p = (p1 + p2) / 2;
             const line = lines[ray];
-            line.setAttribute("x1", x1.toFixed(2));
-            line.setAttribute("y1", y1.toFixed(2));
-            line.setAttribute("x2", x2.toFixed(2));
-            line.setAttribute("y2", y2.toFixed(2));
+            line.setAttribute("x1", at(x1).toFixed(2));
+            line.setAttribute("y1", at(y1).toFixed(2));
+            line.setAttribute("x2", at(x2).toFixed(2));
+            line.setAttribute("y2", at(y2).toFixed(2));
             // nearer lines thicker and brighter, farther ones thinner and dimmer
-            line.setAttribute("stroke-width", (STROKE * p * p).toFixed(2));
+            line.setAttribute("stroke-width", (STROKE * p * p * fit).toFixed(2));
             line.setAttribute("opacity", Math.min(1, Math.max(0.35, 1 - (1 - p) * 3)).toFixed(2));
         });
     };

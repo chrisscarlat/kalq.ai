@@ -655,7 +655,8 @@ section[data-tone=light] :is(.hero_layer, #container):has(> .block) {
   .site-header {
     padding: 1rem;
   }
-  .site-logo .site-logo__mark {
+  .site-logo .site-logo__mark,
+  .site-logo .site-logo__custom {
     width: 30px;
     height: 30px;
   }
@@ -689,14 +690,17 @@ section[data-tone=light] :is(.hero_layer, #container):has(> .block) {
 }
 
 .site-logo__custom {
-  display: flex;
-  align-items: center;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
   height: 36px;
+  overflow: hidden;
 }
 .site-logo__custom svg {
+  display: block;
+  width: 100%;
   height: 100%;
-  width: auto;
-  max-width: 120px;
   filter: brightness(0) invert(1);
 }
 
@@ -7185,17 +7189,13 @@ body:has(.kalq-toolbar) .kalq-cookie {
   position: absolute;
   top: 50%;
   left: 50%;
-  height: 62vh;
-  width: auto;
-  max-width: 80vw;
-  transform: translate(-50%, -50%);
+  width: var(--mark-size, 18vh);
+  height: var(--mark-size, 18vh);
+  transform: translate(-50%, -50%) translateY(calc(-1 * var(--mark-lift, 0px)));
   filter: brightness(0) invert(1);
 }
 
 @media (max-width: 540px) {
-  .block.is-logo svg {
-    height: 40vh;
-  }
   .block[data-line=circle] {
     width: 40vh;
     height: 40vh;

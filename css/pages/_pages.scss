@@ -30,23 +30,19 @@
     height: 0;
     background: none;
 
+    // one fixed square above the title (js/variants.js fits its size and lift to the room there); the logo fits inside
     svg {
         position: absolute;
         top: 50%;
         left: 50%;
-        height: 62vh;
-        width: auto;
-        max-width: 80vw;
-        transform: translate(-50%, -50%);
+        width: var(--mark-size, 18vh);
+        height: var(--mark-size, 18vh);
+        transform: translate(-50%, -50%) translateY(calc(-1 * var(--mark-lift, 0px)));
         filter: brightness(0) invert(1);
     }
 }
 
 @media (max-width: 540px) {
-    .block.is-logo svg {
-        height: 40vh;
-    }
-
     .block[data-line="circle"] {
         width: 40vh;
         height: 40vh;

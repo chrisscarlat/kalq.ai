@@ -184,7 +184,8 @@
     }
 
     .site-logo {
-        .site-logo__mark {
+        .site-logo__mark,
+        .site-logo__custom {
             width: 30px;
             height: 30px;
         }
@@ -226,15 +227,20 @@
     display: none;
 }
 
+// Every logo sits in the same fixed square as the built-in mark, fitted inside it (a wide logo shrinks to the
+// square's width), so it never runs into the wordmark beside it
 .site-logo__custom {
-    display: flex;
-    align-items: center;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 36px;
     height: 36px;
+    overflow: hidden;
 
     svg {
+        display: block;
+        width: 100%;
         height: 100%;
-        width: auto;
-        max-width: 120px;
         filter: brightness(0) invert(1);
     }
 }

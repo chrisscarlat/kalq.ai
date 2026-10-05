@@ -91,6 +91,9 @@ export function logoNode(svg) {
     const doc = new DOMParser().parseFromString(clean, "image/svg+xml");
     const root = doc.documentElement;
     if (!root || root.nodeName.toLowerCase() !== "svg" || doc.querySelector("parsererror")) return null;
+    // without a viewBox a logo cannot be fitted into its square: its own width and height give one
+    const w = parseFloat(root.getAttribute("width")), h = parseFloat(root.getAttribute("height"));
+    if (!root.hasAttribute("viewBox") && w > 0 && h > 0) root.setAttribute("viewBox", `0 0 ${w} ${h}`);
     return document.importNode(root, true);
 }
 
@@ -115,6 +118,22 @@ const BUILT_IN_MARK = '<svg viewBox="0 0 174 174" fill="none" stroke="currentCol
 // The big moving element in the home hero: a line in one of five shapes (default the diagonal \), or the variant's
 // logo (its own or the built-in mark), same parallax. GSAP owns the element's transform for the mouse parallax, so
 // the turn is set through it.
+// A logo sits in one fixed square above the title, never over the brand text: as big as the room between the header
+// and the title allows (at most 150px or 18% of the screen height), clear of the title by more than the parallax moves.
+const MARK_GAP = 44; // the parallax moves the hero mark up to about 22px
+function fitHeroLogo(block) {
+    const title = block.parentElement?.querySelector(".hero_title") || document.querySelector(".hero_title");
+    const box = block.offsetParent;
+    if (!title || !box) return;
+    const top = title.getBoundingClientRect().top;
+    const centre = box.getBoundingClientRect().top + box.clientHeight / 2; // the block's own place, without the parallax
+    const head = document.querySelector(".site-header")?.getBoundingClientRect().bottom || 0;
+    const size = Math.max(40, Math.min(150, window.innerHeight * 0.18, top - MARK_GAP - head - 12));
+    block.style.setProperty("--mark-size", `${Math.round(size)}px`);
+    block.style.setProperty("--mark-lift", `${Math.round(centre - (top - MARK_GAP - size / 2))}px`);
+}
+let refitting = false;
+const refitHeroLogos = () => document.querySelectorAll(".block.is-logo").forEach(fitHeroLogo);
 const LINE_TURN = { back: -45, forward: 45, vertical: 0, horizontal: 90, circle: 0 };
 function applyHeroMark(variant) {
     const wantLogo = variant?.hero_mark === "logo";
@@ -124,10 +143,13 @@ function applyHeroMark(variant) {
         block.classList.toggle("is-logo", !!node);
         block.dataset.line = node ? "" : shape;
         block.replaceChildren(...(node ? [node] : []));
+        if (node) fitHeroLogo(block);
+        else ["--mark-size", "--mark-lift"].forEach((p) => block.style.removeProperty(p));
         const rotation = node ? 0 : LINE_TURN[shape];
         if (window.gsap) gsap.set(block, { xPercent: -50, yPercent: -50, rotation });
         else block.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
     });
+    if (wantLogo && !refitting) { refitting = true; window.addEventListener("resize", refitHeroLogos); document.fonts?.ready.then(refitHeroLogos); }
 }
 // Barba brings a fresh hero on every page change
 export const refreshHeroMark = () => applyHeroMark(getActive());

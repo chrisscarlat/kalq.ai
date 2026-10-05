@@ -1,7 +1,7 @@
 // Comments for everyone (guests too): C or the bubble button turns on comment mode, a click drops a pin.
 // Pins attach to the nearest data-kalq-key block (position as % inside it), otherwise to the page (% of the page).
 // Threads have replies and can be resolved by editors or the author. Everything goes through /api/comments.
-import { currentLang } from "./i18n.js";
+import { EDITOR_LANG } from "./i18n.js";
 
 const TEXT = {
     de: {
@@ -19,7 +19,7 @@ const TEXT = {
         by: (n) => `Comment by ${n}`, replies: (n) => (n === 1 ? "1 reply" : `${n} replies`), close: "Close",
     },
 };
-const lang = () => (currentLang() === "en" ? "en" : "de");
+const lang = () => EDITOR_LANG;
 const t = (key) => TEXT[lang()][key];
 
 let collab, panel;

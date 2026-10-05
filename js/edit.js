@@ -4,7 +4,7 @@
 // While someone edits a block, the others see it locked (see setLock in collab.js).
 import { applyDirect, setLocalContent } from "./content.js";
 import { editableHtml, renderBlock, serializeBlock } from "./blocks.js";
-import { applyLanguage, currentLang } from "./i18n.js";
+import { applyLanguage, currentLang, EDITOR_LANG } from "./i18n.js";
 import { progressLine, showDone, uploadMedia } from "./upload.js";
 
 const MAX_BYTES = 50 * 1024 * 1024;
@@ -26,7 +26,7 @@ const TEXT = {
         empty: "Empty text is not saved.", marquee: "Marquee text",
     },
 };
-const t = (key) => TEXT[currentLang() === "en" ? "en" : "de"][key];
+const t = (key) => TEXT[EDITOR_LANG][key];
 
 let collab;
 let on = false;

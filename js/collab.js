@@ -1,4 +1,5 @@
 import { refreshContent } from "./content.js";
+import { EDITOR_LANG } from "./i18n.js";
 
 // Collaboration layer: toolbar, who is online (avatar stack), live cursors, and the hooks the editing,
 // comment and history modules plug into (see `collab` below).
@@ -14,7 +15,7 @@ const TEXT = {
     de: { logout: "Abmelden", online: "Online", you: "Sie" },
     en: { logout: "Log out", online: "Online", you: "You" },
 };
-const t = (key) => TEXT[document.documentElement.lang === "en" ? "en" : "de"][key];
+const t = (key) => TEXT[EDITOR_LANG][key];
 
 const state = {
     sb: null,

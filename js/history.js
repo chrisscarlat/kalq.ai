@@ -2,7 +2,7 @@
 // after that batch. Editors can restore one block, the page or the whole site; a restore only ever adds new
 // revisions (see restore_to in supabase/migrations), so it can itself be undone the same way.
 import { enterPreview, exitPreview, isPreviewing } from "./content.js";
-import { currentLang } from "./i18n.js";
+import { EDITOR_LANG } from "./i18n.js";
 
 const PAGE_NAMES = {
     de: { home: "Start", platform: "Plattform", company: "Unternehmen", impressum: "Impressum", datenschutz: "Datenschutz", site: "Website" },
@@ -38,7 +38,7 @@ const TEXT = {
             removed: "Section removed", published: "Section published", "to draft": "Section set to draft", inserted: "Section inserted" },
     },
 };
-const lang = () => (currentLang() === "en" ? "en" : "de");
+const lang = () => EDITOR_LANG;
 const t = (key) => TEXT[lang()][key];
 
 let collab, panel;

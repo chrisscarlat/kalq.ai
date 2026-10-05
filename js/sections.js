@@ -6,7 +6,7 @@
 // before (or after) an action of this session; nothing is ever deleted. A removed section leaves the layout, its
 // blocks stay, so undo or a restore brings it back with them.
 import { applyStoredLayout, setLocalContent, storedEntry, storedKeys } from "./content.js";
-import { currentLang } from "./i18n.js";
+import { EDITOR_LANG } from "./i18n.js";
 import { collectTemplates, copyKey, layoutKey, newSectionId, parseLayout, resolveLayout, sectionPrefix } from "./layout.js";
 import { MODULES, missingRequired } from "./modules/registry.js";
 
@@ -42,7 +42,7 @@ const TEXT = {
             "about-wedo": "What we do", "about-awwards": "Logos", legal: "Text" },
     },
 };
-const lang = () => (currentLang() === "en" ? "en" : "de");
+const lang = () => EDITOR_LANG;
 const t = (key) => TEXT[lang()][key];
 
 let collab;

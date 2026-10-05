@@ -3,7 +3,7 @@
 // colours and fonts, a sample headline and its hero video. Everyone through the gate votes (one vote per person per
 // variant, again to take it back), sees who voted and comments. Arrow keys and swipe move between cards.
 import { sanitizeSvg } from "../lib/svg-sanitize.js";
-import { currentLang } from "./i18n.js";
+import { EDITOR_LANG } from "./i18n.js";
 import { logoAnimation } from "./logoAnimation.js";
 import { getVariants, loadVariants } from "./variants.js";
 
@@ -13,7 +13,7 @@ const TEXT = {
     de: { title: "Stilvarianten", vote: "Stimme", votes: (n) => (n === 1 ? "1 Stimme" : `${n} Stimmen`), voted: "Abgestimmt", sortVotes: "Nach Stimmen", sortLetter: "Nach Buchstabe", close: "Schließen", comment: "Kommentar schreiben", send: "Senden", noComments: "Noch keine Kommentare.", hint: "← → oder wischen", failed: "Das hat nicht geklappt.", headline: "Ein technischer Kern. Zwei kommerzielle Engines.", body: "Bessere industrielle Entscheidungen." },
     en: { title: "Style variants", vote: "Vote", votes: (n) => (n === 1 ? "1 vote" : `${n} votes`), voted: "Voted", sortVotes: "By votes", sortLetter: "By letter", close: "Close", comment: "Write a comment", send: "Send", noComments: "No comments yet.", hint: "← → or swipe", failed: "That did not work.", headline: "One technical core. Two commercial engines.", body: "Better industrial decisions." },
 };
-const t = (key) => TEXT[currentLang() === "en" ? "en" : "de"][key];
+const t = (key) => TEXT[EDITOR_LANG][key];
 
 let collab, root = null, index = 0, sort = "letter", votes = {}, people = {}, comments = [], timelines = [];
 

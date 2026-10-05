@@ -1,7 +1,7 @@
 // Module picker (editors, edit mode): opened by a plus button between sections. Left the categories and a search,
 // in the middle schematic previews of every version, on the right the selected one large with Insert.
 // Keyboard: arrows browse the previews, Enter inserts, Esc closes, Tab moves between the three areas.
-import { currentLang } from "./i18n.js";
+import { EDITOR_LANG } from "./i18n.js";
 import { CATEGORIES, MODULES, renderModule } from "./modules/registry.js";
 
 const TEXT = {
@@ -14,7 +14,7 @@ const TEXT = {
         slots: "Contains", required: "required", draft: "Inserted as a draft. Fill in the placeholders, then publish.",
         devices: "How it adapts", derived: "derived", viewport: "CSS viewport" },
 };
-const lang = () => (currentLang() === "en" ? "en" : "de");
+const lang = () => EDITOR_LANG;
 const t = (key) => TEXT[lang()][key];
 
 // The preview devices at their real physical sizes next to each other: each frame renders the device's CSS viewport

@@ -1,11 +1,11 @@
 // "Invite colleague" for editors: a small form above the toolbar, sent to /api/invite.
-import { currentLang } from "./i18n.js";
+import { EDITOR_LANG } from "./i18n.js";
 
 const TEXT = {
     de: { title: "Kollegin oder Kollegen einladen", placeholder: "name@firma.de", send: "Einladen", sent: (e) => `Einladung an ${e} gesendet.`, existing: (e) => `${e} kann sich jetzt anmelden.`, bad: "Bitte eine gültige E-Mail-Adresse eingeben.", failed: "Einladung fehlgeschlagen." },
     en: { title: "Invite colleague", placeholder: "name@company.com", send: "Invite", sent: (e) => `Invite sent to ${e}.`, existing: (e) => `${e} can log in now.`, bad: "Please enter a valid email address.", failed: "The invite did not work." },
 };
-const t = (key) => TEXT[currentLang() === "en" ? "en" : "de"][key];
+const t = (key) => TEXT[EDITOR_LANG][key];
 
 export function initInvite(collab) {
     const button = document.createElement("button");

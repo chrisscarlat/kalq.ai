@@ -46,7 +46,7 @@ export function rangeEl(ctx, slot, target) {
     wrap.className = "kalq-m-range";
     const name = ctx.doc.createElement("span");
     name.className = "kalq-m-range__label";
-    name.textContent = def.label[ctx.lang === "en" ? "en" : "de"];
+    name.textContent = def.label.en; // an editor control: the editor is in English
     const input = ctx.doc.createElement("input");
     input.setAttribute("type", "range");
     ["min", "max", "step"].forEach((a) => input.setAttribute(a, String(def[a])));

@@ -368,6 +368,7 @@ function chatTools(ctx, item, n, count, w) {
 
 function renderInquiry(ctx) {
     const w = chatWords(ctx.lang);
+    const ew = CHAT_WORDS.en; // the editor's own controls and notes: in English, whatever the page language
     const items = chatItems(ctx.entry);
     const contact = chatContact(ctx.entry);
     const s = section(ctx, "kalq-m-chat");
@@ -399,7 +400,7 @@ function renderInquiry(ctx) {
         const li = el(ctx, "li", `kalq-m-chat__q is-${item.kind}`);
         li.setAttribute("data-q", item.id);
         li.setAttribute("data-kind", item.kind);
-        if (ctx.editor) li.append(chatTools(ctx, item, k + 1, items.length, w));
+        if (ctx.editor) li.append(chatTools(ctx, item, k + 1, items.length, ew));
         const q = langSlot(ctx, `q_${item.id}`, "h3", { className: "kalq-m-chat__ask", label: L(`${CHAT_WORDS.de.qph} ${k + 1}`, `${CHAT_WORDS.en.qph} ${k + 1}`) });
         if (!q) return; // visitors: a question without words is not asked
         li.append(q);
@@ -441,26 +442,26 @@ function renderInquiry(ctx) {
         send.children.length ? send : null, el(ctx, "p", "kalq-m-chat__note", w.note));
 
     if (ctx.editor) {
-        const add = el(ctx, "button", "kalq-m-chat__add", `+ ${w.add}`);
+        const add = el(ctx, "button", "kalq-m-chat__add", `+ ${ew.add}`);
         add.setAttribute("type", "button");
         add.setAttribute("data-chat-action", "add");
         if (items.length >= CHAT_MAX) add.setAttribute("disabled", "");
-        const sw = el(ctx, "button", "kalq-m-chat__switch", w.contact);
+        const sw = el(ctx, "button", "kalq-m-chat__switch", ew.contact);
         sw.setAttribute("type", "button");
         sw.setAttribute("data-chat-action", "contact");
         sw.setAttribute("aria-pressed", String(contact));
         const avatarUrl = mediaOf(ctx, "avatar");
-        const avatarField = append(el(ctx, "div", "kalq-m-chat__setting is-avatar"), el(ctx, "span", "", w.avatar), mediaEl(ctx, "avatar", "kalq-m-chat__avatar-field", { alt: "" }),
-            avatarUrl && !isOwnMedia(avatarUrl) ? el(ctx, "span", "kalq-m-chat__missing", w.avatarRefused) : null);
+        const avatarField = append(el(ctx, "div", "kalq-m-chat__setting is-avatar"), el(ctx, "span", "", ew.avatar), mediaEl(ctx, "avatar", "kalq-m-chat__avatar-field", { alt: "" }),
+            avatarUrl && !isOwnMedia(avatarUrl) ? el(ctx, "span", "kalq-m-chat__missing", ew.avatarRefused) : null);
         const dests = CHAT_DESTS.map((d) => {
             const raw = plain(textOf(ctx, d.id));
-            const note = !raw ? w.destMissing(w.send[d.id]) : !d.to(raw) ? w.destInvalid : null;
-            return append(el(ctx, "label", "kalq-m-chat__setting"), el(ctx, "span", "", w.dest[d.id]), slotEl(ctx, d.id, "span", { className: "kalq-m-chat__value" }),
+            const note = !raw ? ew.destMissing(ew.send[d.id]) : !d.to(raw) ? ew.destInvalid : null;
+            return append(el(ctx, "label", "kalq-m-chat__setting"), el(ctx, "span", "", ew.dest[d.id]), slotEl(ctx, d.id, "span", { className: "kalq-m-chat__value" }),
                 note ? el(ctx, "span", "kalq-m-chat__missing", note) : null);
         });
         const none = !CHAT_DESTS.some((d) => destOf(ctx, d));
         const settings = append(el(ctx, "div", "kalq-m-chat__settings"), avatarField, sw,
-            el(ctx, "p", "kalq-m-chat__settings-title", w.destTitle), none ? el(ctx, "p", "kalq-m-chat__nodest", w.noDest) : null, ...dests);
+            el(ctx, "p", "kalq-m-chat__settings-title", ew.destTitle), none ? el(ctx, "p", "kalq-m-chat__nodest", ew.noDest) : null, ...dests);
         append(win, top, log, script, add, settings);
     } else append(win, top, log, script, finish);
     if (!ctx.editor && !items.length && !textOf(ctx, "greeting")) return null;

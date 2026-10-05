@@ -436,8 +436,7 @@ export function renderModule(entry, ctx) {
     stub.className = "kalq-m-unknown";
     stub.setAttribute("data-module", `${entry.module}:${entry.version || ""}`);
     const note = ctx.doc.createElement("p");
-    note.textContent = ctx.lang === "en" ? `Unknown module: ${entry.module} (${entry.version || "–"}), not shown on the page`
-        : `Unbekanntes Modul: ${entry.module} (${entry.version || "–"}), wird auf der Seite nicht angezeigt`;
+    note.textContent = `Unknown module: ${entry.module} (${entry.version || "–"}), not shown on the page`; // editors only: in English
     stub.append(note);
     return stub;
 }

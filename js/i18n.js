@@ -27,6 +27,8 @@ export function t(key) {
 let editedContent = () => null;
 export const setEditedContent = (lookup) => { editedContent = lookup; };
 export const currentLang = () => current;
+// The editor (toolbar, panels, module settings, placeholders) speaks English whatever the page language is
+export const EDITOR_LANG = "en";
 
 export function applyLanguage(code = current) {
     current = contentLang(code);

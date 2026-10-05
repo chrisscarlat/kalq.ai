@@ -1,12 +1,12 @@
 // Side panel with tabs, opened from the clock button in the toolbar (or H). Comments add a tab here,
 // version history adds another. A plain <aside>, never a <nav>, and outside the blended header.
-import { currentLang } from "./i18n.js";
+import { EDITOR_LANG } from "./i18n.js";
 
 const tabs = [];
 let root, body, tabBar, button, active = null, collab;
 
 const TEXT = { de: { title: "Verlauf (H)", close: "Schließen" }, en: { title: "History (H)", close: "Close" } };
-const t = (key) => TEXT[currentLang() === "en" ? "en" : "de"][key];
+const t = (key) => TEXT[EDITOR_LANG][key];
 
 function renderTabs() {
     tabBar.replaceChildren(...tabs.map((tab) => {

@@ -118,27 +118,41 @@ nothing is marked yet.
 
 ## 2. Design panel in tabs
 
-The design panel (Styles, admins only) keeps its controls in tabs. Each tab has a small title saying what it
-controls:
+The design panel (Styles, admins only) keeps its controls in tabs: real tabs, words on one rule with the selected one
+underlined, in one row (a narrow window scrolls them). Each tab has a small title saying what it controls; each
+section heading inside is in small capitals with a hairline running to the end of the column. Like the rest of the
+editor, the panel is always in English, whatever the page language. Each tab:
 
 | Tab | Controls |
 | --- | --- |
-| Bilder / Images | Fill all, the liquid reveal, and the page map of every image slot (beside the tab) |
+| Images | Fill all, the liquid reveal, and the page map of every image slot (beside the tab) |
 | Logos | The variant's logo, and what sits in the middle of the hero |
-| Menü / Menu | The main menu's style |
-| Navigation | The footer (classic or with contact and links; wordmark, gradient) |
-| Benachrichtigungen / Notifications | The cookie bar: mode, both texts in both languages, preview, its own save |
-| Farben und Schrift / Colours and fonts | The variant's colours and fonts |
+| Menu | The main menu's style, with a wireframe preview beside the tab |
+| Navigation | The footer (classic or with contact and links; wordmark, gradient), with a wireframe preview |
+| Notifications | The cookie bar: mode, both texts in both languages, preview, its own save; a wireframe preview |
+| Colours & fonts | The variant's colours and fonts |
 
 The variant's letter, name and switches stay above the tabs; Versions and the actions (Preview, Save, …) below.
-The Notifications tab is site-wide, the same in every variant, and is saved on its own ("Hinweis speichern").
+The Notifications tab is site-wide, the same in every variant, and is saved on its own ("Save notice").
+
+### Wireframe previews
+
+Beside Menu, Navigation and Notifications: a browser drawn in white lines with the page inside as a wireframe
+(white bars for text, pills for buttons), redrawn on every choice. Menu shows the selected style's header with its
+own buttons (the four dots that turn to a diamond, the panels icon, the two lines) and opens in a loop as on the
+site: the dropdown card, the three panels wiping down, the mega panel, the full-screen sheet. Navigation shows the
+end of a page with the footer (classic, or contact and links with the wordmark and the moving gradient).
+Notifications shows the cookie pill: in notice mode the line runs out and it folds into its cookie; in consent mode
+Accept and Deny on its left. Under reduced motion: the open state, still. The frame is `role="img"` with a label
+naming what is shown.
 
 ### Files
 
 | File | Change |
 | --- | --- |
-| `js/styles.js` | The tabs (`role="tablist"`, arrow keys, Home, End), the tab titles, the sections split by tab (`revealSection`, `menuSection`, `footerSection`), and `cookieSection` and `saveCookieBlocks` for the cookie bar. |
-| `css/collab.scss`, `css/collab.css` | The tab styles; the page map only beside Images (`.kalq-styles__content.is-single` for the other tabs). |
+| `js/styles.js` | The tabs (`role="tablist"`, arrow keys, Home, End), the tab titles, the sections split by tab (`revealSection`, `menuSection`, `footerSection`), `cookieSection` and `saveCookieBlocks` for the cookie bar, and `drawPreview` for the right side. |
+| `js/stylePreview.js` | The wireframe previews: `menuPreview(style, label)`, `footerPreview({ style, wordmark, gradient }, label)`, `cookiePreview(mode, label)`. Plain DOM, no Kalq internals; it clones the page's wordmark and cookie icon when they are there. |
+| `css/collab.scss`, `css/collab.css` | The tab styles, the section headings, the previews (`.kalq-wire`); the right side only beside Images, Menu, Navigation and Notifications (`.kalq-styles__content.is-single` for the other tabs). |
 
 ### Dependencies on Kalq internals
 
@@ -149,4 +163,6 @@ store (`js/content.js`: `storedEntry`, `setLocalContent`) and the editor's broad
 
 certil.com ports the tab pattern and the Notifications tab into its own editor. The tab markup and keyboard handling
 in `renderPanel` are self-contained. `cookieSection` needs certil.com's content store and save function in place
-of Kalq's.
+of Kalq's. `js/stylePreview.js` ports as it is; its drawings follow Kalq's six menu styles and two footers, so
+certil.com redraws any style it does not have. The editor language is one constant (`EDITOR_LANG` in
+`js/i18n.js`).

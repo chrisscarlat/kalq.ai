@@ -5,11 +5,12 @@
 // Images, Logos, Menu, Navigation, Notifications (the cookie bar: site-wide blocks, saved on their own), Colours and
 // fonts.
 import { sanitizeSvg } from "../lib/svg-sanitize.js";
-import { currentLang } from "./i18n.js";
+import { EDITOR_LANG } from "./i18n.js";
 import { progressLine, showDone, uploadMedia } from "./upload.js";
 import { applyVariant, endPreview, getActive, loadVariants, logoNode } from "./variants.js";
 import { setLocalContent, storedEntry } from "./content.js";
 import { COOKIE_KEYS, applyCookieSettings, previewCookieBar } from "./cookieBar.js";
+import { cookiePreview, footerPreview, menuPreview } from "./stylePreview.js";
 
 const TEXT = {
     de: {
@@ -35,6 +36,7 @@ const TEXT = {
         tabTitles: { images: "Hero-Video, die Bildplätze aller Seiten und die Enthüllung über den Bildern", logos: "Das Logo der Variante und was in der Mitte des Heros steht",
             menu: "Wie das Hauptmenü aussieht und sich öffnet", navigation: "Der Footer: Kontakt, Links und Schriftzug am Ende jeder Seite",
             notifications: "Der Cookie-Hinweis unten auf jeder Seite. Gilt für die ganze Website, in jeder Variante gleich.", look: "Die Farben und Schriften der Variante" },
+        wirePreview: "Vorschau", wireMenu: (n) => `Vorschau: Menü ${n}`, wireFooter: (n) => `Vorschau: Footer ${n}`, wireCookie: (n) => `Vorschau: Cookie-Hinweis, ${n}`,
         tabsLabel: "Bereiche", cookieMode: "Art", cookieNotice: "Hinweis", cookieConsent: "Einwilligung",
         cookieNoticeHint: "Es werden keine Daten erhoben: eine Zeile ohne Buttons, nach 5 Sekunden verschwindet sie von selbst.",
         cookieConsentHint: "Es werden Daten erhoben: mit Akzeptieren und Ablehnen; bleibt, bis gewählt wird. Optionales lädt erst nach Akzeptieren.",
@@ -61,10 +63,11 @@ const TEXT = {
         peek: "View page", unsaved: "Not saved",
         pages: { home: "Home", platform: "Platform", company: "Company", impressum: "Legal notice", datenschutz: "Privacy" }, preview: "Preview", endPreview: "End preview", save: "Save", remove: "Delete",
         history: "Versions", restore: "Restore", saved: "Saved", failed: "Could not save", confirmDelete: "Delete this variant? It stays in the versions.",
-        tabs: { images: "Images", logos: "Logos", menu: "Menu", navigation: "Navigation", notifications: "Notifications", look: "Colours and fonts" },
+        tabs: { images: "Images", logos: "Logos", menu: "Menu", navigation: "Navigation", notifications: "Notifications", look: "Colours & fonts" },
         tabTitles: { images: "Hero video, the image slots of every page and the reveal over the images", logos: "The variant's logo and what sits in the middle of the hero",
             menu: "How the main menu looks and opens", navigation: "The footer: contact, links and wordmark at the end of every page",
             notifications: "The cookie notice at the bottom of every page. For the whole site, the same in every variant.", look: "The variant's colours and fonts" },
+        wirePreview: "Preview", wireMenu: (n) => `Preview: menu ${n}`, wireFooter: (n) => `Preview: footer ${n}`, wireCookie: (n) => `Preview: cookie notice, ${n}`,
         tabsLabel: "Sections", cookieMode: "Kind", cookieNotice: "Notice", cookieConsent: "Consent",
         cookieNoticeHint: "No data is collected: one line, no buttons; after 5 seconds it goes by itself.",
         cookieConsentHint: "Data is collected: with Accept and Deny; it stays until one is chosen. Optional content loads only after Accept.",
@@ -73,7 +76,7 @@ const TEXT = {
         errors: { letter_taken: "That letter is taken.", default_must_be_published: "The default variant must be published.", choose_another_default: "Make another variant the default first.", default_cannot_be_deleted: "The default variant cannot be deleted." },
     },
 };
-const t = (key) => TEXT[currentLang() === "en" ? "en" : "de"][key];
+const t = (key) => TEXT[EDITOR_LANG][key];
 const COLORS = ["bg", "text", "accent", "light", "dark"];
 const GOOGLE_SUGGESTIONS = ["Inter", "Space Grotesk", "Manrope", "DM Sans", "Sora", "Outfit", "Archivo", "IBM Plex Sans", "Work Sans", "Syne", "Playfair Display", "Fraunces", "Instrument Serif", "JetBrains Mono"];
 
@@ -250,7 +253,7 @@ function revealSection() {
 // Menu: the main menu's style
 function menuSection() {
     const menu = seg([["dropdown", t("menuDropdown")], ["panels", t("menuPanels")], ["minimal", t("menuMinimal")], ["plain", t("menuPlain")], ["mega", t("menuMega")], ["overlay", t("menuOverlay")]],
-        draft.menu_style, (v) => { draft.menu_style = v; changed(); });
+        draft.menu_style, (v) => { draft.menu_style = v; changed(); drawPreview(); });
     menu.classList.add("is-wrap");
     return el("section", {}, el("h4", { textContent: t("menu") }), menu);
 }
@@ -261,10 +264,10 @@ function footerSection() {
     const toggle = (key, label) => {
         const b = el("button", { type: "button", className: "kalq-seg__item", textContent: label });
         b.setAttribute("aria-pressed", draft[key] === true);
-        b.addEventListener("click", () => { draft[key] = !draft[key]; b.setAttribute("aria-pressed", draft[key]); changed(); });
+        b.addEventListener("click", () => { draft[key] = !draft[key]; b.setAttribute("aria-pressed", draft[key]); changed(); drawPreview(); });
         return b;
     };
-    const footer = seg([["classic", t("footerClassic")], ["harbor", t("footerHarbor")]], draft.footer_style, (v) => { draft.footer_style = v; extras.hidden = v !== "harbor"; changed(); });
+    const footer = seg([["classic", t("footerClassic")], ["harbor", t("footerHarbor")]], draft.footer_style, (v) => { draft.footer_style = v; extras.hidden = v !== "harbor"; changed(); drawPreview(); });
     const extras = el("div", { className: "kalq-seg", role: "group" }, toggle("footer_wordmark", t("footerWordmark")), toggle("footer_gradient", t("footerGradient")));
     extras.hidden = draft.footer_style !== "harbor";
     return el("section", {}, el("h4", { textContent: t("footer") }), footer, extras);
@@ -283,7 +286,7 @@ function cookieSection() {
     }
     const hint = el("p", { className: "kalq-styles__inherited" });
     const showHint = () => { hint.textContent = cookieDraft.mode === "consent" ? t("cookieConsentHint") : t("cookieNoticeHint"); };
-    const mode = seg([["notice", t("cookieNotice")], ["consent", t("cookieConsent")]], cookieDraft.mode, (v) => { cookieDraft.mode = v; showHint(); });
+    const mode = seg([["notice", t("cookieNotice")], ["consent", t("cookieConsent")]], cookieDraft.mode, (v) => { cookieDraft.mode = v; showHint(); drawPreview(); });
     showHint();
     const text = (m, l) => {
         const id = `kalq-cookie-${m}-${l}`;
@@ -540,7 +543,7 @@ async function historySection(box) {
     const { versions = [] } = await res.json();
     box.replaceChildren(el("h4", { textContent: t("history") }), ...versions.map((v, i) => {
         const row = el("div", { className: "kalq-styles__version" },
-            el("span", { textContent: `${new Date(v.created_at).toLocaleString(currentLang() === "en" ? "en-GB" : "de-DE", { dateStyle: "medium", timeStyle: "short" })} · ${v.label || ""}` }));
+            el("span", { textContent: `${new Date(v.created_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })} · ${v.label || ""}` }));
         if (i > 0) {
             const restore = el("button", { type: "button", className: "kalq-btn", textContent: t("restore") });
             restore.addEventListener("click", async () => {
@@ -652,11 +655,32 @@ function renderPanel() {
             el("div", { className: "kalq-styles__actions-view" }, preview, peek, dup),
             el("div", { className: "kalq-styles__actions-main" }, del, unsaved, save)),
         el("datalist", { id: "kalq-google-fonts" }, ...GOOGLE_SUGGESTIONS.map((f) => el("option", { value: f }))));
-    // the page map (every image slot) shows beside the Images tab
-    root.querySelector(".kalq-styles__content").classList.toggle("is-single", activeTab !== "images");
-    if (activeTab === "images") map.replaceChildren(el("h4", { textContent: t("sitemap") }), sitemapNode());
-    else map.replaceChildren();
+    drawPreview();
     historySection(history);
+}
+
+// Beside the settings: the page map (every image slot) for Images; for Menu, Navigation and Notifications a wireframe
+// of what is selected (js/stylePreview.js), redrawn on every choice. The other tabs take the full width.
+function drawPreview() {
+    const map = root?.querySelector(".kalq-styles__map");
+    if (!map || !draft) return;
+    const MENUS = { dropdown: "menuDropdown", panels: "menuPanels", minimal: "menuMinimal", plain: "menuPlain", mega: "menuMega", overlay: "menuOverlay" };
+    const name = (key) => t(key).toLowerCase();
+    let preview = null;
+    if (activeTab === "menu") preview = menuPreview(draft.menu_style, t("wireMenu")(name(MENUS[draft.menu_style] || "menuDropdown")));
+    else if (activeTab === "navigation") {
+        const extras = draft.footer_style === "harbor" ? [draft.footer_wordmark && name("footerWordmark"), draft.footer_gradient && name("footerGradient")].filter(Boolean) : [];
+        preview = footerPreview({ style: draft.footer_style, wordmark: !!draft.footer_wordmark, gradient: !!draft.footer_gradient },
+            t("wireFooter")([name(draft.footer_style === "harbor" ? "footerHarbor" : "footerClassic"), ...extras].join(", ")));
+    } else if (activeTab === "notifications") {
+        const mode = cookieDraft?.mode === "consent" ? "consent" : "notice";
+        preview = cookiePreview(mode, t("wireCookie")(name(mode === "consent" ? "cookieConsent" : "cookieNotice")));
+    }
+    root.querySelector(".kalq-styles__content").classList.toggle("is-single", activeTab !== "images" && !preview);
+    if (activeTab === "images") map.replaceChildren(el("h4", { textContent: t("sitemap") }), sitemapNode());
+    else if (preview) map.replaceChildren(el("h4", { textContent: t("wirePreview") }), el("div", { className: "kalq-styles__wire" }, preview),
+        el("p", { className: "kalq-styles__inherited", textContent: preview.getAttribute("aria-label").replace(/^[^:]+:\s*/, "") }));
+    else map.replaceChildren();
 }
 
 // New draft from an existing variant: same look, next free letter, never the default. A new style (not a duplicate)

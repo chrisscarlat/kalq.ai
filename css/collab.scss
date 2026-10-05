@@ -886,12 +886,23 @@ $pin-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
         transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.65, 0, 0.35, 1);
     }
 
+    // a section's heading: small capitals, and a hairline from its text to the end of the column marking the area
     h4 {
-        margin: 1.1rem 0 0.5rem;
-        font: 500 0.78rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
-        letter-spacing: 0.08em;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin: 1.2rem 0 0.55rem;
+        font: 500 0.66rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
-        opacity: 0.6;
+        color: rgba(255, 255, 255, 0.6);
+
+        &::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.16);
+        }
     }
 
     input[type="text"],
@@ -957,10 +968,11 @@ $pin-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
     flex: 1;
     min-height: 0;
     display: grid;
-    grid-template-columns: 360px 1fr;
+    grid-template-columns: 400px 1fr;
 }
 
 .kalq-styles__settings {
+    overflow-x: hidden;
     overflow-y: auto;
     padding: 0.2rem 1rem 0;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
@@ -974,33 +986,38 @@ $pin-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
 
 // The settings in tabs (Images, Logos, Menu, Navigation, Notifications, Colours and fonts), each with a small
 // title saying what it controls; the page map stands beside the Images tab only
+// Real tabs: words on one rule, the selected one standing on it with a white underline
 .kalq-styles__tabs {
     position: sticky;
     top: 0;
     z-index: 1;
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
+    column-gap: 0.85rem;
+    overflow-x: auto; // one row: a narrow window scrolls the tabs rather than stacking them
+    scrollbar-width: none;
     margin: 0.6rem -1rem 0;
-    padding: 0.5rem 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background: inherit;
+    padding: 0.35rem 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.16);
     background-color: rgba(20, 20, 20, 0.96);
 }
 
 .kalq-styles__tab {
-    padding: 0.35rem 0.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 999px;
+    position: relative;
+    margin-bottom: -1px; // the underline lies on the rule
+    padding: 0.55rem 0 0.5rem;
+    border: 0;
+    border-bottom: 2px solid transparent;
     background: none;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(255, 255, 255, 0.55);
     font: inherit;
-    font-size: 0.8rem;
+    font-size: 0.74rem;
+    white-space: nowrap;
     cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
 
-    &:hover { color: #fff; border-color: rgba(255, 255, 255, 0.4); }
-    &[aria-selected="true"] { background: #fff; border-color: #fff; color: #101010; }
-    &:focus-visible { outline: 2px solid #3B82F6; outline-offset: 2px; }
+    &:hover { color: #fff; border-bottom-color: rgba(255, 255, 255, 0.3); }
+    &[aria-selected="true"] { color: #fff; border-bottom-color: #fff; }
+    &:focus-visible { outline: 2px solid #3B82F6; outline-offset: 2px; border-radius: 2px; }
 }
 
 .kalq-styles__tabtitle {
@@ -2005,6 +2022,19 @@ $pin-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
     padding: 0;
 }
 
+// a row of choices that does not apply (the footer's extras without "Contact and links") is hidden
+.kalq-seg[hidden] {
+    display: none;
+}
+
+// many choices (the menu styles): one word per button, the row wraps within the column
+.kalq-seg.is-wrap {
+    display: flex;
+    flex-wrap: wrap;
+
+    .kalq-seg__item { white-space: nowrap; }
+}
+
 .kalq-styles__field[hidden] {
     display: none;
 }
@@ -2501,14 +2531,10 @@ body:not(.kalq-edit) .kalq-undo-btn {
     cursor: text;
 
     &::before {
-        content: attr(data-ph-de);
+        content: attr(data-ph-en); // the editor is in English, whatever the page language
         color: #3B82F6;
         opacity: 0.85;
     }
-}
-
-:lang(en) .kalq-ph:empty::before {
-    content: attr(data-ph-en);
 }
 
 .kalq-m-button.kalq-ph:empty {
@@ -2532,15 +2558,11 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
     background: #1D4ED8 $kalq-image-glyph center 42% / auto 46% no-repeat;
 
     &::before {
-        content: attr(data-ph-de);
+        content: attr(data-ph-en);
         color: rgba(255, 255, 255, 0.85);
         font-size: 0.85rem;
         font-weight: 500;
     }
-}
-
-:lang(en) .kalq-ph-media::before {
-    content: attr(data-ph-en);
 }
 
 // The button's address, editable in place (visitors get a real link instead)
@@ -3109,4 +3131,506 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video)) {
     display: block;
     position: relative;
     background: #1D4ED8 $kalq-image-glyph center 45% / auto 32% no-repeat;
+}
+
+//=================================== Design panel: the wireframe previews ===================================//
+// js/stylePreview.js: a browser in white lines, the page inside as a wireframe (white bars for text, pills for
+// buttons), the selected menu, footer or cookie bar drawn the way it looks on the site, opening as it does there.
+.kalq-styles__wire {
+    max-width: 880px;
+    margin-top: 0.4rem;
+}
+
+.kalq-wire {
+    --line: rgba(255, 255, 255, 0.78);
+    --soft: rgba(255, 255, 255, 0.22);
+    --ease: cubic-bezier(0.65, 0, 0.35, 1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: 16 / 10;
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.kalq-wire__chrome {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 30px;
+    padding: 0 12px;
+    border-bottom: 1.5px solid var(--line);
+}
+
+.kalq-wire__lights {
+    display: flex;
+    gap: 5px;
+
+    i { width: 8px; height: 8px; border: 1.5px solid var(--line); border-radius: 50%; }
+}
+
+.kalq-wire__address {
+    flex: 0 1 46%;
+    height: 14px;
+    margin-inline: auto;
+    border: 1.5px solid var(--soft);
+    border-radius: 999px;
+}
+
+.kalq-wire__page {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+// text: white bars; buttons: pills
+.kalq-wire__txt {
+    display: block;
+    flex: 0 0 auto;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.85);
+
+    &.is-faint { background: rgba(255, 255, 255, 0.4); }
+    &.is-big { height: 8px; }
+    &.is-huge { height: 14px; border-radius: 4px; }
+    &.is-title { height: 13px; border-radius: 4px; }
+    &.is-sub { height: 6px; background: rgba(255, 255, 255, 0.45); }
+}
+
+.kalq-wire__pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    width: 64px;
+    height: 20px;
+    padding: 0 3px 0 9px;
+    border-radius: 999px;
+    background: #fff;
+
+    .kalq-wire__txt { background: #101010; height: 4px; }
+}
+
+.kalq-wire__pill-dot { flex: 0 0 auto; width: 14px; height: 14px; border-radius: 50%; background: #101010; }
+
+// the header: logo at the left, the tools at the right; its own buttons as on the site
+.kalq-wire__head {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 44px;
+    padding: 0 18px;
+}
+
+.kalq-wire__logo {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.kalq-wire__mark { width: 16px; height: 16px; border: 1.5px solid var(--line); border-radius: 3px; }
+.kalq-wire__txt.is-word { height: 7px; }
+
+.kalq-wire__right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.kalq-wire__mode { width: 12px; height: 12px; border: 1.5px solid var(--line); border-radius: 50%; }
+.kalq-wire__txt.is-lang { height: 7px; }
+
+.kalq-wire__links {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    &.is-centred { position: absolute; left: 50%; transform: translateX(-50%); }
+
+    .kalq-wire__txt { height: 5px; }
+
+    .is-current { box-shadow: 0 6px 0 -1.5px #fff; } // the current page, underlined
+}
+
+// the four dots: a 2 by 2 grid that turns into a diamond when the menu is open (as .site-menu-toggle)
+.kalq-wire__dots {
+    display: grid;
+    grid-template-columns: repeat(2, 4px);
+    gap: 4px;
+    padding: 3px;
+    transition: transform 0.5s var(--ease);
+
+    i { width: 4px; height: 4px; border-radius: 50%; background: #fff; }
+}
+
+.kalq-wire.is-open .kalq-wire__dots { transform: rotate(45deg); }
+
+// the panels' icon: a bar that lifts, three small blocks dropping under it, getting smaller to the right
+.kalq-wire__panels-icon {
+    position: relative;
+    width: 16px;
+    height: 12px;
+
+    i {
+        position: absolute;
+        top: 5px;
+        background: #fff;
+        transform: scaleY(0);
+        transform-origin: top;
+        transition: transform 0.35s var(--ease);
+
+        &:nth-child(2) { left: 1px; width: 5px; height: 5px; transition-delay: 0.12s; }
+        &:nth-child(3) { left: 6px; width: 4px; height: 4px; transition-delay: 0.06s; }
+        &:nth-child(4) { left: 10px; width: 3.5px; height: 3px; }
+    }
+
+    .is-top { top: 2px; left: 0; width: 16px; height: 3px; transform: none; transition: transform 0.35s var(--ease); }
+}
+
+.kalq-wire.is-open .kalq-wire__panels-icon {
+    i { transform: none; }
+    .is-top { transform: translateY(-2px); }
+}
+
+// the overlay's two lines
+.kalq-wire__lines {
+    display: grid;
+    gap: 4px;
+    width: 16px;
+
+    i { height: 1.5px; background: #fff; }
+}
+
+// the page behind: a hero with its title, some text
+.kalq-wire__hero {
+    display: grid;
+    align-content: center;
+    gap: 7px;
+    height: 58%;
+    padding: 44px 18px 0;
+    border-bottom: 1.5px solid var(--soft);
+
+    .is-sub { margin-top: 5px; }
+}
+
+.kalq-wire__body {
+    display: grid;
+    gap: 8px;
+    padding: 18px;
+}
+
+// Dropdown: a frosted card under the dots, from the top right corner
+.kalq-wire__drop {
+    position: absolute;
+    top: 42px;
+    right: 14px;
+    z-index: 2;
+    display: grid;
+    gap: 2px;
+    width: 30%;
+    padding: 6px;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    background: rgba(16, 16, 16, 0.75);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+    transform-origin: top right;
+    transition: transform 0.4s var(--ease), opacity 0.3s ease;
+}
+
+.kalq-wire__drop-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 8px 9px;
+
+    &.is-current::after { content: ""; position: absolute; right: 9px; width: 5px; height: 5px; border-radius: 50%; background: #fff; }
+}
+
+.kalq-wire.is-open .kalq-wire__drop { opacity: 1; transform: none; }
+
+// Panels: three flush panels hanging from the top right corner, a staircase, wiping down right one first
+.kalq-wire__panes {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 2;
+    display: flex;
+    align-items: flex-start;
+}
+
+.kalq-wire__pane {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 92px;
+    padding: 8px;
+    border: 1.5px solid var(--line);
+    border-top: 0;
+    border-right-width: 0;
+    background: #1b1b1b;
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 0.55s cubic-bezier(0.76, 0, 0.24, 1);
+
+    &.is-1 { height: 190px; transition-delay: 0.16s; }
+    &.is-2 { height: 148px; transition-delay: 0.08s; }
+    &.is-3 { height: 114px; }
+
+    // the label at the bottom of each panel
+    .kalq-wire__txt { width: 56%; }
+}
+
+// the header's right side sits over them, so the panels start below its height
+.kalq-wire__pane:first-child { padding-top: 48px; }
+.kalq-wire__pane { padding-top: 48px; }
+
+.kalq-wire__pane-num {
+    width: 10px;
+    height: 10px;
+    border: 1.5px solid var(--line);
+    border-radius: 50%;
+
+    &.is-current { background: #fff; }
+}
+
+.kalq-wire.is-open .kalq-wire__pane { clip-path: inset(0); }
+.kalq-wire:not(.is-open) .kalq-wire__pane { transition-delay: 0s; }
+.kalq-wire:not(.is-open) .kalq-wire__pane.is-2 { transition-delay: 0.08s; }
+.kalq-wire:not(.is-open) .kalq-wire__pane.is-3 { transition-delay: 0.16s; }
+
+// Mega: under the Platform link, a centred panel: a feature card at the left, six items in a 2 by 3 grid
+.kalq-wire__mega {
+    position: absolute;
+    top: 46px;
+    left: 12.5%;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 40% 1fr;
+    gap: 12px;
+    width: 75%;
+    padding: 12px;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    background: #141414;
+    opacity: 0;
+    transform: translateY(-4px);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.kalq-wire__feature { display: grid; gap: 6px; align-content: start; }
+.kalq-wire__image { aspect-ratio: 16 / 9; margin-bottom: 3px; border: 1.5px solid var(--line); border-radius: 6px; }
+
+.kalq-wire__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 12px;
+    align-content: start;
+}
+
+.kalq-wire__item { display: flex; align-items: center; gap: 7px; }
+.kalq-wire__thumb { flex: 0 0 auto; width: 22px; height: 22px; border: 1.5px solid var(--line); border-radius: 5px; }
+.kalq-wire__item-text { flex: 1; display: grid; gap: 5px; }
+
+.kalq-wire.is-open .kalq-wire__mega { opacity: 1; transform: none; }
+.kalq-wire.is-open .is-mega-link { box-shadow: 0 6px 0 -1.5px #fff; }
+
+// Overlay: the full-screen sheet, fading in, huge links stacked and the button under them, the X at the top right
+.kalq-wire__sheet {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 9px;
+    padding: 0 8%;
+    background: #121212;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+
+    .kalq-wire__txt.is-huge { height: 20px; border-radius: 5px; }
+    .is-current { opacity: 1; }
+    .kalq-wire__pill { margin-top: 10px; }
+}
+
+.kalq-wire__sheet-close {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    width: 14px;
+    height: 14px;
+    background: linear-gradient(45deg, transparent calc(50% - 0.75px), #fff calc(50% - 0.75px), #fff calc(50% + 0.75px), transparent calc(50% + 0.75px)),
+        linear-gradient(-45deg, transparent calc(50% - 0.75px), #fff calc(50% - 0.75px), #fff calc(50% + 0.75px), transparent calc(50% + 0.75px));
+}
+
+.kalq-wire.is-open .kalq-wire__sheet { opacity: 1; }
+
+// Footer: the end of a page, then the footer
+.kalq-wire__page.is-footer {
+    display: flex;
+    flex-direction: column;
+}
+
+.kalq-wire__foot {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-top: 1.5px solid var(--line);
+    background: rgba(255, 255, 255, 0.03);
+
+    &.is-classic {
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-align: center;
+
+        > .kalq-wire__txt { margin-inline: auto; }
+        .is-sub { margin-top: 6px; }
+    }
+
+    &.is-harbor {
+        justify-content: flex-start;
+        gap: 22px;
+        padding: 26px 26px 14px;
+    }
+
+    // the moving gradient: slow bands of light drifting across, back and forth
+    &.has-gradient {
+        background: linear-gradient(120deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.08)) 0 0 / 300% 100%;
+        animation: kalq-wire-drift 8s ease-in-out infinite alternate;
+    }
+}
+
+@keyframes kalq-wire-drift { to { background-position: 100% 0; } }
+
+.kalq-wire__buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.kalq-wire__outline {
+    display: grid;
+    place-items: center;
+    width: 92px;
+    height: 26px;
+    border: 1.5px solid var(--line);
+    border-radius: 999px;
+}
+
+.kalq-wire__legal {
+    align-self: stretch;
+    display: flex;
+    justify-content: center;
+    margin: 14px auto 0;
+    padding-top: 10px;
+    width: 70%;
+    border-top: 1.5px solid var(--soft);
+}
+
+.kalq-wire__foot.is-harbor .kalq-wire__legal {
+    justify-content: flex-start;
+    width: auto;
+    margin: 0;
+}
+
+.kalq-wire__foot-cols {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr auto;
+    gap: 22px;
+}
+
+.kalq-wire__col {
+    display: grid;
+    gap: 7px;
+    align-content: start;
+
+    .is-link { box-shadow: 0 6px 0 -1.5px #fff; }
+}
+
+.kalq-wire__circle { width: 18px; height: 18px; border: 1.5px solid var(--line); border-radius: 50%; }
+
+.kalq-wire__wordmark {
+    margin-top: auto;
+    padding-inline: 6%;
+
+    svg { display: block; width: 100%; height: auto; color: #fff; fill: currentColor; }
+}
+
+// Cookie bar: the black pill at the bottom centre, its cookie, the line running out; in consent mode Accept and Deny
+.kalq-wire__cookie {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 16px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: max-content;
+    margin-inline: auto;
+    padding: 7px 12px;
+    border: 1.5px solid var(--line);
+    border-radius: 999px;
+    background: #000;
+
+    .is-cookie-text { height: 5px; }
+}
+
+.kalq-wire__cookie-icon { order: -2; flex: 0 0 auto; display: block; width: 16px; height: 16px; color: #fff; }
+.kalq-wire__cookie-actions { order: -1; display: flex; gap: 5px; }
+.kalq-wire__cookie-line { width: 26px; height: 2px; border-radius: 2px; background: #fff; transform-origin: right center; }
+
+.kalq-wire__cookie .kalq-wire__pill {
+    justify-content: center;
+    width: 42px;
+    height: 16px;
+    padding: 0 6px;
+
+    &.is-deny { background: transparent; border: 1.5px solid rgba(255, 255, 255, 0.55); .kalq-wire__txt { background: #fff; } }
+}
+
+// consent: the line runs out and the bar stays (once more every few seconds, for the preview)
+.kalq-wire__cookie.is-consent .kalq-wire__cookie-line { animation: kalq-wire-line 6s linear infinite; }
+@keyframes kalq-wire-line { 0% { transform: none; } 84%, 100% { transform: scaleX(0); } }
+
+// notice: it rises, the line runs out, the pill folds into its cookie and the cookie shrinks away; then again
+.kalq-wire__cookie.is-notice {
+    animation: kalq-wire-notice 8s var(--ease) infinite;
+
+    .kalq-wire__cookie-line { animation: kalq-wire-notice-line 8s linear infinite; }
+    > :not(.kalq-wire__cookie-icon) { animation: kalq-wire-notice-fade 8s ease infinite; }
+    .kalq-wire__cookie-icon { animation: kalq-wire-notice-icon 8s ease infinite; }
+}
+
+@keyframes kalq-wire-notice {
+    0% { opacity: 0; transform: translateY(10px); clip-path: inset(0 0 0 0 round 999px); }
+    6%, 70% { opacity: 1; transform: none; clip-path: inset(0 0 0 0 round 999px); }
+    80% { opacity: 1; transform: none; clip-path: inset(0 calc(100% - 42px) 0 0 round 999px); }
+    90%, 100% { opacity: 0; transform: scale(0.3); clip-path: inset(0 calc(100% - 42px) 0 0 round 999px); }
+}
+
+@keyframes kalq-wire-notice-line { 0%, 6% { transform: none; } 68%, 100% { transform: scaleX(0); } }
+@keyframes kalq-wire-notice-fade { 0%, 70% { opacity: 1; } 75%, 100% { opacity: 0; } }
+@keyframes kalq-wire-notice-icon { 0%, 80% { transform: none; } 90%, 100% { transform: rotate(-120deg) scale(0.6); } }
+
+// reduced motion: the open state, still; the cookie bar shown, its line full
+.kalq-wire.is-still *,
+.kalq-wire__cookie.is-still,
+.kalq-wire__cookie.is-still * { transition: none !important; animation: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+    .kalq-wire *,
+    .kalq-wire__foot.has-gradient { transition: none !important; animation: none !important; }
 }

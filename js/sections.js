@@ -19,7 +19,7 @@ const TEXT = {
         removed: (n) => `${n} entfernt. ⌘Z macht es rückgängig.`, nothing: "Nichts rückgängig zu machen.", nothingRedo: "Nichts zu wiederholen.",
         changed: "Die Seite wurde inzwischen geändert. In den Versionen wiederherstellen.", map: "Seitenaufbau", fixed: "Fixiert", footer: "Footer",
         themeChoose: "Darstellung wählen",
-        failed: "Das hat nicht geklappt.", relogin: "Bitte melden Sie sich erneut an.", copyOf: "Kopie", section: "Abschnitt",
+        failed: "Das hat nicht geklappt.", refused: (why) => `Nicht gespeichert: Die Datenbank lehnt es ab (${why}). Nichts wurde geändert.`, denied: "Nicht gespeichert: Ihre Anmeldung darf das nicht. Nichts wurde geändert.", relogin: "Bitte melden Sie sich erneut an.", copyOf: "Kopie", section: "Abschnitt",
         heroInserted: "Der neue Hero steht als Entwurf oben. Beim Veröffentlichen ersetzt er den bisherigen.",
         insert: "Modul hier einfügen", insertAfter: "Modul darunter einfügen", missing: (list) => `Erst ausfüllen: ${list}`,
         names: { header: "Hero", about: "Über Kalq", expertise: "Plattform-Liste", belief: "Haltung", social: "Social", "expertise-header": "Kopf",
@@ -34,7 +34,7 @@ const TEXT = {
         removed: (n) => `${n} removed. ⌘Z undoes it.`, nothing: "Nothing to undo.", nothingRedo: "Nothing to redo.",
         changed: "The page has changed since. Restore it from Versions.", map: "Page outline", fixed: "Fixed", footer: "Footer",
         themeChoose: "Choose appearance",
-        failed: "That did not work.", relogin: "Please log in again.", copyOf: "copy", section: "Section",
+        failed: "That did not work.", refused: (why) => `Not saved: the database refused it (${why}). Nothing was changed.`, denied: "Not saved: your login is not allowed to do this. Nothing was changed.", relogin: "Please log in again.", copyOf: "copy", section: "Section",
         heroInserted: "The new hero is on top as a draft. Publishing it replaces the current one.",
         insert: "Insert a module here", insertAfter: "Insert a module below", missing: (list) => `Fill in first: ${list}`,
         names: { header: "Hero", about: "About Kalq", expertise: "Platform list", belief: "Belief", social: "Social", "expertise-header": "Header",
@@ -114,13 +114,23 @@ async function write(layout, label, extra = [], { record = true } = {}) {
     collab.broadcast("content", { keys: [key], color: collab.me.color });
 }
 
+// What a refused save says: the database's own reason (a constraint, a missing column), or that the login may not
+// write, so a refusal is never a silent "did not work"
+function saveError(error) {
+    if (error?.message === "relogin") return t("relogin");
+    const code = String(error?.code || "");
+    if (code === "42501" || /row-level security|permission denied/i.test(error?.message || "")) return t("denied");
+    if (/^(23|42)/.test(code)) return t("refused")(String(error.message || code).replace(/^new row for relation "(\w+)" violates /, "$1: ").slice(0, 160));
+    return t("failed");
+}
+
 async function run(action) {
     if (busy) return;
     busy = true;
     try { await action(); }
     catch (error) {
         console.error("section", error);
-        collab.toast(error?.message === "relogin" ? t("relogin") : t("failed"), "error");
+        collab.toast(saveError(error), "error");
     } finally {
         busy = false;
         render();

@@ -38,7 +38,7 @@ const UI = {
         warn: "The file is larger than 8 MB. It uploads, but loads slowly for visitors.",
     },
 };
-const ui = (ctx) => UI[ctx.lang === "en" ? "en" : "de"];
+const ui = () => UI.en; // the editor is always in English, whatever the page language (js/i18n.js EDITOR_LANG)
 
 export const stepItems = (entry) => (Array.isArray(entry?.opts?.items) ? entry.opts.items.filter((x) => x && /^[a-z0-9]{1,12}$/.test(x.id)).slice(0, STEPS_MAX) : []);
 const newId = () => Math.random().toString(36).slice(2, 8);

@@ -5,7 +5,7 @@ internals, and what certil.com will need to change.
 
 ---
 
-## 1. Cookie bar
+## 1. Cookie bar ("dontpanic")
 
 A black pill at the bottom centre with a one-colour white cookie (crumbs and chocolate chips), one line of white
 text and a thin white line on the right that runs out over 5 seconds. Two modes, each with its own text in each
@@ -16,38 +16,58 @@ language, both editable:
 - **Consent** (data collected): Accept and Deny on the left, after the cookie. The line runs out but the bar stays
   until one is chosen. Nothing non-essential runs before Accept. The choice is kept; Accept reloads the page.
 
+### Names: never a word ad blockers look for
+
+Ad blockers refuse any file whose address contains words like cookie, consent, gdpr, privacy, notification or
+banner (`net::ERR_BLOCKED_BY_CLIENT`), and some hide elements whose class or id does. On kalq.ai that once broke
+more than the bar: the design panel imported `js/cookieBar.js`, the blocker refused it, so `js/styles.js` failed
+to import and the Styles button never appeared. So:
+
+- Every file, path, class, id and data value of the unit is neutral: `js/dontpanic.js`,
+  `css/components/_dontpanic.scss`, the class `dontpanic-bar`, the modes `tell` and `ask` in the markup, the
+  localStorage keys `kalq-dontpanic-seen` and `kalq-dontpanic-choice`, `data-optional`, `window.kalqOptional`.
+  The same rule for anything else that ports (the gate's cookie library is `lib/gate-token.js`).
+- Nothing else imports the bar's script statically. The design panel loads it only when its tab needs it
+  (`loadDontPanic()` in `js/styles.js`), and says so if it is refused; the rest of the panel works without it.
+- Visible text may say "Cookies": blockers match addresses and class names, not words on the page.
+- What stays: the stored block keys `site.cookie.*` (data, never in an address or a class; renaming them needs a
+  data migration) and the server variable `GATE_COOKIE_SECRET` (never seen by a browser).
+- Test: `blocked-ui` blocks every request containing those words, then the bar's script itself, and checks that
+  nothing of the site is caught, the Styles button appears and the panel works; it also scans the repo's file
+  names, classes and ids for the words.
+
 ### Files
 
 | File | What it is |
 | --- | --- |
-| `js/cookieBar.js` | The unit. `applyCookieSettings(doc, get)` writes the stored mode and texts into a document (shared by server and browser, no browser globals at the top level); the browser part shows the bar, handles Accept and Deny, runs consented content, and `previewCookieBar()` for the editor. Starts on its own when loaded. |
-| `css/components/_cookie-bar.scss` | The one style block. |
-| Markup in `tools/build_pages.py` (`COOKIE`) | In the shared page shell and on the gate, outside the page container. Built into `index.html`, `platform.html`, `company.html`, `impressum.html`, `datenschutz.html`, `gate.html`. |
+| `js/dontpanic.js` | The unit. `applyNoteSettings(doc, get)` writes the stored mode and texts into a document (shared by server and browser, no browser globals at the top level); the browser part shows the bar, handles Accept and Deny, runs what waited for Accept, and `previewDontPanic()` for the editor. Starts on its own when loaded. Exports `NOTE_KEYS` (the stored keys) and `MODES` (the stored values `notice`, `consent`); the markup says `tell` and `ask`. |
+| `css/components/_dontpanic.scss` | The one style block. |
+| Markup in `tools/build_pages.py` (`DONTPANIC`) | In the shared page shell and on the gate, outside the page container. Built into `index.html`, `platform.html`, `company.html`, `impressum.html`, `datenschutz.html`, `gate.html`. |
 
 Touched to wire it in:
 
 | File | Change |
 | --- | --- |
-| `lib/render-page.js` | Calls `applyCookieSettings` on every rendered page; `renderGate` does it for the gate. |
+| `lib/render-page.js` | Calls `applyNoteSettings` on every rendered page; `renderGate` does it for the gate. |
 | `api/page.js` | The gate page gets the stored settings (`latest_content("site")`). |
 | `css/components/_components.scss`, `css/gate.scss` | Import the style block (the gate has its own stylesheet). |
 | `css/main.css`, `css/gate.css` | Compiled. |
-| `middleware.js` | `js/cookieBar.js` is public: the gate and the legal pages load it without the gate cookie. |
+| `middleware.js` | `js/dontpanic.js` is public: the gate and the legal pages load it without the gate cookie. |
 
 ### Markup
 
 ```html
-<div class="kalq-cookie" data-mode="notice" role="status" aria-live="polite" hidden>
-    <svg class="kalq-cookie__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">…white cookie…</svg>
-    <p class="kalq-cookie__text" data-for="notice"><span lang="de">…</span><span lang="en">…</span></p>
-    <p class="kalq-cookie__text" data-for="consent"><span lang="de">…</span><span lang="en">…</span></p>
-    <div class="kalq-cookie__actions">
-        <button type="button" class="kalq-cookie__accept"><span lang="de">Akzeptieren</span><span lang="en">Accept</span></button>
-        <button type="button" class="kalq-cookie__deny"><span lang="de">Ablehnen</span><span lang="en">Deny</span></button>
+<div class="dontpanic-bar" data-mode="tell" role="status" aria-live="polite" hidden>
+    <svg class="dontpanic-bar__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">…white cookie…</svg>
+    <p class="dontpanic-bar__text" data-for="tell"><span lang="de">…</span><span lang="en">…</span></p>
+    <p class="dontpanic-bar__text" data-for="ask"><span lang="de">…</span><span lang="en">…</span></p>
+    <div class="dontpanic-bar__actions">
+        <button type="button" class="dontpanic-bar__accept"><span lang="de">Akzeptieren</span><span lang="en">Accept</span></button>
+        <button type="button" class="dontpanic-bar__deny"><span lang="de">Ablehnen</span><span lang="en">Deny</span></button>
     </div>
-    <span class="kalq-cookie__line" aria-hidden="true"></span>
+    <span class="dontpanic-bar__line" aria-hidden="true"></span>
 </div>
-<script src="js/cookieBar.js" type="module"></script>
+<script src="js/dontpanic.js" type="module"></script>
 ```
 
 Every text is in the HTML. The style block shows the current mode's sentence in the page's language
@@ -60,43 +80,44 @@ Site blocks (page `site`), saved like any edited text, append-only with versions
 
 | Key | Content |
 | --- | --- |
-| `site.cookie.mode` | `notice` or `consent` (the same in `de` and `en`). Missing means `notice`. |
+| `site.cookie.mode` | `notice` or `consent` (the same in `de` and `en`). Missing means `notice`. In the markup: `data-mode="tell"` or `"ask"`. |
 | `site.cookie.notice` | The notice text, per language. Missing keeps the HTML's default. |
 | `site.cookie.consent` | The consent text, per language. Missing keeps the HTML's default. |
 
-In the visitor's browser (localStorage): `kalq-cookie-notice = "seen"` (notice shown) and
-`kalq-cookie-consent = "granted" | "denied"` (the choice).
+In the visitor's browser (localStorage): `kalq-dontpanic-seen = "seen"` (the bar in tell mode was shown) and
+`kalq-dontpanic-choice = "granted" | "denied"` (the choice). These replaced `kalq-cookie-notice` and
+`kalq-cookie-consent`: visitors who had seen the old notice see the bar once more.
 
 ### Consent: what waits for Accept
 
 Non-essential content goes into the page in a form that does nothing on its own:
 
 ```html
-<script type="text/plain" data-consent src="…"></script>   <!-- or with inline code -->
-<template data-consent>…markup…</template>
+<script type="text/plain" data-optional src="…"></script>   <!-- or with inline code -->
+<template data-optional>…markup…</template>
 ```
 
-After Accept, and on every later page load, `js/cookieBar.js` turns these into a running script or into the markup.
-`window.kalqConsent = { mode, granted, choice }` tells other scripts. Kalq has no non-essential content today, so
+After Accept, and on every later page load, `js/dontpanic.js` turns these into a running script or into the markup.
+`window.kalqOptional = { mode, granted, choice }` tells other scripts. Kalq has no non-essential content today, so
 nothing is marked yet.
 
 ### Dependencies on Kalq internals
 
 - The server render (`lib/render-page.js`) and its content rows (`latest_content`): certil.com calls
-  `applyCookieSettings(document, get)` with its own store, where `get(key)` returns `{ de, en }` or null.
+  `applyNoteSettings(document, get)` with its own store, where `get(key)` returns `{ de, en }` or null.
 - The editor's save (the design panel, below) writes the blocks through Kalq's Supabase tables (`blocks`,
   `revisions`) with the editor's session.
-- One Kalq-specific rule in the style block: `body:has(.kalq-toolbar) .kalq-cookie` lifts the bar above Kalq's
+- One Kalq-specific rule in the style block: `body:has(.kalq-toolbar) .dontpanic-bar` lifts the bar above Kalq's
   editor and guest toolbar. certil.com drops it or points it at its own bottom bar.
 - `z-index: 90`, above Kalq's magazine (70) and hinge strip (71).
 
 ### What certil.com will need to change
 
-1. The storage keys (`kalq-cookie-notice`, `kalq-cookie-consent`) and the block keys (`site.cookie.*`), if it
+1. The storage keys (`kalq-dontpanic-seen`, `kalq-dontpanic-choice`) and the block keys (`site.cookie.*`), if it
    uses its own names.
-2. The class prefix `kalq-cookie`.
+2. The class prefix `dontpanic-bar`.
 3. The toolbar rule and the `z-index`, against its own layout.
-4. Mark its non-essential scripts (analytics, embeds) with `type="text/plain" data-consent`, and switch the mode to
+4. Mark its non-essential scripts (analytics, embeds) with `type="text/plain" data-optional`, and switch the mode to
    consent.
 5. The default texts in the markup (they ship as Kalq's defaults).
 
@@ -134,7 +155,7 @@ editor, the panel is always in English, whatever the page language. Each tab:
 
 The head names the style being edited ("Editing: …"); a click opens Colours & fonts, where styles are added, switched
 and edited. The other tabs edit the selected style. Versions and the actions (Preview, Save, …) stay below the tabs.
-The Notifications tab is site-wide, the same in every variant, and is saved on its own ("Save notice").
+The Notifications tab (its id `dontpanic`, the label stays "Notifications") is site-wide, the same in every variant, and is saved on its own ("Save notice"). Its script loads only when the tab needs it.
 
 ### Wireframe previews
 
@@ -151,7 +172,7 @@ naming what is shown.
 
 | File | Change |
 | --- | --- |
-| `js/styles.js` | The tabs (`role="tablist"`, arrow keys, Home, End), the tab titles, the sections split by tab (`revealSection`, `menuSection`, `footerSection`), `cookieSection` and `saveCookieBlocks` for the cookie bar, and `drawPreview` for the right side. |
+| `js/styles.js` | The tabs (`role="tablist"`, arrow keys, Home, End), the tab titles, the sections split by tab (`revealSection`, `menuSection`, `footerSection`), `noteSection` and `saveNoteBlocks` for the cookie bar, and `drawPreview` for the right side. |
 | `js/stylePreview.js` | The wireframe previews: `menuPreview(style, label)`, `footerPreview({ style, wordmark, gradient }, label)`, `cookiePreview(mode, label)`. Plain DOM, no Kalq internals; it clones the page's wordmark and cookie icon when they are there. |
 | `css/collab.scss`, `css/collab.css` | The tab styles, the section headings, the previews (`.kalq-wire`); the right side only beside Images, Menu, Navigation and Notifications (`.kalq-styles__content.is-single` for the other tabs). |
 
@@ -163,7 +184,7 @@ store (`js/content.js`: `storedEntry`, `setLocalContent`) and the editor's broad
 ### What certil.com will need to change
 
 certil.com ports the tab pattern and the Notifications tab into its own editor. The tab markup and keyboard handling
-in `renderPanel` are self-contained. `cookieSection` needs certil.com's content store and save function in place
+in `renderPanel` are self-contained. `noteSection` needs certil.com's content store and save function in place
 of Kalq's. `js/stylePreview.js` ports as it is; its drawings follow Kalq's six menu styles and two footers, so
 certil.com redraws any style it does not have. The editor language is one constant (`EDITOR_LANG` in
 `js/i18n.js`).

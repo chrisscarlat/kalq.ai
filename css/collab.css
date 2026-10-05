@@ -254,6 +254,16 @@ html.kalq-magazine-open .kalq-switcher {
   transform: translateY(-50%);
 }
 
+.kalq-media-style {
+  max-width: 16rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 8px;
+  background: rgba(16, 16, 16, 0.72);
+  color: #FFB400;
+  font: 500 0.72rem/1.3 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+  text-align: right;
+}
+
 .kalq-replace {
   padding: 0.55rem 1rem;
   border: 1px solid rgba(255, 255, 255, 0.4);

@@ -2,7 +2,8 @@
 // Saves go straight to Supabase with the editor's own login (RLS: editors only, as themselves) and are live for
 // everyone at once: the page channel only says "this block changed", every browser then reloads it from the server.
 // While someone edits a block, the others see it locked (see setLock in collab.js).
-import { applyDirect, setLocalContent } from "./content.js";
+import { applyDirect, setLocalContent, setPageMediaOnly, styleMediaFor } from "./content.js";
+import { getActive } from "./variants.js";
 import { editableHtml, renderBlock, serializeBlock } from "./blocks.js";
 import { applyLanguage, currentLang, EDITOR_LANG } from "./i18n.js";
 import { progressLine, showDone, uploadMedia } from "./upload.js";
@@ -16,13 +17,13 @@ const TEXT = {
     de: {
         edit: "Bearbeiten (E)", saved: "Gespeichert", failed: "Speichern fehlgeschlagen",
         locked: (n) => `${n} bearbeitet gerade`, relogin: "Bitte melden Sie sich erneut an, um zu bearbeiten.",
-        replace: "Ersetzen", add: "Bild oder Video hinzufügen", remove: "Entfernen", uploading: "Wird hochgeladen", tooLarge: "Die Datei ist größer als 50 MB.",
+        styleMedia: (l) => `Stil ${l} zeigt hier ein eigenes Bild`, replace: "Ersetzen", add: "Bild oder Video hinzufügen", remove: "Entfernen", uploading: "Wird hochgeladen", tooLarge: "Die Datei ist größer als 50 MB.",
         empty: "Leerer Text wird nicht gespeichert.", marquee: "Laufschrift",
     },
     en: {
         edit: "Edit (E)", saved: "Saved", failed: "Could not save",
         locked: (n) => `${n} is editing`, relogin: "Please log in again to edit.",
-        replace: "Replace", add: "Add image or video", remove: "Remove", uploading: "Uploading", tooLarge: "The file is larger than 50 MB.",
+        styleMedia: (l) => `Style ${l} shows its own media here`, replace: "Replace", add: "Add image or video", remove: "Remove", uploading: "Uploading", tooLarge: "The file is larger than 50 MB.",
         empty: "Empty text is not saved.", marquee: "Marquee text",
     },
 };
@@ -206,6 +207,14 @@ function replaceButtons() {
             tools.append(btn);
         };
         add(isEmptySlot(node) ? t("add") : t("replace"), "kalq-replace", (btn) => pickFile(key, btn));
+        // the active style shows its own image or video here (outside edit mode): say which, so nobody wonders
+        const style = styleMediaFor(key) ? getActive() : null;
+        if (style) {
+            const note = document.createElement("span");
+            note.className = "kalq-media-style";
+            note.textContent = t("styleMedia")(style.letter);
+            tools.append(note);
+        }
         if (isHolderNode(node) && !isEmptySlot(node)) add(t("remove"), "kalq-replace kalq-remove", () => setSlot(key, ""));
         host.append(tools);
     });
@@ -273,6 +282,9 @@ function setMode(next) {
     on = next;
     if (on) collab.setActiveMode("edit");
     document.body.classList.toggle("kalq-edit", on);
+    // editing shows the page's own images and videos (an upload shows at once); outside it the active style's again
+    setPageMediaOnly(on);
+    applyDirect(document);
     button.setAttribute("aria-pressed", on);
     if (!on) stopEditing(true);
     replaceButtons();

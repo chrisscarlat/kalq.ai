@@ -444,6 +444,17 @@
     box-shadow: inset 1px 0 rgba(128, 128, 128, 0.5), inset -1px 0 rgba(128, 128, 128, 0.5);
 }
 
+// Two screens stacked (a foldable held with its fold across): the same reading, top and bottom; the page flows across
+// the fold as one surface, and anything that wants to keep clear of it reads these (the picker's stacked frame sets them too)
+@media (vertical-viewport-segments: 2) {
+    :root {
+        --seg-t: env(viewport-segment-height 0 0, 50svh);
+        --seg-b: env(viewport-segment-height 0 1, 50svh);
+        --seg-hinge: calc(env(viewport-segment-top 0 1, 50svh) - env(viewport-segment-bottom 0 0, 50svh));
+        --seg-w: env(viewport-segment-width 0 0, 100vw);
+    }
+}
+
 @media (horizontal-viewport-segments: 2) {
     :root {
         --seg-l: env(viewport-segment-width 0 0, 50vw);

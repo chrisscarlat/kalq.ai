@@ -1618,6 +1618,25 @@ footer #container .footer_bottom a {
     border-radius: 18px;
   }
 }
+@container (max-width: 599px) {
+  .kalq-m :is(.kalq-m-split__media, .kalq-m-center__media, .kalq-m-services__media, .kalq-m-cascade__media) {
+    width: 100cqi;
+    max-width: none;
+    margin-left: calc(50% - 50cqi);
+    margin-right: calc(50% - 50cqi);
+    border-radius: 0;
+  }
+  .kalq-m-cascade__visual {
+    padding-bottom: 0;
+  }
+  .kalq-m-cascade__block {
+    display: none;
+  }
+  .kalq-m-cascade__media {
+    margin-top: 0;
+    translate: none;
+  }
+}
 @container (min-width: 600px) and (max-width: 760px) {
   .kalq-m-inner {
     padding: 0 1.75rem;
@@ -7592,6 +7611,14 @@ body:has(.kalq-toolbar) .dontpanic-bar {
   display: none;
 }
 
+@media (vertical-viewport-segments: 2) {
+  :root {
+    --seg-t: env(viewport-segment-height 0 0, 50svh);
+    --seg-b: env(viewport-segment-height 0 1, 50svh);
+    --seg-hinge: calc(env(viewport-segment-top 0 1, 50svh) - env(viewport-segment-bottom 0 0, 50svh));
+    --seg-w: env(viewport-segment-width 0 0, 100vw);
+  }
+}
 @media (horizontal-viewport-segments: 2) {
   :root {
     --seg-l: env(viewport-segment-width 0 0, 50vw);

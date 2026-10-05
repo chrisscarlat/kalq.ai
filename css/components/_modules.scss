@@ -312,6 +312,22 @@
     .kalq-m-media { border-radius: 18px; }
 }
 
+// Phones and folded foldables: a module's one picture runs edge to edge, the full width of the screen, whatever the
+// module's own side padding (100cqi is the section's width: .kalq-m is the size container). The cascade's offset
+// block, which shifts its picture to the right on wide screens, is left out here.
+@container (max-width: 599px) {
+    .kalq-m :is(.kalq-m-split__media, .kalq-m-center__media, .kalq-m-services__media, .kalq-m-cascade__media) {
+        width: 100cqi;
+        max-width: none;
+        margin-left: calc(50% - 50cqi);
+        margin-right: calc(50% - 50cqi);
+        border-radius: 0;
+    }
+    .kalq-m-cascade__visual { padding-bottom: 0; }
+    .kalq-m-cascade__block { display: none; }
+    .kalq-m-cascade__media { margin-top: 0; translate: none; }
+}
+
 // Unfolded foldables and small tablets: nearly square, so the split stays side by side with a square picture
 @container (min-width: 600px) and (max-width: 760px) {
     .kalq-m-inner { padding: 0 1.75rem; }

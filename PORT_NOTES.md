@@ -130,9 +130,10 @@ editor, the panel is always in English, whatever the page language. Each tab:
 | Menu | The main menu's style, with a wireframe preview beside the tab |
 | Navigation | The footer (classic or with contact and links; wordmark, gradient), with a wireframe preview |
 | Notifications | The cookie bar: mode, both texts in both languages, preview, its own save; a wireframe preview |
-| Colours & fonts | The variant's colours and fonts |
+| Colours & fonts | The style editor: every style as a card (a click switches to it), "+ New variant", the selected style's letter, name, Published and Default; then its colours and fonts |
 
-The variant's letter, name and switches stay above the tabs; Versions and the actions (Preview, Save, …) below.
+The head names the style being edited ("Editing: …"); a click opens Colours & fonts, where styles are added, switched
+and edited. The other tabs edit the selected style. Versions and the actions (Preview, Save, …) stay below the tabs.
 The Notifications tab is site-wide, the same in every variant, and is saved on its own ("Save notice").
 
 ### Wireframe previews
@@ -260,3 +261,24 @@ image; one-sentence description), closing line, button text and link, visibility
 - **Book mode:** every step open, the poster instead of the video.
 - **Reading order in the HTML:** h2, intro, the `<ol>` (each item an h3 with the label and heading, then a `<p>`),
   closing line, button, then the visual with its description as visually hidden text.
+
+---
+
+## 4. Gate logos
+
+The gate (the first password screen) cycles the logos of the published styles, one per second. Every style's logo
+sits in one fixed 120×120 square, the same size and place in every style and at every width, fitted inside it
+whatever its shape, and clipped to it: it never runs over the wordmark and the code fields below. A logo without a
+viewBox gets one from its own width and height, so it scales instead of being cut. The built-in mark's animation
+keeps its drawing inside its square (`js/logoAnimation.js`), like the header mark.
+
+### Files
+
+| File | Change |
+| --- | --- |
+| `css/gate.scss`, `css/gate.css` | `.gate_logo__stack` the fixed square; `.gate_logo__layer` clips, its `svg` fills the square; `.gate_mark` clips. |
+| `js/gate.js` | A viewBox for a logo that has none. |
+
+### What certil.com will need to change
+
+Nothing beyond its own gate markup and class names; the rule is the square and the fitted, clipped SVG.

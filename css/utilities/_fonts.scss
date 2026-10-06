@@ -10,48 +10,22 @@
     }
 }
 
-h1 {
-    font-size: clamp(5rem, 15cqi, 9rem);
-    letter-spacing: -0.04em;
-    font-weight: 300;
-    line-height: 120%;
-    word-spacing: 0.1em;
-}
-
-h2 {
-    font-size: clamp(3.8rem, 9cqi, 7rem);
-    letter-spacing: -0.04em;
-    font-weight: 300;
-    line-height: 120%;
-    word-spacing: 0.1em;
-}
-
-h3 {
-    font-size: clamp(3.2rem, 6cqi, 5rem);
-    letter-spacing: -0.04em;
-    font-weight: 300;
-    line-height: 120%;
-    word-spacing: 0.1em;
-}
-
-h4 {
-    font-size: clamp(2rem, 4cqi, 3.8rem);
-    letter-spacing: -0.03em;
-    font-weight: 300;
-    line-height: 120%;
-    word-spacing: 0.1em;
-}
-
-h5 {
-    font-size: clamp(1.7rem, 3.5cqi, 2.2rem);
-    font-weight: 300;
-    letter-spacing: -0.01em;
-    word-spacing: 0.1em;
-}
+// The headings and paragraphs take the shared type tokens (css/utilities/_type.scss): h1 to h3 in the style's main
+// font, h4, h5 and paragraphs in its secondary font. Every built-in page section is a width container, like every
+// module, so their sizes measure the same way.
+h1 { @include type(h1); }
+h2 { @include type(h2); }
+h3 { @include type(h3); }
+h4 { @include type(h4); }
+h5 { @include type(h5); }
 
 p {
-    font-size: 1rem;
+    @include type-size(body);
     letter-spacing: -0.01em;
+}
+
+[data-barba="container"] > section[data-section-builtin] {
+    container-type: inline-size;
 }
 
 .bold {
@@ -65,32 +39,6 @@ p {
     overflow: hidden;
     clip: rect(0 0 0 0);
     white-space: nowrap;
-}
-
-@media (max-width: 320px) {
-    h1 {
-        font-size: clamp(3.5rem, 15cqi, 9rem);
-    }
-    h2 {
-        font-size: clamp(3rem, 9cqi, 7rem);
-    }
-    h3 {
-        font-size: clamp(2rem, 6cqi, 5rem);
-    }
-    h4 {
-        font-size: clamp(1.6rem, 4cqi, 3.8rem);
-    }
-    h5 {
-        font-size: clamp(1.2rem, 3.5cqi, 2.2rem);
-    }
-}
-
-/* Style variants: the main font sets the wordmark and h1 to h3, the secondary font (body) everything else,
-   so h4, h5 and paragraphs simply inherit it from body */
-h1,
-h2,
-h3 {
-    font-family: var(--kalq-font-heading, inherit);
 }
 
 /* Wordmark: the outlined Clash Grotesk logo by default; with a variant's own main font, "KALQ" set in that font */

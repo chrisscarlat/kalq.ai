@@ -1,0 +1,66 @@
+/* One type scale for the site and every module. Each token sets the font (the style's main or secondary font), a size
+   that is fluid by the width of its container (cqi: every module and every built-in page section is a size
+   container, never the window), a weight, a line height and letter spacing. A heading's tag follows its role in the
+   document; its size comes from the token it takes, so a card title can be an h3 with the h5 token.
+
+   h1 to h5 are the built-in pages' heading sizes as they were, now shared by the modules. On two screens the unit
+   --cq is one screen's width (css/utilities/_dual.scss), so a token measures the screen its text sits on.
+   "light" is the lightest weight a style's font has from 300 up (js/variants.js: Syne has no 300, so 400). */
+
+$type-tokens: (
+    //            font       min        cq     max       min ≤320   weight    line   letter
+    display:     (heading,   5rem,      15,    9rem,     3.5rem,    light,    1,     -0.04em),
+    h1:          (heading,   5rem,      15,    9rem,     3.5rem,    light,    1.2,   -0.04em),
+    h2:          (heading,   3.8rem,    9,     7rem,     3rem,      light,    1.2,   -0.04em),
+    h3:          (heading,   3.2rem,    6,     5rem,     2rem,      light,    1.2,   -0.04em),
+    h4:          (body,      2rem,      4,     3.8rem,   1.6rem,    light,    1.2,   -0.03em),
+    h5:          (body,      1.7rem,    3.5,   2.2rem,   1.2rem,    light,    normal, -0.01em),
+    quote:       (heading,   1.4rem,    2.6,   2.4rem,   null,      light,    1.35,  -0.01em),
+    figure:      (heading,   2.5rem,    4.4,   4.5rem,   null,      light,    1,     -0.02em),
+    body:        (body,      1rem,      1.1,   1.2rem,   null,      400,      1.6,   -0.01em),
+    small:       (body,      0.875rem,  0.9,   0.95rem,  null,      400,      1.45,  0),
+    caption:     (body,      0.8125rem, 0.8,   0.875rem, null,      400,      1.4,   0),
+    eyebrow:     (body,      0.75rem,   0.75,  0.875rem, null,      500,      1.2,   0.12em),
+    // the inquiry chat's compact scale: fixed sizes, its window stays small at every width
+    chat-text:   (body,      0.8rem,    null,  null,     null,      400,      1.55,  0),
+    chat-title:  (body,      0.8rem,    null,  null,     null,      600,      1.3,   0.04em),
+    chat-small:  (body,      0.75rem,   null,  null,     null,      400,      1.5,   0),
+    chat-micro:  (body,      0.7rem,    null,  null,     null,      600,      1.3,   0.04em),
+);
+
+@function type-size($min, $cq, $max) {
+    @if $cq == null { @return $min; }
+    @return clamp(#{$min}, calc(#{$cq} * var(--cq, 1cqi)), #{$max});
+}
+
+// The whole token: font, size, weight, line height, letter spacing. A heading wraps long words (German compounds)
+// rather than run past a narrow screen.
+@mixin type($name) {
+    $t: map-get($type-tokens, $name);
+    @if $t == null { @error "Unknown type token: #{$name}"; }
+    $font: nth($t, 1); $min: nth($t, 2); $cq: nth($t, 3); $max: nth($t, 4); $small: nth($t, 5);
+    $weight: nth($t, 6); $line: nth($t, 7); $letter: nth($t, 8);
+    font-family: var(--kalq-font-#{$font}, "Clash Grotesk", "Helvetica Neue", Arial, sans-serif);
+    font-size: type-size($min, $cq, $max);
+    @if $weight == light { font-weight: var(--kalq-weight-light-#{$font}, 300); } @else { font-weight: $weight; }
+    line-height: $line;
+    letter-spacing: $letter;
+    @if index((display, h1, h2, h3, h4, h5), $name) {
+        word-spacing: 0.1em;
+        overflow-wrap: break-word;
+        hyphens: auto;
+    }
+    @if $small != null {
+        @container (max-width: 320px) { font-size: type-size($small, $cq, $max); }
+    }
+}
+
+// Only the size (where the rest is set otherwise, e.g. a fit-to-width title takes the token's bounds)
+@mixin type-size($name) {
+    $t: map-get($type-tokens, $name);
+    font-size: type-size(nth($t, 2), nth($t, 3), nth($t, 4));
+}
+
+// The token's bounds, for sizes computed from something else (the hero title fitted to its width)
+@function type-min($name) { @return nth(map-get($type-tokens, $name), 2); }
+@function type-max($name) { @return nth(map-get($type-tokens, $name), 4); }

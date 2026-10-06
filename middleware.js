@@ -15,7 +15,7 @@ const PUBLIC = [
     /^\/favicon\.ico$/,
     /^\/robots\.txt$/,
     /^\/css\/(gate|main|collab)\.css$/,
-    /^\/js\/(gate|logoAnimation|main|header|i18n|strings-public|content|blocks|layout|moduleBehaviour|variants|collab|expertiseHoverimg|verticleLine|heroTone|heroReveal|dontpanic|inquiry)\.js$/,
+    /^\/js\/(gate|logoAnimation|main|header|i18n|strings-public|content|blocks|layout|moduleBehaviour|variants|collab|expertiseHoverimg|verticleLine|heroTone|heroReveal|dontpanic|inquiry|styleMedia)\.js$/, // styleMedia: imported by content.js (code only, no copy)
     /^\/lib\/svg-sanitize\.js$/, // style variant logos are sanitised in the browser too
     /^\/js\/modules\/(registry|kit|final|destinations|scrollEffects)\.js$/, // modules on the legal pages render in the browser too (registry imports the others)
 ];

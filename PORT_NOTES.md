@@ -203,7 +203,7 @@ plain testimonials) is deleted, recoverable from git before commit f87d847. Home
 | `custom.columns` | `custom` | The custom module: 1–6 columns or a scrollable card row; each column or card holds pieces in any order (image, text as title or paragraph, quote, button, link); per column text above, below or over its first picture, bottom left or centred; per image "edge to edge"; on narrow screens the columns stack, or the editor keeps 2 or 3. Links go to a page or a send destination. |
 | `content.image-text` | `image-left`, `image-right` | The picture bleeds to the top, bottom and its side of the page; the text beside it, vertically centred, left-aligned. |
 | `content.alternating` | `left-first`, `right-first` | Three picture and text pairs in a zigzag, the rows close together. |
-| `testimonials.stack` | `stack` | Harbor's stacking cards, centred, the next cards' edges peeking out below in their own colours; an optional h2 above, two editable h4 side labels at mid-height. Each card: a big initial (aria-hidden; or a brand name, or an SVG logo), a small rounded portrait, the quote (blockquote), name, role, an optional SVG brand logo; per card a colour (picker) or a background picture behind a shade. The section pins and each scroll step flicks the top card away. 2–8 quotes. |
+| `testimonials.stack` | `stack` | Harbor's stacking cards, centred, the next cards' edges peeking out below in their own colours; an optional h2 above, two editable h4 side labels at mid-height. Each card: top left the company's logo (SVG or image) or its name, nothing else; top right a larger portrait with little rounding; the quote (blockquote); name (bold), role, a company line ("at Amazon"); bottom right one optional link (a URL) drawn as its icon: LinkedIn, Wikipedia, else a globe. Per card a colour (picker) or a background picture behind a shade. The section pins and each scroll step flicks the top card away. 2–8 quotes. |
 | `interaction.inquiry` | `chat` | The inquiry chat, back (js/modules/chat.js, chatBehaviour.js, css/components/_chat.scss): questions to tap, sent from the visitor's own app. Its send destinations are site-wide (`site.chat.<id>`), set in the insert picker's Chat entry. |
 | `scroll.tether` | `tether` | Each card pins at the top and the next slides up over it, 20px lower. 2–6 cards. |
 | `scroll.horizontal` | `horizontal` | The section pins while its row of cards slides sideways until the last is in view. 2–12 cards. |
@@ -258,7 +258,7 @@ send destinations), Cookie bar (its settings, moved here from the Styles panel, 
 class and ids named "dontpanic"), and for admins Page style, Navigation and Footers, which open the Styles panel at
 Colours & fonts, Menu and Navigation (`kalq:open-styles`).
 
-SVG logos (the testimonials' marks and brand logos) are uploaded as files but kept as sanitised SVG text in their
+SVG logos (the testimonials' company logos) are uploaded as files but kept as sanitised SVG text in their
 block (`data-kalq-type="svg"`, lib/svg-sanitize.js on save, in the browser and in the server render): the storage
 bucket takes no SVG files.
 

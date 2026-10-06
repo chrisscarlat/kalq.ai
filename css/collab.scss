@@ -2726,7 +2726,6 @@ $kalq-image-art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/
     margin-top: 1.4rem;
 }
 
-.kalq-picker.is-settings .kalq-picker__main { grid-template-rows: minmax(0, 1fr) 0; }
 .kalq-picker.is-settings .kalq-picker__hint { display: none; }
 
 .kalq-site {
@@ -2837,9 +2836,10 @@ $kalq-image-art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/
     opacity: 0.55;
 }
 
+// The devices: a slim strip at the top; the cards get the rest
 .kalq-picker__main {
     display: grid;
-    grid-template-rows: minmax(0, 40%) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
     min-width: 0;
     min-height: 0;
 }
@@ -2915,9 +2915,9 @@ $kalq-image-art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/
 }
 
 .kalq-picker__detail {
+    order: -1; // above the cards
     padding: 0 1.6rem;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
     min-width: 0;
 }
 
@@ -2927,13 +2927,13 @@ $kalq-image-art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.6rem;
-    min-height: 100%;
+    gap: 0.35rem;
     margin: 0 -1.6rem;
-    padding: 1rem 24px 2.5rem;
+    padding: 0.6rem 24px 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     background: #2b2b2b;
 
-    > .kalq-picker__label { align-self: flex-start; margin: 0.4rem 0 0; }
+    > .kalq-picker__label { align-self: flex-start; margin: 0; font-size: 0.7rem; }
 }
 
 .kalq-picker__row {
@@ -2952,7 +2952,7 @@ $kalq-image-art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/
     margin: 0;
 
     // every caption two lines high, so the frames above them stand on one line whatever the name's length
-    .kalq-picker__device-name { max-width: 9em; min-height: 2.4em; font-size: 0.62rem; line-height: 1.2; text-align: center; opacity: 0.65; }
+    .kalq-picker__device-name { max-width: 9em; min-height: 2.4em; font-size: 0.56rem; line-height: 1.2; text-align: center; opacity: 0.65; }
 }
 
 

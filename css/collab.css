@@ -2573,10 +2573,6 @@ body:not(.kalq-edit) .kalq-undo-btn {
   margin-top: 1.4rem;
 }
 
-.kalq-picker.is-settings .kalq-picker__main {
-  grid-template-rows: minmax(0, 1fr) 0;
-}
-
 .kalq-picker.is-settings .kalq-picker__hint {
   display: none;
 }
@@ -2709,7 +2705,7 @@ body:not(.kalq-edit) .kalq-undo-btn {
 
 .kalq-picker__main {
   display: grid;
-  grid-template-rows: minmax(0, 40%) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   min-width: 0;
   min-height: 0;
 }
@@ -2781,9 +2777,9 @@ body:not(.kalq-edit) .kalq-undo-btn {
 }
 
 .kalq-picker__detail {
+  order: -1;
   padding: 0 1.6rem;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   min-width: 0;
 }
 
@@ -2791,15 +2787,16 @@ body:not(.kalq-edit) .kalq-undo-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.6rem;
-  min-height: 100%;
+  gap: 0.35rem;
   margin: 0 -1.6rem;
-  padding: 1rem 24px 2.5rem;
+  padding: 0.6rem 24px 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background: #2b2b2b;
 }
 .kalq-picker__stage > .kalq-picker__label {
   align-self: flex-start;
-  margin: 0.4rem 0 0;
+  margin: 0;
+  font-size: 0.7rem;
 }
 
 .kalq-picker__row {
@@ -2820,7 +2817,7 @@ body:not(.kalq-edit) .kalq-undo-btn {
 .kalq-picker__dev .kalq-picker__device-name {
   max-width: 9em;
   min-height: 2.4em;
-  font-size: 0.62rem;
+  font-size: 0.56rem;
   line-height: 1.2;
   text-align: center;
   opacity: 0.65;

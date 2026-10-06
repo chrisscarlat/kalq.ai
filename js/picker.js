@@ -304,7 +304,7 @@ function stage(item) {
         row.append(el("figure", { className: "kalq-picker__dev" }, f.holder, el("figcaption", { className: "kalq-picker__device-name", textContent: d[L] })));
         return f;
     });
-    const GAP = 18, ROW_H = 300;
+    const GAP = 14, ROW_H = 100; // a slim strip: the devices small, the cards get the room
     const fit = () => {
         const room = box.clientWidth - 48;
         if (room <= 0) return;

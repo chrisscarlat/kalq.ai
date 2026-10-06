@@ -2343,13 +2343,7 @@ footer #container .footer_bottom a {
   gap: 1rem;
 }
 
-.kalq-f-ts__mark {
-  font-family: var(--kalq-font-heading, "Clash Grotesk", "Helvetica Neue", Arial, sans-serif);
-  font-size: clamp(3.2rem, 6 * var(--cq, 1cqi), 5rem);
-  font-weight: var(--kalq-weight-light-heading, 300);
-  line-height: 0.9;
-}
-.kalq-f-ts__mark.is-brand {
+.kalq-f-ts__mark.is-name {
   font-family: var(--kalq-font-body, "Clash Grotesk", "Helvetica Neue", Arial, sans-serif);
   font-size: clamp(1.7rem, 3.5 * var(--cq, 1cqi), 2.2rem);
   font-weight: var(--kalq-weight-light-body, 300);
@@ -2360,28 +2354,44 @@ footer #container .footer_bottom a {
   hyphens: auto;
 }
 @container (max-width: 320px) {
-  .kalq-f-ts__mark.is-brand {
+  .kalq-f-ts__mark.is-name {
     font-size: clamp(1.2rem, 3.5 * var(--cq, 1cqi), 2.2rem);
   }
 }
-.kalq-f-ts__mark.is-brand {
+.kalq-f-ts__mark.is-name {
   font-weight: 600;
 }
 .kalq-f-ts__mark.is-logo {
-  height: 2.6rem;
+  height: 2.4rem;
+  max-width: 11rem;
 }
 .kalq-f-ts__mark.is-logo svg {
+  display: block;
   height: 100%;
   width: auto;
-  max-width: 12rem;
-  display: block;
+  max-width: 11rem;
+}
+.kalq-f-ts__mark.is-image {
+  width: 11rem;
+  border-radius: 0;
+  background: none;
+}
+.kalq-f-ts__mark.is-image img {
+  object-fit: contain;
+  object-position: left center;
+}
+
+.kalq-f-ts__mark-edit {
+  display: grid;
+  gap: 0.3rem;
 }
 
 .kalq-f-ts__photo {
   flex-shrink: 0;
-  width: 3.6rem;
-  height: 3.6rem;
-  border-radius: 14px;
+  width: clamp(9.5rem, 18cqi, 13rem);
+  aspect-ratio: 4/5;
+  height: auto;
+  border-radius: 8px;
 }
 
 .kalq-f-ts__quote {
@@ -2399,6 +2409,13 @@ footer #container .footer_bottom a {
   margin-top: 0.8rem;
 }
 
+.kalq-f-ts__foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
 .kalq-f-ts__who {
   display: grid;
   gap: 0.15rem;
@@ -2413,7 +2430,7 @@ footer #container .footer_bottom a {
   font-weight: 600;
 }
 
-.kalq-f-ts__role {
+.kalq-f-ts__role, .kalq-f-ts__company {
   font-family: var(--kalq-font-body, "Clash Grotesk", "Helvetica Neue", Arial, sans-serif);
   font-size: clamp(0.875rem, 0.9 * var(--cq, 1cqi), 0.95rem);
   font-weight: 400;
@@ -2422,14 +2439,50 @@ footer #container .footer_bottom a {
   opacity: 0.75;
 }
 
-.kalq-f-ts__logo {
-  height: 1.9rem;
+.kalq-f-ts__social {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  color: #000;
+  background: none;
+  transition: opacity 0.2s ease;
 }
-.kalq-f-ts__logo svg {
-  display: block;
-  height: 100%;
+.kalq-f-ts__social svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+.kalq-f-ts__social:hover {
+  opacity: 0.65;
+}
+.kalq-f-ts__social:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+div.kalq-f-ts__social {
   width: auto;
-  max-width: 10rem;
+  height: auto;
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.kalq-f-ts__mark-choices {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.kalq-f-ts__mark-choices > .kalq-f-ts__mark {
+  width: 7rem;
+  height: 2.6rem;
+}
+
+.kalq-f-ts__mark-choices .kalq-ph-media {
+  min-height: 0;
 }
 
 .kalq-f-ts.is-armed .kalq-f-ts__inner {
@@ -2656,9 +2709,12 @@ footer #container .footer_bottom a {
   grid-area: 1/1;
   margin-top: calc(var(--i, 0) * 20px);
 }
+.kalq-device .kalq-f-hs__pin {
+  overflow: hidden;
+}
 .kalq-device .kalq-f-hs__track {
   display: flex;
-  overflow: hidden;
+  width: max-content;
   padding-inline: var(--f-pad-x);
   max-width: none;
 }
@@ -2666,6 +2722,83 @@ footer #container .footer_bottom a {
   flex: 0 0 clamp(14rem, 30cqi, 22rem);
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .kalq-device .kalq-f-ts__card:nth-child(1) {
+    animation: kalq-pv-flick 3.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+  .kalq-device .kalq-f-ts__card:nth-child(2) {
+    animation: kalq-pv-rise-2 3.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+  .kalq-device .kalq-f-ts__card:nth-child(3) {
+    animation: kalq-pv-rise-3 3.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+  .kalq-device .kalq-f-tether__list > :nth-child(n+2) {
+    animation: kalq-pv-tether 4.8s cubic-bezier(0.25, 1, 0.5, 1) both infinite;
+    animation-delay: calc((var(--i, 1) - 1) * 0.6s);
+  }
+  .kalq-device .kalq-f-hs__track {
+    animation: kalq-pv-slide 7s ease-in-out infinite alternate;
+  }
+}
+@keyframes kalq-pv-flick {
+  0%, 35% {
+    transform: none;
+    opacity: 1;
+  }
+  60% {
+    transform: translate(30%, -115%) rotate(-10deg);
+    opacity: 0;
+  }
+  61%, 85% {
+    transform: translateY(2.2rem) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes kalq-pv-rise-2 {
+  0%, 35% {
+    transform: translateY(1.1rem) scale(0.95);
+  }
+  60%, 85% {
+    transform: none;
+  }
+  100% {
+    transform: translateY(1.1rem) scale(0.95);
+  }
+}
+@keyframes kalq-pv-rise-3 {
+  0%, 35% {
+    transform: translateY(2.2rem) scale(0.9);
+  }
+  60%, 85% {
+    transform: translateY(1.1rem) scale(0.95);
+  }
+  100% {
+    transform: translateY(2.2rem) scale(0.9);
+  }
+}
+@keyframes kalq-pv-tether {
+  0%, 8% {
+    transform: translateY(110%);
+  }
+  30%, 82% {
+    transform: none;
+  }
+  100% {
+    transform: translateY(110%);
+  }
+}
+@keyframes kalq-pv-slide {
+  0%, 12% {
+    transform: none;
+  }
+  88%, 100% {
+    transform: translateX(calc(100cqi - 100%));
+  }
+}
 body .kalq-device.kalq-device :is(.kalq-f-tools, .kalq-m-alt-field) {
   display: none;
 }

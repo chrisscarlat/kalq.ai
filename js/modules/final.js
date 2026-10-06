@@ -297,11 +297,13 @@ function renderAlternating(ctx) {
 // brand name or an SVG logo), a small rounded portrait top right, the quote, the name, the role, an optional brand
 // logo. Per card the editor sets its colour or a background picture (the text stays readable over a shade).
 export const TESTIMONIALS_MIN = 2, TESTIMONIALS_MAX = 8;
-const MARKS = ["initial", "brand", "logo"];
+// top left: the brand's logo (an uploaded SVG or image) or its name, switched in the editor. Earlier marks map over
+const MARKS = ["logo", "name"];
+const OLD_MARKS = { initial: "name", brand: "name", svg: "logo", image: "logo" };
 const HEX = /^#[0-9a-f]{6}$/i;
 const DEFAULT_TESTIMONIALS = [{ id: "t1" }, { id: "t2" }, { id: "t3" }];
 export const testimonialItems = (entry) => itemsOf(entry, TESTIMONIALS_MAX, DEFAULT_TESTIMONIALS).map((x) => ({
-    id: x.id, bg: HEX.test(x.bg || "") ? x.bg.toLowerCase() : "", image: x.image === true, mark: MARKS.includes(x.mark) ? x.mark : "initial" }));
+    id: x.id, bg: HEX.test(x.bg || "") ? x.bg.toLowerCase() : "", image: x.image === true, mark: MARKS.includes(x.mark) ? x.mark : OLD_MARKS[x.mark] || "name" }));
 const LABELS = { left: L("Stimmen", "Testimonials"), right: L("Sie lieben uns", "They are in love with us") };
 // light text on a dark card: by the colour's relative luminance
 const isDarkHex = (hex) => {
@@ -347,6 +349,38 @@ function testimonialsAct(opts, action, id, arg) {
     return label;
 }
 
+// The card's one optional link (a profile or a website), drawn as its site's icon: LinkedIn, Wikipedia, else a globe
+const SOCIAL = [
+    { id: "linkedin", test: /(^|\.)linkedin\.com$/i, label: "LinkedIn",
+        svg: '<path d="M4.5 9h3v10.5h-3zM6 4.3a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5ZM10 9h2.9v1.5c.5-.9 1.7-1.8 3.4-1.8 3.2 0 3.8 2 3.8 4.7v6.1h-3v-5.4c0-1.3 0-2.9-1.8-2.9s-2.1 1.4-2.1 2.8v5.5h-3z" fill="currentColor"/>' },
+    { id: "wikipedia", test: /(^|\.)wikipedia\.org$/i, label: "Wikipedia",
+        svg: '<path d="M2.5 6.5h4.2M9.6 6.5h3.8M16.8 6.5h4.7M4.4 6.5l4.3 11 3.1-7.4M10.6 6.5l4.5 11 4.4-11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' },
+    { id: "web", test: /./, label: { de: "Website", en: "Website" },
+        svg: '<circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.4 5.3 3.4 8.5s-1 6.1-3.4 8.5c-2.4-2.4-3.4-5.3-3.4-8.5s1-6.1 3.4-8.5Z" fill="none" stroke="currentColor" stroke-width="1.5"/>' },
+];
+function socialLink(ctx, slot, who) {
+    const raw = plain(textOf(ctx, slot));
+    let url = null;
+    try { url = /^https?:\/\//i.test(raw) ? new URL(raw) : null; } catch { url = null; }
+    if (!url && !ctx.editor) return null;
+    const kind = url ? SOCIAL.find((x) => x.test.test(url.hostname)) : SOCIAL[2];
+    const name = typeof kind.label === "string" ? kind.label : kind.label[ctx.lang === "en" ? "en" : "de"];
+    const icon = `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">${kind.svg}</svg>`;
+    if (ctx.editor) {
+        const wrap = el(ctx, "div", `kalq-f-ts__social is-${kind.id}`);
+        wrap.innerHTML = icon;
+        wrap.append(slotEl(ctx, slot, "span", { className: "kalq-m-link-field", label: L("Link (optional): LinkedIn, Wikipedia oder eine Website", "Link (optional): LinkedIn, Wikipedia or a website") }));
+        return wrap;
+    }
+    const a = el(ctx, "a", `kalq-f-ts__social is-${kind.id}`);
+    a.setAttribute("href", url.href);
+    a.setAttribute("target", "_blank");
+    a.setAttribute("rel", "noopener");
+    a.setAttribute("aria-label", who ? `${name}: ${who}` : name);
+    a.innerHTML = icon;
+    return a;
+}
+
 function testimonialCard(ctx, it, k, count, pos) {
     const n = `Card ${k + 1}: `, nd = `Karte ${k + 1}: `;
     const quote = slotEl(ctx, `q_${it.id}`, "blockquote", { className: "kalq-f-ts__quote", format: "paragraphs", label: L(`${nd}Zitat (nur echte Zitate)`, `${n}quote (real quotes only)`) });
@@ -370,25 +404,31 @@ function testimonialCard(ctx, it, k, count, pos) {
         colour.setAttribute("aria-label", "Card colour");
         t.append(group(ctx, "Colour", colour, tool(ctx, "bg", "Default", { id: it.id, arg: "", pressed: !it.bg })),
             tool(ctx, "image", "Background picture", { id: it.id, pressed: it.image }),
-            group(ctx, "Mark", ...MARKS.map((m) => tool(ctx, "mark", { initial: "Initial", brand: "Brand name", logo: "Logo (SVG)" }[m], { id: it.id, arg: m, pressed: it.mark === m }))));
+            group(ctx, "Top left", ...MARKS.map((m) => tool(ctx, "mark", { logo: "Logo", name: "Brand name" }[m], { id: it.id, arg: m, pressed: it.mark === m }))));
         card.append(t);
     }
-    // top: the mark (left), the portrait (right)
-    let mark = null;
-    if (it.mark === "brand") mark = slotEl(ctx, `b_${it.id}`, "span", { className: "kalq-f-ts__mark is-brand", label: L(`${nd}Markenname`, `${n}brand name`) });
-    else if (it.mark === "logo") mark = svgEl(ctx, `k_${it.id}`, "kalq-f-ts__mark is-logo", { label: L(`${nd}Logo (SVG)`, `${n}logo (SVG)`) });
-    if (!mark) { // the initial (also for visitors when a brand name or logo is not set yet)
-        const own = plain(textOf(ctx, `i_${it.id}`)).slice(0, 2);
-        mark = ctx.editor ? slotEl(ctx, `i_${it.id}`, "span", { className: "kalq-f-ts__mark", label: L("A", "A") })
-            : el(ctx, "span", "kalq-f-ts__mark", (own || plain(textOf(ctx, `n_${it.id}`)).slice(0, 1)).toUpperCase());
-        mark.setAttribute("aria-hidden", "true"); // decorative: the name says who
+    // top left: the brand's logo (an uploaded SVG, else an uploaded image) or the brand name; nothing else there
+    const company = plain(textOf(ctx, `b_${it.id}`));
+    let mark;
+    if (it.mark === "logo") {
+        const svg = svgEl(ctx, `k_${it.id}`, "kalq-f-ts__mark is-logo", { label: L(`${nd}Logo als SVG`, `${n}logo as SVG`), name: company || null });
+        const hasSvg = !!svg?.querySelector("svg");
+        const img = hasSvg ? null : mediaEl(ctx, `m_${it.id}`, "kalq-f-ts__mark is-logo is-image", { alt: company, label: L(`${nd}Logo als Bild`, `${n}logo as image`) });
+        if (!ctx.editor) mark = hasSvg ? svg : img;
+        else mark = append(el(ctx, "div", "kalq-f-ts__mark-edit"), hasSvg ? svg : append(el(ctx, "div", "kalq-f-ts__mark-choices"), svg, img),
+            slotEl(ctx, `b_${it.id}`, "span", { className: "kalq-m-alt-field", label: L(`${nd}Markenname (Alternativtext des Logos)`, `${n}brand name (the logo's alt text)`) }));
     }
+    if (!mark) mark = slotEl(ctx, `b_${it.id}`, "span", { className: "kalq-f-ts__mark is-name", label: L(`${nd}Markenname`, `${n}brand name`) });
+    // top right: the portrait
     const portrait = mediaEl(ctx, `p_${it.id}`, "kalq-f-ts__photo", { alt: "", label: L(`${nd}Porträt`, `${n}portrait`) });
-    portrait?.setAttribute("aria-hidden", "true");
-    const brand = it.mark === "brand" ? null : plain(textOf(ctx, `b_${it.id}`));
+    portrait?.setAttribute("aria-hidden", "true"); // decorative: the name says who
+    const who = plain(textOf(ctx, `n_${it.id}`));
     append(card, append(el(ctx, "div", "kalq-f-ts__top"), mark, portrait), quote,
-        append(el(ctx, "figcaption", "kalq-f-ts__who"), name, slotEl(ctx, `r_${it.id}`, "span", { className: "kalq-f-ts__role", label: L(`${nd}Rolle und Firma`, `${n}role and company`) })),
-        svgEl(ctx, `l_${it.id}`, "kalq-f-ts__logo", { label: L(`${nd}Firmenlogo (SVG, optional)`, `${n}brand logo (SVG, optional)`), name: brand || plain(textOf(ctx, `r_${it.id}`)) || null }));
+        append(el(ctx, "div", "kalq-f-ts__foot"),
+            append(el(ctx, "figcaption", "kalq-f-ts__who"), name,
+                slotEl(ctx, `r_${it.id}`, "span", { className: "kalq-f-ts__role", label: L(`${nd}Rolle`, `${n}role`) }),
+                slotEl(ctx, `co_${it.id}`, "span", { className: "kalq-f-ts__company", label: L(`${nd}Firmenzeile, z. B. „bei Amazon“`, `${n}company line, e.g. "at Amazon"`) })),
+            socialLink(ctx, `u_${it.id}`, who)));
     return card;
 }
 

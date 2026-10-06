@@ -66,6 +66,18 @@ const notify = () => listeners.forEach((fn) => fn(getActive(), variants));
 
 //=================================== Fonts ===================================//
 const loadedFonts = new Set();
+// The type tokens' "light" weight (css/utilities/_type.scss) is the lightest weight a font has from 300 up: Google
+// sends only the weights a family has (Syne starts at 400), so read them from the faces its stylesheet declared
+const fontSheets = new Map(); // family -> the loading of its Google stylesheet
+async function lightWeight(family) {
+    await fontSheets.get(family);
+    const ranges = [...document.fonts].filter((f) => f.family.replace(/["']/g, "") === family).map((f) => String(f.weight).split(" ").map(Number));
+    if (!ranges.length) return null;
+    if (ranges.some(([a, b = a]) => a <= 300 && 300 <= b)) return 300;
+    const above = ranges.map(([a, b = a]) => (a >= 300 ? a : b >= 300 ? 300 : null)).filter((w) => w != null);
+    return above.length ? Math.min(...above) : null;
+}
+
 function fontStack(font) {
     if (!font || font.source === "default" || !font.family) return null;
     const id = `${font.source}:${font.family}:${font.url || ""}`;
@@ -75,6 +87,7 @@ function fontStack(font) {
             const link = document.createElement("link");
             link.rel = "stylesheet";
             link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font.family).replace(/%20/g, "+")}:wght@200;300;400;500;600;700&display=swap`;
+            fontSheets.set(font.family, new Promise((done) => { link.onload = link.onerror = done; }));
             document.head.append(link);
         } else if (font.source === "upload" && font.url && window.FontFace) {
             new FontFace(font.family, `url(${font.url})`).load().then((f) => document.fonts.add(f)).catch(() => { });
@@ -165,9 +178,18 @@ export function applyVariant(variant, { remember = false, preview = false } = {}
     }
     root.dataset.mode = mode;
     for (const [part, prop] of [["heading", "--kalq-font-heading"], ["body", "--kalq-font-body"]]) {
-        const stack = fontStack(variant.fonts?.[part]);
+        const font = variant.fonts?.[part];
+        const stack = fontStack(font);
         if (stack) { root.style.setProperty(prop, stack); look[prop] = stack; }
         else root.style.removeProperty(prop);
+        // the light weight this font really has (Clash Grotesk and uploaded files: 300)
+        const weightProp = `--kalq-weight-light-${part}`;
+        root.style.removeProperty(weightProp);
+        if (stack && font.source === "google") {
+            lightWeight(font.family).then((w) => {
+                if (w && w !== 300 && getActive()?.fonts?.[part]?.family === font.family) root.style.setProperty(weightProp, String(w));
+            });
+        }
     }
     root.dataset.variant = variant.letter;
     // A main font of its own also sets the wordmark (header, hero); the default keeps the outlined Clash logo

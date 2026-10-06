@@ -5554,6 +5554,7 @@ body:has(.kalq-toolbar) .dontpanic-bar {
     grid-template-columns: var(--seg-l) var(--seg-r);
     column-gap: var(--seg-hinge);
     align-items: stretch;
+    align-content: stretch;
     padding: 0;
     border-radius: 0;
     min-height: calc(var(--seg-h) - 6rem);
@@ -5874,6 +5875,7 @@ body:has(.kalq-toolbar) .dontpanic-bar {
   grid-template-columns: var(--seg-l) var(--seg-r);
   column-gap: var(--seg-hinge);
   align-items: stretch;
+  align-content: stretch;
   padding: 0;
   border-radius: 0;
   min-height: calc(var(--seg-h) - 6rem);

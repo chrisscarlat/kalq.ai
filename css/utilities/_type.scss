@@ -21,11 +21,6 @@ $type-tokens: (
     small:       (body,      0.875rem,  0.9,   0.95rem,  null,      400,      1.45,  0),
     caption:     (body,      0.8125rem, 0.8,   0.875rem, null,      400,      1.4,   0),
     eyebrow:     (body,      0.75rem,   0.75,  0.875rem, null,      500,      1.2,   0.12em),
-    // the inquiry chat's compact scale: fixed sizes, its window stays small at every width
-    chat-text:   (body,      0.8rem,    null,  null,     null,      400,      1.55,  0),
-    chat-title:  (body,      0.8rem,    null,  null,     null,      600,      1.3,   0.04em),
-    chat-small:  (body,      0.75rem,   null,  null,     null,      400,      1.5,   0),
-    chat-micro:  (body,      0.7rem,    null,  null,     null,      600,      1.3,   0.04em),
 );
 
 @function type-size($min, $cq, $max) {

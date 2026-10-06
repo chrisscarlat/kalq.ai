@@ -191,97 +191,75 @@ certil.com redraws any style it does not have. The editor language is one consta
 
 ---
 
-## 3. Scroll story (media.scroll-steps)
+## 3. The builder's module set
 
-A scroll story: a pinned visual (a video scrubbed by the scroll, or an image), a thin progress bar, and an ordered
-list of steps where the active one opens. One unit for the port to certil.com.
+The page builder offers seven modules; every other module (the earlier library, the inquiry chat, the scroll story,
+contact, both plain testimonials) is deleted, recoverable from git before commit f87d847. Home's one live module,
+the central video (section `sb8z0z`), is kept unchanged; Platform, Company and the legal pages use built-in sections
+only.
 
-### Module id
+| Module id | Versions | What it is |
+| --- | --- | --- |
+| `content.media-center` | `image`, `video` | Kept: a central image or video with a heading and a caption. |
+| `custom.columns` | `custom` | The custom module: 1–6 columns or a scrollable card row; each column or card holds pieces in any order (image, text as title or paragraph, quote, button, link); per column text above, below or over its first picture, bottom left or centred; per image "edge to edge"; on narrow screens the columns stack, or the editor keeps 2 or 3. Links go to a page or a send destination. |
+| `content.image-text` | `image-left`, `image-right` | The picture bleeds to the top, bottom and its side of the page; the text beside it, vertically centred, left-aligned. |
+| `content.alternating` | `left-first`, `right-first` | Three picture and text pairs in a zigzag, the rows close together. |
+| `testimonials.stack` | `stack` | Harbor's stacking cards: the section pins and each scroll step flicks the top card away. 2–8 quotes. |
+| `scroll.tether` | `tether` | Each card pins at the top and the next slides up over it, 20px lower. 2–6 cards. |
+| `scroll.horizontal` | `horizontal` | The section pins while its row of cards slides sideways until the last is in view. 2–12 cards. |
 
-`media.scroll-steps` (registry category `media`). One version: `pinned`.
+Every heading is real by its role (the module's title an h2, a card's or row's title an h3) and every size is a
+shared type token (section 5). Everything a visitor reads is in the HTML in reading order; the scroll effects only
+move it.
 
-### GSAP
+### Scroll effects
 
-GSAP **3.12.5** with ScrollTrigger 3.12.5, the version certil.com has vendored. The module adds no library: it uses
-the page's global `gsap` and `ScrollTrigger`. Kalq loads them from cdnjs (`gsap/3.12.5/gsap.min.js`,
-`gsap/3.12.5/ScrollTrigger.min.js`); certil.com loads its vendored copies. Without them the module stays static.
+GSAP 3.12.5 ScrollTrigger, as on the page; with the smooth scroller the pins move by transform
+(`pinType: "transform"`). An effect arms its section (`.is-armed`) only with motion allowed, outside edit mode and
+with ScrollTrigger on the page; it disarms when that changes (reduced motion switched on, edit mode, the section
+removed, a foldable folding). Unarmed, without JavaScript and under reduced motion each scroll module is a plain
+stacked list.
 
 ### Files
 
-Created (the module itself):
-
-| File | What it is |
+| File | What it holds |
 | --- | --- |
-| `js/modules/scrollSteps.js` | The registry entry (`SCROLL_STEPS`), its category, the template (`render`, shared by server and browser), the book unit, and the behaviour (`setupScrollSteps`). |
-| `css/components/_scroll-steps.scss` | The one style block, including the two-screen mixin `scroll-steps-two-screens`. |
+| `js/modules/final.js` | The six new definitions (`FINAL`, `FINAL_CATEGORIES`): slots, versions with their picker wireframes, templates (shared by the server and the browser), the custom module's editor changes (`act`), the lists' limits (`itemsEditor`), the publish checks (`missing`), the magazine units. |
+| `js/modules/scrollEffects.js` | The three effects (`stack`, `tether`, `horizontal`) and their arming (`setupScrollEffect`). Browser only. |
+| `js/modules/destinations.js` | The send destinations (`SEND_DESTS`): WhatsApp, Telegram, Threema, SMS, email; each validates its address and builds the link. Moved out of the deleted chat. |
+| `js/modules/registry.js` | `MODULES` = the central image or video plus `FINAL`; the picker's categories (Custom, Content, Testimonials, Scroll effects, and the Navigation and Footers notes). |
+| `js/modules/kit.js` | Per-item slots take their label (`mediaEl`, `altField`); the empty picture's drawing (`PLACEHOLDER_ART`). |
+| `js/sections.js` | One handler for a module's own controls (`data-items-action`, `-id`, `-arg`): a module's `act(opts, action, id, arg)` or its `itemsEditor` list (add, move, remove); each change is one undo step. |
+| `js/moduleBehaviour.js` | Starts the effects for `.kalq-f[data-scroll-effect]` outside edit mode; the built-in platform list on two screens. |
+| `css/components/_final.scss` | The modules' styles (tokens only), the picker previews of the scroll modules, the editor controls, the two-screen mixin `final-two-screens`; also what the site keeps from the old library: `.kalq-btn-round` (the header's call to action), `.kalq-link-underline`, `.kalq-sr`, `.kalq-m-alt-field`. |
+| `css/utilities/_dual.scss` | `@include final-two-screens`. |
+| `middleware.js` | `js/modules/{registry,kit,final,destinations,scrollEffects}.js` are public (the legal pages load the registry). |
 
-Kalq's pattern has no separate template file: a module's markup is its `render(ctx)` function in the same file.
+### Stored data
 
-Touched (one line or one small block each, so the module is wired in):
+A module's lists live in its layout entry (`opts.items`), each item's content in its own blocks
+`<page>.<section>.<slot>_<itemId>`. The custom module: `opts = { cols, row, narrow, items: [{ id, over, align,
+pieces: [{ id, kind, bleed, as, to }] }] }`, its pieces' blocks `img_<id>` (+ `img_<id>_alt`), `t_<id>`, `q_<id>` +
+`qa_<id>`, `b_<id>` + `h_<id>` (label + address).
 
-| File | Change |
-| --- | --- |
-| `js/modules/registry.js` | Imports `SCROLL_STEPS` and its category; `Object.assign(MODULES, SCROLL_STEPS)`. |
-| `js/moduleBehaviour.js` | Imports and calls `setupScrollSteps` for `.kalq-ss[data-scroll-steps]`. |
-| `css/components/_components.scss` | `@import "scroll-steps"`. |
-| `css/utilities/_dual.scss` | `@include scroll-steps-two-screens` (two-screen devices and the picker's two-screen preview). |
-| `js/sections.js` | Generic item actions (`data-items-action`: add, up, down, remove, visibility) for any module with `itemsEditor`; each one undo step. |
-| `js/edit.js` | Opt-in upload hint and size warning for a media slot (`data-kalq-upload-hint`, `data-kalq-upload-warn`). |
-| `middleware.js` | `js/modules/scrollSteps.js` is public, like the registry that imports it (the legal pages load the registry). |
-| `css/main.css` | Compiled. |
+### The editor
 
-### What the editor sets
+The editor's controls sit on the module itself in edit mode (English, the editor's language) and are hidden
+otherwise; signed-in editors get the editor render with edit mode off too, so the effects run for them outside edit
+mode. The empty picture is an inline SVG, aria-hidden: a delicate mountain under a larger sun in the text's colour
+at very low contrast.
 
-Section heading (h2, required), intro line, steps (2 to 8, default 4; each: label, heading, one or two sentences,
-start time in the video in seconds), the visual (MP4 video or an image; optional WebM of the same video; poster
-image; one-sentence description), closing line, button text and link, visibility (public / private space only).
-
-### Dependencies on Kalq internals
-
-- **Render helpers** from `js/modules/kit.js`: `L, append, el, mediaEl, mediaOf, plain, section, slotEl, hrefOf,
-  textOf, editorField` (and through it `renderBlock` from `js/blocks.js`). certil.com needs equivalents or a copy.
-- **Render context** `ctx = { doc, page, id, entry, def, store, lang, editor }`; content keys are
-  `<page>.<sectionId>.<slot>`, text per language, media as `{ media: url }`.
-- **Section entry options**: the steps live in `entry.opts.items` (`[{ id }]`, in order) and the visibility in
-  `entry.opts.visibility`. Each step's words are blocks `label_<id>`, `heading_<id>`, `text_<id>`, `time_<id>`.
-- **Editor**: placeholders (`kalq-ph`, styled in `css/collab.scss`), media replace buttons (`js/edit.js`
-  `replaceButtons`), the item actions in `js/sections.js`, the go-live check `def.missing` (used by
-  `missingRequired` in the registry), `def.initialOpts` (used by `insertModule`).
-- **Base styles**: `.kalq-m` / `.kalq-m-inner` (container queries, padding) from `css/components/_modules.scss`;
-  `.kalq-sr` (visually hidden) from `css/components/_library.scss`; colour tokens `--kalq-bg`, `--kalq-text`,
-  `--kalq-accent`; two-screen variables `--seg-l`, `--seg-r`, `--seg-hinge`.
-- **Scrolling**: Kalq scrolls through smooth-scrollbar (`window.Scrollbar`, `.scrollbar-container`) with a
-  ScrollTrigger scroller proxy. The module uses `pinType: "transform"` and `Scrollbar.scrollTo` when it finds it;
-  otherwise `pinType: "fixed"` and `window.scrollTo`. certil.com without smooth-scrollbar takes the second path.
-- **Book mode**: `magazine.unit` returns a unit for Kalq's magazine layout `A` (`js/book/layouts.js`).
-- **Own storage**: `OWN_STORAGE` in `scrollSteps.js` accepts site paths and Kalq's Supabase bucket
-  (`https://<project>.supabase.co/storage/v1/object/public/site-media/...`).
+The picker opens on "All" (every module version in one view); the selected card carries its Insert (Enter inserts
+too). Below the cards, on a dark grey stage, the selected version on all eight preview devices in one row, scaled
+together so each keeps its real size relative to the others, their screens black where the module ends; under the
+row the module on the laptop's width, large enough to read.
 
 ### What certil.com will need to change
 
-1. `OWN_STORAGE` in `js/modules/scrollSteps.js`: certil.com's own storage rule.
-2. **Visibility**: Kalq has no private space, so the setting is stored (`opts.visibility`) but not enforced here.
-   certil.com must hide the section from the public page when it is `"private"`.
-3. The render helpers and base styles listed above, or certil.com's equivalents. Class names use the `kalq-ss`
-   prefix (`kalq-m` for the module base); rename if certil.com uses its own prefix.
-4. The colour tokens `--kalq-bg`, `--kalq-text`, `--kalq-accent`, or certil.com's tokens.
-5. The editor wiring (item actions, upload hint and size warning, placeholders) in certil.com's editor.
-6. The script calls `setupScrollSteps(section)` for each `.kalq-ss[data-scroll-steps]` after the page's content is
-   in place, and again after a page transition.
-7. **Inline styles at runtime only**: the markup has no `style` attribute and no inline script. While pinned,
-   ScrollTrigger sets the pin's position and the script sets the progress bar's `transform`.
-8. The upload hint and the 8 MB warning text live in the module's `UI` words. The editor shows them in English (`EDITOR_LANG`).
-
-### Behaviour summary
-
-- **Wide screens (768px and up), motion allowed, GSAP present:** the section pins for `steps × 0.8` viewport
-  heights. The scroll position sets the active step (`aria-current="step"`, open), fills the progress bar and
-  scrubs the video through each step's start time. The video never plays on its own; it seeks one frame at a time.
-- **Reduced motion, no JavaScript, under 768px:** not pinned, not scrubbed. The poster once (the video is not
-  loaded), then every step open.
-- **Book mode:** every step open, the poster instead of the video.
-- **Reading order in the HTML:** h2, intro, the `<ol>` (each item an h3 with the label and heading, then a `<p>`),
-  closing line, button, then the visual with its description as visually hidden text.
+1. Its own storage and content store for the slots (`js/content.js` here), and its section layout entries with `opts`.
+2. Its GSAP and smooth scroller: `scroller()` in `js/modules/scrollEffects.js` reads Kalq's smooth-scrollbar.
+3. Its colour tokens in place of `--kalq-text` / `--kalq-bg`, and the type tokens of section 5.
+4. The send destinations' wording, if certil.com names them differently.
 
 ---
 
@@ -309,7 +287,7 @@ Nothing beyond its own gate markup and class names; the rule is the square and t
 ## 5. One type scale (tokens)
 
 The site and every module share one scale, `css/utilities/_type.scss`: display, h1–h5, body, small, caption,
-eyebrow, quote, figure, and the inquiry chat's compact tokens (chat-text, chat-title, chat-small, chat-micro). Each
+eyebrow, quote and figure (the inquiry chat's compact tokens went with the chat). Each
 token sets the font (the style's main or secondary font), a size fluid by its container's width (`cqi`, never the
 window), a weight and a line height. A heading's tag follows its role; its size comes from the token it takes
 (`@include type(h5)` on a card's h3).

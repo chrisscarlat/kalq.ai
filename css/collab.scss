@@ -2579,27 +2579,51 @@ body:not(.kalq-edit) .kalq-undo-btn {
     min-width: 8rem;
 }
 
-// The one image placeholder, as in the picker's wireframes (js/picker.js GLYPH): a dark blue block, a lighter blue
-// sun behind a single darker blue mountain. The label says what belongs there.
-$kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 70%22%3E%3Ccircle cx=%2261%22 cy=%2225%22 r=%2210%22 fill=%22%237DB3FF%22/%3E%3Cpath d=%22M24 62L48 19L72 62Z%22 fill=%22%23172E7A%22/%3E%3C/svg%3E");
+// The one image placeholder (js/modules/kit.js PLACEHOLDER_ART, inline and aria-hidden; the picker's wireframes draw
+// the same): a delicate mountain under a larger sun, very low contrast, in the colour of the text around it, so it
+// reads on a light page and in a dark card alike. The slot's label sits small at the foot.
+$kalq-image-art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 160 100%22%3E%3Ccircle cx=%22104%22 cy=%2236%22 r=%2217%22 fill-opacity=%22.3%22/%3E%3Cpath d=%22M30 78 L62 46 L76 60 L88 50 L120 78%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.4%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E");
 
 .kalq-ph-media {
+    position: relative;
+    display: grid;
+    place-items: center;
     width: 100%;
     height: 100%;
     min-height: 220px;
-    display: grid;
-    align-content: end;
-    justify-items: center;
-    padding-bottom: 1rem;
     border-radius: inherit;
-    background: #1D4ED8 $kalq-image-glyph center 42% / auto 46% no-repeat;
+    background: color-mix(in srgb, currentColor 4%, transparent);
 
     &::before {
         content: attr(data-ph-en);
-        color: rgba(255, 255, 255, 0.85);
-        font-size: 0.85rem;
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0.9rem;
+        text-align: center;
+        color: currentColor;
+        opacity: 0.45;
+        font-size: 0.8rem;
         font-weight: 500;
     }
+}
+
+.kalq-ph-art {
+    width: min(42%, 220px);
+    height: auto;
+    overflow: visible;
+}
+
+.kalq-ph-art__sun { fill: currentColor; fill-opacity: 0.06; }
+
+.kalq-ph-art__mountain {
+    fill: none;
+    stroke: currentColor;
+    stroke-opacity: 0.2;
+    stroke-width: 1.2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
 }
 
 // The button's address, editable in place (visitors get a real link instead)
@@ -2720,7 +2744,7 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
 
 .kalq-picker__main {
     display: grid;
-    grid-template-rows: minmax(0, 38%) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 40%) minmax(0, 1fr);
     min-width: 0;
     min-height: 0;
 }
@@ -2796,109 +2820,70 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
 }
 
 .kalq-picker__detail {
-    padding: 1.1rem 1.6rem 0;
+    padding: 0 1.6rem;
     overflow-y: auto;
     overflow-x: hidden;
     min-width: 0;
 }
 
-.kalq-picker__info {
-    display: grid;
-    grid-template-columns: 150px 1fr auto;
-    gap: 1.4rem;
-    align-items: start;
-    margin-bottom: 0.9rem;
-
-    .kalq-picker__detail-name {
-        margin-top: 0;
-    }
-
-    .kalq-picker__label {
-        margin-top: 0.6rem;
-    }
-}
-
-.kalq-picker__side-actions {
-    max-width: 280px;
-
-    .kalq-picker__note {
-        margin-top: 0;
-    }
-}
-
-.kalq-picker__preview svg {
-    display: block;
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
-}
-
-// How it adapts: the selected module on one device, its frame centred near the top of a black stage; the device
-// list on the right, in its three groups, scrolling when it overflows (js/picker.js)
-.kalq-picker__adapt {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 210px;
-    margin: 0 -1.6rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    background: #000;
-}
-
+// How it adapts (js/picker.js stage): on a dark grey stage, all eight devices in one row, centred at the top, one
+// scale for all; their screens black where the module ends. Under the row the module itself, large enough to read.
 .kalq-picker__stage {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; // near the top; the space below stays open
-    gap: 0.9rem;
-    min-width: 0;
-    height: 520px; // js/picker.js sets it to the picker's visible detail height
-    padding: 28px 32px 0;
-    overflow: hidden;
+    gap: 0.6rem;
+    min-height: 100%;
+    margin: 0 -1.6rem;
+    padding: 1rem 24px 2.5rem;
+    background: #2b2b2b;
+
+    > .kalq-picker__label { align-self: flex-start; margin: 0.4rem 0 0; }
 }
 
-.kalq-picker__device-caption {
+.kalq-picker__row {
+    display: flex;
+    align-items: flex-end; // the devices stand on one line
+    justify-content: center;
+    gap: 18px;
+    width: 100%;
+}
+
+.kalq-picker__dev {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: 6px;
     margin: 0;
+
+    // every caption two lines high, so the frames above them stand on one line whatever the name's length
+    .kalq-picker__device-name { max-width: 9em; min-height: 2.4em; font-size: 0.62rem; line-height: 1.2; text-align: center; opacity: 0.65; }
 }
 
-.kalq-picker__device-list {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    height: 520px;
-    padding: 18px 12px 18px 14px;
-    overflow-y: auto; // a long list scrolls, the stage stays
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
-    background: #0b0b0b;
+.kalq-picker__content {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #000;
+
+    > .kalq-device { position: absolute; top: 0; left: 0; transform-origin: 0 0; overflow: visible; }
 }
 
-.kalq-picker__device-group {
-    margin: 14px 8px 6px;
-    font-size: 0.64rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.5);
-
-    &:first-child { margin-top: 0; }
-}
-
-.kalq-picker__device-pick {
-    padding: 0.5rem 0.7rem;
+// The selected card's Insert
+.kalq-picker__insert {
+    align-self: flex-start;
+    margin-top: 0.45rem;
+    padding: 0.35rem 0.95rem;
     border: 0;
-    border-radius: 8px;
-    background: none;
-    color: rgba(255, 255, 255, 0.72);
+    border-radius: 999px;
+    background: #3B82F6;
+    color: #fff;
     font: inherit;
     font-size: 0.8rem;
-    text-align: left;
+    font-weight: 500;
     cursor: pointer;
 
-    &:hover { color: #fff; background: rgba(255, 255, 255, 0.06); }
-    &[aria-checked="true"] { color: #fff; background: rgba(255, 255, 255, 0.14); }
-    &:focus-visible { outline: 2px solid #3B82F6; outline-offset: -2px; }
+    &:hover, &:focus-visible { background: #2563EB; outline: none; }
 }
 
 // The frame: drawn at the device's own size in screen points, then scaled down as one piece
@@ -2917,7 +2902,9 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
 .kalq-frame__screen {
     position: relative;
     overflow: hidden;
-    background: #fff;
+    background: #000;
+
+    > .kalq-device { background: #000; } // the module paints its own ground; below it the screen stays black
 }
 
 // Phones and the folding phone: the black glass around the screen inside a thin metal edge
@@ -3069,8 +3056,6 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
     .kalq-ph-media {
         min-height: 0;
         border-radius: 0;
-        background-position: center;
-        background-size: auto 46%;
 
         &::before {
             content: none;
@@ -3078,14 +3063,6 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
     }
 }
 
-.kalq-picker__detail-name {
-    margin: 1rem 0 0.2rem;
-    font-size: 1.1rem;
-    font-weight: 500;
-    letter-spacing: 0;
-}
-
-.kalq-picker__detail-module,
 .kalq-picker__label {
     font-size: 0.8rem;
     opacity: 0.6;
@@ -3093,38 +3070,6 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
 
 .kalq-picker__label {
     margin-top: 1rem;
-}
-
-.kalq-picker__slots {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin: 0.4rem 0 0;
-    padding: 0;
-    list-style: none;
-
-    li {
-        padding: 0.2rem 0.55rem;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.08);
-        font-size: 0.75rem;
-    }
-}
-
-.kalq-picker__note {
-    margin-top: 1rem;
-    padding: 0.6rem 0.75rem;
-    border-radius: 8px;
-    background: rgba(255, 180, 0, 0.12);
-    color: #FFD27A;
-    font-size: 0.8rem;
-}
-
-.kalq-picker__actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    margin-top: 1.2rem;
 }
 
 .kalq-picker__close {
@@ -3151,15 +3096,6 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
     .kalq-picker__window {
         inset: 1rem;
         grid-template-columns: 200px 1fr;
-    }
-
-    .kalq-picker__info {
-        grid-template-columns: 140px 1fr;
-
-        .kalq-picker__side-actions {
-            grid-column: 1 / -1;
-            max-width: none;
-        }
     }
 }
 
@@ -3223,17 +3159,6 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
     }
 }
 
-// Device labels: the name, and its resolution small below
-.kalq-picker__device-name {
-    font-size: 0.72rem;
-    opacity: 0.8;
-}
-
-.kalq-picker__device-size {
-    font-size: 0.64rem;
-    opacity: 0.5;
-    font-variant-numeric: tabular-nums;
-}
 
 // Phones look like phones: a thin dark bezel around the screen (the corner radius is set per device)
 
@@ -3255,7 +3180,18 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
 body.kalq-edit .kalq-media-slot:not(:has(> img, > video)) {
     display: block;
     position: relative;
-    background: #1D4ED8 $kalq-image-glyph center 45% / auto 32% no-repeat;
+    background: color-mix(in srgb, currentColor 4%, transparent);
+
+    // the same drawing as an empty module picture, in the text's colour (a mask: the holder's children come and go)
+    &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: currentColor;
+        opacity: 0.2;
+        mask: $kalq-image-art center / auto 32% no-repeat;
+        pointer-events: none;
+    }
 }
 
 //=================================== Design panel: the wireframe previews ===================================//

@@ -679,7 +679,7 @@ body.kalq-edit .kalq-f-col.is-over { padding-top: 4.5rem; }
 
     // the stacking cards: the text on the left screen, the picture on the right, a screen high
     .kalq-f-tether__list { padding: 0; }
-    .kalq-f-tether__card { grid-template-columns: var(--seg-l) var(--seg-r); column-gap: var(--seg-hinge); align-items: stretch; padding: 0; border-radius: 0; min-height: calc(var(--seg-h) - 6rem); }
+    .kalq-f-tether__card { grid-template-columns: var(--seg-l) var(--seg-r); column-gap: var(--seg-hinge); align-items: stretch; align-content: stretch; padding: 0; border-radius: 0; min-height: calc(var(--seg-h) - 6rem); }
     .kalq-f-tether__text { align-self: center; padding: 2rem; }
     .kalq-f-tether__media { align-self: stretch; height: auto; aspect-ratio: auto; border-radius: 0; }
     .kalq-f-tether__card:nth-child(even) .kalq-f-tether__media { order: -1; } // the picture changes sides, so each screen alternates

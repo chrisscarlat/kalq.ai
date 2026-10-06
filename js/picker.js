@@ -1,18 +1,18 @@
-// Module picker (editors, edit mode): opened by a plus button between sections. Left the categories and a search,
-// in the middle schematic previews of every version, on the right the selected one large with Insert.
-// Keyboard: arrows browse the previews, Enter inserts, Esc closes, Tab moves between the three areas.
+// Module picker (editors, edit mode): opened by a plus button between sections. Left the categories ("All" first) and
+// a search; on top schematic cards of every version, the selected card with its Insert button; below, on a dark grey
+// stage, the selected version on all eight devices in one row at their real sizes relative to each other, and under
+// the row the module itself, large enough to read.
+// Keyboard: arrows browse the cards, Enter inserts, Esc closes, Tab moves between the areas.
 import { EDITOR_LANG } from "./i18n.js";
 import { CATEGORIES, MODULES, renderModule } from "./modules/registry.js";
 
 const TEXT = {
     de: { title: "Modul einfügen", search: "Module suchen", insert: "Einfügen", cancel: "Abbrechen", close: "Schließen",
         none: "Keine Module gefunden.", results: "Suchergebnisse", hint: "Pfeiltasten zum Blättern, Enter fügt ein, Esc schließt.",
-        slots: "Enthält", required: "Pflicht", draft: "Wird als Entwurf eingefügt. Platzhalter ausfüllen, dann veröffentlichen.",
-        devices: "So passt es sich an", derived: "abgeleitet", viewport: "CSS-Viewport" },
+        all: "Alle", devices: "So passt es sich an", content: "Inhalt, groß" },
     en: { title: "Insert a module", search: "Search modules", insert: "Insert", cancel: "Cancel", close: "Close",
         none: "No modules found.", results: "Search results", hint: "Arrow keys to browse, Enter inserts, Esc closes.",
-        slots: "Contains", required: "required", draft: "Inserted as a draft. Fill in the placeholders, then publish.",
-        devices: "How it adapts", derived: "derived", viewport: "CSS viewport" },
+        all: "All", devices: "How it adapts", content: "The content, large" },
 };
 const lang = () => EDITOR_LANG;
 const t = (key) => TEXT[lang()][key];
@@ -43,11 +43,11 @@ export const DEVICE_GROUPS = [
     ] },
 ];
 const DEVICES = DEVICE_GROUPS.flatMap((g) => g.devices);
-const DEVICE_KEY = "kalq-picker-device"; // the last chosen preset, per browser
-const savedDevice = () => { try { return localStorage.getItem(DEVICE_KEY); } catch { return null; } };
-let deviceId = DEVICES.some((d) => d.id === savedDevice()) ? savedDevice() : "iphone-18-pro";
+const CONTENT_DEVICE = DEVICES.find((d) => d.id === "macbook-air-13"); // the large preview below the row
 
-// Every version of every module the picker offers (retired modules still render where a page has one)
+// Every version of every module the picker offers (retired modules still render where a page has one); the "All"
+// category lists them in one view
+const ALL_CATEGORY = { id: "all", de: TEXT.de.all, en: TEXT.en.all };
 const ALL = Object.entries(MODULES).filter(([, def]) => !def.retired).flatMap(([module, def]) => Object.entries(def.versions).map(([version, v]) => ({ module, version, def, v })));
 
 //=================================== Wireframes ===================================//
@@ -73,15 +73,15 @@ function wireframe(wire, { large = false } = {}) {
     return `<svg viewBox="0 0 100 60" ${large ? "" : 'preserveAspectRatio="xMidYMid meet"'} aria-hidden="true" focusable="false"><rect width="100" height="60" fill="#fff"/>${parts}</svg>`;
 }
 
-// The one image placeholder, the same everywhere an image can go (also as CSS in collab.scss, .kalq-ph-media):
-// a dark blue block, a lighter blue sun behind a single darker blue mountain
-export const GLYPH = { block: "#1D4ED8", sun: "#7DB3FF", mountain: "#172E7A" };
+// The one image placeholder, the same motif everywhere an image can go (js/modules/kit.js PLACEHOLDER_ART): here in the
+// wireframes' blue, a pale block with a delicate mountain under a larger sun
 function imageGlyph(x, y, w, h) {
     const s = Math.min(w, h * 1.6); // the motif keeps its shape in wide and tall boxes
-    const cx = x + w / 2, base = y + h * 0.82, top = base - s * 0.42;
-    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="1.2" fill="${GLYPH.block}"/>`
-        + `<circle cx="${cx + s * 0.13}" cy="${top + s * 0.06}" r="${s * 0.09}" fill="${GLYPH.sun}"/>`
-        + `<path d="M${cx - s * 0.26} ${base}L${cx - s * 0.02} ${top}L${cx + s * 0.24} ${base}Z" fill="${GLYPH.mountain}"/>`;
+    const cx = x + w / 2, cy = y + h / 2, u = s / 160; // the drawing's own units (viewBox 160 × 100), centred
+    const pt = (px, py) => `${cx + (px - 80) * u} ${cy + (py - 57) * u}`;
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="1.2" fill="${BLUE}" fill-opacity=".12"/>`
+        + `<circle cx="${cx + 24 * u}" cy="${cy - 21 * u}" r="${17 * u}" fill="${BLUE}" fill-opacity=".22"/>`
+        + `<path d="M${pt(30, 78)}L${pt(62, 46)}L${pt(76, 60)}L${pt(88, 50)}L${pt(120, 78)}" fill="none" stroke="${BLUE}" stroke-opacity=".7" stroke-width=".5" stroke-linejoin="round"/>`;
 }
 
 //=================================== Dialog ===================================//
@@ -122,6 +122,7 @@ function build() {
 function items() {
     const q = state.query.toLowerCase();
     if (q) return ALL.filter(({ def, v }) => `${def.name.de} ${def.name.en} ${v.name.de} ${v.name.en} ${def.keywords}`.toLowerCase().includes(q));
+    if (state.category === ALL_CATEGORY.id) return ALL;
     return ALL.filter(({ def }) => def.category === state.category);
 }
 
@@ -140,8 +141,8 @@ function draw() {
     const cats = root.querySelector(".kalq-picker__cats");
     cats.setAttribute("aria-label", t("title"));
     // a category with nothing to insert and no note of its own (Navigation and Footers explain where they are set) is not shown
-    cats.replaceChildren(...CATEGORIES.filter((c) => c.note || ALL.some((x) => x.def.category === c.id)).map((c) => {
-        const count = ALL.filter((x) => x.def.category === c.id).length;
+    cats.replaceChildren(...[ALL_CATEGORY, ...CATEGORIES.filter((c) => c.note || ALL.some((x) => x.def.category === c.id))].map((c) => {
+        const count = c === ALL_CATEGORY ? ALL.length : ALL.filter((x) => x.def.category === c.id).length;
         const b = el("button", { type: "button", className: "kalq-picker__cat" }, el("span", { textContent: c[L] }), el("span", { className: "kalq-picker__count", textContent: count || "–" }));
         b.setAttribute("aria-pressed", !state.query && state.category === c.id);
         b.addEventListener("click", () => { state.category = c.id; state.query = ""; state.index = 0; search.value = ""; draw(); focusGrid(); });
@@ -149,7 +150,7 @@ function draw() {
     }));
 
     const list = items();
-    const category = CATEGORIES.find((c) => c.id === state.category);
+    const category = state.category === ALL_CATEGORY.id ? ALL_CATEGORY : CATEGORIES.find((c) => c.id === state.category);
     root.querySelector(".kalq-picker__heading").textContent = state.query ? t("results") : category[L];
     const grid = root.querySelector(".kalq-picker__grid");
     grid.setAttribute("aria-label", state.query ? t("results") : category[L]);
@@ -164,7 +165,12 @@ function draw() {
             option.tabIndex = i === state.index ? 0 : -1;
             option.innerHTML = wireframe(item.v.wire);
             option.append(el("span", { className: "kalq-picker__name", textContent: item.v.name[L] }), el("span", { className: "kalq-picker__module", textContent: item.def.name[L] }));
-            option.addEventListener("click", () => { state.index = i; draw(); focusGrid(); });
+            if (i === state.index) { // the selected card carries its Insert (out of the tab order: Enter inserts it)
+                const go = el("button", { type: "button", className: "kalq-picker__insert", textContent: t("insert"), tabIndex: -1 });
+                go.addEventListener("click", (e) => { e.stopPropagation(); insert(item); });
+                option.append(go);
+            }
+            option.addEventListener("click", () => { if (state.index === i) return; state.index = i; draw(); focusGrid(); });
             option.addEventListener("dblclick", () => insert(item));
             return option;
         }));
@@ -173,13 +179,13 @@ function draw() {
     detail(list[state.index]);
 }
 
-// The module itself, rendered with empty placeholders (drawn as blue shapes), on the chosen device: the frame centred
-// near the top of a black stage, the device list on the right (grouped, scrolls when it overflows)
-function deviceScreen(item, d) {
+// The module itself, rendered with empty placeholders (drawn as blue shapes), on one device's screen (its CSS
+// viewport); with fit, as tall as the module (the large preview below the row)
+function deviceScreen(item, d, { fit = false } = {}) {
     const L = lang();
     const screen = el("div", { className: `kalq-device${d.segments === "side" ? " is-span-h" : d.segments === "stacked" ? " is-span-v" : ""}` });
     screen.style.width = `${d.w}px`;
-    screen.style.height = `${d.h}px`;
+    if (!fit) screen.style.height = `${d.h}px`;
     if (d.segments === "side") { // two screens side by side: the variables css/utilities/_dual.scss reads from a real device
         const one = (d.w - d.gap) / 2;
         Object.entries({ "--seg-l": one, "--seg-r": one, "--seg-hinge": d.gap, "--seg-h": d.h }).forEach(([k, v]) => screen.style.setProperty(k, `${v}px`));
@@ -212,106 +218,77 @@ function deviceGeometry(d) {
     return { w: bw, h: bh, inset: { top: (bh - d.h) / 2, left: (bw - d.w) / 2 } };
 }
 
-function devices(item) {
+// One device drawn at its own size in screen points (frame, black screen, the module on it); scaled by the row
+function deviceFrame(item, d) {
+    const g = deviceGeometry(d);
+    const body = el("div", { className: `kalq-frame is-${d.kind || (d.segments ? "fold" : "phone")}` });
+    const screenBox = el("div", { className: "kalq-frame__screen" }, deviceScreen(item, d));
+    Object.assign(screenBox.style, { width: `${d.w}px`, height: `${d.h}px`, borderRadius: `${d.radius}px` });
+    if (d.kind) {
+        const lid = el("div", { className: "kalq-frame__lid" }, screenBox);
+        Object.assign(lid.style, { width: `${g.lid.w}px`, height: `${g.lid.h}px`, paddingTop: `${g.inset.top}px`, paddingLeft: `${g.inset.left}px`, borderRadius: d.kind === "laptop" ? "34px 34px 10px 10px" : "18px" });
+        if (d.kind === "laptop") lid.append(el("span", { className: "kalq-frame__notch" }));
+        const base = el("div", { className: "kalq-frame__base" });
+        Object.assign(base.style, { width: `${g.base.w}px`, height: `${g.base.h}px` });
+        body.append(lid, base);
+    } else {
+        Object.assign(body.style, { width: `${g.w}px`, height: `${g.h}px`, borderRadius: `${d.radius + Math.round((g.w - d.w) / 2)}px` });
+        screenBox.style.position = "absolute";
+        screenBox.style.top = `${g.inset.top}px`;
+        screenBox.style.left = `${g.inset.left}px`;
+        body.append(screenBox);
+        if (d.island) screenBox.append(el("span", { className: `kalq-frame__cam is-${d.island}` }));
+        if (d.segments) screenBox.append(el("span", { className: `kalq-frame__crease is-${d.segments}` }));
+    }
+    const holder = el("div", { className: "kalq-frame__holder" }, body);
+    holder.dataset.device = d.id;
+    return { holder, body, g };
+}
+
+let stageObserver = null;
+
+// How it adapts: all eight devices in one row, centred at the top of a dark grey stage, one scale for all so each
+// keeps its real size relative to the others; below the row the module on the laptop's width, large enough to read
+function stage(item) {
     const L = lang();
-    const stage = el("div", { className: "kalq-picker__stage" });
-    const draw = () => {
-        const d = DEVICES.find((x) => x.id === deviceId) || DEVICES[0];
-        const g = deviceGeometry(d);
-        const body = el("div", { className: `kalq-frame is-${d.kind || (d.segments ? "fold" : "phone")}` });
-        body.style.setProperty("--w", `${g.w}px`);
-        body.style.setProperty("--h", `${g.h}px`);
-        const screenBox = el("div", { className: "kalq-frame__screen" }, deviceScreen(item, d));
-        Object.assign(screenBox.style, { width: `${d.w}px`, height: `${d.h}px`, borderRadius: `${d.radius}px` });
-        if (d.kind) {
-            const lid = el("div", { className: "kalq-frame__lid" }, screenBox);
-            Object.assign(lid.style, { width: `${g.lid.w}px`, height: `${g.lid.h}px`, paddingTop: `${g.inset.top}px`, paddingLeft: `${g.inset.left}px`, borderRadius: d.kind === "laptop" ? "34px 34px 10px 10px" : "18px" });
-            if (d.kind === "laptop") lid.append(el("span", { className: "kalq-frame__notch" }));
-            const base = el("div", { className: "kalq-frame__base" });
-            Object.assign(base.style, { width: `${g.base.w}px`, height: `${g.base.h}px` });
-            body.append(lid, base);
-        } else {
-            Object.assign(body.style, { width: `${g.w}px`, height: `${g.h}px`, borderRadius: `${d.radius + Math.round((g.w - d.w) / 2)}px` });
-            screenBox.style.position = "absolute";
-            screenBox.style.top = `${g.inset.top}px`;
-            screenBox.style.left = `${g.inset.left}px`;
-            body.append(screenBox);
-            if (d.island) screenBox.append(el("span", { className: `kalq-frame__cam is-${d.island}` }));
-            if (d.segments) screenBox.append(el("span", { className: `kalq-frame__crease is-${d.segments}` }));
-        }
-        // scale the whole device to the stage: near the top, centred, room below
-        const fit = () => {
-            // the stage is as tall as the picker's visible detail area, so scrolled to it, all of it is in view
-            const view = root.querySelector(".kalq-picker__detail")?.clientHeight || 0;
-            if (view > 360) { stage.style.height = `${view}px`; list.style.height = `${view}px`; }
-            // the device takes at most 78% of that height: near the top, with open space below for the caption and air
-            const room = { w: stage.clientWidth - 64, h: Math.max(240, stage.clientHeight * 0.78 - 28) };
-            const k = Math.min(room.w / g.w, room.h / g.h, 1);
+    const box = el("div", { className: "kalq-picker__stage" });
+    const row = el("div", { className: "kalq-picker__row" });
+    const frames = DEVICES.map((d) => {
+        const f = deviceFrame(item, d);
+        row.append(el("figure", { className: "kalq-picker__dev" }, f.holder, el("figcaption", { className: "kalq-picker__device-name", textContent: d[L] })));
+        return f;
+    });
+    const content = deviceScreen(item, CONTENT_DEVICE, { fit: true });
+    const contentHolder = el("div", { className: "kalq-picker__content" }, content);
+    const GAP = 18, ROW_H = 200;
+    const fit = () => {
+        const room = box.clientWidth - 48;
+        if (room <= 0) return;
+        const sumW = frames.reduce((a, f) => a + f.g.w, 0), maxH = Math.max(...frames.map((f) => f.g.h));
+        const k = Math.min((room - GAP * (frames.length - 1)) / sumW, ROW_H / maxH);
+        frames.forEach(({ holder, body, g }) => {
             body.style.transform = `scale(${k})`;
             holder.style.width = `${Math.round(g.w * k)}px`;
             holder.style.height = `${Math.round(g.h * k)}px`;
-        };
-        const holder = el("div", { className: "kalq-frame__holder" }, body);
-        const caption = el("p", { className: "kalq-picker__device-caption" }, el("span", { className: "kalq-picker__device-name", textContent: d[L] }),
-            el("span", { className: "kalq-picker__device-size", textContent: `${d.w} × ${d.h} · ${d.dpr}×${d.derived ? ` · ${t("derived")}` : ""}` }));
-        stage.replaceChildren(holder, caption);
-        requestAnimationFrame(fit);
-        stage._fit = fit;
-    };
-    // the list: three labelled groups; a radio group with the arrow keys
-    const list = el("div", { className: "kalq-picker__device-list", role: "radiogroup" });
-    list.setAttribute("aria-label", t("devices"));
-    const buttons = [];
-    DEVICE_GROUPS.forEach((group) => {
-        list.append(el("p", { className: "kalq-picker__device-group", textContent: group[L] }));
-        group.devices.forEach((d) => {
-            const b = el("button", { type: "button", className: "kalq-picker__device-pick", textContent: d[L] });
-            b.setAttribute("role", "radio");
-            b.dataset.device = d.id;
-            b.addEventListener("click", () => choose(d.id, true));
-            buttons.push(b);
-            list.append(b);
         });
-    });
-    const choose = (id, focus) => {
-        deviceId = id;
-        try { localStorage.setItem(DEVICE_KEY, id); } catch { /* remembered for this visit only */ }
-        buttons.forEach((b) => { const on = b.dataset.device === id; b.setAttribute("aria-checked", String(on)); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); });
-        draw();
+        const c = Math.min(1, room / CONTENT_DEVICE.w);
+        content.style.transform = `scale(${c})`;
+        contentHolder.style.width = `${Math.round(CONTENT_DEVICE.w * c)}px`;
+        contentHolder.style.height = `${Math.round(content.offsetHeight * c)}px`;
     };
-    list.addEventListener("keydown", (e) => {
-        const step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
-        if (!step) return;
-        e.preventDefault();
-        e.stopPropagation();
-        const i = DEVICES.findIndex((d) => d.id === deviceId);
-        choose(DEVICES[(i + step + DEVICES.length) % DEVICES.length].id, true);
-    });
-    const area = el("div", { className: "kalq-picker__adapt" }, stage, list);
-    choose(deviceId, false);
-    new ResizeObserver(() => stage._fit?.()).observe(stage);
-    return area;
+    box.append(el("p", { className: "kalq-picker__label", textContent: t("devices") }), row,
+        el("p", { className: "kalq-picker__label", textContent: t("content") }), contentHolder);
+    requestAnimationFrame(fit);
+    stageObserver?.disconnect(); // the previous selection's stage is gone
+    stageObserver = new ResizeObserver(fit);
+    stageObserver.observe(box);
+    return box;
 }
 
 function detail(item) {
     const box = root.querySelector(".kalq-picker__detail");
     if (!item) return box.replaceChildren();
-    const L = lang();
-    const preview = el("div", { className: "kalq-picker__preview" });
-    preview.innerHTML = wireframe(item.v.wire, { large: true });
-    const slots = el("ul", { className: "kalq-picker__slots" }, ...Object.values(item.def.slots)
-        .filter((s, i, all) => all.findIndex((x) => x.kind === s.kind && x.label[L].replace(/\d+/, "") === s.label[L].replace(/\d+/, "")) === i)
-        .map((s) => el("li", { textContent: s.label[L].replace(/\s*\d+$/, "") + (s.required ? ` · ${t("required")}` : "") })));
-    const go = el("button", { type: "button", className: "kalq-btn kalq-btn--primary kalq-picker__insert", textContent: t("insert") });
-    go.addEventListener("click", () => insert(item));
-    const cancel = el("button", { type: "button", className: "kalq-btn", textContent: t("cancel") });
-    cancel.addEventListener("click", close);
-    const info = el("div", { className: "kalq-picker__info" }, preview,
-        el("div", {}, el("h3", { className: "kalq-picker__detail-name", textContent: item.v.name[L] }),
-            el("p", { className: "kalq-picker__detail-module", textContent: item.def.name[L] }),
-            el("p", { className: "kalq-picker__label", textContent: t("slots") }), slots),
-        el("div", { className: "kalq-picker__side-actions" }, el("p", { className: "kalq-picker__note", textContent: t("draft") }), el("div", { className: "kalq-picker__actions" }, cancel, go)));
-    box.replaceChildren(info, el("p", { className: "kalq-picker__label", textContent: t("devices") }), devices(item));
+    box.replaceChildren(stage(item));
 }
 
 const focusGrid = () => root.querySelector(".kalq-picker__item[tabindex='0']")?.focus();
@@ -360,13 +337,14 @@ function close() {
     if (!state) return;
     root.classList.remove("is-open");
     root.querySelector(".kalq-picker__detail").replaceChildren(); // no previews left in the page
+    stageObserver?.disconnect();
     document.documentElement.classList.remove("kalq-scroll-lock");
     const back = state.returnFocus;
     state = null;
     back?.focus?.();
 }
 
-export function openPicker({ onInsert, category = "content" }) {
+export function openPicker({ onInsert, category = ALL_CATEGORY.id }) {
     if (!root) build();
     state = { onInsert, category, query: "", index: 0, returnFocus: document.activeElement };
     root.querySelector(".kalq-picker__search").value = "";

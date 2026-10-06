@@ -67,6 +67,12 @@ export function placeholder(el, def) {
     el.setAttribute("data-ph-en", def.label.en);
 }
 
+// The empty picture, drawn: a delicate mountain under a larger sun, very low contrast, in the site's colours (css:
+// .kalq-ph-art, from --kalq-text on --kalq-bg). Decorative: the slot's label says what belongs there.
+export const PLACEHOLDER_ART = '<svg class="kalq-ph-art" viewBox="0 0 160 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">'
+    + '<circle class="kalq-ph-art__sun" cx="104" cy="36" r="17"/>'
+    + '<path class="kalq-ph-art__mountain" d="M30 78 L62 46 L76 60 L88 50 L120 78"/></svg>';
+
 // A media slot's box: the image or video, or for editors the placeholder glyph. Content images name what they show
 // (alt): from { alt } (e.g. a person's name) or the slot's own description block "<slot>_alt"; otherwise decorative
 export function mediaEl(ctx, slot, className, { alt, label } = {}) {
@@ -80,6 +86,7 @@ export function mediaEl(ctx, slot, className, { alt, label } = {}) {
         el = ctx.doc.createElement("div");
         placeholder(el, def);
         el.classList.add("kalq-ph-media");
+        el.innerHTML = PLACEHOLDER_ART;
     } else if (VIDEO_URL.test(url)) {
         el = ctx.doc.createElement("video");
         ["muted", "loop", "playsinline", "autoplay"].forEach((a) => el.setAttribute(a, ""));

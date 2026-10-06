@@ -16,7 +16,7 @@ const TEXT = {
         focal: "Motiv auf zwei Bildschirmen", focalLeft: "Motiv links", focalRight: "Motiv rechts",
         move: "Verschieben", up: "Nach oben", down: "Nach unten", copy: "Kopieren (⌘C)", remove: "Entfernen (Entf)", draft: "Entwurf",
         publish: "Veröffentlichen", toDraft: "Zum Entwurf", undo: "Rückgängig (⌘Z)", redo: "Wiederholen (⇧⌘Z)",
-        removed: (n) => `${n} entfernt. ⌘Z macht es rückgängig.`, nothing: "Nichts rückgängig zu machen.", nothingRedo: "Nichts zu wiederholen.",
+        removed: (n) => `${n} entfernt. ⌘Z macht es rückgängig.`, nothing: "Nichts rückgängig zu machen.", nothingRedo: "Nichts zu wiederholen.", undone: "Rückgängig gemacht", redone: "Wiederholt",
         changed: "Die Seite wurde inzwischen geändert. In den Versionen wiederherstellen.", map: "Seitenaufbau", fixed: "Fixiert", footer: "Footer",
         themeChoose: "Darstellung wählen",
         failed: "Das hat nicht geklappt.", refused: (why) => `Nicht gespeichert: Die Datenbank lehnt es ab (${why}). Nichts wurde geändert.`, denied: "Nicht gespeichert: Ihre Anmeldung darf das nicht. Nichts wurde geändert.", relogin: "Bitte melden Sie sich erneut an.", copyOf: "Kopie", section: "Abschnitt",
@@ -31,7 +31,7 @@ const TEXT = {
         focal: "Subject on two screens", focalLeft: "Subject left", focalRight: "Subject right",
         move: "Move", up: "Move up", down: "Move down", copy: "Copy (⌘C)", remove: "Remove (Delete)", draft: "Draft",
         publish: "Publish", toDraft: "Back to draft", undo: "Undo (⌘Z)", redo: "Redo (⇧⌘Z)",
-        removed: (n) => `${n} removed. ⌘Z undoes it.`, nothing: "Nothing to undo.", nothingRedo: "Nothing to redo.",
+        removed: (n) => `${n} removed. ⌘Z undoes it.`, nothing: "Nothing to undo.", nothingRedo: "Nothing to redo.", undone: "Undone", redone: "Redone",
         changed: "The page has changed since. Restore it from Versions.", map: "Page outline", fixed: "Fixed", footer: "Footer",
         themeChoose: "Choose appearance",
         failed: "That did not work.", refused: (why) => `Not saved: the database refused it (${why}). Nothing was changed.`, denied: "Not saved: your login is not allowed to do this. Nothing was changed.", relogin: "Please log in again.", copyOf: "copy", section: "Section",
@@ -302,10 +302,27 @@ function onItemsAction(e) {
 
 // Undo and redo: a new history entry that writes back the layout before (or after) the action. Only while the page
 // is still as that action left it; otherwise Versions is the way back.
+// An edit to a text, a picture or a setting (js/edit.js): one step of the same history, undone in place
+export function recordUndo(step) {
+    undoStack.push({ ...step, page: pageName() });
+    redoStack.length = 0;
+    saveHistory();
+    updateUndoButtons();
+}
+const blockStep = async (step, dir) => (await import("./edit.js")).restoreBlock(step, dir);
+
 const undo = () => run(async () => {
     const page = pageName();
     const last = [...undoStack].reverse().find((a) => a.page === page);
     if (!last) return collab.toast(t("nothing"));
+    if (last.kind === "block") { // an edit: its text or picture back, the page not re-rendered
+        if (!(await blockStep(last, "undo"))) return collab.toast(t("changed"), "error");
+        undoStack.splice(undoStack.lastIndexOf(last), 1);
+        redoStack.push(last);
+        saveHistory();
+        updateUndoButtons();
+        return collab.toast(t("undone"));
+    }
     if (serialize(currentLayout()) !== last.after) return collab.toast(t("changed"), "error");
     await write(parseLayout(last.before), `Section undo: ${last.label.replace(/^Section /, "")}`, [], { record: false });
     undoStack.splice(undoStack.lastIndexOf(last), 1);
@@ -318,6 +335,14 @@ const redo = () => run(async () => {
     const page = pageName();
     const next = [...redoStack].reverse().find((a) => a.page === page);
     if (!next) return collab.toast(t("nothingRedo"));
+    if (next.kind === "block") {
+        if (!(await blockStep(next, "redo"))) return collab.toast(t("changed"), "error");
+        redoStack.splice(redoStack.lastIndexOf(next), 1);
+        undoStack.push(next);
+        saveHistory();
+        updateUndoButtons();
+        return collab.toast(t("redone"));
+    }
     if (serialize(currentLayout()) !== next.before) return collab.toast(t("changed"), "error");
     await write(parseLayout(next.after), `Section redo: ${next.label.replace(/^Section /, "")}`, [], { record: false });
     redoStack.splice(redoStack.lastIndexOf(next), 1);

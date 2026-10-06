@@ -132,8 +132,7 @@ function build() {
             </div>
             <div class="kalq-picker__main">
                 <div class="kalq-picker__browse">
-                    <p class="kalq-picker__hint"></p>
-                    <h3 class="kalq-picker__heading"></h3>
+                    <div class="kalq-picker__headrow"><h3 class="kalq-picker__heading"></h3><p class="kalq-picker__hint"></p></div>
                     <div class="kalq-picker__grid" role="listbox"></div>
                 </div>
                 <section class="kalq-picker__detail" aria-live="polite"></section>
@@ -223,7 +222,9 @@ function draw() {
             option.innerHTML = wireframe(item.v.wire, { motion: item.v.motion });
             option.append(el("span", { className: "kalq-picker__name", textContent: item.v.name[L] }), el("span", { className: "kalq-picker__module", textContent: item.def.name[L] }));
             if (i === state.index) { // the selected card carries its Insert (out of the tab order: Enter inserts it)
-                const go = el("button", { type: "button", className: "kalq-picker__insert", textContent: t("insert"), tabIndex: -1 });
+                const go = el("button", { type: "button", className: "kalq-picker__insert", tabIndex: -1, title: t("insert"),
+                    innerHTML: '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" focusable="false"><path d="M10 3.5v11M5 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' });
+                go.setAttribute("aria-label", `${t("insert")}: ${item.v.name[L]}`);
                 go.addEventListener("click", (e) => { e.stopPropagation(); insert(item); });
                 option.append(go);
             }
@@ -317,7 +318,7 @@ function stage(item) {
         row.append(fig);
         return f;
     });
-    const GAP = 10, ROW_H = 34; // a slim strip: the devices small, the cards get the room
+    const GAP = 12, ROW_H = 64; // a strip: the devices readable, the cards keep their room
     const fit = () => {
         const room = row.clientWidth; // beside the label
         if (room <= 0) return;

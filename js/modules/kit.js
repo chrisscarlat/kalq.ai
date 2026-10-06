@@ -21,7 +21,8 @@ export const mediaOf = (ctx, slot) => ctx.store.get(keyOf(ctx, slot))?.media || 
 // an empty slot is left out (null)
 export function slotEl(ctx, slot, tag, { className = "", format, label } = {}) {
     const def = ctx.def.slots[slot] || { label: label || { de: slot, en: slot } }; // a slot made per item (a chat's question) brings its label
-    const html = textOf(ctx, slot);
+    const stored = textOf(ctx, slot);
+    const html = stored === "" ? null : stored; // an emptied block (e.g. an edit undone back to nothing) is a placeholder again
     if (html == null && !ctx.editor) return null;
     const el = ctx.doc.createElement(tag);
     if (className) el.className = className;

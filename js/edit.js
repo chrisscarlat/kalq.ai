@@ -59,22 +59,44 @@ async function editorSession() {
     return session && session.user?.app_metadata?.role === "editor" ? session : null;
 }
 
-// One revision batch: the block row (first save creates it) and one revision per language
-async function save(key, type, langs, content) {
+// One revision batch: the block row (first save creates it) and one revision per language. Every edit is also one
+// step of the editor's undo (js/sections.js): what the block held before, per language (or its media), so ⌘Z writes
+// it back in place, without re-rendering the page. before: what the page showed before, when the store has none yet
+// (a built-in text never edited).
+async function save(key, type, langs, content, { undo = true, before = null, batchLabel = null } = {}) {
     const session = await editorSession();
     if (!session) throw new Error("relogin");
     const page = pageOf(key);
+    const prev = storedEntry(key);
+    const was = Object.fromEntries(langs.map((lang) => [lang ?? "media", lang == null ? (prev?.media ?? before ?? "") : (prev?.[lang] ?? before ?? "")]));
     const { error: blockError } = await collab.sb.from("blocks").upsert({ key, page, type }, { onConflict: "key", ignoreDuplicates: true });
     if (blockError) throw blockError;
     const batch = crypto.randomUUID();
     const rows = langs.map((lang) => ({
         block_key: key, page, lang, content, author_id: session.user.id,
-        batch_id: batch, batch_scope: "block", batch_label: label(key),
+        batch_id: batch, batch_scope: "block", batch_label: batchLabel || label(key),
     }));
     const { error } = await collab.sb.from("revisions").insert(rows);
     if (error) throw error;
     langs.forEach((lang) => setLocalContent(key, lang, content, type));
     collab.broadcast("content", { keys: [key], color: collab.me.color });
+    if (undo) recordUndo({ kind: "block", key, type, langs, before: was, after: content, label: label(key) });
+}
+
+// Undo or redo of an edit (js/sections.js): only while the block still holds what that edit left; one new revision
+// per language with the other value, shown at once. false: the block changed since (someone else, or later).
+export async function restoreBlock(step, dir) {
+    const now = storedEntry(step.key);
+    const current = (lang) => (lang == null ? now?.media ?? "" : now?.[lang] ?? "");
+    const target = (lang) => (dir === "undo" ? step.before[lang ?? "media"] : step.after);
+    const expect = (lang) => (dir === "undo" ? step.after : step.before[lang ?? "media"]);
+    if (!step.langs.every((lang) => current(lang) === expect(lang))) return false;
+    for (const lang of step.langs) {
+        await save(step.key, step.type, [lang], target(lang), { undo: false, batchLabel: `${dir === "undo" ? "Undo" : "Redo"}: ${step.label}` });
+    }
+    applyDirect(document);
+    replaceButtons();
+    return true;
 }
 
 const fail = (error) => {
@@ -150,7 +172,7 @@ async function stopEditing(keep) {
     // Translated blocks save the language being shown, the others (numbers, email) both languages
     const langs = isTranslated(node) ? [currentLang()] : ["de", "en"];
     try {
-        await save(key, "text", langs, after);
+        await save(key, "text", langs, after, { before });
         applyDirect(document); // e.g. the mailto link follows an edited email
         collab.toast(t("saved"));
     } catch (error) {
@@ -187,6 +209,8 @@ async function onSettingChange(e) {
 //=================================== Media ===================================//
 // The slot element can be swapped (image <-> video), so always look it up by key
 const slot = (key) => document.querySelector(`[data-kalq-key="${CSS.escape(key)}"]`);
+// what a media slot shows now (for undo): its stored file, else the page's own (the HTML's)
+const shownUrl = (key) => { const n = slot(key); return storedEntry(key)?.media ?? n?.dataset.kalqDefault ?? n?.getAttribute("src") ?? n?.querySelector("video, img")?.getAttribute("src") ?? ""; };
 const isHolderNode = (node) => node.classList.contains("hero_media") || node.classList.contains("kalq-media-slot");
 const isEmptySlot = (node) => isHolderNode(node) && !node.querySelector(":scope > img, :scope > video");
 
@@ -273,7 +297,7 @@ async function setSlot(key, url) {
     if (locks.has(key)) return collab.toast(t("locked")(locks.get(key).name), "error");
     const node = slot(key);
     try {
-        await save(key, typeOf(node), [null], url);
+        await save(key, typeOf(node), [null], url, { before: shownUrl(key) });
         applyDirect(document);
         replaceButtons();
         collab.toast(t("saved"));
@@ -311,7 +335,7 @@ function pickFile(key, btn) {
                 progress.set(p);
                 btn.textContent = `${t("uploading")} ${Math.round(p * 100)} %`;
             });
-            await save(key, typeOf(slot(key)), [null], url);
+            await save(key, typeOf(slot(key)), [null], url, { before: shownUrl(key) });
             applyDirect(document);
             showDone(host);
             collab.toast(t("saved"));

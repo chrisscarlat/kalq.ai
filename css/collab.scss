@@ -2862,19 +2862,29 @@ $kalq-image-art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/
 }
 
 .kalq-picker__browse {
-    padding: 1.4rem 4rem 1rem 1.6rem;
+    padding: 1rem 4rem 1rem 1.6rem;
     overflow-y: auto;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.kalq-picker__hint {
+// The category's name and the keyboard hint on one line
+.kalq-picker__headrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
     margin-bottom: 0.8rem;
-    font-size: 0.75rem;
+}
+
+.kalq-picker__hint {
+    margin: 0;
+    font-size: 0.72rem;
     opacity: 0.5;
 }
 
 .kalq-picker__heading {
-    margin-bottom: 1rem;
+    margin: 0;
     font-size: 1rem;
     font-weight: 500;
     letter-spacing: 0;
@@ -2883,17 +2893,19 @@ $kalq-image-art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/
 // the cards in two rows: as many columns as half the cards (js/picker.js sets --cols)
 .kalq-picker__grid {
     display: grid;
-    grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(var(--cols, 4), minmax(0, 168px)); // small cards
+    gap: 10px;
 }
 
 @media (max-width: 900px) { .kalq-picker__grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
 
 .kalq-picker__item {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    padding: 8px 8px 10px;
+    gap: 0.15rem;
+    padding: 6px 6px 8px;
+    font-size: 0.78rem;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 12px;
     cursor: pointer;
@@ -2979,21 +2991,27 @@ $kalq-image-art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/
 
 
 // The selected card's Insert
+// The selected card's Insert: a small blue arrow down at the card's right (into the page)
 .kalq-picker__insert {
-    align-self: flex-start;
-    margin-top: 0.45rem;
-    padding: 0.35rem 0.95rem;
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
     border: 0;
-    border-radius: 999px;
+    border-radius: 50%;
     background: #3B82F6;
     color: #fff;
-    font: inherit;
-    font-size: 0.8rem;
-    font-weight: 500;
     cursor: pointer;
 
     &:hover, &:focus-visible { background: #2563EB; outline: none; }
+    &:focus-visible { box-shadow: 0 0 0 2px #fff; }
 }
+
+.kalq-picker__item .kalq-picker__name, .kalq-picker__item .kalq-picker__module { padding-right: 2rem; }
 
 // The frame: drawn at the device's own size in screen points, then scaled down as one piece
 .kalq-frame__holder {

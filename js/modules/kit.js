@@ -77,13 +77,15 @@ export const PLACEHOLDER_ART = '<svg class="kalq-ph-art" viewBox="0 0 160 100" p
     + '<path class="kalq-ph-art__mountain" d="M30 78 L62 46 L76 60 L88 50 L120 78"/></svg>';
 
 // A media slot's box: the image or video, or for editors the placeholder glyph. Content images name what they show
-// (alt): from { alt } (e.g. a person's name) or the slot's own description block "<slot>_alt"; otherwise decorative
-export function mediaEl(ctx, slot, className, { alt, label } = {}) {
+// (alt): from { alt } (e.g. a person's name) or the slot's own description block "<slot>_alt"; otherwise decorative.
+// identity: a person's or a brand's picture (a portrait, a logo): never filled from another slot, and left out when empty
+export function mediaEl(ctx, slot, className, { alt, label, identity = false } = {}) {
     const url = mediaOf(ctx, slot);
     const def = ctx.def.slots[slot] || { label: label || { de: slot, en: slot } }; // a slot made per item brings its label
     if (!url && !ctx.editor) {
-        // a slot another style has filled but this one not yet: a plain grey box, so the layout holds; empty everywhere: out
-        if (!ctx.filled?.has(keyOf(ctx, slot))) return null;
+        // an empty picture (none in this style, none to borrow at publish): a plain grey box, so the layout holds; an
+        // empty portrait or logo is left out
+        if (identity) return null;
         const box = ctx.doc.createElement("div");
         box.className = `${className} kalq-m-media is-empty`;
         box.setAttribute("aria-hidden", "true");
@@ -110,6 +112,7 @@ export function mediaEl(ctx, slot, className, { alt, label } = {}) {
     }
     el.setAttribute("data-kalq-key", keyOf(ctx, slot));
     el.setAttribute("data-kalq-type", "image");
+    if (identity) el.setAttribute("data-kalq-identity", "");
     box.append(el);
     return box;
 }

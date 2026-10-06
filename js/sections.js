@@ -5,7 +5,9 @@
 // batch, so it shows in Versions and can be restored. Undo and redo are such entries too: they write back the layout
 // before (or after) an action of this session; nothing is ever deleted. A removed section leaves the layout, its
 // blocks stay, so undo or a restore brings it back with them.
-import { applyStoredLayout, setLocalContent, storedEntry, storedKeys, styleMediaOf } from "./content.js";
+import { applyDirect, applyStoredLayout, setLocalContent, shownStyleId, storedEntry, storedKeys, styleMediaOf } from "./content.js";
+import { styleKey } from "./styleMedia.js";
+import { getActive } from "./variants.js";
 import { EDITOR_LANG } from "./i18n.js";
 import { collectTemplates, copyKey, layoutKey, newSectionId, parseLayout, resolveLayout, sectionPrefix } from "./layout.js";
 import { MODULES, missingRequired } from "./modules/registry.js";
@@ -22,6 +24,7 @@ const TEXT = {
         failed: "Das hat nicht geklappt.", refused: (why) => `Nicht gespeichert: Die Datenbank lehnt es ab (${why}). Nichts wurde geändert.`, denied: "Nicht gespeichert: Ihre Anmeldung darf das nicht. Nichts wurde geändert.", relogin: "Bitte melden Sie sich erneut an.", copyOf: "Kopie", section: "Abschnitt",
         heroInserted: "Der neue Hero steht als Entwurf oben. Beim Veröffentlichen ersetzt er den bisherigen.",
         insert: "Modul hier einfügen", insertAfter: "Modul darunter einfügen", missing: (list) => `Erst ausfüllen: ${list}`,
+        borrowed: (n) => (n === 1 ? "1 leeres Bild mit einem Bild dieses Stils gefüllt" : `${n} leere Bilder mit Bildern dieses Stils gefüllt`),
         names: { header: "Hero", about: "Über Kalq", expertise: "Plattform-Liste", belief: "Haltung", social: "Social", "expertise-header": "Kopf",
             "expertise-header-img": "Bild", "expertise-container": "Karten", "about-header": "Kopf", "about-header-img": "Bild", "about-goals": "Ziele",
             "about-wedo": "Was wir tun", "about-awwards": "Logos", legal: "Text" },
@@ -37,6 +40,7 @@ const TEXT = {
         failed: "That did not work.", refused: (why) => `Not saved: the database refused it (${why}). Nothing was changed.`, denied: "Not saved: your login is not allowed to do this. Nothing was changed.", relogin: "Please log in again.", copyOf: "copy", section: "Section",
         heroInserted: "The new hero is on top as a draft. Publishing it replaces the current one.",
         insert: "Insert a module here", insertAfter: "Insert a module below", missing: (list) => `Fill in first: ${list}`,
+        borrowed: (n) => (n === 1 ? "1 empty picture filled with one of this style's" : `${n} empty pictures filled with this style's pictures`),
         names: { header: "Hero", about: "About Kalq", expertise: "Platform list", belief: "Belief", social: "Social", "expertise-header": "Header",
             "expertise-header-img": "Image", "expertise-container": "Cards", "about-header": "Header", "about-header-img": "Image", "about-goals": "Goals",
             "about-wedo": "What we do", "about-awwards": "Logos", legal: "Text" },
@@ -88,7 +92,8 @@ async function editorSession() {
 }
 
 // One batch: the new layout, plus any copied blocks. Remembered for undo unless it is an undo or redo itself.
-async function write(layout, label, extra = [], { record = true } = {}) {
+// media: picture rows written with it (pictures borrowed at publish), emptied again by its undo
+async function write(layout, label, extra = [], { record = true, media = [] } = {}) {
     const session = await editorSession();
     if (!session) throw new Error("relogin");
     const page = pageName();
@@ -104,11 +109,12 @@ async function write(layout, label, extra = [], { record = true } = {}) {
     const { error } = await collab.sb.from("revisions").insert(rows);
     if (error) throw error;
     // stored: from here on the action is in the history, whatever happens while the page catches up
-    if (record) { undoStack.push({ page, before, after: content, label }); redoStack.length = 0; saveHistory(); }
+    if (record) { undoStack.push({ page, before, after: content, label, ...(media.length ? { media } : {}) }); redoStack.length = 0; saveHistory(); }
     updateUndoButtons();
     try {
         setLocalContent(key, null, content, "layout");
         extra.forEach((r) => setLocalContent(r.key, r.lang, r.content, r.type));
+        if (media.length || extra.some((r) => r.type === "image" || r.type === "video")) applyDirect(document); // pictures set in place first, so the tools drawn after the layout see them
         applyStoredLayout();
     } catch (error) { console.error("section: saved, but the page did not update", error); } // the next refresh shows it
     collab.broadcast("content", { keys: [key], color: collab.me.color });
@@ -177,15 +183,17 @@ const setState = (id, state) => run(async () => {
     const layout = currentLayout();
     const entry = layout.sections.find((s) => s.id === id);
     if (!entry || entry.state === state) return;
-    // A section with required placeholders still empty cannot go live
+    // A section with required texts still empty cannot go live; an empty picture never holds it back (see borrowPictures)
+    let fills = [];
     if (state === "live") {
-        const missing = missingRequired(entry, pageName(), storedEntry, { mediaFilled: (k) => !!styleMediaOf(k) }); // the shown style's pictures
+        const missing = missingRequired(entry, pageName(), storedEntry);
         if (missing.length) {
             // a missing piece set somewhere else (the chat's site-wide destinations): the message opens it
             const fix = missing.find((l) => l.fix)?.fix;
             return collab.toast(t("missing")(missing.map((l) => l[lang()]).join(", ")), "error",
                 fix ? { onClick: () => openPicker(layout.sections.indexOf(entry) + 1, { focus: fix }) } : {});
         }
+        fills = await borrowPictures(entry.id);
     }
     entry.state = state;
     // A hero going live replaces the hero it was put above (one step: undo brings the old one back)
@@ -194,8 +202,24 @@ const setState = (id, state) => run(async () => {
         layout.sections = layout.sections.filter((s) => !others.includes(s));
         others.forEach((o) => { if (o.module === "legacy" && !o.source && !layout.removed.includes(o.id)) layout.removed.push(o.id); });
     }
-    await write(layout, `Section ${state === "live" ? "published" : "to draft"}: ${sectionName(entry)}`);
+    await write(layout, `Section ${state === "live" ? "published" : "to draft"}: ${sectionName(entry)}`, fills, { media: fills });
+    if (fills.length) collab.toast(t("borrowed")(fills.length));
 });
+
+// Publishing fills the section's empty pictures, in the shown style only, each with a random picture that style already
+// shows somewhere on the site (never another style's, never a portrait or a logo, and none of those is filled). With
+// nothing to borrow a slot stays empty: visitors see a plain grey box.
+async function borrowPictures(id) {
+    const section = document.querySelector(`section[data-section="${CSS.escape(id)}"]`);
+    const empty = [...(section?.querySelectorAll('[data-kalq-type="image"], [data-kalq-type="video"]') || [])]
+        .filter((n) => !n.hasAttribute("data-kalq-identity")).map((n) => n.getAttribute("data-kalq-key")).filter((k) => k && !styleMediaOf(k));
+    if (!empty.length) return [];
+    const { lendable, siteMediaSlots } = await import("./mediaSlots.js");
+    const pool = lendable(await siteMediaSlots(getActive()));
+    if (!pool.length) return [];
+    const own = (k) => (shownStyleId() ? styleKey(k, shownStyleId()) : k);
+    return [...new Set(empty)].map((k) => ({ key: own(k), page: k.split(".")[0], type: "image", lang: null, content: pool[Math.floor(Math.random() * pool.length)] }));
+}
 
 // Light, dark or following the site toggle: one history entry
 const setTheme = (id, theme) => run(async () => {
@@ -324,7 +348,7 @@ const undo = () => run(async () => {
         return collab.toast(t("undone"));
     }
     if (serialize(currentLayout()) !== last.after) return collab.toast(t("changed"), "error");
-    await write(parseLayout(last.before), `Section undo: ${last.label.replace(/^Section /, "")}`, [], { record: false });
+    await write(parseLayout(last.before), `Section undo: ${last.label.replace(/^Section /, "")}`, (last.media || []).map((m) => ({ ...m, content: "" })), { record: false });
     undoStack.splice(undoStack.lastIndexOf(last), 1);
     redoStack.push(last);
     saveHistory();
@@ -344,7 +368,7 @@ const redo = () => run(async () => {
         return collab.toast(t("redone"));
     }
     if (serialize(currentLayout()) !== next.before) return collab.toast(t("changed"), "error");
-    await write(parseLayout(next.after), `Section redo: ${next.label.replace(/^Section /, "")}`, [], { record: false });
+    await write(parseLayout(next.after), `Section redo: ${next.label.replace(/^Section /, "")}`, next.media || [], { record: false });
     redoStack.splice(redoStack.lastIndexOf(next), 1);
     undoStack.push(next);
     saveHistory();

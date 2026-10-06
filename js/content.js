@@ -154,7 +154,7 @@ export function applyStoredLayout(container = currentContainer()) {
     const sig = (s) => s.dataset.section + (s.dataset.sectionState || "") + (s.dataset.sectionTheme || "") + (s.dataset.opts || "");
     const before = [...container.querySelectorAll(":scope > section[data-section]")].map(sig).join();
     const editor = !!container.querySelector(":scope > template.kalq-sections");
-    const modules = (entry, doc) => renderModule(entry, { doc, page, store, lang: currentLang(), editor, mediaFor, filled: filled(), mediaStyle: mediaStyle?.id || "" });
+    const modules = (entry, doc) => renderModule(entry, { doc, page, store, lang: currentLang(), editor, mediaFor, mediaStyle: mediaStyle?.id || "" });
     // another style shown: the modules are drawn again with its pictures
     const restyle = renderedStyle !== (mediaStyle?.id || "");
     renderedStyle = mediaStyle?.id || "";

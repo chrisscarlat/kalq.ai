@@ -82,15 +82,15 @@ export function renderModule(entry, ctx) {
     return stub;
 }
 
-// Required slots that are still placeholders (a section with any cannot go live)
-// mediaFilled(key): whether the shown style has a picture there (pictures are per style; js/styleMedia.js)
-export function missingRequired(entry, page, store, { mediaFilled = null } = {}) {
+// Required texts that are still placeholders (a section with any cannot go live). A required picture never holds a
+// section back: publishing borrows one of the shown style's pictures for it, or visitors see a plain grey box
+export function missingRequired(entry, page, store) {
     const def = MODULES[entry.module];
     if (!def) return [];
     return [...Object.entries(def.slots).filter(([slot, s]) => {
         if (!s.required) return false;
         const e = store(`${page}.${entry.id}.${slot}`);
-        if (s.kind === "media") return mediaFilled ? !mediaFilled(`${page}.${entry.id}.${slot}`) : !e?.media;
+        if (s.kind === "media") return false;
         return !e || (e.de == null && e.en == null);
     }).map(([slot, s]) => s.label), ...(def.missing ? def.missing(entry, page, store) : [])]; // the module's own checks (e.g. the testimonials' quotes)
 }

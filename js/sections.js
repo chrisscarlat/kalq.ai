@@ -248,75 +248,44 @@ const duplicate = (id) => run(async () => {
     reveal(copyId);
 });
 
-// The inquiry chat's questions (js/modules/library.js): add, move, remove, change kind; the contact step on or off.
-// They live in the section's entry, so each is one history entry like any other change to the page.
-const chatAction = (id, action, qid) => run(async () => {
+// A module's own controls in edit mode (data-items-action, -id, -arg): its list of items (itemsEditor: { min, max,
+// make }: add, move, remove) or its own changes (act(opts, action, id, arg) changes the options and names the change,
+// e.g. the custom module's columns and pieces). Stored in the section's entry: one history entry each.
+const itemsAction = (id, action, itemId, arg) => run(async () => {
     const layout = currentLayout();
     const entry = layout.sections.find((s) => s.id === id);
-    if (!entry || entry.module !== "interaction.inquiry") return;
-    const opts = { items: [], contact: true, ...(entry.opts || {}) };
-    const items = [...(opts.items || [])];
-    const i = items.findIndex((x) => x.id === qid);
-    let label;
-    if (action === "add") {
-        if (items.length >= 12) return;
-        items.push({ id: Math.random().toString(36).slice(2, 8), kind: "choice" });
-        label = "question added";
-    } else if (action === "remove" && i >= 0) { items.splice(i, 1); label = "question removed"; }
-    else if ((action === "up" && i > 0) || (action === "down" && i >= 0 && i < items.length - 1)) {
-        const j = action === "up" ? i - 1 : i + 1;
-        [items[i], items[j]] = [items[j], items[i]];
-        label = `question moved ${action}`;
-    } else if (/^kind-(choice|text)$/.test(action) && i >= 0) {
-        const kind = action.slice(5);
-        if (items[i].kind === kind) return;
-        items[i] = { ...items[i], kind };
-        label = `question as ${kind === "choice" ? "choices" : "short text"}`;
-    } else if (action === "contact") { opts.contact = !(opts.contact !== false); label = `contact details ${opts.contact ? "on" : "off"}`; }
-    else return;
-    entry.opts = { ...opts, items };
-    await write(layout, `Section chat ${label}: ${sectionName(entry)}`);
-});
-
-// A module's list of items edited in the panel (its definition says itemsEditor: { min, max, make }): add, move,
-// remove; and its visibility setting. Stored in the section's entry: one history entry each.
-const itemsAction = (id, action, itemId) => run(async () => {
-    const layout = currentLayout();
-    const entry = layout.sections.find((s) => s.id === id);
-    const cfg = entry && MODULES[entry.module]?.itemsEditor;
-    if (!cfg) return;
-    const opts = { ...(entry.opts || {}) };
-    const items = [...(opts.items || [])];
-    const i = items.findIndex((x) => x.id === itemId);
-    let label;
-    if (action === "add" && items.length < cfg.max) { items.push(cfg.make()); label = "item added"; }
-    else if (action === "remove" && i >= 0 && items.length > cfg.min) { items.splice(i, 1); label = "item removed"; }
-    else if ((action === "up" && i > 0) || (action === "down" && i >= 0 && i < items.length - 1)) {
-        const j = action === "up" ? i - 1 : i + 1;
-        [items[i], items[j]] = [items[j], items[i]];
-        label = `item moved ${action}`;
-    } else if (action === "visibility") { opts.visibility = opts.visibility === "private" ? "public" : "private"; label = `visibility ${opts.visibility}`; }
-    else return;
-    entry.opts = { ...opts, items };
+    const def = entry && MODULES[entry.module];
+    if (!def) return;
+    const opts = structuredClone(entry.opts || (def.initialOpts ? def.initialOpts() : {}));
+    let label = null;
+    if (def.act) label = def.act(opts, action, itemId, arg);
+    else if (def.itemsEditor) {
+        const cfg = def.itemsEditor;
+        const items = [...(opts.items || [])];
+        const i = items.findIndex((x) => x.id === itemId);
+        if (action === "add" && items.length < cfg.max) { items.push(cfg.make()); label = "item added"; }
+        else if (action === "remove" && i >= 0 && items.length > cfg.min) { items.splice(i, 1); label = "item removed"; }
+        else if ((action === "up" && i > 0) || (action === "down" && i >= 0 && i < items.length - 1)) {
+            const j = action === "up" ? i - 1 : i + 1;
+            [items[i], items[j]] = [items[j], items[i]];
+            label = `item moved ${action}`;
+        }
+        opts.items = items;
+    }
+    if (!label) return;
+    entry.opts = opts;
     await write(layout, `Section ${label}: ${sectionName(entry)}`);
 });
 
-function onChatAction(e) {
+function onItemsAction(e) {
     const it = e.target.closest?.("[data-items-action]");
-    if (it && editing()) {
-        const sec = it.closest("section[data-section]");
-        if (!sec) return;
-        e.preventDefault();
-        e.stopPropagation();
-        return itemsAction(sec.dataset.section, it.dataset.itemsAction, it.dataset.itemsId);
-    }
-    const b = e.target.closest?.("[data-chat-action]");
-    if (!b || !editing()) return;
-    const sec = b.closest("section[data-section]");
+    if (!it || !editing()) return;
+    const sec = it.closest("section[data-section]");
     if (!sec) return;
     e.preventDefault();
     e.stopPropagation();
-    chatAction(sec.dataset.section, b.dataset.chatAction, b.dataset.chatId);
+    if (it.disabled) return;
+    itemsAction(sec.dataset.section, it.dataset.itemsAction, it.dataset.itemsId, it.dataset.itemsArg);
 }
 
 // Undo and redo: a new history entry that writes back the layout before (or after) the action. Only while the page
@@ -350,7 +319,7 @@ export const insertModule = (index, module, version) => run(async () => {
     if (!MODULES[module]?.versions[version]) return;
     const layout = currentLayout();
     const entry = { id: newSectionId(), module, version, state: "draft" };
-    if (MODULES[module].initialOpts) entry.opts = MODULES[module].initialOpts(); // e.g. a chat's first questions
+    if (MODULES[module].initialOpts) entry.opts = MODULES[module].initialOpts(); // e.g. the custom module's first columns
     // A hero always goes on top, above the current one, as a draft; publishing it replaces the old one
     const hero = MODULES[module].category === "heroes";
     layout.sections.splice(hero ? 0 : Math.max(firstMovable(layout), Math.min(index, layout.sections.length)), 0, entry);
@@ -775,7 +744,7 @@ export function initSections(api) {
     document.addEventListener("kalq:language", render);
     collab.on("page", () => { selected = null; expanded = null; render(); });
     document.addEventListener("pointerdown", onPointerDown, true);
-    document.addEventListener("click", onChatAction, true); // the inquiry chat's question controls
+    document.addEventListener("click", onItemsAction, true); // a module's own controls (its items, its layout)
     // A click outside the open panel folds it back, after the click has reached its target (a button on another
     // section's bar still does what it says)
     document.addEventListener("click", (e) => { if (expanded && !e.target.closest(".kalq-section-tools.is-expanded")) setTimeout(() => collapse(false)); }, true);

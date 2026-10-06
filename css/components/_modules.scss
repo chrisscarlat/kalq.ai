@@ -96,22 +96,6 @@
     }
 }
 
-/* Image and text side by side */
-.kalq-m-split .kalq-m-inner {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: center;
-    gap: clamp(2.5rem, 6cqi, 7rem);
-}
-
-.kalq-m-split__media {
-    aspect-ratio: 4 / 5;
-}
-
-.kalq-m-split.is-text-left .kalq-m-split__media {
-    order: 2;
-}
-
 /* Central image or video */
 .kalq-m-center {
     .kalq-m-heading {
@@ -141,139 +125,6 @@
     opacity: 0.6;
 }
 
-/* Call to action band */
-.kalq-m-cta {
-    background: var(--kalq-dark, #{$dark});
-    color: var(--kalq-light, #{$light});
-
-    &.is-centered .kalq-m-inner {
-        text-align: center;
-
-        .kalq-m-heading {
-            max-width: 20ch;
-            margin: 0 auto;
-        }
-
-        .kalq-m-text {
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .kalq-m-actions {
-            justify-content: center;
-        }
-    }
-
-    &.is-split .kalq-m-inner {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 3rem;
-
-        .kalq-m-cta__text {
-            flex: 1 1 auto;
-            align-self: stretch; // stacked on a phone it spans the width too, not the width of its (empty) content
-            min-width: 0;
-        }
-
-        .kalq-m-actions {
-            margin-top: 0;
-            flex-shrink: 0;
-        }
-    }
-}
-
-/* Questions and answers */
-.kalq-m-faq {
-    .kalq-m-faq__list {
-        border-top: 1px solid var(--kalq-line, #{$grey2});
-    }
-
-    &.is-single {
-        .kalq-m-inner {
-            max-width: 980px;
-        }
-
-        .kalq-m-faq__head {
-            margin-bottom: 3rem;
-            text-align: center;
-        }
-    }
-
-    &.is-split .kalq-m-inner {
-        display: grid;
-        grid-template-columns: 1fr 1.6fr;
-        gap: clamp(2.5rem, 6cqi, 6rem);
-        align-items: start;
-    }
-}
-
-.kalq-m-faq__item {
-    border-bottom: 1px solid var(--kalq-line, #{$grey2});
-}
-
-.kalq-m .kalq-m-faq__title {
-    margin: 0;
-    @include type(h5);
-}
-
-.kalq-m-faq__toggle,
-.kalq-m-faq__title > .kalq-m-faq__q {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1.5rem;
-    width: 100%;
-    padding: 1.4rem 0;
-    border: 0;
-    background: none;
-    color: inherit;
-    font: inherit;
-    text-align: left;
-}
-
-.kalq-m-faq__toggle {
-    cursor: pointer;
-
-    &::after {
-        content: "";
-        flex-shrink: 0;
-        width: 14px;
-        height: 14px;
-        background:
-            linear-gradient(currentColor, currentColor) center / 100% 1.5px no-repeat,
-            linear-gradient(currentColor, currentColor) center / 1.5px 100% no-repeat;
-        transition: transform 0.3s ease;
-    }
-
-    &[aria-expanded="true"]::after {
-        transform: rotate(45deg);
-    }
-
-    &:focus-visible {
-        outline: 2px solid currentColor;
-        outline-offset: 4px;
-    }
-}
-
-.kalq-m-faq__a {
-    padding: 0 0 1.6rem;
-    max-width: 52rem;
-
-    p {
-        @include type(body);
-        opacity: 0.8;
-
-        + p {
-            margin-top: 0.8rem;
-        }
-    }
-
-    &[hidden] {
-        display: none;
-    }
-}
-
 /* Responsive rules, one class at a time (container widths, so the picker's device frames show the same):
    phones and folded foldables ≤ 480 · large phones 481–599 · unfolded foldables and small tablets 600–760 (nearly
    square) · tablets portrait 761–1024 · tablets landscape and small laptops 1025–1366 · laptops 1367–1920 (the
@@ -282,67 +133,43 @@
 // Phones and folded foldables
 @container (max-width: 480px) {
     .kalq-m-inner { padding: 0 1rem; }
-    .kalq-m-split .kalq-m-inner { grid-template-columns: 1fr; gap: 1.75rem; }
-    .kalq-m-split.is-text-left .kalq-m-split__media { order: 0; } // the picture first, whichever side it has on wide screens
-    .kalq-m-split__media { aspect-ratio: 4 / 3; }
     .kalq-m-center .kalq-m-heading { margin-bottom: 1.75rem; }
     .kalq-m-center.is-video .kalq-m-center__media { aspect-ratio: 16 / 9; }
-    .kalq-m-cta.is-split .kalq-m-inner { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
-    .kalq-m-cta .kalq-m-actions, .kalq-m-cta .kalq-m-button { width: 100%; justify-content: center; } // full-width tap target
-    .kalq-m-faq.is-split .kalq-m-inner { grid-template-columns: 1fr; gap: 1.5rem; }
-    .kalq-m-faq.is-single .kalq-m-faq__head { margin-bottom: 1.75rem; text-align: left; }
     .kalq-m-media { border-radius: 16px; }
 }
 
 // Large phones
 @container (min-width: 481px) and (max-width: 599px) {
     .kalq-m-inner { padding: 0 1.5rem; }
-    .kalq-m-split .kalq-m-inner { grid-template-columns: 1fr; gap: 2rem; }
-    .kalq-m-split.is-text-left .kalq-m-split__media { order: 0; }
-    .kalq-m-split__media { aspect-ratio: 3 / 2; }
-    .kalq-m-cta.is-split .kalq-m-inner { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
-    .kalq-m-faq.is-split .kalq-m-inner { grid-template-columns: 1fr; gap: 2rem; }
     .kalq-m-media { border-radius: 18px; }
 }
 
-// Phones and folded foldables: a module's one picture runs edge to edge, the full width of the screen, whatever the
-// module's own side padding (100cqi is the section's width: .kalq-m is the size container). The cascade's offset
-// block, which shifts its picture to the right on wide screens, is left out here.
+// Phones and folded foldables: the central picture runs edge to edge, the full width of the screen, whatever the
+// module's own side padding (100cqi is the section's width: .kalq-m is the size container)
 @container (max-width: 599px) {
-    .kalq-m :is(.kalq-m-split__media, .kalq-m-center__media, .kalq-m-services__media, .kalq-m-cascade__media) {
+    .kalq-m .kalq-m-center__media {
         width: 100cqi;
         max-width: none;
         margin-left: calc(50% - 50cqi);
         margin-right: calc(50% - 50cqi);
         border-radius: 0;
     }
-    .kalq-m-cascade__visual { padding-bottom: 0; }
-    .kalq-m-cascade__block { display: none; }
-    .kalq-m-cascade__media { margin-top: 0; translate: none; }
 }
 
-// Unfolded foldables and small tablets: nearly square, so the split stays side by side with a square picture
+// Unfolded foldables and small tablets
 @container (min-width: 600px) and (max-width: 760px) {
     .kalq-m-inner { padding: 0 1.75rem; }
-    .kalq-m-split .kalq-m-inner { grid-template-columns: 1fr 1fr; gap: 1.75rem; }
-    .kalq-m-split__media { aspect-ratio: 1 / 1; }
-    .kalq-m-cta.is-split .kalq-m-inner { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
-    .kalq-m-faq.is-split .kalq-m-inner { grid-template-columns: 1fr; gap: 2rem; }
     .kalq-m-media { border-radius: 20px; }
 }
 
 // Tablets in portrait (side margins in proportion with the other classes, about 4.4% of the width)
 @container (min-width: 761px) and (max-width: 1024px) {
     .kalq-m-inner { padding: 0 2.25rem; }
-    .kalq-m-split .kalq-m-inner { grid-template-columns: 1fr 1.1fr; gap: 2.5rem; }
-    .kalq-m-split__media { aspect-ratio: 4 / 5; }
-    .kalq-m-faq.is-split .kalq-m-inner { grid-template-columns: 1fr; gap: 2.5rem; }
 }
 
 // Tablets in landscape and small laptops
 @container (min-width: 1025px) and (max-width: 1366px) {
     .kalq-m-inner { padding: 0 3rem; }
-    .kalq-m-split .kalq-m-inner { gap: 4rem; }
 }
 
 // Large screens: content keeps a readable width, the type grows with it
@@ -354,25 +181,9 @@
 // Dual screens, spanned side by side: see css/utilities/_dual.scss (each screen one complete panel, nothing across
 // the hinge). The picker's two-screen frame uses the same rules.
 
-// Dual screens, spanned top and bottom (a hinge across): the picture on the upper screen, the text on the lower
-@mixin span-vertical($hinge) {
-    .kalq-m-split .kalq-m-inner { grid-template-columns: 1fr; row-gap: calc(#{$hinge} + 2rem); }
-    .kalq-m-split.is-text-left .kalq-m-split__media { order: 0; }
-    .kalq-m-split__media { aspect-ratio: 16 / 9; }
-}
-
-@media (vertical-viewport-segments: 2) {
-    @include span-vertical(calc(env(viewport-segment-top 0 1, 0px) - env(viewport-segment-bottom 0 0, 0px)));
-}
-
-.kalq-device.is-span-v {
-    @include span-vertical(28px);
-}
-
 @media (prefers-reduced-motion: reduce) {
     .kalq-m-button,
-    .kalq-m-button::after,
-    .kalq-m-faq__toggle::after {
+    .kalq-m-button::after {
         transition: none;
     }
 }

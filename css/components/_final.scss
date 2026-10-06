@@ -1,0 +1,690 @@
+/* The builder's module set (js/modules/final.js): the custom module, image and text, alternating rows, the stacking
+   testimonials, the stacking pinned cards and the horizontal scroll cards; and what the site shares from the earlier
+   library (the round arrow button, the underline link, text for screen readers, the editor's description field).
+   Type: the shared tokens only (css/utilities/_type.scss). Each module is a size container (.kalq-m), so its layout
+   follows the width it has (the page, or a device frame in the picker): narrow below 600px, a middle class to 760px.
+   The scroll modules are plain stacked lists until js/modules/scrollEffects.js arms them (.is-armed): never under
+   reduced motion, never while editing. Two screens: @mixin final-two-screens, included by css/utilities/_dual.scss. */
+
+$f-max: 1680px;
+$f-ease: cubic-bezier(0.25, 1, 0.5, 1);
+
+//=================================== Shared ===================================//
+// Text for screen readers and search engines only
+.kalq-sr {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+// Round arrow button (the header's call to action): a pill with its text and a circle holding an arrow; on hover the
+// arrow leaves up and to the right while a copy comes in from the lower left, and the circle draws in a little
+.kalq-btn-round {
+    --ease: cubic-bezier(0.12, 0.75, 0.4, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.4rem 0.4rem 0.4rem 1.4rem;
+    border-radius: 999px;
+    background: var(--kalq-text, #{$dark});
+    color: var(--kalq-bg, #{$light});
+    @include type-size(body);
+    line-height: 1.2;
+    text-decoration: none;
+
+    &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 3px; }
+}
+
+.kalq-btn-round__circle {
+    position: relative;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.6rem;
+    height: 2.6rem;
+    overflow: hidden;
+    border-radius: 50%;
+    background: var(--kalq-bg, #{$light});
+    color: var(--kalq-text, #{$dark});
+    transition: transform 0.55s var(--ease);
+}
+
+.kalq-btn-round__arrow {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    transition: transform 0.55s var(--ease);
+
+    svg { width: 1rem; height: 1rem; }
+    &.is-next { transform: translate(-130%, 130%); }
+}
+
+@media (hover: hover) {
+    .kalq-btn-round:hover {
+        .kalq-btn-round__circle { transform: scale(0.88); }
+        .kalq-btn-round__arrow { transform: translate(130%, -130%); }
+        .kalq-btn-round__arrow.is-next { transform: none; }
+    }
+}
+
+// Underline link: the line grows from the left on hover and focus; without a pointer it keeps a faint line
+.kalq-link-underline {
+    color: inherit;
+    text-decoration: none;
+    background: linear-gradient(currentColor, currentColor) left bottom / 0 1px no-repeat;
+    padding-bottom: 2px;
+    transition: background-size 0.45s $f-ease;
+    font-weight: 500;
+
+    &:hover, &:focus-visible { background-size: 100% 1px; }
+    &:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
+}
+
+@media (hover: none) { .kalq-link-underline { background-size: 100% 1px; } }
+
+//=================================== The modules' frame ===================================//
+.kalq-m.kalq-f {
+    --f-pad-x: 4rem;
+    --f-pad-y: clamp(4.5rem, 9cqi, 9rem);
+    // from the content's edge out to the module's: its side padding and, on very wide screens, the margin beside the
+    // capped width (cqi: the module's own width, it is the size container)
+    --f-edge: calc(var(--f-pad-x) + max(0px, (100cqi - #{$f-max}) / 2));
+    padding: var(--f-pad-y) 0;
+}
+
+.kalq-f-inner {
+    width: 100%;
+    max-width: $f-max;
+    margin: 0 auto;
+    padding: 0 var(--f-pad-x);
+}
+
+.kalq-f .kalq-f-heading {
+    margin: 0;
+    @include type(h2);
+}
+
+.kalq-f .kalq-f-title {
+    margin: 0;
+    @include type(h5);
+}
+
+.kalq-f-text {
+    max-width: 40rem;
+
+    p {
+        @include type(body);
+        opacity: 0.85;
+
+        + p { margin-top: 0.9rem; }
+    }
+}
+
+.kalq-f .kalq-m-eyebrow { margin-bottom: 1rem; }
+.kalq-f-button { align-self: flex-start; }
+.kalq-f-link { align-self: flex-start; @include type(body); font-weight: 500; }
+
+// The side padding by width (as the other modules'): set on the module's children, the module is the container
+@container (max-width: 480px) { .kalq-f > * { --f-pad-x: 1rem; } }
+@container (min-width: 481px) and (max-width: 599px) { .kalq-f > * { --f-pad-x: 1.5rem; } }
+@container (min-width: 600px) and (max-width: 760px) { .kalq-f > * { --f-pad-x: 1.75rem; } }
+@container (min-width: 761px) and (max-width: 1024px) { .kalq-f > * { --f-pad-x: 2.25rem; } }
+@container (min-width: 1025px) and (max-width: 1366px) { .kalq-f > * { --f-pad-x: 3rem; } }
+
+//=================================== 1. Custom module ===================================//
+.kalq-f-custom .kalq-f-heading {
+    max-width: 22ch;
+    margin-bottom: clamp(2rem, 4cqi, 3.5rem);
+}
+
+@for $i from 1 through 6 { .kalq-f-custom.has-cols-#{$i} { --cols: #{$i}; } }
+@for $i from 1 through 3 { .kalq-f-custom.keep-#{$i} { --keep: #{$i}; } }
+
+.kalq-f-custom.is-cols .kalq-f-track {
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
+    gap: clamp(2.5rem, 4cqi, 4rem) clamp(1.25rem, 2.5cqi, 2.5rem);
+}
+
+.kalq-f-col {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.kalq-f-col__body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1;
+}
+
+.kalq-f-col.is-center .kalq-f-col__body {
+    align-items: center;
+    text-align: center;
+
+    .kalq-f-text { margin-inline: auto; }
+    .kalq-f-button, .kalq-f-link { align-self: center; }
+}
+
+.kalq-f-piece { min-width: 0; }
+.kalq-f-piece.is-image + .kalq-f-piece { margin-top: 0.25rem; }
+.kalq-f-custom.has-cols-1 .kalq-f-title, .kalq-f-custom.has-cols-2 .kalq-f-title { @include type(h4); }
+
+.kalq-f-img {
+    aspect-ratio: 4 / 3;
+    border-radius: 20px;
+
+    &.is-bleed { border-radius: 0; }
+}
+
+.kalq-f-custom.has-cols-1 .kalq-f-img { aspect-ratio: 16 / 9; }
+.kalq-f-custom.has-cols-2 .kalq-f-img { aspect-ratio: 3 / 2; }
+
+.kalq-f-quote {
+    margin: 0;
+
+    blockquote { margin: 0; }
+    p { @include type(quote); }
+}
+
+.kalq-f-quote__who {
+    margin-top: 0.8rem;
+    @include type(caption);
+    opacity: 0.7;
+}
+
+// Text over the picture: the picture fills the column behind a soft shade; the text at the foot, bottom left, or in
+// the middle, centred
+.kalq-f-col.is-over {
+    justify-content: flex-end;
+    min-height: clamp(22rem, 34cqi, 34rem);
+    padding: clamp(1.25rem, 2.5cqi, 2rem);
+    overflow: hidden;
+    isolation: isolate;
+    border-radius: 20px;
+    color: #fff;
+
+    &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 35%, rgba(0, 0, 0, 0.6) 100%);
+        pointer-events: none;
+    }
+
+    &.is-center { justify-content: center; &::before { background: rgba(0, 0, 0, 0.38); } }
+    .kalq-f-col__body { flex: 0 0 auto; }
+    .kalq-m-button { background: #fff; color: #101010; }
+}
+
+.kalq-f-col.is-over > .is-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+
+    .kalq-f-img, .kalq-f-img-edit { height: 100%; aspect-ratio: auto; border-radius: 0; }
+}
+
+.kalq-f-col.is-over:has(> .is-backdrop.is-bleed) { border-radius: 0; }
+
+// Pictures to the edge: out to the module's edges the column touches (wide: its columns side by side)
+@mixin custom-bleed($p) {
+    .kalq-f-custom.is-cols {
+        .#{$p}-l .kalq-f-piece.is-bleed { margin-left: calc(-1 * var(--f-edge)); }
+        .#{$p}-r .kalq-f-piece.is-bleed { margin-right: calc(-1 * var(--f-edge)); }
+        .#{$p}-b .kalq-f-col__body > .kalq-f-piece.is-bleed:last-child { margin-bottom: calc(-1 * var(--f-pad-y)); }
+        &:not(.has-head) .#{$p}-t .kalq-f-col__body > .kalq-f-piece.is-bleed:first-child { margin-top: calc(-1 * var(--f-pad-y)); }
+
+        // text over a picture to the edge: the whole column runs out, its text stays in line with the others
+        .kalq-f-col.is-over:has(> .is-backdrop.is-bleed) {
+            &.#{$p}-l { margin-left: calc(-1 * var(--f-edge)); padding-left: calc(var(--f-edge) + clamp(1.25rem, 2.5cqi, 2rem)); }
+            &.#{$p}-r { margin-right: calc(-1 * var(--f-edge)); padding-right: calc(var(--f-edge) + clamp(1.25rem, 2.5cqi, 2rem)); }
+            &.#{$p}-b { margin-bottom: calc(-1 * var(--f-pad-y)); }
+        }
+        &:not(.has-head) .kalq-f-col.is-over.#{$p}-t:has(> .is-backdrop.is-bleed) { margin-top: calc(-1 * var(--f-pad-y)); }
+    }
+}
+
+@container (min-width: 600px) { @include custom-bleed(w); }
+
+// Narrow: one column, or the number the editor keeps
+@container (max-width: 599px) {
+    .kalq-f-custom.is-cols .kalq-f-track { grid-template-columns: repeat(var(--keep, 1), minmax(0, 1fr)); gap: 2.5rem 1rem; }
+    .kalq-f-custom:is(.keep-2, .keep-3) .kalq-f-title { @include type(small); font-weight: 600; }
+    .kalq-f-custom:is(.keep-2, .keep-3) .kalq-f-text p { @include type(small); }
+    .kalq-f-col.is-over { min-height: 24rem; }
+    .kalq-f-custom.keep-1 .kalq-f-img { aspect-ratio: 4 / 3; }
+    @include custom-bleed(n);
+}
+
+// The card row: cards side by side, scrolled sideways (touch, trackpad, keyboard), from edge to edge of the module
+.kalq-f-custom.is-row .kalq-f-track {
+    display: flex;
+    gap: clamp(0.75rem, 1.5cqi, 1.25rem);
+    margin-inline: calc(-1 * var(--f-edge));
+    padding: 0 var(--f-edge) 1rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--f-edge);
+    scrollbar-width: thin;
+
+    &:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+}
+
+.kalq-f-custom.is-row .kalq-f-col {
+    --card-pad: clamp(1rem, 1.6cqi, 1.4rem);
+    flex: 0 0 clamp(15rem, 28cqi, 24rem);
+    padding: var(--card-pad);
+    overflow: hidden;
+    border-radius: 22px;
+    background: color-mix(in srgb, currentColor 6%, transparent);
+    scroll-snap-align: start;
+
+    .kalq-f-col__body > .kalq-f-piece.is-bleed { margin-inline: calc(-1 * var(--card-pad)); }
+    .kalq-f-col__body > .kalq-f-piece.is-bleed:first-child { margin-top: calc(-1 * var(--card-pad)); }
+    .kalq-f-col__body > .kalq-f-piece.is-bleed:last-child { margin-bottom: calc(-1 * var(--card-pad)); }
+    .kalq-f-img { aspect-ratio: 4 / 5; border-radius: 14px; &.is-bleed { border-radius: 0; } }
+    &.is-over { min-height: 0; aspect-ratio: 4 / 5; border-radius: 22px; }
+}
+
+//=================================== 2. Image and text ===================================//
+// The picture fills its half to the module's edges (no padding on any side); the text beside it, centred vertically
+.kalq-m.kalq-f-it { padding: 0; }
+
+.kalq-f-it__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    min-height: clamp(30rem, 48cqi, 52rem);
+}
+
+.kalq-f-it__media {
+    height: 100%;
+    min-height: inherit;
+    border-radius: 0;
+}
+
+.kalq-f-it.is-image-right .kalq-f-it__media { order: 2; }
+
+.kalq-f-it__text {
+    align-self: center;
+    max-width: 46rem;
+    padding: var(--f-pad-y) var(--f-pad-x);
+    text-align: left;
+
+    .kalq-f-text { margin-top: 1.4rem; }
+}
+
+@container (min-width: 600px) and (max-width: 1024px) { .kalq-f-it .kalq-f-heading { @include type(h3); } }
+
+@container (max-width: 599px) {
+    .kalq-f-it__grid { grid-template-columns: 1fr; min-height: 0; }
+    .kalq-f-it.is-image-right .kalq-f-it__media { order: 0; } // the picture first, whichever side it has on wide screens
+    .kalq-f-it__media { height: auto; min-height: 0; aspect-ratio: 4 / 3; }
+    .kalq-f-it__text { padding: 2.5rem var(--f-pad-x) 3.5rem; }
+}
+
+//=================================== 3. Alternating rows ===================================//
+.kalq-f-alt__head { margin-bottom: clamp(2rem, 4cqi, 3.5rem); }
+
+.kalq-f-alt__rows {
+    display: grid;
+    gap: clamp(0.5rem, 1cqi, 1rem); // tight
+}
+
+.kalq-f-alt__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    min-height: clamp(20rem, 32cqi, 34rem);
+}
+
+.kalq-f-alt__media {
+    align-self: stretch;
+    min-height: inherit;
+    border-radius: 0; // out to its side's edge
+}
+
+.kalq-f-alt__text {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 2rem var(--f-edge) 2rem clamp(2rem, 5cqi, 6rem);
+
+    .kalq-f-title { @include type(h4); }
+}
+
+// the zigzag: in each row the picture on its side, the text facing it
+@mixin alt-picture-right {
+    .kalq-f-alt__media { order: 2; }
+    .kalq-f-alt__text { padding: 2rem clamp(2rem, 5cqi, 6rem) 2rem var(--f-edge); }
+}
+.kalq-f-alt.is-left-first .kalq-f-alt__row:nth-child(even),
+.kalq-f-alt.is-right-first .kalq-f-alt__row:nth-child(odd) { @include alt-picture-right; }
+
+@container (max-width: 599px) {
+    .kalq-f-alt__row { grid-template-columns: 1fr; min-height: 0; }
+    .kalq-f-alt[class] .kalq-f-alt__row:nth-child(n) .kalq-f-alt__media { order: 0; min-height: 0; aspect-ratio: 4 / 3; }
+    .kalq-f-alt[class] .kalq-f-alt__row:nth-child(n) .kalq-f-alt__text { padding: 1.5rem var(--f-pad-x) 2rem; }
+    .kalq-f-alt__rows { gap: 0.5rem; }
+}
+
+//=================================== 4. Testimonials (stacking) ===================================//
+.kalq-f-ts__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+    gap: clamp(2rem, 5cqi, 6rem);
+    align-items: center;
+}
+
+.kalq-f-ts__deck {
+    display: grid;
+    gap: 1.25rem; // the plain list
+}
+
+.kalq-f-ts__card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 2rem;
+    min-height: clamp(16rem, 26cqi, 24rem);
+    margin: 0;
+    padding: clamp(1.5rem, 3cqi, 2.75rem);
+    border-radius: 24px;
+    background: var(--kalq-text, #{$dark});
+    color: var(--kalq-bg, #{$light});
+    transform-origin: 50% 100%;
+
+    &:nth-child(3n + 2) { background: color-mix(in srgb, var(--kalq-text, #{$dark}) 82%, var(--kalq-bg, #{$light})); }
+    &:nth-child(3n + 3) { background: color-mix(in srgb, var(--kalq-text, #{$dark}) 68%, var(--kalq-bg, #{$light})); }
+}
+
+.kalq-f-ts__quote {
+    margin: 0;
+
+    p { @include type(quote); }
+    p + p { margin-top: 0.8rem; }
+}
+
+.kalq-f-ts__who {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+}
+
+.kalq-f-ts__photo {
+    flex-shrink: 0;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+}
+
+.kalq-f-ts__id { display: grid; gap: 0.15rem; }
+.kalq-f-ts__name { @include type(small); font-weight: 600; }
+.kalq-f-ts__role { @include type(caption); opacity: 0.7; }
+
+// Armed: the cards lie on one pile (one grid cell), the section pinned for the time it takes to flick them away
+.kalq-f-ts.is-armed {
+    .kalq-f-ts__inner { min-height: 100svh; padding-block: 5rem; }
+    .kalq-f-ts__deck > * { grid-area: 1 / 1; will-change: transform; }
+}
+
+@container (max-width: 760px) {
+    .kalq-f-ts__inner { grid-template-columns: 1fr; gap: 2rem; }
+}
+
+//=================================== 5. Stacking pinned cards (Tether) ===================================//
+.kalq-f-tether__head { margin-bottom: clamp(2rem, 4cqi, 3.5rem); }
+
+.kalq-f-tether__list {
+    display: grid;
+    gap: 1.25rem; // the plain list
+    max-width: $f-max;
+    margin: 0 auto;
+    padding: 0 var(--f-pad-x);
+}
+
+.kalq-f-tether__card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(1.5rem, 4cqi, 4rem);
+    min-height: clamp(24rem, 44cqi, 40rem);
+    padding: clamp(1.5rem, 4cqi, 4rem);
+    border-radius: 28px;
+    background: var(--kalq-text, #{$dark});
+    color: var(--kalq-bg, #{$light});
+    box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.12);
+
+    &:nth-child(even) {
+        background: color-mix(in srgb, var(--kalq-text, #{$dark}) 6%, var(--kalq-bg, #{$light}));
+        color: var(--kalq-text, #{$dark});
+    }
+
+    .kalq-f-title { @include type(h3); }
+    .kalq-f-text { margin-top: 0.4rem; }
+}
+
+.kalq-f-tether__text {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.kalq-f-tether__media {
+    aspect-ratio: 4 / 3;
+    border-radius: 18px;
+}
+
+.kalq-f-tether__card:nth-child(odd) .kalq-m-button { background: var(--kalq-bg, #{$light}); color: var(--kalq-text, #{$dark}); }
+
+// Armed: each card a screen high (less the edges left in view above it), pinned in turn
+.kalq-f-tether.is-armed .kalq-f-tether__card {
+    min-height: min(calc(100svh - 8rem), 48rem);
+}
+
+@container (max-width: 760px) {
+    .kalq-f-tether__card { grid-template-columns: 1fr; align-content: start; min-height: 0; }
+    .kalq-f-tether__media { aspect-ratio: 16 / 10; }
+    .kalq-f-tether__card .kalq-f-title { @include type(h4); }
+    .kalq-f-tether.is-armed .kalq-f-tether__card { min-height: min(calc(100svh - 6rem), 40rem); }
+}
+
+//=================================== 6. Horizontal scroll cards ===================================//
+.kalq-f-hs__head {
+    margin-bottom: clamp(2rem, 4cqi, 3.5rem);
+
+    .kalq-f-text { margin-top: 1.2rem; }
+}
+
+// the plain list: a grid that wraps (one column on a phone)
+.kalq-f-hs__track {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+    gap: 2.5rem clamp(1rem, 2cqi, 1.75rem);
+    max-width: $f-max;
+    margin: 0 auto;
+    padding: 0 var(--f-pad-x);
+}
+
+.kalq-f-hs__card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    min-width: 0;
+}
+
+.kalq-f-hs__media {
+    aspect-ratio: 4 / 5;
+    margin-bottom: 0.4rem;
+    border-radius: 18px;
+}
+
+.kalq-f-hs__card .kalq-f-text p { @include type(small); }
+
+// Armed: the section pins, one row of cards slides sideways under it
+.kalq-f-hs.is-armed {
+    .kalq-f-hs__pin {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 100svh;
+        overflow-x: clip;
+    }
+
+    .kalq-f-hs__track {
+        display: flex;
+        width: 100%;
+        max-width: none;
+        padding-inline: var(--f-edge);
+        will-change: transform;
+
+        &::after { content: ""; flex: 0 0 1px; } // the end padding counts in the width it scrolls
+    }
+
+    .kalq-f-hs__card { flex: 0 0 clamp(16rem, 28cqi, 26rem); }
+}
+
+@container (max-width: 599px) {
+    .kalq-f-hs.is-armed .kalq-f-hs__card { flex-basis: 76cqi; }
+    .kalq-f-hs__media { aspect-ratio: 4 / 3; }
+    .kalq-f-hs.is-armed .kalq-f-hs__media { aspect-ratio: 4 / 5; }
+}
+
+//=================================== The picker's previews ===================================//
+// A picture of each scroll module as it moves (the preview never scrolls it): the pile, the overlapping cards, the row
+.kalq-device {
+    .kalq-f-ts__deck > * { grid-area: 1 / 1; }
+    .kalq-f-ts__card:nth-child(1) { z-index: 3; }
+    .kalq-f-ts__card:nth-child(2) { z-index: 2; transform: translateY(0.9rem) scale(0.95); }
+    .kalq-f-ts__card:nth-child(3) { z-index: 1; transform: translateY(1.8rem) scale(0.9); }
+    .kalq-f-ts__card:nth-child(n + 4) { visibility: hidden; }
+    .kalq-f-tether__list { gap: 0; }
+    .kalq-f-tether__list > * { grid-area: 1 / 1; margin-top: calc(var(--i, 0) * 20px); }
+    .kalq-f-hs__track { display: flex; overflow: hidden; padding-inline: var(--f-pad-x); max-width: none; }
+    .kalq-f-hs__card { flex: 0 0 clamp(14rem, 30cqi, 22rem); }
+}
+
+// the previews are pictures: no editor controls in them (edit mode is on while the picker is open)
+body .kalq-device.kalq-device :is(.kalq-f-tools, .kalq-m-alt-field) { display: none; }
+
+//=================================== Editing ===================================//
+// The module's own controls (English, the editor's language): small pills in the editor's blue
+.kalq-m-alt-field { display: none; }
+
+body.kalq-edit .kalq-m-alt-field { display: block; margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.75; }
+
+.kalq-f-tools { display: none; } // signed-in editors get the editor render outside edit mode too
+
+body.kalq-edit .kalq-f-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 0 0.6rem;
+    padding: 0.25rem 0.35rem;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.9); // readable over a picture or a dark card
+    font: 500 12px/1.2 system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: 0;
+    color: #1d4ed8;
+
+    &.is-module { margin-bottom: 1.5rem; }
+    &.is-add { margin: 0.8rem 0 0; }
+    &.is-piece { position: relative; z-index: 1; }
+}
+
+.kalq-f-tools__num { margin-right: 0.3rem; font-weight: 600; }
+
+.kalq-f-group {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.kalq-f-group__name { margin: 0 0.15rem 0 0.5rem; opacity: 0.75; }
+
+.kalq-f-tool {
+    padding: 0.3rem 0.6rem;
+    border: 1px solid rgba(59, 130, 246, 0.45);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.94);
+    color: #1d4ed8;
+    font: inherit;
+    cursor: pointer;
+
+    &[aria-pressed="true"] { background: #3b82f6; border-color: #3b82f6; color: #fff; }
+    &:disabled { opacity: 0.4; cursor: default; }
+    &:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
+}
+
+.kalq-f-edit-link .kalq-m-link-field { display: none; }
+body.kalq-edit .kalq-f-edit-link .kalq-m-link-field { display: inline-block; }
+
+.kalq-f-edit-link {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+}
+
+body.kalq-edit .kalq-f-col.is-over > .is-backdrop > .kalq-f-tools { position: absolute; top: 1rem; left: 50%; transform: translateX(-50%); }
+body.kalq-edit .kalq-f-col.is-over > .kalq-f-tools.is-col { position: relative; z-index: 1; align-self: flex-start; margin-bottom: auto; }
+body.kalq-edit .kalq-f-col.is-over { padding-top: 4.5rem; }
+.kalq-f-ts__photo .kalq-ph-media::before { content: none; } // too small for its label: the glyph says it is a picture
+
+//=================================== Reduced motion ===================================//
+@media (prefers-reduced-motion: reduce) {
+    .kalq-link-underline { transition: none; }
+    .kalq-btn-round__circle, .kalq-btn-round__arrow { transition: none; }
+}
+
+//=================================== Two screens ===================================//
+// A device spanning two screens side by side (css/utilities/_dual.scss, and the picker's frame): each screen a
+// complete panel, nothing across the hinge; the type measures one screen (--cq)
+@mixin final-two-screens {
+    .kalq-m.kalq-f { --f-pad-x: 2rem; padding: 3rem 0; }
+    .kalq-f > * { --f-pad-x: 2rem; }
+
+    // custom: two columns, one per screen; a picture to the edge stops at the screen's edge
+    .kalq-f-custom.is-cols:not(.has-cols-1) .kalq-f-track { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: calc(var(--seg-hinge) + 4rem); }
+    .kalq-f-custom.is-cols .kalq-f-piece.is-bleed { margin-inline: 0; }
+    .kalq-f-custom.is-cols .kalq-f-col.is-over:has(> .is-backdrop.is-bleed) { margin-inline: 0; padding-inline: clamp(1.25rem, 2.5cqi, 2rem); }
+    .kalq-f-custom.is-row .kalq-f-col { flex-basis: calc(var(--seg-l) - 4rem); }
+    .kalq-f-custom.is-row .kalq-f-track { gap: calc(var(--seg-hinge) + 4rem); }
+
+    // image and text: one on each screen, a screen high
+    .kalq-f-it__grid { grid-template-columns: var(--seg-l) var(--seg-r); column-gap: var(--seg-hinge); min-height: var(--seg-h); }
+    .kalq-f-it__media { height: 100%; aspect-ratio: auto; min-height: var(--seg-h); }
+    .kalq-f-it.is-image-right .kalq-f-it__media { order: 2; }
+    .kalq-f-it__text { padding: 3rem 2rem; }
+
+    // alternating rows: picture and text each on a screen
+    .kalq-f-alt__row { grid-template-columns: var(--seg-l) var(--seg-r); column-gap: var(--seg-hinge); min-height: calc(var(--seg-h) * 0.6); }
+    .kalq-f-alt[class] .kalq-f-alt__row:nth-child(n) .kalq-f-alt__text { padding: 2rem; }
+
+    // testimonials: the heading on the left screen, the pile on the right
+    .kalq-f-ts__inner { grid-template-columns: var(--seg-l) var(--seg-r); column-gap: var(--seg-hinge); padding: 0; }
+    .kalq-f-ts__head, .kalq-f-ts__deck { padding: 0 2rem; }
+
+    // the stacking cards: the text on the left screen, the picture on the right, a screen high
+    .kalq-f-tether__list { padding: 0; }
+    .kalq-f-tether__card { grid-template-columns: var(--seg-l) var(--seg-r); column-gap: var(--seg-hinge); align-items: stretch; padding: 0; border-radius: 0; min-height: calc(var(--seg-h) - 6rem); }
+    .kalq-f-tether__text { align-self: center; padding: 2rem; }
+    .kalq-f-tether__media { align-self: stretch; height: auto; aspect-ratio: auto; border-radius: 0; }
+    .kalq-f-tether__card:nth-child(even) .kalq-f-tether__media { order: -1; } // the picture changes sides, so each screen alternates
+
+    // horizontal cards: one card a screen wide
+    .kalq-f-hs.is-armed .kalq-f-hs__card { flex-basis: calc(var(--seg-l) - 4rem); }
+    .kalq-f-hs.is-armed .kalq-f-hs__track { gap: calc(var(--seg-hinge) + 4rem); padding-inline: 2rem; }
+}

@@ -69,9 +69,9 @@ export function placeholder(el, def) {
 
 // A media slot's box: the image or video, or for editors the placeholder glyph. Content images name what they show
 // (alt): from { alt } (e.g. a person's name) or the slot's own description block "<slot>_alt"; otherwise decorative
-export function mediaEl(ctx, slot, className, { alt } = {}) {
+export function mediaEl(ctx, slot, className, { alt, label } = {}) {
     const url = mediaOf(ctx, slot);
-    const def = ctx.def.slots[slot];
+    const def = ctx.def.slots[slot] || { label: label || { de: slot, en: slot } }; // a slot made per item brings its label
     if (!url && !ctx.editor) return null;
     const box = ctx.doc.createElement("div");
     box.className = `${className} kalq-m-media`;
@@ -88,7 +88,7 @@ export function mediaEl(ctx, slot, className, { alt } = {}) {
     } else {
         el = ctx.doc.createElement("img");
         el.setAttribute("src", url);
-        el.setAttribute("alt", alt ?? (ctx.def.slots[`${slot}_alt`] ? plain(textOf(ctx, `${slot}_alt`)) : ""));
+        el.setAttribute("alt", alt ?? plain(textOf(ctx, `${slot}_alt`))); // its description block, if it has one
         el.setAttribute("loading", "lazy");
     }
     el.setAttribute("data-kalq-key", keyOf(ctx, slot));
@@ -174,7 +174,8 @@ export const picture = (slot, label, { required = false, alt = true } = {}) => [
 ];
 
 // The description field under a picture, for editors (visitors get it as the image's alt)
-export const altField = (ctx, slot) => (ctx.editor && ctx.def.slots[`${slot}_alt`] ? slotEl(ctx, `${slot}_alt`, "p", { className: "kalq-m-alt-field" }) : null);
+export const altField = (ctx, slot, label) => (ctx.editor && (ctx.def.slots[`${slot}_alt`] || label)
+    ? slotEl(ctx, `${slot}_alt`, "p", { className: "kalq-m-alt-field", label }) : null);
 
 // An editor-only field (a link address, a description): null for visitors
 export const editorField = (ctx, slot, tag = "span", className = "kalq-m-link-field") => (ctx.editor ? slotEl(ctx, slot, tag, { className }) : null);

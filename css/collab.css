@@ -2906,7 +2906,7 @@ body:not(.kalq-edit) .kalq-undo-btn {
   height: 0.75em;
   width: 72%;
 }
-.kalq-device .kalq-m-center h2.kalq-ph:empty, .kalq-device .kalq-m-cta.is-centered h2.kalq-ph:empty {
+.kalq-device .kalq-m-center h2.kalq-ph:empty {
   width: 60%;
   margin-left: auto;
   margin-right: auto;
@@ -2916,28 +2916,26 @@ body:not(.kalq-edit) .kalq-undo-btn {
   width: 22%;
   opacity: 0.6;
 }
-.kalq-device .kalq-m-text.kalq-ph:empty, .kalq-device .kalq-m-faq__a.kalq-ph:empty {
+.kalq-device :is(.kalq-m-text, .kalq-f-text, .kalq-f-ts__quote).kalq-ph:empty {
   height: 4.4em;
   width: 88%;
   border-radius: 0;
   background: repeating-linear-gradient(to bottom, rgba(59, 130, 246, 0.5) 0 0.5em, transparent 0.5em 1.3em);
 }
-.kalq-device .kalq-m-faq__a.kalq-ph:empty {
-  height: 2.4em;
-  margin-bottom: 1.4rem;
+.kalq-device .kalq-f-ts__quote.kalq-ph:empty {
+  height: 3.4em;
+  background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.55) 0 0.5em, transparent 0.5em 1.3em);
 }
-.kalq-device .kalq-m-cta.is-centered .kalq-m-text.kalq-ph:empty {
-  width: 50%;
+.kalq-device .kalq-f-ts__card .kalq-ph:empty:not(.kalq-ph-media), .kalq-device .kalq-f-tether__card:nth-child(odd) .kalq-ph:empty:not(.kalq-ph-media):not(.kalq-f-text) {
+  background: rgba(255, 255, 255, 0.6);
+}
+.kalq-device h3.kalq-ph:empty {
+  height: 0.7em;
+  width: 60%;
 }
 .kalq-device .kalq-m-button.kalq-ph:empty {
   width: 9rem;
   height: 3rem;
-}
-.kalq-device .kalq-m-faq__q.kalq-ph:empty {
-  height: 0.8em;
-  width: 70%;
-  margin: 1.4rem 0;
-  padding: 0;
 }
 .kalq-device .kalq-m-caption.kalq-ph:empty {
   height: 0.6em;
@@ -3087,44 +3085,6 @@ body:not(.kalq-edit) .kalq-undo-btn {
   color: #101010;
 }
 
-@container (max-width: 599px) {
-  body.kalq-edit .kalq-m-cta .kalq-m-cta__screen2 {
-    position: relative;
-    right: auto;
-    bottom: auto;
-    margin: 1.5rem auto 0;
-  }
-}
-@media not all and (horizontal-viewport-segments: 2) {
-  body.kalq-edit .kalq-m-cta {
-    position: relative;
-  }
-  body.kalq-edit .kalq-m-cta__screen2 {
-    display: block;
-    position: absolute;
-    right: 1.25rem;
-    bottom: 1.25rem;
-    width: 200px;
-    height: 130px;
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  body.kalq-edit .kalq-m-cta__screen2 .kalq-m-media,
-  body.kalq-edit .kalq-m-cta__screen2 .kalq-ph-media {
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    border-radius: 0;
-  }
-  body.kalq-edit .kalq-m-cta__screen2 .kalq-ph-media::before {
-    font-size: 0.7rem;
-    padding: 0 0.5rem;
-    text-align: center;
-  }
-  body.kalq-edit .kalq-m-cta__screen2 .kalq-auto {
-    display: none;
-  }
-}
 .kalq-picker__device-name {
   font-size: 0.72rem;
   opacity: 0.8;

@@ -127,7 +127,7 @@ async function biggestPicture(roots) {
 const sectionKind = (s) => s.dataset.section in SECTIONS ? s.dataset.section
     : (s.classList[0] || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); // a copy keeps its class
 
-// What a library module's own unit builder gets (js/modules/library.js magazine.unit): copies of the page's text
+// What a module's own unit builder gets (js/modules/final.js magazine.unit): copies of the page's text
 const UNIT_KIT = {
     parasOf, mediaUrl,
     textOf: (src, tag, cls, prefix) => { const t = textOf(src, tag, cls); if (t && prefix) t.prepend(prefix); return t; },

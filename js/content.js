@@ -5,6 +5,7 @@ import { applyLanguage, currentLang, setEditedContent } from "./i18n.js";
 import { renderBlock, sanitize } from "./blocks.js";
 import { applyLayout, layoutKey, parseLayout } from "./layout.js";
 import { renderModule } from "./modules/registry.js";
+import { PLACEHOLDER_ART } from "./modules/kit.js";
 import { sanitizeSvg } from "../lib/svg-sanitize.js";
 
 const TIMEOUT_MS = 1500;
@@ -29,7 +30,7 @@ const SKIP_ATTRS = new Set(["src", "autoplay", "muted", "loop", "playsinline", "
 function mediaNode(url, like) {
     const video = isVideoUrl(url);
     const node = document.createElement(video ? "video" : "img");
-    if (like) [...like.attributes].forEach((a) => { if (!SKIP_ATTRS.has(a.name) && !a.name.startsWith("data-ph-")) node.setAttribute(a.name, a.value); });
+    if (like) [...like.attributes].forEach((a) => { if (!SKIP_ATTRS.has(a.name)) node.setAttribute(a.name, a.value); }); // its placeholder label stays, for an undo back to empty
     node.classList.remove("kalq-ph", "kalq-ph-media"); // a filled placeholder is no longer one
     if (video) {
         node.muted = true;
@@ -66,6 +67,15 @@ export function setMedia(el, url) {
     }
     // <img> or <video> in the page: same kind updates; anything else (the other kind, or an empty module slot's
     // placeholder, a <div>) is replaced by the right element. A <div> given a src shows nothing.
+    // a module's picture emptied again (an upload undone): its placeholder comes back
+    if (!url && /^(IMG|VIDEO)$/.test(el.tagName) && el.closest(".kalq-m-media") && el.hasAttribute("data-ph-en")) {
+        const ph = document.createElement("div");
+        [...el.attributes].forEach((a) => { if (!SKIP_ATTRS.has(a.name)) ph.setAttribute(a.name, a.value); });
+        ph.classList.add("kalq-ph", "kalq-ph-media");
+        ph.innerHTML = PLACEHOLDER_ART;
+        el.replaceWith(ph);
+        return;
+    }
     if (!url || currentUrl(el) === url) return;
     const wantVideo = isVideoUrl(url);
     if (el.tagName === (wantVideo ? "VIDEO" : "IMG")) {

@@ -2,7 +2,8 @@
 // Saves go straight to Supabase with the editor's own login (RLS: editors only, as themselves) and are live for
 // everyone at once: the page channel only says "this block changed", every browser then reloads it from the server.
 // While someone edits a block, the others see it locked (see setLock in collab.js).
-import { applyDirect, setLocalContent, setPageMediaOnly, styleMediaFor } from "./content.js";
+import { applyDirect, setLocalContent, setPageMediaOnly, storedEntry, styleMediaFor } from "./content.js";
+import { recordUndo } from "./sections.js";
 import { getActive } from "./variants.js";
 import { editableHtml, renderBlock, serializeBlock } from "./blocks.js";
 import { applyLanguage, currentLang, EDITOR_LANG } from "./i18n.js";

@@ -3840,3 +3840,8 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video)) {
 
 .kalq-site__label { margin: 0.4rem 0 0; font-size: 0.8rem; color: rgba(255, 255, 255, 0.75); }
 .kalq-site__switch { justify-self: start; }
+
+// The chat's photo in the picker's Chat panel
+.kalq-site__photo-row { display: flex; align-items: center; gap: 0.6rem; }
+.kalq-site__photo { display: block; width: 2.75rem; height: 2.75rem; overflow: hidden; border-radius: 50%; background: rgba(255, 255, 255, 0.08);
+    img { display: block; width: 100%; height: 100%; object-fit: cover; } }

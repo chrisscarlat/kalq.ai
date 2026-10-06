@@ -3101,10 +3101,7 @@ body.kalq-edit .kalq-f-ts__card > .kalq-f-tools {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.kalq-chat__toggle svg {
-  width: 100%;
-  height: 100%;
+  overflow: hidden;
 }
 .kalq-chat__toggle:hover {
   transform: scale(1.08) rotate(5deg);
@@ -3117,6 +3114,18 @@ body.kalq-edit .kalq-f-ts__card > .kalq-f-tools {
 
 .kalq-chat.is-open .kalq-chat__toggle {
   transform: scale(0.92);
+}
+
+.kalq-chat__toggle-photo, .kalq-chat__avatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.kalq-chat__toggle-photo img, .kalq-chat__toggle-photo svg, .kalq-chat__avatar img, .kalq-chat__avatar svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .kalq-chat__window {
@@ -3171,34 +3180,20 @@ body.kalq-edit .kalq-f-ts__card > .kalq-f-tools {
   text-transform: uppercase;
 }
 
-.kalq-chat__langs {
-  display: flex;
-  gap: 3px;
-  padding: 3px;
-  border-radius: 8px;
-  background: color-mix(in srgb, currentColor 5%, transparent);
-}
-
-.kalq-chat__lang {
-  padding: 0.25rem 0.55rem;
-  border: 0;
-  border-radius: 5px;
-  background: none;
-  color: color-mix(in srgb, currentColor 55%, transparent);
+.kalq-chat__langs .lang {
   font-family: var(--kalq-font-body, "Clash Grotesk", "Helvetica Neue", Arial, sans-serif);
   font-size: 0.7rem;
   font-weight: 600;
   line-height: 1.3;
   letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
+}
+.kalq-chat__langs .lang__item {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
-}
-.kalq-chat__lang[aria-pressed=true] {
-  background: var(--kalq-text, #101010);
-  color: var(--kalq-bg, #fff);
-}
-.kalq-chat__lang:focus-visible {
-  outline: 2px solid var(--kalq-accent, #3b82f6);
-  outline-offset: 1px;
 }
 
 .kalq-chat__close {
@@ -3257,11 +3252,6 @@ body.kalq-edit .kalq-f-ts__card > .kalq-f-tools {
   height: 2.25rem;
   overflow: hidden;
   border-radius: 50%;
-}
-.kalq-chat__avatar svg {
-  display: block;
-  width: 100%;
-  height: 100%;
 }
 
 .kalq-chat__bubble {
@@ -3485,10 +3475,6 @@ body.kalq-edit .kalq-f-ts__card > .kalq-f-tools {
     height: min(560px, 100svh - 7rem);
   }
 }
-body.kalq-edit .kalq-chat {
-  bottom: max(5.5rem, env(safe-area-inset-bottom, 0px));
-}
-
 @media (prefers-reduced-motion: reduce) {
   .kalq-chat__window, .kalq-chat__msg {
     animation: none;

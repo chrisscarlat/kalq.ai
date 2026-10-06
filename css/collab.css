@@ -3999,3 +3999,24 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video))::after {
 .kalq-site__switch {
   justify-self: start;
 }
+
+.kalq-site__photo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.kalq-site__photo {
+  display: block;
+  width: 2.75rem;
+  height: 2.75rem;
+  overflow: hidden;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+.kalq-site__photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

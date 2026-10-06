@@ -390,6 +390,7 @@ function close() {
     if (!state) return;
     root.classList.remove("is-open");
     root.querySelector(".kalq-picker__detail").replaceChildren(); // no previews left in the page
+    root.querySelector(".kalq-picker__settings")?.remove(); // nor the chat's preview (a second .kalq-chat)
     stageObserver?.disconnect();
     document.documentElement.classList.remove("kalq-scroll-lock");
     const back = state.returnFocus;

@@ -12,7 +12,7 @@ import { initModules } from "./moduleBehaviour.js";
 // The inquiry chat, floating on every page while it is on: loaded only then, and never in the way if a blocker stops it
 const inquiryOn = () => /on/.test(String(storedEntry("site.chat.active")?.de ?? storedEntry("site.chat.active")?.en ?? ""));
 const initInquiry = () => {
-    if (!inquiryOn() && !document.querySelector(".kalq-chat")) return; // off and not shown: nothing to load
+    if (!inquiryOn() && !document.querySelector(".kalq-chat:not(.is-preview)")) return; // off and not shown: nothing to load
     import("./inquiry.js").then((m) => m.initChatWidget()).catch((e) => console.warn("inquiry", e.message));
 };
 

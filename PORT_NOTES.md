@@ -303,3 +303,28 @@ keeps its drawing inside its square (`js/logoAnimation.js`), like the header mar
 ### What certil.com will need to change
 
 Nothing beyond its own gate markup and class names; the rule is the square and the fitted, clipped SVG.
+
+---
+
+## 5. One type scale (tokens)
+
+The site and every module share one scale, `css/utilities/_type.scss`: display, h1–h5, body, small, caption,
+eyebrow, quote, figure, and the inquiry chat's compact tokens (chat-text, chat-title, chat-small, chat-micro). Each
+token sets the font (the style's main or secondary font), a size fluid by its container's width (`cqi`, never the
+window), a weight and a line height. A heading's tag follows its role; its size comes from the token it takes
+(`@include type(h5)` on a card's h3).
+
+- h1–h5 are the built-in pages' heading sizes as they were; the pages look the same, the modules now match them.
+- Every module and every built-in page section is a width container (`container-type: inline-size`), so a token
+  measures the box it sits in.
+- Two screens: the tokens' unit `--cq` is one screen's width (`css/utilities/_dual.scss`), so text is sized for the
+  screen it is on.
+- "light" is the lightest weight a style's font really has from 300 up: `js/variants.js` reads the weights Google
+  sent (Syne starts at 400) and sets `--kalq-weight-light-heading` / `-body`.
+- Not tokens on purpose: the editor's own controls (setting fields, slider labels) and a button's medium weight and
+  one-line height in its pill.
+
+### What certil.com will need to change
+
+Its own font variables in place of `--kalq-font-heading` / `--kalq-font-body`, and the same container rule for its
+sections. The token values themselves port as they are.

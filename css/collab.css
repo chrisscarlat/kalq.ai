@@ -2525,9 +2525,131 @@ body:not(.kalq-edit) .kalq-undo-btn {
 }
 
 .kalq-picker__side {
+  display: flex;
+  flex-direction: column;
   padding: 1.4rem 1rem;
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   overflow-y: auto;
+}
+
+.kalq-picker__site {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: auto;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.kalq-picker__site-label {
+  margin: 0 0.6rem 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.kalq-picker__cat.is-site {
+  justify-content: flex-start;
+  align-items: center;
+}
+.kalq-picker__cat.is-site .kalq-picker__count {
+  margin-left: auto;
+}
+
+.kalq-picker__icon {
+  display: grid;
+  place-items: center;
+  width: 1.2rem;
+  opacity: 0.8;
+}
+.kalq-picker__icon svg {
+  display: block;
+}
+
+.kalq-picker__settings {
+  max-width: 760px;
+  margin-top: 1.4rem;
+}
+
+.kalq-picker.is-settings .kalq-picker__main {
+  grid-template-rows: minmax(0, 1fr) 0;
+}
+
+.kalq-picker.is-settings .kalq-picker__hint {
+  display: none;
+}
+
+.kalq-site {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.2rem 1.3rem 1.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.kalq-site__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.kalq-site__intro, .kalq-site__hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 62ch;
+}
+
+.kalq-site__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 0.8rem 1rem;
+}
+
+.kalq-site__field {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.kalq-site__input {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  resize: vertical;
+}
+.kalq-site__input:focus {
+  outline: none;
+  border-color: #3B82F6;
+}
+.kalq-site__input[aria-invalid=true] {
+  border-color: #f87171;
+}
+
+.kalq-site__state {
+  min-height: 1em;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.kalq-site__input[aria-invalid=true] + .kalq-site__state {
+  color: #fca5a5;
+}
+
+.kalq-site__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
 
 .kalq-picker__title {
@@ -2702,20 +2824,6 @@ body:not(.kalq-edit) .kalq-undo-btn {
   line-height: 1.2;
   text-align: center;
   opacity: 0.65;
-}
-
-.kalq-picker__content {
-  position: relative;
-  overflow: hidden;
-  border-radius: 10px;
-  background: #000;
-}
-.kalq-picker__content > .kalq-device {
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform-origin: 0 0;
-  overflow: visible;
 }
 
 .kalq-picker__insert {
@@ -3779,4 +3887,7 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video))::after {
     transition: none !important;
     animation: none !important;
   }
+}
+.kalq-picker.is-settings .kalq-site__title {
+  display: none;
 }

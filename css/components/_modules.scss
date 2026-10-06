@@ -96,28 +96,17 @@
     }
 }
 
-/* Central image or video */
+/* Central image or video: one size for both, the full width at 21:9 (as Home's video) */
 .kalq-m-center {
     .kalq-m-heading {
         max-width: 18ch;
         margin: 0 auto 3rem;
         text-align: center;
     }
-
-    &.is-image .kalq-m-center__figure {
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
     .kalq-m-center__media {
-        aspect-ratio: 16 / 9;
-    }
-
-    &.is-video .kalq-m-center__media {
         aspect-ratio: 21 / 9;
     }
 }
-
 .kalq-m-caption {
     margin-top: 1rem;
     text-align: center;
@@ -134,7 +123,7 @@
 @container (max-width: 480px) {
     .kalq-m-inner { padding: 0 1rem; }
     .kalq-m-center .kalq-m-heading { margin-bottom: 1.75rem; }
-    .kalq-m-center.is-video .kalq-m-center__media { aspect-ratio: 16 / 9; }
+    .kalq-m-center .kalq-m-center__media { aspect-ratio: 16 / 9; }
     .kalq-m-media { border-radius: 16px; }
 }
 

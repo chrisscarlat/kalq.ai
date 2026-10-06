@@ -78,7 +78,7 @@ function sectionName(entry) {
     if (entry.module === "legacy") return `${names[entry.source] || entry.source} (${t("copyOf")})`;
     const def = MODULES[entry.module];
     if (!def) return entry.module;
-    return `${def.name[lang()]} · ${def.versions[entry.version]?.name[lang()] || entry.version}`;
+    return `${def.name[lang()]} · ${(def.versions[entry.version] || def.versions[def.aliases?.[entry.version]])?.name[lang()] || entry.version}`;
 }
 
 async function editorSession() {
@@ -280,6 +280,13 @@ const itemsAction = (id, action, itemId, arg) => run(async () => {
 function onItemsAction(e) {
     const it = e.target.closest?.("[data-items-action]");
     if (!it || !editing()) return;
+    if (it.tagName === "INPUT") { // a value control (a card's colour): its change is the action, its click opens it
+        if (e.type !== "change") { e.stopPropagation(); return; }
+        const sec = it.closest("section[data-section]");
+        if (sec) itemsAction(sec.dataset.section, it.dataset.itemsAction, it.dataset.itemsId, it.value);
+        return;
+    }
+    if (e.type === "change") return;
     const sec = it.closest("section[data-section]");
     if (!sec) return;
     e.preventDefault();
@@ -331,7 +338,7 @@ export const insertModule = (index, module, version) => run(async () => {
 
 async function openPicker(index) {
     const { openPicker: open } = await import("./picker.js");
-    open({ onInsert: (module, version) => insertModule(index, module, version) });
+    open({ onInsert: (module, version) => insertModule(index, module, version), collab });
 }
 
 // Scroll the page so a section is in view, its bar clear below the header
@@ -745,6 +752,7 @@ export function initSections(api) {
     collab.on("page", () => { selected = null; expanded = null; render(); });
     document.addEventListener("pointerdown", onPointerDown, true);
     document.addEventListener("click", onItemsAction, true); // a module's own controls (its items, its layout)
+    document.addEventListener("change", onItemsAction, true); // and their value controls (a colour)
     // A click outside the open panel folds it back, after the click has reached its target (a button on another
     // section's bar still does what it says)
     document.addEventListener("click", (e) => { if (expanded && !e.target.closest(".kalq-section-tools.is-expanded")) setTimeout(() => collapse(false)); }, true);

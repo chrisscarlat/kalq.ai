@@ -2,20 +2,14 @@
 // Google Fonts or an uploaded woff2), logo as SVG file or pasted code (sanitised, previewed on dark and light),
 // hero video and per-image replacements uploaded to Supabase Storage. Draft or published, one default, every save
 // is a version that can be restored. The settings are in tabs, each with a small title saying what it controls:
-// Images, Logos, Menu, Navigation, Notifications (the cookie bar: site-wide blocks, saved on their own), Colours and
-// fonts.
+// Images, Logos, Menu, Navigation, Colours and fonts. The insert picker's left menu opens it at a tab (kalq:open-styles).
 import { sanitizeSvg } from "../lib/svg-sanitize.js";
 import { EDITOR_LANG } from "./i18n.js";
 import { progressLine, showDone, uploadMedia } from "./upload.js";
 import { applyVariant, endPreview, getActive, loadVariants, logoNode } from "./variants.js";
 import { setLocalContent, storedEntry } from "./content.js";
-import { dontpanicPreview, footerPreview, menuPreview } from "./stylePreview.js";
-// The bottom bar's script loads only when its tab needs it: if a browser or blocker refuses it, the rest of the panel
-// (and the Styles button) still works. Its stored keys, the same as in js/dontpanic.js (data: they never change):
-const NOTE_KEYS = { mode: "site.cookie.mode", notice: "site.cookie.notice", consent: "site.cookie.consent" };
-const PAGE_MODE = { notice: "tell", consent: "ask" }; // the bar's markup (data-for)
-let dontpanic = null;
-const loadDontPanic = () => (dontpanic ||= import("./dontpanic.js").catch((error) => { dontpanic = null; throw error; }));
+import { footerPreview, menuPreview } from "./stylePreview.js";
+// The cookie bar's settings are in the insert picker's left menu now (js/siteSettings.js), with the chat's.
 
 const TEXT = {
     de: {
@@ -37,17 +31,13 @@ const TEXT = {
         peek: "Seite ansehen", unsaved: "Nicht gespeichert",
         pages: { home: "Start", platform: "Plattform", company: "Unternehmen", impressum: "Impressum", datenschutz: "Datenschutz" }, preview: "Vorschau", endPreview: "Vorschau beenden", save: "Speichern", remove: "Löschen",
         history: "Versionen", restore: "Wiederherstellen", saved: "Gespeichert", failed: "Speichern fehlgeschlagen", confirmDelete: "Diese Variante löschen? Sie bleibt in den Versionen.",
-        tabs: { images: "Bilder", logos: "Logos", menu: "Menü", navigation: "Navigation", dontpanic: "Benachrichtigungen", look: "Farben und Schrift" },
+        tabs: { images: "Bilder", logos: "Logos", menu: "Menü", navigation: "Navigation", look: "Farben und Schrift" },
         tabTitles: { images: "Hero-Video, die Bildplätze aller Seiten und die Enthüllung über den Bildern", logos: "Das Logo der Variante und was in der Mitte des Heros steht",
             menu: "Wie das Hauptmenü aussieht und sich öffnet", navigation: "Der Footer: Kontakt, Links und Schriftzug am Ende jeder Seite",
-            dontpanic: "Der Cookie-Hinweis unten auf jeder Seite. Gilt für die ganze Website, in jeder Variante gleich.", look: "Die Stile: hinzufügen, wechseln, Name und Status; die Farben und Schriften des gewählten Stils" },
-        wirePreview: "Vorschau", wireMenu: (n) => `Vorschau: Menü ${n}`, wireFooter: (n) => `Vorschau: Footer ${n}`, wireCookie: (n) => `Vorschau: Cookie-Hinweis, ${n}`,
+            look: "Die Stile: hinzufügen, wechseln, Name und Status; die Farben und Schriften des gewählten Stils" },
+        wirePreview: "Vorschau", wireMenu: (n) => `Vorschau: Menü ${n}`, wireFooter: (n) => `Vorschau: Footer ${n}`,
         styles: "Stile", editing: "Bearbeitet:", stylesOpen: "Stile hinzufügen, wechseln und bearbeiten",
-        tabsLabel: "Bereiche", cookieMode: "Art", cookieNotice: "Hinweis", cookieConsent: "Einwilligung",
-        cookieNoticeHint: "Es werden keine Daten erhoben: eine Zeile ohne Buttons, nach 5 Sekunden verschwindet sie von selbst.",
-        cookieConsentHint: "Es werden Daten erhoben: mit Akzeptieren und Ablehnen; bleibt, bis gewählt wird. Optionales lädt erst nach Akzeptieren.",
-        cookieTextNotice: "Text des Hinweises", cookieTextConsent: "Text der Einwilligung", lang_de: "Deutsch", lang_en: "Englisch",
-        noteBlocked: "Die Vorschau konnte nicht laden: Der Browser oder ein Blocker hat das Skript der Leiste verhindert. Speichern geht trotzdem.", cookiePreview: "Vorschau zeigen", cookieSave: "Hinweis speichern", cookieSaved: "Cookie-Hinweis gespeichert", cookieEmpty: "Bitte beide Sprachen ausfüllen.",
+        tabsLabel: "Bereiche",
         errors: { letter_taken: "Dieser Buchstabe ist vergeben.", default_must_be_published: "Die Standard-Variante muss veröffentlicht sein.", choose_another_default: "Erst eine andere Variante zum Standard machen.", default_cannot_be_deleted: "Die Standard-Variante kann nicht gelöscht werden." },
     },
     en: {
@@ -69,17 +59,13 @@ const TEXT = {
         peek: "View page", unsaved: "Not saved",
         pages: { home: "Home", platform: "Platform", company: "Company", impressum: "Legal notice", datenschutz: "Privacy" }, preview: "Preview", endPreview: "End preview", save: "Save", remove: "Delete",
         history: "Versions", restore: "Restore", saved: "Saved", failed: "Could not save", confirmDelete: "Delete this variant? It stays in the versions.",
-        tabs: { images: "Images", logos: "Logos", menu: "Menu", navigation: "Navigation", dontpanic: "Notifications", look: "Colours & fonts" },
+        tabs: { images: "Images", logos: "Logos", menu: "Menu", navigation: "Navigation", look: "Colours & fonts" },
         tabTitles: { images: "Hero video, the image slots of every page and the reveal over the images", logos: "The variant's logo and what sits in the middle of the hero",
             menu: "How the main menu looks and opens", navigation: "The footer: contact, links and wordmark at the end of every page",
-            dontpanic: "The cookie notice at the bottom of every page. For the whole site, the same in every variant.", look: "The styles: add, switch, name and status; the colours and fonts of the selected style" },
-        wirePreview: "Preview", wireMenu: (n) => `Preview: menu ${n}`, wireFooter: (n) => `Preview: footer ${n}`, wireCookie: (n) => `Preview: cookie notice, ${n}`,
+            look: "The styles: add, switch, name and status; the colours and fonts of the selected style" },
+        wirePreview: "Preview", wireMenu: (n) => `Preview: menu ${n}`, wireFooter: (n) => `Preview: footer ${n}`,
         styles: "Styles", editing: "Editing:", stylesOpen: "Add, switch and edit styles",
-        tabsLabel: "Sections", cookieMode: "Kind", cookieNotice: "Notice", cookieConsent: "Consent",
-        cookieNoticeHint: "No data is collected: one line, no buttons; after 5 seconds it goes by itself.",
-        cookieConsentHint: "Data is collected: with Accept and Deny; it stays until one is chosen. Optional content loads only after Accept.",
-        cookieTextNotice: "Notice text", cookieTextConsent: "Consent text", lang_de: "German", lang_en: "English",
-        noteBlocked: "The preview could not load: the browser or a blocker stopped the bar's script. Saving still works.", cookiePreview: "Show preview", cookieSave: "Save notice", cookieSaved: "Cookie notice saved", cookieEmpty: "Please fill in both languages.",
+        tabsLabel: "Sections",
         errors: { letter_taken: "That letter is taken.", default_must_be_published: "The default variant must be published.", choose_another_default: "Make another variant the default first.", default_cannot_be_deleted: "The default variant cannot be deleted." },
     },
 };
@@ -278,74 +264,6 @@ function footerSection() {
     const extras = el("div", { className: "kalq-seg", role: "group" }, toggle("footer_wordmark", t("footerWordmark")), toggle("footer_gradient", t("footerGradient")));
     extras.hidden = draft.footer_style !== "harbor";
     return el("section", {}, el("h4", { textContent: t("footer") }), footer, extras);
-}
-
-// Notifications: the cookie bar. Not part of a variant: its mode and texts are site blocks (js/dontpanic.js), saved
-// here on their own, as a version like any edited text; the server writes them into every page.
-let noteDraft = null;
-function noteSection() {
-    const plainOf = (key, lang) => { const e = storedEntry(key); return String((e && (e[lang] ?? (lang === "de" ? e.en : e.de))) || "").replace(/<[^>]+>/g, "").trim(); };
-    const bar = document.querySelector(".dontpanic-bar");
-    const builtIn = (mode, lang) => bar?.querySelector(`.dontpanic-bar__text[data-for="${PAGE_MODE[mode]}"] [lang="${lang}"]`)?.textContent.trim() || "";
-    if (!noteDraft) {
-        noteDraft = { mode: plainOf(NOTE_KEYS.mode, "de") === "consent" ? "consent" : "notice", texts: {} };
-        ["notice", "consent"].forEach((m) => ["de", "en"].forEach((l) => { noteDraft.texts[`${m}.${l}`] = plainOf(NOTE_KEYS[m], l) || builtIn(m, l); }));
-    }
-    const hint = el("p", { className: "kalq-styles__inherited" });
-    const showHint = () => { hint.textContent = noteDraft.mode === "consent" ? t("cookieConsentHint") : t("cookieNoticeHint"); };
-    const mode = seg([["notice", t("cookieNotice")], ["consent", t("cookieConsent")]], noteDraft.mode, (v) => { noteDraft.mode = v; showHint(); drawPreview(); });
-    showHint();
-    const text = (m, l) => {
-        const id = `dontpanic-${PAGE_MODE[m]}-${l}`;
-        const area = el("textarea", { id, className: "kalq-styles__prose", rows: 2, maxLength: 200, value: noteDraft.texts[`${m}.${l}`] || "", spellcheck: true });
-        area.addEventListener("input", () => { noteDraft.texts[`${m}.${l}`] = area.value; });
-        area.addEventListener("keydown", (e) => e.stopPropagation());
-        return el("label", { className: "kalq-styles__field", htmlFor: id }, el("span", { textContent: `${t(m === "notice" ? "cookieTextNotice" : "cookieTextConsent")} · ${t(`lang_${l}`)}` }), area);
-    };
-    // the page's bar shows what is set here (before saving too)
-    const toPage = async () => (await loadDontPanic()).applyNoteSettings(document, (key) => {
-        if (key === NOTE_KEYS.mode) return { de: noteDraft.mode, en: noteDraft.mode };
-        const m = key === NOTE_KEYS.notice ? "notice" : "consent";
-        return { de: noteDraft.texts[`${m}.de`], en: noteDraft.texts[`${m}.en`] };
-    });
-    const preview = el("button", { type: "button", className: "kalq-btn", textContent: t("cookiePreview") });
-    preview.addEventListener("click", async () => {
-        try { await toPage(); minimize(); (await loadDontPanic()).previewDontPanic(); }
-        catch (error) { console.error("dontpanic", error); collab.toast(t("noteBlocked"), "error"); }
-    });
-    const save = el("button", { type: "button", className: "kalq-btn kalq-btn--primary", textContent: t("cookieSave") });
-    save.addEventListener("click", async () => {
-        const m = noteDraft.mode;
-        if (!noteDraft.texts[`${m}.de`]?.trim() || !noteDraft.texts[`${m}.en`]?.trim()) return collab.toast(t("cookieEmpty"), "error");
-        save.disabled = true;
-        try { await saveNoteBlocks(); collab.toast(t("cookieSaved")); toPage().catch(() => { }); } // saved; the page's bar follows when its script is there
-        catch (error) { console.error("cookie", error); collab.toast(t("failed"), "error"); }
-        finally { save.disabled = false; }
-    });
-    return el("section", {}, el("h4", { textContent: t("tabs").dontpanic }),
-        el("div", { className: "kalq-styles__field" }, el("span", { textContent: t("cookieMode") }), mode), hint,
-        text("notice", "de"), text("notice", "en"), text("consent", "de"), text("consent", "en"),
-        el("div", { className: "kalq-styles__note-actions" }, preview, save));
-}
-
-// One batch of site blocks: the mode (both languages alike) and the two texts per language
-async function saveNoteBlocks() {
-    const { data } = await collab.sb.auth.getSession();
-    const session = data?.session;
-    if (!session) throw new Error("relogin");
-    const rows = [
-        ...["de", "en"].map((lang) => ({ key: NOTE_KEYS.mode, lang, content: noteDraft.mode })),
-        ...["notice", "consent"].flatMap((m) => ["de", "en"].map((lang) => ({ key: NOTE_KEYS[m], lang, content: noteDraft.texts[`${m}.${lang}`].trim() }))),
-    ].filter((r) => r.content);
-    const keys = [...new Set(rows.map((r) => r.key))];
-    const { error: blockError } = await collab.sb.from("blocks").upsert(keys.map((key) => ({ key, page: "site", type: "text" })), { onConflict: "key", ignoreDuplicates: true });
-    if (blockError) throw blockError;
-    const batch = crypto.randomUUID();
-    const { error } = await collab.sb.from("revisions").insert(rows.map((r) => ({ block_key: r.key, page: "site", lang: r.lang, content: r.content, author_id: session.user.id,
-        batch_id: batch, batch_scope: "site", batch_label: "Edited cookie notice" })));
-    if (error) throw error;
-    rows.forEach((r) => setLocalContent(r.key, r.lang, r.content, "text"));
-    collab.broadcast("content", { keys, color: collab.me.color });
 }
 
 // The site's own Kalq mark, for variants without their own logo
@@ -638,7 +556,6 @@ function renderPanel() {
         logos: () => [logoSection(), heroMarkSection()],
         menu: () => [menuSection()],
         navigation: () => [footerSection()],
-        dontpanic: () => [noteSection()], // the tab id (kalq-styles-tab-dontpanic) avoids words that blockers hide
         // the style editor: every style (switch by a click), a new one, this one's letter, name and switches; then its look
         look: () => [el("section", { className: "kalq-styles__styles" }, el("h4", { textContent: t("styles") }), list, create, headerSection()),
             colorSection(), el("section", {}, el("h4", { textContent: t("fonts") }), fontRow("heading"), fontRow("body"))],
@@ -693,9 +610,6 @@ function drawPreview() {
         const extras = draft.footer_style === "harbor" ? [draft.footer_wordmark && name("footerWordmark"), draft.footer_gradient && name("footerGradient")].filter(Boolean) : [];
         preview = footerPreview({ style: draft.footer_style, wordmark: !!draft.footer_wordmark, gradient: !!draft.footer_gradient },
             t("wireFooter")([name(draft.footer_style === "harbor" ? "footerHarbor" : "footerClassic"), ...extras].join(", ")));
-    } else if (activeTab === "dontpanic") {
-        const mode = noteDraft?.mode === "consent" ? "consent" : "notice";
-        preview = dontpanicPreview(mode, t("wireCookie")(name(mode === "consent" ? "cookieConsent" : "cookieNotice")));
     }
     root.querySelector(".kalq-styles__content").classList.toggle("is-single", activeTab !== "images" && !preview);
     if (activeTab === "images") map.replaceChildren(el("h4", { textContent: t("sitemap") }), sitemapNode());
@@ -732,7 +646,7 @@ function setOpen(open, { keepPreview = false } = {}) {
     root.toggleAttribute("inert", !open);
     document.documentElement.classList.toggle("kalq-scroll-lock", open); // the page stays put underneath
     button.setAttribute("aria-pressed", open);
-    if (open && !wasMinimized) { noteDraft = null; refresh(); }
+    if (open && !wasMinimized) refresh();
     else if (open) render();
     else if (previewOn && !keepPreview) togglePreview(false);
 }
@@ -767,4 +681,10 @@ export function initStyles(api_) {
     collab.on("key:s", () => button.click());
     collab.on("variants", () => { if (root.classList.contains("is-open") && !previewOn) refresh(); });
     document.addEventListener("kalq:language", () => { if (root.classList.contains("is-open")) render(); });
+    // the insert picker's Style, Navigation and Footers: this panel at that tab
+    document.addEventListener("kalq:open-styles", (e) => {
+        const tab = e.detail?.tab;
+        if (["images", "logos", "menu", "navigation", "look"].includes(tab)) activeTab = tab;
+        if (root.classList.contains("is-open")) render(); else setOpen(true);
+    });
 }

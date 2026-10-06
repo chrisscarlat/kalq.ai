@@ -377,67 +377,139 @@ $f-ease: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 //=================================== 4. Testimonials (stacking) ===================================//
+// Harbor's stacking cards: an optional heading above; the cards centred, piled, the next ones' edges peeking out
+// below in their own colours; at the cards' mid-height a small label on each side. Without the effect (no script,
+// reduced motion, editing) the cards are a plain stacked list.
 .kalq-f-ts__inner {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
-    gap: clamp(2rem, 5cqi, 6rem);
+    justify-items: center;
+    gap: clamp(2rem, 4cqi, 3.5rem);
+
+    > .kalq-f-heading { max-width: 18ch; text-align: center; }
+}
+
+.kalq-f-ts__stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 34rem) minmax(0, 1fr);
     align-items: center;
+    gap: clamp(1rem, 3cqi, 3rem);
+    width: 100%;
+}
+
+.kalq-f .kalq-f-ts__label {
+    margin: 0;
+    @include type(small);
+    font-weight: 500;
+    opacity: 0.7;
+
+    &.is-left { justify-self: start; }
+    &.is-right { justify-self: end; text-align: right; }
 }
 
 .kalq-f-ts__deck {
     display: grid;
     gap: 1.25rem; // the plain list
+    width: 100%;
 }
 
+// The card's own colour: the editor's (--ts-bg, set on the card), else one of four tones from the site's colours
 .kalq-f-ts__card {
+    --ts-tone: color-mix(in srgb, var(--kalq-accent, #3b82f6) 18%, var(--kalq-bg, #{$light}));
+    position: relative;
+    isolation: isolate;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    gap: 2rem;
-    min-height: clamp(16rem, 26cqi, 24rem);
+    gap: 1.4rem;
+    min-height: clamp(24rem, 42cqi, 31rem);
     margin: 0;
-    padding: clamp(1.5rem, 3cqi, 2.75rem);
-    border-radius: 24px;
-    background: var(--kalq-text, #{$dark});
-    color: var(--kalq-bg, #{$light});
+    padding: clamp(1.5rem, 3.5cqi, 2.5rem);
+    overflow: hidden;
+    border-radius: 28px;
+    background: var(--ts-bg, var(--ts-tone));
+    color: var(--kalq-text, #{$dark});
     transform-origin: 50% 100%;
 
-    &:nth-child(3n + 2) { background: color-mix(in srgb, var(--kalq-text, #{$dark}) 82%, var(--kalq-bg, #{$light})); }
-    &:nth-child(3n + 3) { background: color-mix(in srgb, var(--kalq-text, #{$dark}) 68%, var(--kalq-bg, #{$light})); }
+    &.tone-1 { --ts-tone: color-mix(in srgb, var(--kalq-text, #{$dark}) 7%, var(--kalq-bg, #{$light})); }
+    &.tone-2 { --ts-tone: color-mix(in srgb, var(--kalq-accent, #3b82f6) 42%, var(--kalq-bg, #{$light})); }
+    &.tone-3 { --ts-tone: var(--kalq-text, #{$dark}); }
+    &.is-dark, &.has-image { color: var(--kalq-bg, #{$light}); }
+    &.has-image { color: #fff; }
+}
+
+// A background picture: behind a shade, so the text stays readable on any picture
+.kalq-f-ts__bg {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    border-radius: 0;
+}
+
+.kalq-f-ts__card.has-image::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.35) 45%, rgba(0, 0, 0, 0.7) 100%);
+    pointer-events: none;
+}
+
+.kalq-f-ts__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.kalq-f-ts__mark {
+    font-family: var(--kalq-font-heading, "Clash Grotesk", "Helvetica Neue", Arial, sans-serif);
+    @include type-size(h3);
+    font-weight: var(--kalq-weight-light-heading, 300);
+    line-height: 0.9;
+
+    &.is-brand { @include type(h5); font-weight: 600; }
+    &.is-logo { height: 2.6rem; svg { height: 100%; width: auto; max-width: 12rem; display: block; } }
+}
+
+.kalq-f-ts__photo {
+    flex-shrink: 0;
+    width: 3.6rem;
+    height: 3.6rem;
+    border-radius: 14px;
 }
 
 .kalq-f-ts__quote {
+    flex: 1;
     margin: 0;
 
     p { @include type(quote); }
     p + p { margin-top: 0.8rem; }
 }
 
-.kalq-f-ts__who {
-    display: flex;
-    align-items: center;
-    gap: 0.9rem;
+.kalq-f-ts__who { display: grid; gap: 0.15rem; }
+.kalq-f-ts__name { @include type(body); font-weight: 600; }
+.kalq-f-ts__role { @include type(small); opacity: 0.75; }
+
+.kalq-f-ts__logo {
+    height: 1.9rem;
+
+    svg { display: block; height: 100%; width: auto; max-width: 10rem; }
 }
 
-.kalq-f-ts__photo {
-    flex-shrink: 0;
-    width: 3rem;
-    height: 3rem;
-    border-radius: 50%;
-}
-
-.kalq-f-ts__id { display: grid; gap: 0.15rem; }
-.kalq-f-ts__name { @include type(small); font-weight: 600; }
-.kalq-f-ts__role { @include type(caption); opacity: 0.7; }
-
-// Armed: the cards lie on one pile (one grid cell), the section pinned for the time it takes to flick them away
+// Armed: the cards lie on one pile (one grid cell), room below for the edges peeking out; the section pinned for the
+// time it takes to flick them away
 .kalq-f-ts.is-armed {
-    .kalq-f-ts__inner { min-height: 100svh; padding-block: 5rem; }
+    .kalq-f-ts__inner { align-content: center; min-height: 100svh; padding-block: 5rem; }
+    .kalq-f-ts__deck { padding-bottom: 3.6rem; }
     .kalq-f-ts__deck > * { grid-area: 1 / 1; will-change: transform; }
 }
 
+// Narrow: the two labels in a row above the cards
 @container (max-width: 760px) {
-    .kalq-f-ts__inner { grid-template-columns: 1fr; gap: 2rem; }
+    .kalq-f-ts__stage { grid-template-columns: 1fr 1fr; grid-template-areas: "l r" "d d"; row-gap: 1.25rem; }
+    .kalq-f-ts__label.is-left { grid-area: l; }
+    .kalq-f-ts__label.is-right { grid-area: r; }
+    .kalq-f-ts__deck { grid-area: d; }
+    .kalq-f-ts__card { min-height: 22rem; }
 }
 
 //=================================== 5. Stacking pinned cards (Tether) ===================================//
@@ -563,8 +635,9 @@ $f-ease: cubic-bezier(0.25, 1, 0.5, 1);
 .kalq-device {
     .kalq-f-ts__deck > * { grid-area: 1 / 1; }
     .kalq-f-ts__card:nth-child(1) { z-index: 3; }
-    .kalq-f-ts__card:nth-child(2) { z-index: 2; transform: translateY(0.9rem) scale(0.95); }
-    .kalq-f-ts__card:nth-child(3) { z-index: 1; transform: translateY(1.8rem) scale(0.9); }
+    .kalq-f-ts__deck { padding-bottom: 2.4rem; }
+    .kalq-f-ts__card:nth-child(2) { z-index: 2; transform: translateY(1.1rem) scale(0.95); }
+    .kalq-f-ts__card:nth-child(3) { z-index: 1; transform: translateY(2.2rem) scale(0.9); }
     .kalq-f-ts__card:nth-child(n + 4) { visibility: hidden; }
     .kalq-f-tether__list { gap: 0; }
     .kalq-f-tether__list > * { grid-area: 1 / 1; margin-top: calc(var(--i, 0) * 20px); }
@@ -642,6 +715,11 @@ body.kalq-edit .kalq-f-col.is-over > .is-backdrop > .kalq-f-tools { position: ab
 body.kalq-edit .kalq-f-col.is-over > .kalq-f-tools.is-col { position: relative; z-index: 1; align-self: flex-start; margin-bottom: auto; }
 body.kalq-edit .kalq-f-col.is-over { padding-top: 4.5rem; }
 .kalq-f-ts__photo .kalq-ph-media::before { content: none; } // too small for its label: the glyph says it is a picture
+.kalq-f-ts__photo .kalq-ph-media { min-height: 0; }
+[data-kalq-type="svg"] { position: relative; min-width: 6rem; }
+.kalq-f-ts__bg .kalq-ph-media::before { content: none; }
+body.kalq-edit .kalq-f-ts__card > .kalq-f-tools { position: relative; z-index: 1; }
+.kalq-f-colour { width: 2rem; height: 1.6rem; padding: 0.1rem; }
 
 //=================================== Reduced motion ===================================//
 @media (prefers-reduced-motion: reduce) {
@@ -674,8 +752,12 @@ body.kalq-edit .kalq-f-col.is-over { padding-top: 4.5rem; }
     .kalq-f-alt[class] .kalq-f-alt__row:nth-child(n) .kalq-f-alt__text { padding: 2rem; }
 
     // testimonials: the heading on the left screen, the pile on the right
-    .kalq-f-ts__inner { grid-template-columns: var(--seg-l) var(--seg-r); column-gap: var(--seg-hinge); padding: 0; }
-    .kalq-f-ts__head, .kalq-f-ts__deck { padding: 0 2rem; }
+    // testimonials: the labels on the left screen, the pile on the right
+    .kalq-f-ts__stage { grid-template-columns: var(--seg-l) var(--seg-r); grid-template-areas: "l d" "r d"; column-gap: var(--seg-hinge); row-gap: 0.5rem; }
+    .kalq-f-ts__inner { padding: 0; }
+    .kalq-f-ts__label.is-left { grid-area: l; align-self: end; justify-self: start; padding: 0 2rem; }
+    .kalq-f-ts__label.is-right { grid-area: r; align-self: start; justify-self: start; text-align: left; padding: 0 2rem; }
+    .kalq-f-ts__deck { grid-area: d; padding-inline: 2rem; }
 
     // the stacking cards: the text on the left screen, the picture on the right, a screen high
     .kalq-f-tether__list { padding: 0; }

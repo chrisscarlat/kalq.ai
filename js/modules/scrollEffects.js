@@ -27,7 +27,7 @@ function stack(sec) {
     const place = (f) => cards.forEach((c, j) => {
         const t = smooth(Math.min(1, Math.max(0, f - j)));
         const d = Math.min(3, Math.max(0, j - f));
-        c.style.transform = `translate(${t * 30}%, ${-t * 115}%) rotate(${-t * 10}deg) translateY(${d * 0.9}rem) scale(${1 - d * 0.05})`;
+        c.style.transform = `translate(${t * 30}%, ${-t * 115}%) rotate(${-t * 10}deg) translateY(${d * 1.1}rem) scale(${1 - d * 0.05})`;
         c.style.opacity = t >= 1 || j - f > 3 ? "0" : "1";
         c.style.zIndex = String(n - j);
     });

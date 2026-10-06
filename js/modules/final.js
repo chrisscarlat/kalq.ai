@@ -9,7 +9,8 @@
 // motion and in edit mode, each scroll module is a plain stacked list. Signed-in editors get the editor render with
 // edit mode on or off: its controls show only in edit mode (css), its effects run only outside it.
 import { renderBlock } from "../blocks.js";
-import { L, SAFE_HREF, altField, append, buttonEl, el, mediaEl, mediaOf, picture, plain, section, slotEl, textOf } from "./kit.js";
+import { L, SAFE_HREF, altField, append, buttonEl, el, keyOf, mediaEl, mediaOf, picture, placeholder, plain, section, slotEl, textOf } from "./kit.js";
+import { sanitizeSvg } from "../../lib/svg-sanitize.js";
 import { SEND_DESTS, destOf } from "./destinations.js";
 
 const ID = /^[a-z0-9]{1,12}$/;
@@ -81,7 +82,7 @@ function linkTo(ctx, labelSlot, addrSlot, to, cls, { n = "" } = {}) {
 export const CUSTOM_MAX_ITEMS = 12;
 export const CUSTOM_MAX_PIECES = 10;
 const KINDS = ["image", "text", "quote", "button", "link"];
-const KIND_NAMES = { image: "Image", text: "Text", quote: "Quote", button: "Button", link: "Link" };
+const KIND_NAMES = { image: "Image or video", text: "Text", quote: "Quote", button: "Button", link: "Link" };
 
 const makeColumn = (id = newId) => ({ id: id(), over: false, align: "start",
     pieces: [{ id: id(), kind: "image", bleed: false }, { id: id(), kind: "text", as: "title" }, { id: id(), kind: "text", as: "body" }, { id: id(), kind: "link", to: "page" }] });
@@ -164,7 +165,7 @@ function renderPiece(ctx, p, k, count) {
     let body = null;
     if (p.kind === "image") {
         if (p.bleed) box.classList.add("is-bleed");
-        body = mediaEl(ctx, `img_${p.id}`, "kalq-f-img", { label: label("Bild", "Image") });
+        body = mediaEl(ctx, `img_${p.id}`, "kalq-f-img", { label: label("Bild oder Video", "Image or video") });
         if (body) body.classList.toggle("is-bleed", p.bleed);
         if (body && ctx.editor) body = append(el(ctx, "div", "kalq-f-img-edit"), body, altField(ctx, `img_${p.id}`, label("Bildbeschreibung (Alternativtext)", "Image description (alt text)")));
     } else if (p.kind === "text") {
@@ -290,31 +291,122 @@ function renderAlternating(ctx) {
 }
 
 //=================================== 4. Testimonials (stacking) ===================================//
-// The cards lie on a pile; scrolling flicks the top one away to reveal the next (js/modules/scrollEffects.js).
+// Harbor's stacking cards: the cards centred on the page, piled, the next cards' edges peeking out below in their own
+// colours; scrolling flicks the top one away to reveal the next (js/modules/scrollEffects.js). An optional heading
+// above; at the cards' mid-height two small side labels. Each card: a big mark top left (the person's initial, a
+// brand name or an SVG logo), a small rounded portrait top right, the quote, the name, the role, an optional brand
+// logo. Per card the editor sets its colour or a background picture (the text stays readable over a shade).
 export const TESTIMONIALS_MIN = 2, TESTIMONIALS_MAX = 8;
+const MARKS = ["initial", "brand", "logo"];
+const HEX = /^#[0-9a-f]{6}$/i;
 const DEFAULT_TESTIMONIALS = [{ id: "t1" }, { id: "t2" }, { id: "t3" }];
-export const testimonialItems = (entry) => itemsOf(entry, TESTIMONIALS_MAX, DEFAULT_TESTIMONIALS);
+export const testimonialItems = (entry) => itemsOf(entry, TESTIMONIALS_MAX, DEFAULT_TESTIMONIALS).map((x) => ({
+    id: x.id, bg: HEX.test(x.bg || "") ? x.bg.toLowerCase() : "", image: x.image === true, mark: MARKS.includes(x.mark) ? x.mark : "initial" }));
+const LABELS = { left: L("Stimmen", "Testimonials"), right: L("Sie lieben uns", "They are in love with us") };
+// light text on a dark card: by the colour's relative luminance
+const isDarkHex = (hex) => {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b < 0.4;
+};
+
+// An SVG uploaded as a logo: kept as sanitised SVG text in its block (lib/svg-sanitize.js), drawn inline. Editors get
+// the keyed box (js/edit.js offers the upload); visitors get it only when there is one.
+function svgEl(ctx, slot, cls, { label, name } = {}) {
+    const clean = sanitizeSvg(textOf(ctx, slot) || "");
+    if (!clean && !ctx.editor) return null;
+    const box = el(ctx, "div", cls);
+    if (ctx.editor) {
+        box.setAttribute("data-kalq-key", keyOf(ctx, slot));
+        box.setAttribute("data-kalq-type", "svg");
+        if (!clean) { placeholder(box, { label }); box.classList.add("kalq-ph-svg"); }
+    }
+    if (clean) box.innerHTML = clean;
+    if (name) { box.setAttribute("role", "img"); box.setAttribute("aria-label", name); } else box.setAttribute("aria-hidden", "true");
+    return box;
+}
+
+// The editor's changes: the list (add, move, remove) and each card's colour, background picture and mark
+function testimonialsAct(opts, action, id, arg) {
+    const items = testimonialItems({ opts });
+    const i = items.findIndex((x) => x.id === id);
+    let label = null;
+    if (action === "add" && items.length < TESTIMONIALS_MAX) { items.push({ id: newId() }); label = "testimonial added"; }
+    else if (action === "remove" && i >= 0 && items.length > TESTIMONIALS_MIN) { items.splice(i, 1); label = "testimonial removed"; }
+    else if ((action === "up" && i > 0) || (action === "down" && i >= 0 && i < items.length - 1)) {
+        const j = action === "up" ? i - 1 : i + 1;
+        [items[i], items[j]] = [items[j], items[i]];
+        label = `testimonial moved ${action}`;
+    } else if (action === "bg" && i >= 0 && (arg === "" || HEX.test(arg || ""))) {
+        if (items[i].bg === (arg || "").toLowerCase()) return null;
+        items[i].bg = (arg || "").toLowerCase();
+        label = arg ? `card colour ${arg}` : "card colour reset";
+    } else if (action === "image" && i >= 0) { items[i].image = !items[i].image; label = `background picture ${items[i].image ? "on" : "off"}`; }
+    else if (action === "mark" && i >= 0 && MARKS.includes(arg)) { if (items[i].mark === arg) return null; items[i].mark = arg; label = `card mark: ${arg}`; }
+    if (!label) return null;
+    opts.items = items;
+    return label;
+}
+
+function testimonialCard(ctx, it, k, count, pos) {
+    const n = `Card ${k + 1}: `, nd = `Karte ${k + 1}: `;
+    const quote = slotEl(ctx, `q_${it.id}`, "blockquote", { className: "kalq-f-ts__quote", format: "paragraphs", label: L(`${nd}Zitat (nur echte Zitate)`, `${n}quote (real quotes only)`) });
+    const name = slotEl(ctx, `n_${it.id}`, "span", { className: "kalq-f-ts__name", label: L(`${nd}Name`, `${n}name`) });
+    if (!ctx.editor && (!quote || !name)) return null;
+    const dark = it.bg ? isDarkHex(it.bg) : pos % 4 === 3;
+    const card = el(ctx, "figure", `kalq-f-ts__card tone-${pos % 4}${dark ? " is-dark" : ""}`);
+    if (it.bg) card.setAttribute("style", `--ts-bg: ${it.bg}`);
+    // the background picture behind a shade, so the text stays readable
+    if (it.image) {
+        const bg = mediaEl(ctx, `g_${it.id}`, "kalq-f-ts__bg", { alt: "", label: L(`${nd}Hintergrund: Bild oder Video`, `${n}background: image or video`) });
+        if (bg) { bg.setAttribute("aria-hidden", "true"); card.append(bg); card.classList.add("has-image"); }
+    }
+    if (ctx.editor) {
+        const t = itemTools(ctx, it.id, k + 1, count, TESTIMONIALS_MIN, "Testimonial");
+        const colour = el(ctx, "input", "kalq-f-tool kalq-f-colour");
+        colour.setAttribute("type", "color");
+        colour.setAttribute("value", it.bg || "#e8ecf6");
+        colour.setAttribute("data-items-action", "bg");
+        colour.setAttribute("data-items-id", it.id);
+        colour.setAttribute("aria-label", "Card colour");
+        t.append(group(ctx, "Colour", colour, tool(ctx, "bg", "Default", { id: it.id, arg: "", pressed: !it.bg })),
+            tool(ctx, "image", "Background picture", { id: it.id, pressed: it.image }),
+            group(ctx, "Mark", ...MARKS.map((m) => tool(ctx, "mark", { initial: "Initial", brand: "Brand name", logo: "Logo (SVG)" }[m], { id: it.id, arg: m, pressed: it.mark === m }))));
+        card.append(t);
+    }
+    // top: the mark (left), the portrait (right)
+    let mark = null;
+    if (it.mark === "brand") mark = slotEl(ctx, `b_${it.id}`, "span", { className: "kalq-f-ts__mark is-brand", label: L(`${nd}Markenname`, `${n}brand name`) });
+    else if (it.mark === "logo") mark = svgEl(ctx, `k_${it.id}`, "kalq-f-ts__mark is-logo", { label: L(`${nd}Logo (SVG)`, `${n}logo (SVG)`) });
+    if (!mark) { // the initial (also for visitors when a brand name or logo is not set yet)
+        const own = plain(textOf(ctx, `i_${it.id}`)).slice(0, 2);
+        mark = ctx.editor ? slotEl(ctx, `i_${it.id}`, "span", { className: "kalq-f-ts__mark", label: L("A", "A") })
+            : el(ctx, "span", "kalq-f-ts__mark", (own || plain(textOf(ctx, `n_${it.id}`)).slice(0, 1)).toUpperCase());
+        mark.setAttribute("aria-hidden", "true"); // decorative: the name says who
+    }
+    const portrait = mediaEl(ctx, `p_${it.id}`, "kalq-f-ts__photo", { alt: "", label: L(`${nd}Porträt`, `${n}portrait`) });
+    portrait?.setAttribute("aria-hidden", "true");
+    const brand = it.mark === "brand" ? null : plain(textOf(ctx, `b_${it.id}`));
+    append(card, append(el(ctx, "div", "kalq-f-ts__top"), mark, portrait), quote,
+        append(el(ctx, "figcaption", "kalq-f-ts__who"), name, slotEl(ctx, `r_${it.id}`, "span", { className: "kalq-f-ts__role", label: L(`${nd}Rolle und Firma`, `${n}role and company`) })),
+        svgEl(ctx, `l_${it.id}`, "kalq-f-ts__logo", { label: L(`${nd}Firmenlogo (SVG, optional)`, `${n}brand logo (SVG, optional)`), name: brand || plain(textOf(ctx, `r_${it.id}`)) || null }));
+    return card;
+}
 
 function renderTestimonials(ctx) {
     const items = testimonialItems(ctx.entry);
     const s = section(ctx, "kalq-f kalq-f-ts");
     s.setAttribute("data-scroll-effect", "stack"); // armed outside edit mode only (signed-in editors get this render too)
     const inner = el(ctx, "div", "kalq-f-inner kalq-f-ts__inner");
-    const head = append(el(ctx, "div", "kalq-f-ts__head"), slotEl(ctx, "eyebrow", "p", { className: "kalq-m-eyebrow" }), slotEl(ctx, "heading", "h2", { className: "kalq-f-heading" }));
     const deck = el(ctx, "div", "kalq-f-ts__deck");
-    items.forEach((it, k) => {
-        const quote = slotEl(ctx, `q_${it.id}`, "blockquote", { className: "kalq-f-ts__quote", format: "paragraphs", label: L(`Zitat ${k + 1} (nur echte Zitate)`, `Quote ${k + 1} (real quotes only)`) });
-        const name = slotEl(ctx, `n_${it.id}`, "span", { className: "kalq-f-ts__name", label: L(`Name ${k + 1}`, `Name ${k + 1}`) });
-        if (!ctx.editor && (!quote || !name)) return;
-        const photo = mediaEl(ctx, `p_${it.id}`, "kalq-f-ts__photo", { alt: "", label: L(`Foto ${k + 1} (optional)`, `Photo ${k + 1} (optional)`) }); // decorative: the name says who
-        const card = el(ctx, "figure", "kalq-f-ts__card");
-        if (ctx.editor) card.append(itemTools(ctx, it.id, k + 1, items.length, TESTIMONIALS_MIN, "Testimonial"));
-        append(card, quote, append(el(ctx, "figcaption", "kalq-f-ts__who"), photo,
-            append(el(ctx, "span", "kalq-f-ts__id"), name, slotEl(ctx, `r_${it.id}`, "span", { className: "kalq-f-ts__role", label: L(`Rolle und Firma ${k + 1}`, `Role and company ${k + 1}`) }))));
-        deck.append(card);
-    });
+    let pos = 0;
+    items.forEach((it, k) => { const c = testimonialCard(ctx, it, k, items.length, pos); if (c) { deck.append(c); pos++; } });
     if (!deck.children.length && !ctx.editor) return null;
-    append(inner, head, deck, ctx.editor ? addTool(ctx, "testimonial", items.length, TESTIMONIALS_MAX) : null);
+    // the side labels: the editor's words, else the defaults
+    const label = (slot, side) => slotEl(ctx, slot, "h4", { className: `kalq-f-ts__label is-${side}` })
+        || el(ctx, "h4", `kalq-f-ts__label is-${side}`, LABELS[side][ctx.lang === "en" ? "en" : "de"]);
+    append(inner, slotEl(ctx, "heading", "h2", { className: "kalq-f-heading" }),
+        append(el(ctx, "div", "kalq-f-ts__stage"), label("label_left", "left"), deck, label("label_right", "right")),
+        ctx.editor ? addTool(ctx, "testimonial", items.length, TESTIMONIALS_MAX) : null);
     return append(s, inner);
 }
 
@@ -335,7 +427,7 @@ function renderTether(ctx) {
         const n = `Card ${k + 1}: `, nd = `Karte ${k + 1}: `;
         const title = slotEl(ctx, `t_${it.id}`, "h3", { className: "kalq-f-title", label: L(`${nd}Titel`, `${n}title`) });
         if (!ctx.editor && !title) return;
-        const media = mediaEl(ctx, `p_${it.id}`, "kalq-f-tether__media", { label: L(`${nd}Bild`, `${n}image`) });
+        const media = mediaEl(ctx, `p_${it.id}`, "kalq-f-tether__media", { label: L(`${nd}Bild oder Video`, `${n}image or video`) });
         const card = el(ctx, "article", "kalq-f-tether__card");
         card.setAttribute("style", `--i: ${k}`); // its place in the pile: each one about 20px lower
         if (ctx.editor) card.append(itemTools(ctx, it.id, k + 1, items.length, TETHER_MIN, "Card"));
@@ -369,7 +461,7 @@ function renderHorizontal(ctx) {
         const n = `Card ${k + 1}: `, nd = `Karte ${k + 1}: `;
         const title = slotEl(ctx, `t_${it.id}`, "h3", { className: "kalq-f-title", label: L(`${nd}Titel`, `${n}title`) });
         if (!ctx.editor && !title) return;
-        const media = mediaEl(ctx, `p_${it.id}`, "kalq-f-hs__media", { label: L(`${nd}Bild`, `${n}image`) });
+        const media = mediaEl(ctx, `p_${it.id}`, "kalq-f-hs__media", { label: L(`${nd}Bild oder Video`, `${n}image or video`) });
         const card = el(ctx, "article", "kalq-f-hs__card");
         if (ctx.editor) card.append(itemTools(ctx, it.id, k + 1, items.length, HCARDS_MIN, "Card"));
         append(card, media, altField(ctx, `p_${it.id}`, L(`${nd}Bildbeschreibung`, `${n}image description (alt text)`)), title, slotEl(ctx, `x_${it.id}`, "div", { className: "kalq-f-text", format: "paragraphs", label: L(`${nd}kurzer Text`, `${n}short text`) }),
@@ -447,7 +539,7 @@ export const FINAL = {
         slots: {
             heading: { kind: "heading", label: L("Überschrift (optional)", "Heading (optional)") },
             ...Object.fromEntries(Array.from({ length: ROWS }, (_, i) => i + 1).flatMap((n) => [
-                ...picture(`media${n}`, L(`Reihe ${n}: Bild`, `Row ${n}: image`), { required: true }),
+                ...picture(`media${n}`, L(`Reihe ${n}: Bild oder Video`, `Row ${n}: image or video`), { required: true }),
                 [`title${n}`, { kind: "heading", label: L(`Reihe ${n}: Titel`, `Row ${n}: title`), required: true }],
                 [`text${n}`, { kind: "text", label: L(`Reihe ${n}: Text`, `Row ${n}: text`) }],
                 [`link_label${n}`, { kind: "button", label: L(`Reihe ${n}: Linktext (optional)`, `Row ${n}: link label (optional)`) }],
@@ -468,23 +560,26 @@ export const FINAL = {
     "testimonials.stack": {
         category: "testimonials",
         name: L("Stimmen im Stapel", "Testimonials"),
-        keywords: "testimonials stimmen zitate quotes kunden clients stack stapel cards karten",
+        keywords: "testimonials stimmen zitate quotes kunden clients stack stapel cards karten harbor",
         slots: {
-            eyebrow: { kind: "eyebrow", label: L("Kleine Überschrift (optional)", "Eyebrow (optional)") },
-            heading: { kind: "heading", label: L("Überschrift (optional)", "Heading (optional)") },
+            heading: { kind: "heading", label: L("Überschrift über den Karten (optional)", "Heading above the cards (optional)") },
+            label_left: { kind: "eyebrow", label: L("Links neben den Karten (Standard: Stimmen)", "Left of the cards (default: Testimonials)") },
+            label_right: { kind: "eyebrow", label: L("Rechts neben den Karten (Standard: Sie lieben uns)", "Right of the cards (default: They are in love with us)") },
         },
         versions: {
             stack: { name: L("Karten im Stapel, die oberste fliegt beim Scrollen weg", "Stacked cards, the top one flicks away on scroll"),
-                wire: [["heading", 6, 10, 30], ["line", 6, 16, 22], ["band", 50, 18, 40, 30], ["band", 47, 14, 46, 30], ["rule", 44, 10, 52], ["line", 48, 20, 36, "bold"], ["line", 48, 25, 32], ["line", 48, 36, 14]] },
+                wire: [["heading", 35, 5, 30], ["band", 33, 20, 34, 34], ["band", 31, 15, 38, 34], ["line", 4, 31, 14], ["line", 82, 31, 14], ["line", 35, 21, 6, "bold"], ["line", 35, 30, 28], ["line", 35, 34, 24], ["line", 35, 41, 10, "bold"]] },
         },
         initialOpts: () => ({ items: Array.from({ length: 3 }, () => ({ id: newId() })) }),
-        itemsEditor: { min: TESTIMONIALS_MIN, max: TESTIMONIALS_MAX, make: () => ({ id: newId() }) },
+        act: testimonialsAct,
         missing: (entry, page, get) => (testimonialItems(entry).filter((it) => has(get, page, entry, `q_${it.id}`) && has(get, page, entry, `n_${it.id}`)).length >= TESTIMONIALS_MIN
             ? [] : [L(`mindestens ${TESTIMONIALS_MIN} Zitate mit Namen`, `at least ${TESTIMONIALS_MIN} quotes with a name`)]),
         magazine: {
             layout: "B",
-            unit: (s, k) => ({ layout: "B", eyebrow: s.querySelector(".kalq-m-eyebrow"), title: s.querySelector(".kalq-f-heading") || s.querySelector(".kalq-f-ts__name"),
-                body: [...s.querySelectorAll(".kalq-f-ts__card")].flatMap((c) => [k.textOf(c.querySelector(".kalq-f-ts__id"), "p", "bk-eyebrow"), ...k.parasOf(c.querySelector(".kalq-f-ts__quote"))]) /* who, then the quote: a page never ends on a name */.filter(Boolean) }),
+            // both side labels and the heading: the left label above, the heading (or the right label) as the title, the right label under it
+            unit: (s, k) => ({ layout: "B", eyebrow: s.querySelector(".kalq-f-ts__label.is-left"), title: s.querySelector(".kalq-f-heading") || s.querySelector(".kalq-f-ts__label.is-right"),
+                lead: s.querySelector(".kalq-f-heading") ? s.querySelector(".kalq-f-ts__label.is-right") : null,
+                body: [...s.querySelectorAll(".kalq-f-ts__card")].flatMap((c) => [k.textOf(c.querySelector(".kalq-f-ts__who"), "p", "bk-eyebrow"), ...k.parasOf(c.querySelector(".kalq-f-ts__quote"))]) /* who, then the quote: a page never ends on a name */.filter(Boolean) }),
         },
         render: renderTestimonials,
     },

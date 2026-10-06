@@ -5,6 +5,7 @@ import { applyLanguage, currentLang, setEditedContent } from "./i18n.js";
 import { renderBlock, sanitize } from "./blocks.js";
 import { applyLayout, layoutKey, parseLayout } from "./layout.js";
 import { renderModule } from "./modules/registry.js";
+import { sanitizeSvg } from "../lib/svg-sanitize.js";
 
 const TIMEOUT_MS = 1500;
 const store = new Map(); // key -> { type, de, en, media }
@@ -98,6 +99,11 @@ export function applyDirect(root) {
             if (el.dataset.kalqDefault === undefined) el.dataset.kalqDefault = defaultUrl(el);
             const url = (!pageMediaOnly && mediaOverride(key)) || (entry && "media" in entry ? entry.media : el.dataset.kalqDefault);
             setMedia(el, url || "");
+        } else if (type === "svg") { // an SVG logo kept as text: drawn inline, sanitised again on the way in
+            const clean = sanitizeSvg((entry && (entry.de ?? entry.en)) || "");
+            const tools = el.querySelector(":scope > .kalq-media-tools");
+            if (clean) { el.innerHTML = clean; el.classList.remove("kalq-ph", "kalq-ph-svg"); } else el.replaceChildren();
+            if (tools) el.append(tools);
         } else if (!entry) {
             return;
         } else if (type === "text" && !el.hasAttribute("data-i18n") && !el.hasAttribute("data-i18n-marquee")) {

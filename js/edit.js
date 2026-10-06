@@ -7,6 +7,7 @@ import { getActive } from "./variants.js";
 import { editableHtml, renderBlock, serializeBlock } from "./blocks.js";
 import { applyLanguage, currentLang, EDITOR_LANG } from "./i18n.js";
 import { progressLine, showDone, uploadMedia } from "./upload.js";
+import { sanitizeSvg } from "../lib/svg-sanitize.js";
 
 const MAX_BYTES = 50 * 1024 * 1024;
 // Every slot takes an image or a video
@@ -19,12 +20,14 @@ const TEXT = {
         locked: (n) => `${n} bearbeitet gerade`, relogin: "Bitte melden Sie sich erneut an, um zu bearbeiten.",
         styleMedia: (l) => `Stil ${l} zeigt hier ein eigenes Bild`, replace: "Ersetzen", add: "Bild oder Video hinzufügen", remove: "Entfernen", uploading: "Wird hochgeladen", tooLarge: "Die Datei ist größer als 50 MB.",
         empty: "Leerer Text wird nicht gespeichert.", marquee: "Laufschrift",
+        svgAdd: "SVG-Logo hochladen", svgBad: "Diese Datei ist kein verwendbares SVG.",
     },
     en: {
         edit: "Edit (E)", saved: "Saved", failed: "Could not save",
         locked: (n) => `${n} is editing`, relogin: "Please log in again to edit.",
         styleMedia: (l) => `Style ${l} shows its own media here`, replace: "Replace", add: "Add image or video", remove: "Remove", uploading: "Uploading", tooLarge: "The file is larger than 50 MB.",
         empty: "Empty text is not saved.", marquee: "Marquee text",
+        svgAdd: "Upload SVG logo", svgBad: "This file is not a usable SVG.",
     },
 };
 const t = (key) => TEXT[EDITOR_LANG][key];
@@ -218,6 +221,52 @@ function replaceButtons() {
         if (isHolderNode(node) && !isEmptySlot(node)) add(t("remove"), "kalq-replace kalq-remove", () => setSlot(key, ""));
         host.append(tools);
     });
+    // SVG logos (a module's data-kalq-type="svg" box): uploaded as a file, kept as sanitised SVG text in the block
+    document.querySelectorAll('[data-kalq-type="svg"]').forEach((node) => {
+        const key = keyOf(node);
+        const tools = document.createElement("div");
+        tools.className = "kalq-media-tools is-svg";
+        const add = (label, cls, fn) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = cls;
+            btn.textContent = label;
+            btn.dataset.forKey = key;
+            btn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); fn(); });
+            tools.append(btn);
+        };
+        const filled = !!node.querySelector(":scope > svg");
+        add(filled ? t("replace") : t("svgAdd"), "kalq-replace", () => pickSvg(key));
+        if (filled) add(t("remove"), "kalq-replace kalq-remove", () => saveSvg(key, ""));
+        node.append(tools);
+    });
+}
+
+function pickSvg(key) {
+    if (locks.has(key)) return collab.toast(t("locked")(locks.get(key).name), "error");
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/svg+xml,.svg";
+    input.addEventListener("change", async () => {
+        const file = input.files[0];
+        if (!file) return;
+        const clean = sanitizeSvg(await file.text());
+        if (!clean) return collab.toast(t("svgBad"), "error");
+        saveSvg(key, clean);
+    });
+    input.click();
+}
+
+// Both languages the same; the page shows it at once (js/content.js applyDirect draws svg boxes)
+async function saveSvg(key, clean) {
+    try {
+        await save(key, "text", ["de", "en"], clean);
+        applyDirect(document);
+        replaceButtons();
+        collab.toast(t("saved"));
+    } catch (error) {
+        fail(error);
+    }
 }
 
 async function setSlot(key, url) {

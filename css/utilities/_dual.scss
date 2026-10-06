@@ -27,6 +27,7 @@
     }
 
     @include final-two-screens; // the builder's module set (css/components/_final.scss)
+    @include chat-two-screens; // the inquiry chat (css/components/_chat.scss)
 
     // Central image or video: one continuous picture across both screens; the heading on the left screen, the
     // caption on the right, never centred on the hinge

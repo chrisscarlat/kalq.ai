@@ -193,18 +193,18 @@ certil.com redraws any style it does not have. The editor language is one consta
 
 ## 3. The builder's module set
 
-The page builder offers seven modules; every other module (the earlier library, the inquiry chat, the scroll story,
-contact, both plain testimonials) is deleted, recoverable from git before commit f87d847. Home's one live module,
-the central video (section `sb8z0z`), is kept unchanged; Platform, Company and the legal pages use built-in sections
-only.
+The page builder offers eight modules; every other module (the earlier library, the scroll story, contact, both
+plain testimonials) is deleted, recoverable from git before commit f87d847. Home's one live module, the central video
+(section `sb8z0z`), is kept unchanged; Platform, Company and the legal pages use built-in sections only.
 
 | Module id | Versions | What it is |
 | --- | --- | --- |
-| `content.media-center` | `image`, `video` | Kept: a central image or video with a heading and a caption. |
+| `content.media-center` | `media` | Kept: a central image or video (one slot, either; one size, 21:9) with a heading and a caption. The earlier versions `image` and `video` still render (`aliases`). |
 | `custom.columns` | `custom` | The custom module: 1–6 columns or a scrollable card row; each column or card holds pieces in any order (image, text as title or paragraph, quote, button, link); per column text above, below or over its first picture, bottom left or centred; per image "edge to edge"; on narrow screens the columns stack, or the editor keeps 2 or 3. Links go to a page or a send destination. |
 | `content.image-text` | `image-left`, `image-right` | The picture bleeds to the top, bottom and its side of the page; the text beside it, vertically centred, left-aligned. |
 | `content.alternating` | `left-first`, `right-first` | Three picture and text pairs in a zigzag, the rows close together. |
-| `testimonials.stack` | `stack` | Harbor's stacking cards: the section pins and each scroll step flicks the top card away. 2–8 quotes. |
+| `testimonials.stack` | `stack` | Harbor's stacking cards, centred, the next cards' edges peeking out below in their own colours; an optional h2 above, two editable h4 side labels at mid-height. Each card: a big initial (aria-hidden; or a brand name, or an SVG logo), a small rounded portrait, the quote (blockquote), name, role, an optional SVG brand logo; per card a colour (picker) or a background picture behind a shade. The section pins and each scroll step flicks the top card away. 2–8 quotes. |
+| `interaction.inquiry` | `chat` | The inquiry chat, back (js/modules/chat.js, chatBehaviour.js, css/components/_chat.scss): questions to tap, sent from the visitor's own app. Its send destinations are site-wide (`site.chat.<id>`), set in the insert picker's Chat entry. |
 | `scroll.tether` | `tether` | Each card pins at the top and the next slides up over it, 20px lower. 2–6 cards. |
 | `scroll.horizontal` | `horizontal` | The section pins while its row of cards slides sideways until the last is in view. 2–12 cards. |
 
@@ -251,8 +251,16 @@ at very low contrast.
 
 The picker opens on "All" (every module version in one view); the selected card carries its Insert (Enter inserts
 too). Below the cards, on a dark grey stage, the selected version on all eight preview devices in one row, scaled
-together so each keeps its real size relative to the others, their screens black where the module ends; under the
-row the module on the laptop's width, large enough to read.
+together so each keeps its real size relative to the others, their screens black where the module ends.
+
+At the bottom of the picker's left menu, "For the whole site", each with an icon: Chat (the chat module and its
+send destinations), Cookie bar (its settings, moved here from the Styles panel, for every editor; js/siteSettings.js,
+class and ids named "dontpanic"), and for admins Page style, Navigation and Footers, which open the Styles panel at
+Colours & fonts, Menu and Navigation (`kalq:open-styles`).
+
+SVG logos (the testimonials' marks and brand logos) are uploaded as files but kept as sanitised SVG text in their
+block (`data-kalq-type="svg"`, lib/svg-sanitize.js on save, in the browser and in the server render): the storage
+bucket takes no SVG files.
 
 ### What certil.com will need to change
 
@@ -287,7 +295,7 @@ Nothing beyond its own gate markup and class names; the rule is the square and t
 ## 5. One type scale (tokens)
 
 The site and every module share one scale, `css/utilities/_type.scss`: display, h1–h5, body, small, caption,
-eyebrow, quote and figure (the inquiry chat's compact tokens went with the chat). Each
+eyebrow, quote, figure, and the inquiry chat's compact tokens (chat-text, chat-title, chat-small, chat-micro). Each
 token sets the font (the style's main or secondary font), a size fluid by its container's width (`cqi`, never the
 window), a weight and a line height. A heading's tag follows its role; its size comes from the token it takes
 (`@include type(h5)` on a card's h3).

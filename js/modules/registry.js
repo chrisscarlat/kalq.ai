@@ -6,6 +6,7 @@
 // A placeholder is a slot without any revision: editors see a labelled empty block, the public page never gets it.
 // Placeholder labels name the kind of content ("Frage", "Antwort"); they never invent claims, numbers or quotes.
 import { FINAL, FINAL_CATEGORIES } from "./final.js";
+import { CHAT, CHAT_CATEGORY } from "./chat.js";
 import { L, append, mediaEl, section, slotEl } from "./kit.js";
 
 // The picker's categories, in order; navigation and footer are chosen in the style, their notes say so
@@ -17,6 +18,7 @@ export const CATEGORIES = [
     FINAL_CATEGORIES.find((c) => c.id === "custom"),
     { id: "content", de: "Inhalt", en: "Content" },
     ...FINAL_CATEGORIES.filter((c) => c.id !== "custom"),
+    CHAT_CATEGORY, // the inquiry chat (js/modules/chat.js)
     ...NOTES,
 ];
 
@@ -37,23 +39,25 @@ export const MODULES = {
             media: { kind: "media", label: L("Bild oder Video", "Image or video"), required: true },
             caption: { kind: "text", label: L("Bildunterschrift", "Caption") },
         },
+        // one version: the slot takes an image or a video, at one size. The earlier "image" and "video" versions stay
+        // readable (Home's live section sb8z0z is "video"), rendered the same.
         versions: {
-            image: { name: L("Zentrales Bild", "Central image"),
-                wire: [["heading", 30, 6, 40], ["media", 10, 13, 80, 36], ["line", 30, 53, 40]] },
-            video: { name: L("Zentrales Video", "Central video"),
-                wire: [["heading", 30, 6, 40], ["media", 4, 13, 92, 36, "play"], ["line", 30, 53, 40]] },
+            media: { name: L("Zentrales Bild oder Video", "Central image or video"),
+                wire: [["heading", 30, 6, 40], ["media", 4, 13, 92, 36], ["line", 30, 53, 40]] },
         },
+        aliases: { image: "media", video: "media" },
         magazine: { layout: "C" },
         render: renderMediaCenter,
     },
     ...FINAL, // js/modules/final.js
+    ...CHAT, // js/modules/chat.js
 };
 
-export const moduleVersion = (module, version) => MODULES[module]?.versions[version] ? MODULES[module].versions[version] : null;
+export const moduleVersion = (module, version) => { const def = MODULES[module]; return def?.versions[version] || def?.versions[def?.aliases?.[version]] || null; };
 
 //=================================== Rendering ===================================//
 function renderMediaCenter(ctx) {
-    const s = section(ctx, `kalq-m-center is-${ctx.entry.version === "video" ? "video" : "image"}`);
+    const s = section(ctx, "kalq-m-center");
     const inner = ctx.doc.createElement("div");
     inner.className = "kalq-m-inner";
     const figure = ctx.doc.createElement("figure");
@@ -70,7 +74,7 @@ function renderMediaCenter(ctx) {
 // so they can still move or remove it. Its stored entry and blocks stay untouched either way.
 export function renderModule(entry, ctx) {
     const def = MODULES[entry.module];
-    if (def?.versions[entry.version]) return def.render({ ...ctx, entry, def, id: entry.id });
+    if (def?.versions[entry.version] || def?.aliases?.[entry.version]) return def.render({ ...ctx, entry, def, id: entry.id });
     if (!ctx.editor) return null;
     const stub = ctx.doc.createElement("section");
     stub.className = "kalq-m-unknown";

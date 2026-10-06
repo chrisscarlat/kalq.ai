@@ -1,18 +1,22 @@
 // Module picker (editors, edit mode): opened by a plus button between sections. Left the categories ("All" first) and
 // a search; on top schematic cards of every version, the selected card with its Insert button; below, on a dark grey
-// stage, the selected version on all eight devices in one row at their real sizes relative to each other, and under
-// the row the module itself, large enough to read.
+// stage, the selected version on all eight devices in one row at their real sizes relative to each other.
 // Keyboard: arrows browse the cards, Enter inserts, Esc closes, Tab moves between the areas.
 import { EDITOR_LANG } from "./i18n.js";
 import { CATEGORIES, MODULES, renderModule } from "./modules/registry.js";
+import { chatPanel, cookiePanel } from "./siteSettings.js";
 
 const TEXT = {
     de: { title: "Modul einfügen", search: "Module suchen", insert: "Einfügen", cancel: "Abbrechen", close: "Schließen",
         none: "Keine Module gefunden.", results: "Suchergebnisse", hint: "Pfeiltasten zum Blättern, Enter fügt ein, Esc schließt.",
-        all: "Alle", devices: "So passt es sich an", content: "Inhalt, groß" },
+        all: "Alle", devices: "So passt es sich an", site: "Für die ganze Website",
+        chat: "Chat", dontpanic: "Cookie-Leiste", style: "Stil der Seite", navigation: "Navigation", footers: "Footer",
+        styleHint: "Öffnet die Stile", noteOnly: "Wird im Stil gewählt; Stile bearbeiten nur Admins." },
     en: { title: "Insert a module", search: "Search modules", insert: "Insert", cancel: "Cancel", close: "Close",
         none: "No modules found.", results: "Search results", hint: "Arrow keys to browse, Enter inserts, Esc closes.",
-        all: "All", devices: "How it adapts", content: "The content, large" },
+        all: "All", devices: "How it adapts", site: "For the whole site",
+        chat: "Chat", dontpanic: "Cookie bar", style: "Page style", navigation: "Navigation", footers: "Footers",
+        styleHint: "Opens Styles", noteOnly: "Chosen in the style; only admins edit styles." },
 };
 const lang = () => EDITOR_LANG;
 const t = (key) => TEXT[lang()][key];
@@ -43,12 +47,24 @@ export const DEVICE_GROUPS = [
     ] },
 ];
 const DEVICES = DEVICE_GROUPS.flatMap((g) => g.devices);
-const CONTENT_DEVICE = DEVICES.find((d) => d.id === "macbook-air-13"); // the large preview below the row
 
 // Every version of every module the picker offers (retired modules still render where a page has one); the "All"
 // category lists them in one view
 const ALL_CATEGORY = { id: "all", de: TEXT.de.all, en: TEXT.en.all };
 const ALL = Object.entries(MODULES).filter(([, def]) => !def.retired).flatMap(([module, def]) => Object.entries(def.versions).map(([version, v]) => ({ module, version, def, v })));
+
+// The bottom of the left menu: what is set for the whole site, each with its icon. Chat lists the chat module with
+// the chat's site-wide settings; Cookie bar is its settings; Style, Navigation and Footers open the Styles panel at
+// their tab (admins; for other editors Navigation and Footers say where they are set).
+const ICON = (d) => `<svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" focusable="false"><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const SITE_ITEMS = [
+    { id: "chat", icon: ICON("M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v6.5A1.5 1.5 0 0 1 16 14H9l-4 3v-3H4a1.5 1.5 0 0 1-1.5-1.5V6A1.5 1.5 0 0 1 4 4.5Z") },
+    { id: "dontpanic", icon: ICON("M10 2.8a7.2 7.2 0 1 0 7.2 7.6 2.6 2.6 0 0 1-3.2-2.6 2.6 2.6 0 0 1-3.4-3.3A2.4 2.4 0 0 1 10 2.8ZM7 8.2v.1M6.8 12.4v.1M10.5 12.8v.1M13.4 12.2v.1") },
+    { id: "style", admin: true, tab: "look", icon: ICON("M10 2.8a7.2 7.2 0 1 0 0 14.4c1 0 1.5-.7 1.5-1.5 0-1.1-.9-1.4-.9-2.3 0-.8.7-1.4 1.5-1.4h1.8a3.3 3.3 0 0 0 3.3-3.3C17.2 5.4 14 2.8 10 2.8ZM6.4 9.2v.1M8.8 6.2v.1M12.6 6.4v.1") },
+    { id: "navigation", tab: "menu", note: true, icon: ICON("M3.5 5.5h13M3.5 10h13M3.5 14.5h8") },
+    { id: "footers", tab: "navigation", note: true, icon: ICON("M3 3.5h14v13H3zM3 12.5h14M6 14.5h4") },
+];
+const SITE_IDS = new Set(SITE_ITEMS.map((x) => x.id));
 
 //=================================== Wireframes ===================================//
 // Images and videos as blue rectangles, text as thin blue lines, headings thicker, buttons as small pills
@@ -102,6 +118,7 @@ function build() {
                 <h2 id="kalq-picker-title" class="kalq-picker__title"></h2>
                 <input class="kalq-picker__search" type="search" autocomplete="off">
                 <nav class="kalq-picker__cats"></nav>
+                <nav class="kalq-picker__site"></nav>
             </div>
             <div class="kalq-picker__main">
                 <div class="kalq-picker__browse">
@@ -141,7 +158,7 @@ function draw() {
     const cats = root.querySelector(".kalq-picker__cats");
     cats.setAttribute("aria-label", t("title"));
     // a category with nothing to insert and no note of its own (Navigation and Footers explain where they are set) is not shown
-    cats.replaceChildren(...[ALL_CATEGORY, ...CATEGORIES.filter((c) => c.note || ALL.some((x) => x.def.category === c.id))].map((c) => {
+    cats.replaceChildren(...[ALL_CATEGORY, ...CATEGORIES.filter((c) => !SITE_IDS.has(c.id) && (c.note || ALL.some((x) => x.def.category === c.id)))].map((c) => {
         const count = c === ALL_CATEGORY ? ALL.length : ALL.filter((x) => x.def.category === c.id).length;
         const b = el("button", { type: "button", className: "kalq-picker__cat" }, el("span", { textContent: c[L] }), el("span", { className: "kalq-picker__count", textContent: count || "–" }));
         b.setAttribute("aria-pressed", !state.query && state.category === c.id);
@@ -149,8 +166,36 @@ function draw() {
         return b;
     }));
 
+    // the bottom group: for the whole site
+    const admin = !!state.collab?.me?.is_admin;
+    const site = root.querySelector(".kalq-picker__site");
+    site.setAttribute("aria-label", t("site"));
+    site.replaceChildren(el("p", { className: "kalq-picker__site-label", textContent: t("site") }), ...SITE_ITEMS.filter((x) => !x.admin || admin).map((x) => {
+        const opens = x.tab && admin; // opens the Styles panel
+        const b = el("button", { type: "button", className: `kalq-picker__cat is-site${opens ? " is-link" : ""}` }, el("span", { className: "kalq-picker__icon", innerHTML: x.icon }), el("span", { textContent: t(x.id) }));
+        if (opens) { b.title = t("styleHint"); b.append(el("span", { className: "kalq-picker__count", textContent: "↗" })); }
+        else b.setAttribute("aria-pressed", !state.query && state.category === x.id);
+        b.addEventListener("click", () => {
+            if (opens) { close(); document.dispatchEvent(new CustomEvent("kalq:open-styles", { detail: { tab: x.tab } })); return; }
+            state.category = x.id; state.query = ""; state.index = 0; search.value = ""; draw(); focusGrid();
+        });
+        return b;
+    }));
+
+    const browse = root.querySelector(".kalq-picker__browse");
+    browse.querySelector(".kalq-picker__settings")?.remove();
+    const siteItem = !state.query && SITE_ITEMS.find((x) => x.id === state.category);
+    root.classList.toggle("is-settings", !!siteItem && state.category === "dontpanic");
+    if (siteItem && state.category === "dontpanic") { // settings only: no cards, no devices
+        root.querySelector(".kalq-picker__heading").textContent = t("dontpanic");
+        root.querySelector(".kalq-picker__grid").replaceChildren();
+        browse.append(el("div", { className: "kalq-picker__settings" }, state.collab ? cookiePanel(state.collab, { onPreview: close }) : null));
+        detail(null);
+        return;
+    }
     const list = items();
-    const category = state.category === ALL_CATEGORY.id ? ALL_CATEGORY : CATEGORIES.find((c) => c.id === state.category);
+    const category = state.category === ALL_CATEGORY.id ? ALL_CATEGORY : CATEGORIES.find((c) => c.id === state.category)
+        || { id: state.category, de: t(state.category), en: t(state.category), note: siteItem?.note ? { de: t("noteOnly"), en: t("noteOnly") } : null };
     root.querySelector(".kalq-picker__heading").textContent = state.query ? t("results") : category[L];
     const grid = root.querySelector(".kalq-picker__grid");
     grid.setAttribute("aria-label", state.query ? t("results") : category[L]);
@@ -176,16 +221,17 @@ function draw() {
         }));
         grid.setAttribute("aria-activedescendant", `kalq-pick-${state.index}`);
     }
+    if (siteItem && state.category === "chat" && state.collab) browse.append(el("div", { className: "kalq-picker__settings" }, chatPanel(state.collab)));
     detail(list[state.index]);
 }
 
 // The module itself, rendered with empty placeholders (drawn as blue shapes), on one device's screen (its CSS
-// viewport); with fit, as tall as the module (the large preview below the row)
-function deviceScreen(item, d, { fit = false } = {}) {
+// viewport)
+function deviceScreen(item, d) {
     const L = lang();
     const screen = el("div", { className: `kalq-device${d.segments === "side" ? " is-span-h" : d.segments === "stacked" ? " is-span-v" : ""}` });
     screen.style.width = `${d.w}px`;
-    if (!fit) screen.style.height = `${d.h}px`;
+    screen.style.height = `${d.h}px`;
     if (d.segments === "side") { // two screens side by side: the variables css/utilities/_dual.scss reads from a real device
         const one = (d.w - d.gap) / 2;
         Object.entries({ "--seg-l": one, "--seg-r": one, "--seg-hinge": d.gap, "--seg-h": d.h }).forEach(([k, v]) => screen.style.setProperty(k, `${v}px`));
@@ -248,7 +294,7 @@ function deviceFrame(item, d) {
 let stageObserver = null;
 
 // How it adapts: all eight devices in one row, centred at the top of a dark grey stage, one scale for all so each
-// keeps its real size relative to the others; below the row the module on the laptop's width, large enough to read
+// keeps its real size relative to the others
 function stage(item) {
     const L = lang();
     const box = el("div", { className: "kalq-picker__stage" });
@@ -258,9 +304,7 @@ function stage(item) {
         row.append(el("figure", { className: "kalq-picker__dev" }, f.holder, el("figcaption", { className: "kalq-picker__device-name", textContent: d[L] })));
         return f;
     });
-    const content = deviceScreen(item, CONTENT_DEVICE, { fit: true });
-    const contentHolder = el("div", { className: "kalq-picker__content" }, content);
-    const GAP = 18, ROW_H = 200;
+    const GAP = 18, ROW_H = 300;
     const fit = () => {
         const room = box.clientWidth - 48;
         if (room <= 0) return;
@@ -271,13 +315,8 @@ function stage(item) {
             holder.style.width = `${Math.round(g.w * k)}px`;
             holder.style.height = `${Math.round(g.h * k)}px`;
         });
-        const c = Math.min(1, room / CONTENT_DEVICE.w);
-        content.style.transform = `scale(${c})`;
-        contentHolder.style.width = `${Math.round(CONTENT_DEVICE.w * c)}px`;
-        contentHolder.style.height = `${Math.round(content.offsetHeight * c)}px`;
     };
-    box.append(el("p", { className: "kalq-picker__label", textContent: t("devices") }), row,
-        el("p", { className: "kalq-picker__label", textContent: t("content") }), contentHolder);
+    box.append(el("p", { className: "kalq-picker__label", textContent: t("devices") }), row);
     requestAnimationFrame(fit);
     stageObserver?.disconnect(); // the previous selection's stage is gone
     stageObserver = new ResizeObserver(fit);
@@ -320,7 +359,7 @@ function onKey(e) {
 
 // Focus stays inside the dialog
 function trap(e) {
-    const focusable = [...root.querySelectorAll("button, input, [tabindex='0']")].filter((n) => !n.disabled && n.offsetParent !== null);
+    const focusable = [...root.querySelectorAll("button, input, textarea, [tabindex='0']")].filter((n) => !n.disabled && n.offsetParent !== null);
     const i = focusable.indexOf(document.activeElement);
     const next = e.shiftKey ? (i <= 0 ? focusable.length - 1 : i - 1) : (i === focusable.length - 1 ? 0 : i + 1);
     e.preventDefault();
@@ -344,9 +383,9 @@ function close() {
     back?.focus?.();
 }
 
-export function openPicker({ onInsert, category = ALL_CATEGORY.id }) {
+export function openPicker({ onInsert, collab = null, category = ALL_CATEGORY.id }) {
     if (!root) build();
-    state = { onInsert, category, query: "", index: 0, returnFocus: document.activeElement };
+    state = { onInsert, collab, category, query: "", index: 0, returnFocus: document.activeElement };
     root.querySelector(".kalq-picker__search").value = "";
     draw();
     root.classList.add("is-open");

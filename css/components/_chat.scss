@@ -1,0 +1,199 @@
+/* The inquiry chat (js/modules/chat.js, js/modules/chatBehaviour.js): a compact window at its own type scale (the
+   chat tokens, css/utilities/_type.scss), the editor's controls in edit mode. Two screens: @mixin chat-two-screens,
+   included by css/utilities/_dual.scss. */
+
+// The look of the Project Inquiry chat (scar.lat): a frosted window, small caps title with the language pill, a
+// round avatar, grey bot bubbles, dark visitor bubbles, round chips to tap, the answer bar at the foot. In the
+// site's tokens, so it follows light and dark.
+.kalq-m-chat .kalq-m-inner { display: grid; justify-items: center; }
+.kalq-m-chat.has-intro .kalq-m-inner { grid-template-columns: minmax(0, 1fr) minmax(0, 380px); justify-items: stretch; align-items: center; gap: clamp(2.5rem, 6cqi, 7rem); }
+// the heading beside the chat: the section's h2, at the chat's own small scale
+.kalq-m-chat__intro .kalq-m-heading { @include type(h5); } // beside the compact window: the smallest heading token, not a section's h2
+
+.kalq-m-chat__window {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 380px;
+    min-height: 480px;
+    border: 1px solid color-mix(in srgb, var(--kalq-text, #101010) 10%, transparent);
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--kalq-bg, #fff) 85%, transparent);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    color: var(--kalq-text, #101010);
+    @include type(chat-text); // compact, as the scar.lat chat (12–13px): the chat's own tokens
+
+    // real headings (the title h2, each question and the summary h3) at the chat's scale, not the site's
+    :is(h2, h3) { margin: 0; font: inherit; letter-spacing: normal; text-transform: none; color: inherit; }
+}
+
+.kalq-m-chat__head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.75rem 1rem; border-bottom: 1px solid color-mix(in srgb, currentColor 10%, transparent); }
+.kalq-m-chat__window .kalq-m-chat__title { margin: 0; @include type(chat-title); text-transform: uppercase; }
+.kalq-m-chat__langs { display: flex; gap: 3px; padding: 3px; border-radius: 8px; background: color-mix(in srgb, currentColor 5%, transparent); }
+.kalq-m-chat__lang {
+    padding: 0.25rem 0.55rem;
+    border: 0;
+    border-radius: 5px;
+    background: none;
+    color: color-mix(in srgb, currentColor 55%, transparent);
+    font: inherit;
+    @include type(chat-micro);
+    cursor: pointer;
+
+    &[aria-pressed="true"] { background: var(--kalq-text, #101010); color: var(--kalq-bg, #fff); }
+    &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 1px; }
+}
+
+.kalq-m-chat__log { display: flex; flex-direction: column; gap: 0.75rem; padding: 1.1rem 1rem; }
+.kalq-m-chat__msg { display: flex; gap: 0.6rem; max-width: 92%; animation: kalq-chat-in 0.3s ease both; }
+.kalq-m-chat__msg.is-bot { align-self: flex-start; }
+.kalq-m-chat__msg.is-user { align-self: flex-end; flex-direction: row-reverse; }
+@keyframes kalq-chat-in { from { opacity: 0; transform: translateY(8px); } }
+
+.kalq-m-chat__avatar { flex: 0 0 auto; width: 36px; height: 36px; overflow: hidden; border: 2px solid color-mix(in srgb, currentColor 10%, transparent); border-radius: 50%; box-sizing: border-box;
+    img, svg { display: block; width: 100%; height: 100%; object-fit: cover; } }
+.kalq-m-chat__avatar.is-glyph { border-color: transparent; } // the placeholder glyph, round
+.kalq-m-chat__bubble { min-width: 0; padding: 0.6rem 0.85rem; border-radius: 16px; line-height: 1.6; overflow-wrap: anywhere; p { margin: 0; } p + p { margin-top: 0.5rem; } }
+.is-bot > .kalq-m-chat__bubble { background: color-mix(in srgb, currentColor 6%, transparent); }
+.is-user > .kalq-m-chat__bubble { background: var(--kalq-text, #101010); color: var(--kalq-bg, #fff); }
+.kalq-m-chat__name { font-weight: 600; }
+.kalq-m-chat__typing { letter-spacing: 0.2em; animation: kalq-typing 1s ease-in-out infinite; }
+@keyframes kalq-typing { 50% { opacity: 0.35; } }
+
+.kalq-m-chat__chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+.kalq-m-chat__chip {
+    padding: 0.5rem 0.85rem;
+    border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+    border-radius: 20px;
+    background: var(--kalq-bg, #fff);
+    color: inherit;
+    font: inherit;
+    @include type(chat-text);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+
+    &:hover, &:focus-visible { border-color: currentColor; background: color-mix(in srgb, currentColor 5%, var(--kalq-bg, #fff)); }
+    &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 2px; }
+}
+
+// the questions as a list (without the script, and in the server's HTML): the conversation hides it and asks them
+.kalq-m-chat__script { display: grid; gap: 0.9rem; margin: 0; padding: 0 1rem 1rem 3.6rem; list-style: decimal; }
+.kalq-m-chat__window .kalq-m-chat__ask { margin: 0; font-weight: 500; }
+.kalq-m-chat__choices { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0 0; padding: 0; list-style: none;
+    li { padding: 0.35rem 0.75rem; border: 1px solid color-mix(in srgb, currentColor 22%, transparent); border-radius: 20px; @include type(chat-text); } }
+.kalq-m-chat.is-live .kalq-m-chat__script { display: none; }
+
+// the end: summary and the two ways to send
+.kalq-m-chat__finish { display: grid; gap: 0.75rem; padding: 0 1rem 1rem; &[hidden] { display: none; } } // until the last answer
+.kalq-m-chat__msg .kalq-m-chat__finish { padding: 0.75rem 0 0; }
+.kalq-m-chat:not(.is-live) .kalq-m-chat__summary-title, .kalq-m-chat:not(.is-live) .kalq-m-chat__summary { display: none; }
+.kalq-m-chat__window .kalq-m-chat__summary-title { margin: 0; @include type(chat-micro); text-transform: uppercase; opacity: 0.7; }
+// the summary: each question above its answer (a narrow window never squeezes the answers)
+.kalq-m-chat__summary { display: grid; gap: 0.15rem; margin: 0; padding: 0.7rem 0.75rem; border: 1px solid color-mix(in srgb, currentColor 15%, transparent); border-radius: 10px; background: var(--kalq-bg, #fff); @include type(chat-text);
+    dt { opacity: 0.65; } dt:not(:first-child) { margin-top: 0.45rem; } dd { margin: 0; font-weight: 500; overflow-wrap: break-word; } }
+// the ways to send (each destination the editor set), side by side, two to a row (a long label wraps in its button)
+.kalq-m-chat__send { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+.kalq-m-chat__send > :last-child:nth-child(odd) { grid-column: 1 / -1; } // an odd last one takes the whole row
+.kalq-m-chat__go {
+    display: grid;
+    place-items: center;
+    padding: 0.65rem 0.5rem;
+    border-radius: 10px;
+    color: #fff;
+    @include type(chat-title);
+    text-align: center;
+    text-decoration: none;
+
+    // each in its app's colour, dark enough for white text; SMS and email in the site's own
+    &.is-whatsapp { background: #1c7c43; }
+    &.is-telegram { background: #1f6aa5; }
+    &.is-threema { background: #2b2b2b; }
+    &.is-sms, &.is-email { background: var(--kalq-text, #101010); color: var(--kalq-bg, #fff); }
+    &:hover { filter: brightness(1.1); }
+    &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 2px; }
+}
+.kalq-m-chat__note { margin: 0; @include type(chat-small); opacity: 0.65; }
+
+// the answer bar
+.kalq-m-chat__bar { display: flex; gap: 0.5rem; margin-top: auto; padding: 0.75rem 1rem; border-top: 1px solid color-mix(in srgb, currentColor 10%, transparent); &[hidden] { display: none; } }
+.kalq-m-chat__input, .kalq-m-chat__cc {
+    min-width: 0;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+    border-radius: 24px;
+    background: color-mix(in srgb, var(--kalq-bg, #fff) 60%, transparent);
+    color: inherit;
+    font: inherit;
+
+    &:focus-visible { outline: none; border-color: color-mix(in srgb, currentColor 45%, transparent); }
+}
+.kalq-m-chat__input { flex: 1; }
+.kalq-m-chat__cc { flex: 0 0 auto; padding-right: 0.6rem; &[hidden] { display: none; } }
+.kalq-m-chat__sendbtn {
+    padding: 0.6rem 1.1rem;
+    border: 0;
+    border-radius: 24px;
+    background: var(--kalq-text, #101010);
+    color: var(--kalq-bg, #fff);
+    font: inherit;
+    @include type(chat-micro);
+    text-transform: uppercase;
+    cursor: pointer;
+
+    &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 2px; }
+}
+
+// editing: each question with its controls; adding one; the settings
+.kalq-m-chat__tools, .kalq-m-chat__add, .kalq-m-chat__settings, .kalq-m-chat__choices-field { display: none; }
+body.kalq-edit .kalq-m-chat {
+    .kalq-m-chat__script { padding-left: 1rem; list-style: none; }
+    .kalq-m-chat__q { padding: 0.75rem; border: 1px dashed color-mix(in srgb, currentColor 25%, transparent); border-radius: 12px; }
+    .kalq-m-chat__tools { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-bottom: 0.5rem; font-size: 0.75rem; }
+    .kalq-m-chat__num { margin-right: auto; font-weight: 600; opacity: 0.7; }
+    .kalq-m-chat__kinds { display: flex; gap: 2px; padding: 2px; border-radius: 8px; background: color-mix(in srgb, currentColor 6%, transparent); }
+    .kalq-m-chat__tool { min-width: 28px; padding: 0.25rem 0.55rem; border: 0; border-radius: 6px; background: none; color: inherit; font: inherit; cursor: pointer;
+        &[aria-pressed="true"] { background: #1D4ED8; color: #fff; } &:hover { background: color-mix(in srgb, currentColor 8%, transparent); } }
+    .kalq-m-chat__choices-field { display: block; margin-top: 0.5rem; font-size: 0.85rem; }
+    .kalq-m-chat__add { display: block; margin: 0 1rem 1rem; padding: 0.6rem; border: 1px dashed #1D4ED8; border-radius: 10px; background: none; color: #1D4ED8; font: inherit; cursor: pointer; &:disabled { opacity: 0.4; } }
+    .kalq-m-chat__settings { display: grid; gap: 0.7rem; padding: 1rem; border-top: 1px solid color-mix(in srgb, currentColor 10%, transparent); font-size: 0.8rem; }
+    .kalq-m-chat__switch { justify-self: start; padding: 0.4rem 0.8rem 0.4rem 2.6rem; position: relative; border: 0; border-radius: 999px; background: color-mix(in srgb, currentColor 6%, transparent); color: inherit; font: inherit; cursor: pointer;
+        &::before { content: ""; position: absolute; left: 0.5rem; top: 50%; width: 1.6rem; height: 0.9rem; border-radius: 1rem; background: color-mix(in srgb, currentColor 25%, transparent); transform: translateY(-50%); }
+        &::after { content: ""; position: absolute; left: 0.6rem; top: 50%; width: 0.7rem; height: 0.7rem; border-radius: 50%; background: #fff; transform: translateY(-50%); transition: left 0.2s ease; }
+        &[aria-pressed="true"]::before { background: #1D4ED8; } &[aria-pressed="true"]::after { left: 1.3rem; } }
+    .kalq-m-chat__setting { display: grid; gap: 0.25rem; > span:first-child { opacity: 0.7; } }
+    .kalq-m-chat__avatar-field { width: 64px; height: 64px; border-radius: 50%; overflow: hidden; .kalq-ph-media { min-height: 0; padding: 0; } }
+    .kalq-m-chat__settings-title { margin: 0.4rem 0 0; font-weight: 600; }
+    .kalq-m-chat__nodest { margin: 0; padding: 0.55rem 0.7rem; border-radius: 8px; background: rgba(180, 83, 9, 0.12); color: #b45309; font-weight: 500; }
+    .kalq-m-chat__missing { color: #b45309; font-size: 0.75rem; }
+    .kalq-m-chat__value { display: block; padding: 0.4rem 0.6rem; border-radius: 8px; background: color-mix(in srgb, currentColor 5%, transparent); }
+}
+
+@container (max-width: 999px) { .kalq-m-chat.has-intro .kalq-m-inner { grid-template-columns: 1fr; justify-items: center; } .kalq-m-chat__intro { justify-self: stretch; } }
+@container (max-width: 690px) { .kalq-m-chat .kalq-m-inner { padding: 0 1rem; } .kalq-m-chat__window { min-height: 460px; } }
+@media (prefers-reduced-motion: reduce) { .kalq-m-chat__msg { animation: none; } .kalq-m-chat__typing { animation: none; } .kalq-m-chat__chip { transition: none; } }
+
+// The heading and text beside the chat
+.kalq-m-chat__head-text { margin-bottom: 1.2rem; }
+
+// Editors: where the inquiry is sent is set for the whole site (the insert panel, Chat); here only a note
+body.kalq-edit .kalq-m-chat {
+    .kalq-m-chat__dest-note { margin: 0.4rem 0 0; opacity: 0.75; }
+    .kalq-m-chat__dest-set { margin: 0; font-weight: 600; }
+}
+
+@mixin chat-two-screens {
+    // Inquiry chat: the text on the left screen, the chat window on the right (without text, the chat on the right
+    // all the same; the left screen stays calm)
+    .kalq-m.kalq-m-chat .kalq-m-inner, .kalq-m.kalq-m-chat.has-intro .kalq-m-inner {
+        grid-template-columns: var(--seg-l) var(--seg-r);
+        column-gap: var(--seg-hinge);
+        max-width: none;
+        padding: 0;
+        align-items: center;
+        min-height: var(--seg-h);
+        justify-items: stretch;
+    }
+    .kalq-m.kalq-m-chat .kalq-m-chat__intro { grid-column: 1; padding: 0 2rem; }
+    .kalq-m.kalq-m-chat .kalq-m-chat__window { grid-column: 2; grid-row: 1; justify-self: center; max-width: calc(var(--seg-r) - 3rem); margin: 2rem 0; }
+}

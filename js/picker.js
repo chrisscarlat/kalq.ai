@@ -47,8 +47,8 @@ const DEVICE_KEY = "kalq-picker-device"; // the last chosen preset, per browser
 const savedDevice = () => { try { return localStorage.getItem(DEVICE_KEY); } catch { return null; } };
 let deviceId = DEVICES.some((d) => d.id === savedDevice()) ? savedDevice() : "iphone-18-pro";
 
-// Every version of every module, flat
-const ALL = Object.entries(MODULES).flatMap(([module, def]) => Object.entries(def.versions).map(([version, v]) => ({ module, version, def, v })));
+// Every version of every module the picker offers (retired modules still render where a page has one)
+const ALL = Object.entries(MODULES).filter(([, def]) => !def.retired).flatMap(([module, def]) => Object.entries(def.versions).map(([version, v]) => ({ module, version, def, v })));
 
 //=================================== Wireframes ===================================//
 // Images and videos as blue rectangles, text as thin blue lines, headings thicker, buttons as small pills
@@ -139,7 +139,8 @@ function draw() {
     // Categories with how many versions each has
     const cats = root.querySelector(".kalq-picker__cats");
     cats.setAttribute("aria-label", t("title"));
-    cats.replaceChildren(...CATEGORIES.map((c) => {
+    // a category with nothing to insert and no note of its own (Navigation and Footers explain where they are set) is not shown
+    cats.replaceChildren(...CATEGORIES.filter((c) => c.note || ALL.some((x) => x.def.category === c.id)).map((c) => {
         const count = ALL.filter((x) => x.def.category === c.id).length;
         const b = el("button", { type: "button", className: "kalq-picker__cat" }, el("span", { textContent: c[L] }), el("span", { className: "kalq-picker__count", textContent: count || "–" }));
         b.setAttribute("aria-pressed", !state.query && state.category === c.id);

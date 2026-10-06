@@ -92,6 +92,7 @@ export const MODULES = {
         render: renderCtaBand,
     },
     "logos.belt": {
+        retired: true, // not offered in the picker any more (2026-10-06); a page that already has one keeps it
         category: "logos",
         name: L("Logo-Laufband", "Logo belt"),
         keywords: "logos partner kunden clients belt ticker band laufband",

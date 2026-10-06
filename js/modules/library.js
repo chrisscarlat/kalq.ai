@@ -911,6 +911,7 @@ export const LIBRARY = {
         render: renderCtaSentence,
     },
     "interaction.contact": {
+        retired: true, // not offered in the picker any more (2026-10-06); a page that already has one keeps it
         category: "interaction",
         name: L("Kontakt", "Contact"),
         keywords: "contact kontakt email e-mail linkedin social netzwerke",
@@ -980,6 +981,7 @@ export const LIBRARY = {
         render: renderInquiry,
     },
     "testimonials.slider": {
+        retired: true, // not offered in the picker any more (2026-10-06); a page that already has one keeps it
         category: "testimonials",
         name: L("Zitate, eins nach dem anderen", "Testimonial slider"),
         keywords: "testimonial zitat quote stimmen slider kunden customers",
@@ -1006,6 +1008,7 @@ export const LIBRARY = {
         render: renderQuotes,
     },
     "testimonials.photo-cards": {
+        retired: true, // not offered in the picker any more (2026-10-06); a page that already has one keeps it
         category: "testimonials",
         name: L("Zwei Stimmen mit Foto", "Testimonial photo cards"),
         keywords: "testimonial zitat quote photo foto cards karten rating bewertung",

@@ -559,7 +559,7 @@ a.kalq-m-grid__card:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f
 .kalq-m-chat .kalq-m-inner { display: grid; justify-items: center; }
 .kalq-m-chat.has-intro .kalq-m-inner { grid-template-columns: minmax(0, 1fr) minmax(0, 380px); justify-items: stretch; align-items: center; gap: clamp(2.5rem, 6cqi, 7rem); }
 // the heading beside the chat: the section's h2, at the chat's own small scale
-.kalq-m-chat__intro .kalq-m-heading { @include type(h4); } // beside the compact window: a smaller heading token than a section's h2
+.kalq-m-chat__intro .kalq-m-heading { @include type(h5); } // beside the compact window: the smallest heading token, not a section's h2
 
 .kalq-m-chat__window {
     display: flex;

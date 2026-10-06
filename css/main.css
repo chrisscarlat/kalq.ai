@@ -4199,17 +4199,17 @@ a.kalq-m-grid__card:focus-visible {
 
 .kalq-m-chat__intro .kalq-m-heading {
   font-family: var(--kalq-font-body, "Clash Grotesk", "Helvetica Neue", Arial, sans-serif);
-  font-size: clamp(2rem, 4 * var(--cq, 1cqi), 3.8rem);
+  font-size: clamp(1.7rem, 3.5 * var(--cq, 1cqi), 2.2rem);
   font-weight: var(--kalq-weight-light-body, 300);
-  line-height: 1.2;
-  letter-spacing: -0.03em;
+  line-height: normal;
+  letter-spacing: -0.01em;
   word-spacing: 0.1em;
   overflow-wrap: break-word;
   hyphens: auto;
 }
 @container (max-width: 320px) {
   .kalq-m-chat__intro .kalq-m-heading {
-    font-size: clamp(1.6rem, 4 * var(--cq, 1cqi), 3.8rem);
+    font-size: clamp(1.2rem, 3.5 * var(--cq, 1cqi), 2.2rem);
   }
 }
 

@@ -139,6 +139,7 @@ $ease-out: cubic-bezier(0.25, 1, 0.5, 1);
 //=================================== 2.4 Stats ===================================//
 .kalq-m-stats { position: relative; overflow: hidden; }
 .kalq-m-stats.has-media { color: #fff; }
+.kalq-m-stats.is-colour { background: var(--kalq-text, #101010); color: var(--kalq-bg, #fff); } // "On colour": a band, like the sentence link on colour
 .kalq-m-stats__bg { position: absolute; inset: 0; border-radius: 0; }
 .kalq-m-stats__shade { position: absolute; inset: 0; background: #000; opacity: 0.45; }
 .kalq-m-stats .kalq-m-inner { position: relative; }
@@ -794,7 +795,7 @@ body.kalq-edit {
     // Three features: the heading on the left screen, the three stacked on the right
     .kalq-m.kalq-m-three .kalq-m-inner { align-items: center; min-height: var(--seg-h); }
     .kalq-m.kalq-m-three .kalq-m-lib__head { grid-column: 1; margin: 0; padding: 0 2rem; }
-    .kalq-m.kalq-m-three .kalq-m-three__list { grid-column: 2; grid-template-columns: 1fr; gap: 2rem; padding: 3rem 2rem; text-align: left; }
+    .kalq-m.kalq-m-three .kalq-m-three__list { grid-column: 2; grid-template-columns: 1fr; gap: 2rem; max-width: none; margin: 0; padding: 3rem 2rem; text-align: left; }
     .kalq-m.kalq-m-three .kalq-m-three__item .kalq-m-text { margin-left: 0; }
 
     // Stats: the heading and the first two on the left screen, the others on the right

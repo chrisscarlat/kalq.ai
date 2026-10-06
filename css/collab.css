@@ -2889,6 +2889,10 @@ body:not(.kalq-edit) .kalq-undo-btn {
   box-shadow: inset 1px 0 rgba(128, 128, 128, 0.5), inset -1px 0 rgba(128, 128, 128, 0.5);
   z-index: 2;
 }
+.kalq-device :where(.kalq-ph:empty:not(.kalq-ph-media)) {
+  height: 0.6em;
+  width: 50%;
+}
 .kalq-device .kalq-ph:empty:not(.kalq-ph-media) {
   outline: none;
   min-height: 0;
@@ -3083,6 +3087,14 @@ body:not(.kalq-edit) .kalq-undo-btn {
   color: #101010;
 }
 
+@container (max-width: 599px) {
+  body.kalq-edit .kalq-m-cta .kalq-m-cta__screen2 {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    margin: 1.5rem auto 0;
+  }
+}
 @media not all and (horizontal-viewport-segments: 2) {
   body.kalq-edit .kalq-m-cta {
     position: relative;

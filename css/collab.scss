@@ -3036,7 +3036,9 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
         z-index: 2;
     }
 
-    // Empty placeholders as schematic shapes: no words, like the previews in the grid
+    // Empty placeholders as schematic shapes: no words, like the previews in the grid. Any placeholder without its
+    // own shape below is a bar too (a stat's figure, a sentence link), never a line of no height.
+    :where(.kalq-ph:empty:not(.kalq-ph-media)) { height: 0.6em; width: 50%; }
     .kalq-ph:empty:not(.kalq-ph-media) {
         outline: none;
         min-height: 0;
@@ -3218,6 +3220,16 @@ $kalq-image-glyph: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/200
     .kalq-section-tools__btn[aria-pressed="true"] {
         background: #fff;
         color: #101010;
+    }
+}
+
+// A narrow call to action (a phone): the tile sits below the button, not over it
+@container (max-width: 599px) {
+    body.kalq-edit .kalq-m-cta .kalq-m-cta__screen2 {
+        position: relative;
+        right: auto;
+        bottom: auto;
+        margin: 1.5rem auto 0;
     }
 }
 

@@ -170,6 +170,12 @@
         justify-content: space-between;
         gap: 3rem;
 
+        .kalq-m-cta__text {
+            flex: 1 1 auto;
+            align-self: stretch; // stacked on a phone it spans the width too, not the width of its (empty) content
+            min-width: 0;
+        }
+
         .kalq-m-actions {
             margin-top: 0;
             flex-shrink: 0;

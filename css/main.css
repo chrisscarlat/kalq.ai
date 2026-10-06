@@ -1581,6 +1581,11 @@ footer #container .footer_bottom a {
   justify-content: space-between;
   gap: 3rem;
 }
+.kalq-m-cta.is-split .kalq-m-inner .kalq-m-cta__text {
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-width: 0;
+}
 .kalq-m-cta.is-split .kalq-m-inner .kalq-m-actions {
   margin-top: 0;
   flex-shrink: 0;
@@ -2724,6 +2729,11 @@ body.kalq-edit .kalq-m-hero .kalq-m-range {
 
 .kalq-m-stats.has-media {
   color: #fff;
+}
+
+.kalq-m-stats.is-colour {
+  background: var(--kalq-text, #101010);
+  color: var(--kalq-bg, #fff);
 }
 
 .kalq-m-stats__bg {
@@ -8158,6 +8168,8 @@ body:has(.kalq-toolbar) .dontpanic-bar {
     grid-column: 2;
     grid-template-columns: 1fr;
     gap: 2rem;
+    max-width: none;
+    margin: 0;
     padding: 3rem 2rem;
     text-align: left;
   }
@@ -8920,6 +8932,8 @@ body:has(.kalq-toolbar) .dontpanic-bar {
   grid-column: 2;
   grid-template-columns: 1fr;
   gap: 2rem;
+  max-width: none;
+  margin: 0;
   padding: 3rem 2rem;
   text-align: left;
 }

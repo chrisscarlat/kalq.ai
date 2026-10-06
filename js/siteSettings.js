@@ -5,6 +5,7 @@ import { EDITOR_LANG } from "./i18n.js";
 import { setLocalContent, storedEntry } from "./content.js";
 import { SEND_DESTS } from "./modules/destinations.js";
 import { uploadMedia } from "./upload.js";
+import { chatPreview } from "./inquiry.js";
 
 // The cookie bar's stored keys, the same as in js/dontpanic.js (data: they never change)
 const NOTE_KEYS = { mode: "site.cookie.mode", notice: "site.cookie.notice", consent: "site.cookie.consent" };
@@ -26,7 +27,7 @@ const TEXT = {
         cookiePreview: "Vorschau zeigen", cookieSave: "Hinweis speichern", cookieSaved: "Cookie-Hinweis gespeichert", cookieEmpty: "Bitte beide Sprachen ausfüllen.",
         chatTitle: "Anfrage-Chat", chatIntro: "Ein Chat für die ganze Website, unten rechts auf jeder Seite, solange er an ist. Er stellt ein paar Fragen und lässt die Besucher ihre Anfrage aus der eigenen App senden, über die Wege, die hier eingetragen sind.",
         chatOn: "Chat auf jeder Seite zeigen", chatName: "Name, mit dem der Chat begrüßt (optional, z. B. Chris)", chatDests: "Wohin gesendet wird (mindestens einer)",
-        chatPhoto: "Foto im Chat (rund, z. B. die Person, die antwortet)", chatPhotoAdd: "Foto hochladen", chatPhotoReplace: "Foto ersetzen", chatPhotoRemove: "Entfernen", chatPhotoSaved: "Foto gespeichert", uploading: "Wird hochgeladen",
+        chatPhoto: "Foto im Chat (rund, z. B. die Person, die antwortet)", chatPhotoAdd: "Foto hochladen", chatPhotoReplace: "Foto ersetzen", chatPhotoRemove: "Entfernen", chatPhotoSaved: "Foto gespeichert", uploading: "Wird hochgeladen", chatPreview: "Vorschau", chatPreviewOff: "Aus: Besucher sehen den Chat nicht",
         chatSave: "Chat speichern", chatSaved: "Chat gespeichert", chatInvalid: (n) => `Ungültig: ${n}`, chatNeedsDest: "Für einen Chat, der an ist, braucht es mindestens ein Ziel.",
         failed: "Speichern fehlgeschlagen", relogin: "Bitte melden Sie sich erneut an.",
     },
@@ -40,7 +41,7 @@ const TEXT = {
         cookiePreview: "Show preview", cookieSave: "Save notice", cookieSaved: "Cookie notice saved", cookieEmpty: "Please fill in both languages.",
         chatTitle: "Inquiry chat", chatIntro: "One chat for the whole site, at the bottom right of every page while it is on. It asks a few questions and lets visitors send their inquiry from their own app, through the ways set here.",
         chatOn: "Show the chat on every page", chatName: "Name the chat greets with (optional, e.g. Chris)", chatDests: "Where it sends (at least one)",
-        chatPhoto: "Photo in the chat (round, e.g. the person who answers)", chatPhotoAdd: "Upload photo", chatPhotoReplace: "Replace photo", chatPhotoRemove: "Remove", chatPhotoSaved: "Photo saved", uploading: "Uploading",
+        chatPhoto: "Photo in the chat (round, e.g. the person who answers)", chatPhotoAdd: "Upload photo", chatPhotoReplace: "Replace photo", chatPhotoRemove: "Remove", chatPhotoSaved: "Photo saved", uploading: "Uploading", chatPreview: "Preview", chatPreviewOff: "Off: visitors don't see the chat",
         chatSave: "Save chat", chatSaved: "Chat saved", chatInvalid: (n) => `Not valid: ${n}`, chatNeedsDest: "A chat that is on needs at least one destination.",
         failed: "Could not save", relogin: "Please log in again.",
     },
@@ -145,10 +146,17 @@ export function chatPanel(collab) {
     let name = plainOf("site.chat.name", "de");
     const on = el("input", { type: "checkbox", id: "kalq-site-chat-active", className: "kalq-switch__input", checked: active });
     on.setAttribute("role", "switch");
-    on.addEventListener("change", () => { active = on.checked; });
+    // the chat as visitors meet it, drawn again with every change here (before Save: the photo is saved at once)
+    const preview = chatPreview();
+    const previewNote = el("p", { className: "kalq-site__hint kalq-site__preview-note" });
+    const showPreview = () => {
+        preview.update({ name, photo: storedEntry("site.chat.avatar")?.media || "", active });
+        previewNote.textContent = active ? "" : t("chatPreviewOff");
+    };
+    on.addEventListener("change", () => { active = on.checked; showPreview(); });
     const onField = el("label", { className: "kalq-switch kalq-site__switch", htmlFor: "kalq-site-chat-active" }, on, el("span", { className: "kalq-switch__track", ariaHidden: "true" }), el("span", { textContent: t("chatOn") }));
     const nameInput = el("input", { id: "kalq-site-chat-name", type: "text", className: "kalq-site__input", value: name, maxLength: 40, autocomplete: "off" });
-    nameInput.addEventListener("input", () => { name = nameInput.value; });
+    nameInput.addEventListener("input", () => { name = nameInput.value; showPreview(); });
     const nameField = el("label", { className: "kalq-site__field", htmlFor: "kalq-site-chat-name" }, el("span", { textContent: t("chatName") }), nameInput);
     // the photo: uploaded to the site's storage, saved at once as its own site block (the chat shows it as it is)
     const photoPreview = el("span", { className: "kalq-site__photo" });
@@ -159,6 +167,7 @@ export function chatPanel(collab) {
         photoPreview.replaceChildren(...(url ? [Object.assign(document.createElement("img"), { src: url, alt: "" })] : []));
         photoAdd.textContent = url ? t("chatPhotoReplace") : t("chatPhotoAdd");
         photoRemove.hidden = !url;
+        showPreview();
     };
     const savePhoto = async (url) => {
         await saveSiteBlocks(collab, [{ key: "site.chat.avatar", lang: null, content: url, type: "image" }], "Edited the chat's photo");
@@ -221,8 +230,12 @@ export function chatPanel(collab) {
         } catch (error) { console.error("chat destinations", error); collab.toast(failText(error), "error"); }
         finally { save.disabled = false; }
     });
+    showPreview();
     return el("section", { className: "kalq-site kalq-site--chat" },
-        el("h3", { className: "kalq-site__title", textContent: t("chatTitle") }), el("p", { className: "kalq-site__intro", textContent: t("chatIntro") }),
-        onField, nameField, photoField, el("p", { className: "kalq-site__label", textContent: t("chatDests") }),
-        el("div", { className: "kalq-site__grid" }, ...fields), el("div", { className: "kalq-site__actions" }, save));
+        el("div", { className: "kalq-site__form" },
+            el("h3", { className: "kalq-site__title", textContent: t("chatTitle") }), el("p", { className: "kalq-site__intro", textContent: t("chatIntro") }),
+            onField, nameField, photoField, el("p", { className: "kalq-site__label", textContent: t("chatDests") }),
+            el("div", { className: "kalq-site__grid" }, ...fields), el("div", { className: "kalq-site__actions" }, save)),
+        el("aside", { className: "kalq-site__preview", ariaLabel: t("chatPreview") },
+            el("p", { className: "kalq-site__label", textContent: t("chatPreview") }), preview.node, previewNote));
 }

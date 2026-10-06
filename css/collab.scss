@@ -2745,6 +2745,21 @@ $kalq-image-art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/
 
 .kalq-picker.is-settings .kalq-picker__hint { display: none; }
 
+// The chat's settings with its live preview on the right (js/inquiry.js chatPreview); one column on narrow screens
+.kalq-picker__settings:has(.kalq-site--chat) { max-width: 1120px; }
+
+.kalq-site--chat {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+    align-items: start;
+    gap: 1.6rem;
+
+    @media (max-width: 900px) { grid-template-columns: minmax(0, 1fr); }
+}
+
+.kalq-site__form { display: grid; gap: 0.9rem; min-width: 0; }
+.kalq-site__preview { position: sticky; top: 0; display: grid; gap: 0.6rem; min-width: 0; }
+.kalq-site__preview-note:empty { display: none; }
+
 .kalq-site {
     display: grid;
     gap: 0.9rem;

@@ -97,10 +97,8 @@ const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls)
 const GLYPH = '<svg viewBox="0 0 36 36" aria-hidden="true" focusable="false"><circle cx="18" cy="18" r="18" fill="currentColor" opacity=".08"/><circle cx="22" cy="13" r="3.4" fill="currentColor" opacity=".35"/><path d="M8 26l7-9 4 5 3-3 6 7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" opacity=".6"/></svg>';
 // The chat's photo (site.chat.avatar, set in the picker's Chat), else the glyph; decorative: the name says who
 const OWN = /^(\/|[\w-]+\/|https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/site-media\/)[^?#\s]*$/i;
-function avatar(cls) {
+function avatar(cls, url = storedEntry("site.chat.avatar")?.media || "") {
     const box = el("span", cls);
-    const e = storedEntry("site.chat.avatar");
-    const url = e?.media || "";
     if (url && OWN.test(url)) { const img = el("img"); img.src = url; img.alt = ""; img.loading = "lazy"; box.append(img); }
     else box.innerHTML = GLYPH;
     box.setAttribute("aria-hidden", "true");
@@ -405,3 +403,38 @@ async function summary(s) {
     await say(s, (t) => t.summary, { pause: 500 });
     await bot(s, () => { refresh(false); return [box]; }, { pause: 100 });
 }
+
+//=================================== Preview ===================================//
+// The chat as visitors meet it, for the picker's Chat settings (js/siteSettings.js): its window opened on the first
+// message, with the name and photo being set, and its round button below. A picture: nothing in it reacts. The site's
+// current language. update({ name, photo, active }) draws it again (photo "" is the glyph; active false greys it out).
+export function chatPreview() {
+    const root = el("div", "kalq-chat is-preview");
+    root.setAttribute("aria-hidden", "true");
+    root.inert = true;
+    const draw = ({ name = "", photo = "", active = true } = {}) => {
+        const t = w();
+        const win = el("section", "kalq-chat__window");
+        const head = el("header", "kalq-chat__head");
+        const pill = el("span", "kalq-chat__langs");
+        pill.append(el("span", "lang", lang().toUpperCase()));
+        head.append(el("h2", "kalq-chat__title", t.title), pill, el("span", "kalq-chat__close", "×"));
+        const log = el("div", "kalq-chat__log");
+        const msg = el("div", "kalq-chat__msg is-bot");
+        const bubble = el("div", "kalq-chat__bubble");
+        const row = el("div", "kalq-chat__chips");
+        t.chips.forEach(([, label]) => row.append(el("span", "kalq-chat__chip", label)));
+        bubble.append(el("p", "kalq-chat__hello", t.greet(name.trim())), para(t.intro), row);
+        msg.append(avatar("kalq-chat__avatar", photo), bubble);
+        log.append(msg);
+        const bar = el("div", "kalq-chat__bar");
+        bar.append(el("span", "kalq-chat__input", t.placeholder), el("span", "kalq-chat__send", t.send));
+        win.append(head, log, bar);
+        const toggle = el("span", "kalq-chat__toggle");
+        toggle.append(avatar("kalq-chat__toggle-photo", photo));
+        root.classList.toggle("is-off", !active);
+        root.replaceChildren(win, toggle);
+    };
+    return { node: root, update: draw };
+}
+

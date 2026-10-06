@@ -23,7 +23,7 @@ const TEXT = {
         themeChoose: "Darstellung wählen",
         failed: "Das hat nicht geklappt.", refused: (why) => `Nicht gespeichert: Die Datenbank lehnt es ab (${why}). Nichts wurde geändert.`, denied: "Nicht gespeichert: Ihre Anmeldung darf das nicht. Nichts wurde geändert.", relogin: "Bitte melden Sie sich erneut an.", copyOf: "Kopie", section: "Abschnitt",
         heroInserted: "Der neue Hero steht als Entwurf oben. Beim Veröffentlichen ersetzt er den bisherigen.",
-        insert: "Modul hier einfügen", insertAfter: "Modul darunter einfügen", missing: (list) => `Erst ausfüllen: ${list}`,
+        insert: "Modul hier einfügen", insertAfter: "Modul darunter einfügen", site: "Für die ganze Website", missing: (list) => `Erst ausfüllen: ${list}`,
         borrowed: (n) => (n === 1 ? "1 leeres Bild mit einem Bild dieses Stils gefüllt" : `${n} leere Bilder mit Bildern dieses Stils gefüllt`),
         names: { header: "Hero", about: "Über Kalq", expertise: "Plattform-Liste", belief: "Haltung", social: "Social", "expertise-header": "Kopf",
             "expertise-header-img": "Bild", "expertise-container": "Karten", "about-header": "Kopf", "about-header-img": "Bild", "about-goals": "Ziele",
@@ -39,7 +39,7 @@ const TEXT = {
         themeChoose: "Choose appearance",
         failed: "That did not work.", refused: (why) => `Not saved: the database refused it (${why}). Nothing was changed.`, denied: "Not saved: your login is not allowed to do this. Nothing was changed.", relogin: "Please log in again.", copyOf: "copy", section: "Section",
         heroInserted: "The new hero is on top as a draft. Publishing it replaces the current one.",
-        insert: "Insert a module here", insertAfter: "Insert a module below", missing: (list) => `Fill in first: ${list}`,
+        insert: "Insert a module here", insertAfter: "Insert a module below", site: "For the whole site", missing: (list) => `Fill in first: ${list}`,
         borrowed: (n) => (n === 1 ? "1 empty picture filled with one of this style's" : `${n} empty pictures filled with this style's pictures`),
         names: { header: "Hero", about: "About Kalq", expertise: "Platform list", belief: "Belief", social: "Social", "expertise-header": "Header",
             "expertise-header-img": "Image", "expertise-container": "Cards", "about-header": "Header", "about-header-img": "Image", "about-goals": "Goals",
@@ -390,10 +390,30 @@ export const insertModule = (index, module, version) => run(async () => {
     reveal(entry.id);
 });
 
-// focus: open on a site-wide setting instead of the modules (e.g. "chat-destinations")
-async function openPicker(index, { focus } = {}) {
+// focus: open on a site-wide setting instead of the modules (e.g. "chat-destinations"); category: open on that entry
+async function openPicker(index, { focus, category } = {}) {
     const { openPicker: open } = await import("./picker.js");
-    open({ onInsert: (module, version) => insertModule(index, module, version), collab, focus });
+    open({ onInsert: (module, version) => insertModule(index, module, version), collab, focus, ...(category ? { category } : {}) });
+}
+
+// The toolbar's "For the whole site": the picker straight at its whole-site group (the chat first), without edit mode
+// and a seam first. A module picked from there goes to the end of the page, and edit mode comes on to show it.
+function addSiteButton() {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "kalq-toolbar__btn kalq-site-btn";
+    b.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 12h17M12 3.5c2.3 2.4 3.4 5.2 3.4 8.5s-1.1 6.1-3.4 8.5c-2.3-2.4-3.4-5.2-3.4-8.5s1.1-6.1 3.4-8.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+    const label = () => { b.title = t("site"); b.setAttribute("aria-label", t("site")); };
+    label();
+    document.addEventListener("kalq:language", label);
+    b.addEventListener("click", async () => {
+        const { openPicker: open } = await import("./picker.js");
+        open({ collab, category: "chat", onInsert: (module, version) => {
+            if (!editing()) document.dispatchEvent(new CustomEvent("kalq:edit-on"));
+            insertModule(currentLayout().sections.length, module, version);
+        } });
+    });
+    collab.addTool(b, 36);
 }
 
 // Scroll the page so a section is in view, its bar clear below the header
@@ -799,6 +819,7 @@ export function render() {
 export function initSections(api) {
     collab = api;
     addUndoButtons();
+    addSiteButton();
     // Edit mode on or off, a page change, a layout change (own, someone else's, a restore), a language switch
     let wasEditing = editing();
     new MutationObserver(() => { if (editing() !== wasEditing) { wasEditing = editing(); render(); } }).observe(document.body, { attributes: true, attributeFilter: ["class"] });

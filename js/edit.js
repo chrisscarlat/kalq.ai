@@ -486,6 +486,7 @@ export async function initEditing(api) {
     document.addEventListener("change", onSettingChange);
     document.addEventListener("kalq:language", () => { labelButton(); replaceButtons(); });
     collab.on("key:e", () => button.click());
+    document.addEventListener("kalq:edit-on", () => { if (!on) setMode(true); }); // e.g. a module inserted from the toolbar's whole-site picker
     collab.on("escape", () => { if (on) setMode(false); });
     collab.on("locks", showLocks);
     collab.on("mode", (mode) => { if (mode !== "edit" && on) setMode(false); });

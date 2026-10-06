@@ -3469,6 +3469,47 @@ body.kalq-edit .kalq-f-ts__card > .kalq-f-tools {
   outline-offset: 2px;
 }
 
+.kalq-chat.is-preview {
+  position: relative;
+  right: auto;
+  bottom: auto;
+  z-index: auto;
+  display: grid;
+  justify-items: end;
+  gap: 0.75rem;
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+.kalq-chat.is-preview.is-off {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+.kalq-chat.is-preview .kalq-chat__window {
+  position: static;
+  width: 100%;
+  height: auto;
+  animation: none;
+}
+.kalq-chat.is-preview .kalq-chat__msg {
+  animation: none;
+}
+.kalq-chat.is-preview .kalq-chat__log {
+  overflow: visible;
+}
+.kalq-chat.is-preview .kalq-chat__toggle, .kalq-chat.is-preview .kalq-chat__toggle:hover {
+  transform: none;
+  cursor: default;
+}
+.kalq-chat.is-preview .kalq-chat__chip {
+  cursor: default;
+}
+.kalq-chat.is-preview .kalq-chat__input {
+  opacity: 0.55;
+}
+.kalq-chat.is-preview .kalq-chat__send {
+  display: grid;
+  place-items: center;
+}
+
 @media (max-width: 480px) {
   .kalq-chat__window {
     position: fixed;

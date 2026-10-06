@@ -2597,6 +2597,39 @@ body:not(.kalq-edit) .kalq-undo-btn {
   display: none;
 }
 
+.kalq-picker__settings:has(.kalq-site--chat) {
+  max-width: 1120px;
+}
+
+.kalq-site--chat {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  align-items: start;
+  gap: 1.6rem;
+}
+@media (max-width: 900px) {
+  .kalq-site--chat {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.kalq-site__form {
+  display: grid;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.kalq-site__preview {
+  position: sticky;
+  top: 0;
+  display: grid;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.kalq-site__preview-note:empty {
+  display: none;
+}
+
 .kalq-site {
   display: grid;
   gap: 0.9rem;

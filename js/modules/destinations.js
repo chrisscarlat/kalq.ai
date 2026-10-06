@@ -31,5 +31,15 @@ export const SEND_DESTS = [
 
 export const destOf = (id) => SEND_DESTS.find((d) => d.id === id) || null;
 
-// The inquiry chat's destinations, one for the whole site: each a site block (set in the insert panel, Chat)
+// The inquiry chat's destinations, one for the whole site: each a site block (set in the insert picker, Chat)
 export const CHAT_DEST_KEYS = Object.fromEntries(SEND_DESTS.map((d) => [d.id, `site.chat.${d.id}`]));
+
+// A site-wide destination: its value (the site block), the link and how the inquiry goes into it; null when not set
+// or not valid. get: a lookup of stored blocks (the page's content store)
+export function chatDest(get, d) {
+    const e = get(CHAT_DEST_KEYS[d.id]);
+    const value = e ? plain(e.de ?? e.en ?? "") : "";
+    if (!value) return null;
+    const href = d.href(value);
+    return href ? { href, param: d.param ? d.param(value) : "", blank: d.blank } : null;
+}

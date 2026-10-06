@@ -53,8 +53,8 @@ const DEVICES = DEVICE_GROUPS.flatMap((g) => g.devices);
 const ALL_CATEGORY = { id: "all", de: TEXT.de.all, en: TEXT.en.all };
 const ALL = Object.entries(MODULES).filter(([, def]) => !def.retired).flatMap(([module, def]) => Object.entries(def.versions).map(([version, v]) => ({ module, version, def, v })));
 
-// The bottom of the left menu: what is set for the whole site, each with its icon. Chat lists the chat module with
-// the chat's site-wide settings; Cookie bar is its settings; Style, Navigation and Footers open the Styles panel at
+// The bottom of the left menu: what is set for the whole site, each with its icon. Chat is the floating inquiry
+// chat's settings (on or off, the name it greets with, where it sends); Cookie bar is its settings; Style, Navigation and Footers open the Styles panel at
 // their tab (admins; for other editors Navigation and Footers say where they are set).
 const ICON = (d) => `<svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" focusable="false"><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const SITE_ITEMS = [
@@ -195,11 +195,13 @@ function draw() {
     const browse = root.querySelector(".kalq-picker__browse");
     browse.querySelector(".kalq-picker__settings")?.remove();
     const siteItem = !state.query && SITE_ITEMS.find((x) => x.id === state.category);
-    root.classList.toggle("is-settings", !!siteItem && state.category === "dontpanic");
-    if (siteItem && state.category === "dontpanic") { // settings only: no cards, no devices
-        root.querySelector(".kalq-picker__heading").textContent = t("dontpanic");
+    const settingsOnly = !!siteItem && ["dontpanic", "chat"].includes(state.category); // the cookie bar, the chat: settings, no cards
+    root.classList.toggle("is-settings", settingsOnly);
+    if (settingsOnly) {
+        root.querySelector(".kalq-picker__heading").textContent = t(state.category);
         root.querySelector(".kalq-picker__grid").replaceChildren();
-        browse.append(el("div", { className: "kalq-picker__settings" }, state.collab ? cookiePanel(state.collab, { onPreview: close }) : null));
+        const panel = !state.collab ? null : state.category === "chat" ? chatPanel(state.collab) : cookiePanel(state.collab, { onPreview: close });
+        browse.append(el("div", { className: "kalq-picker__settings" }, panel));
         detail(null);
         return;
     }
@@ -232,7 +234,6 @@ function draw() {
         grid.setAttribute("aria-activedescendant", `kalq-pick-${state.index}`);
         grid.style.setProperty("--cols", String(Math.min(5, Math.max(1, Math.ceil(list.length / 2))))); // the cards in two rows
     }
-    if (siteItem && state.category === "chat" && state.collab) browse.append(el("div", { className: "kalq-picker__settings" }, chatPanel(state.collab)));
     detail(list[state.index]);
 }
 

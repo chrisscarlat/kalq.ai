@@ -6,7 +6,6 @@
 // A placeholder is a slot without any revision: editors see a labelled empty block, the public page never gets it.
 // Placeholder labels name the kind of content ("Frage", "Antwort"); they never invent claims, numbers or quotes.
 import { FINAL, FINAL_CATEGORIES } from "./final.js";
-import { CHAT, CHAT_CATEGORY } from "./chat.js";
 import { L, append, mediaEl, section, slotEl } from "./kit.js";
 
 // The picker's categories, in order; navigation and footer are chosen in the style, their notes say so
@@ -18,7 +17,6 @@ export const CATEGORIES = [
     FINAL_CATEGORIES.find((c) => c.id === "custom"),
     { id: "content", de: "Inhalt", en: "Content" },
     ...FINAL_CATEGORIES.filter((c) => c.id !== "custom"),
-    CHAT_CATEGORY, // the inquiry chat (js/modules/chat.js)
     ...NOTES,
 ];
 
@@ -50,7 +48,6 @@ export const MODULES = {
         render: renderMediaCenter,
     },
     ...FINAL, // js/modules/final.js
-    ...CHAT, // js/modules/chat.js
 };
 
 export const moduleVersion = (module, version) => { const def = MODULES[module]; return def?.versions[version] || def?.versions[def?.aliases?.[version]] || null; };
@@ -93,5 +90,5 @@ export function missingRequired(entry, page, store) {
         if (!s.required) return false;
         const e = store(`${page}.${entry.id}.${slot}`);
         return !e || (s.kind === "media" ? !e.media : e.de == null && e.en == null);
-    }).map(([slot, s]) => s.label), ...(def.missing ? def.missing(entry, page, store) : [])]; // the module's own checks (e.g. the chat's questions)
+    }).map(([slot, s]) => s.label), ...(def.missing ? def.missing(entry, page, store) : [])]; // the module's own checks (e.g. the testimonials' quotes)
 }

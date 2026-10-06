@@ -3970,3 +3970,12 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video))::after {
     transform: translateX(-74px);
   }
 }
+.kalq-site__label {
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.kalq-site__switch {
+  justify-self: start;
+}

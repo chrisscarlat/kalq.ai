@@ -8,7 +8,7 @@ import { SEND_DESTS } from "./modules/destinations.js";
 // The cookie bar's stored keys, the same as in js/dontpanic.js (data: they never change)
 const NOTE_KEYS = { mode: "site.cookie.mode", notice: "site.cookie.notice", consent: "site.cookie.consent" };
 const PAGE_MODE = { notice: "tell", consent: "ask" }; // the bar's markup (data-for)
-// The chat's destinations: one site block each (js/modules/chat.js reads them)
+// The chat's destinations: one site block each (js/inquiry.js reads them)
 export const CHAT_SITE_KEYS = Object.fromEntries(SEND_DESTS.map((d) => [d.id, `site.chat.${d.id}`]));
 // The bar's script loads only when the panel needs it: if a blocker refuses it, saving still works
 let dontpanic = null;
@@ -23,8 +23,9 @@ const TEXT = {
         cookieTextNotice: "Text des Hinweises", cookieTextConsent: "Text der Einwilligung", lang_de: "Deutsch", lang_en: "Englisch",
         noteBlocked: "Die Vorschau konnte nicht laden: Der Browser oder ein Blocker hat das Skript der Leiste verhindert. Speichern geht trotzdem.",
         cookiePreview: "Vorschau zeigen", cookieSave: "Hinweis speichern", cookieSaved: "Cookie-Hinweis gespeichert", cookieEmpty: "Bitte beide Sprachen ausfüllen.",
-        chatTitle: "Wohin der Chat sendet", chatIntro: "Für die ganze Website: jeder Anfrage-Chat bietet die eingetragenen Wege an. Mindestens einer, sonst lässt sich ein Chat nicht veröffentlichen.",
-        chatSave: "Ziele speichern", chatSaved: "Ziele gespeichert", chatInvalid: (n) => `Ungültig: ${n}`,
+        chatTitle: "Anfrage-Chat", chatIntro: "Ein Chat für die ganze Website, unten rechts auf jeder Seite, solange er an ist. Er stellt ein paar Fragen und lässt die Besucher ihre Anfrage aus der eigenen App senden, über die Wege, die hier eingetragen sind.",
+        chatOn: "Chat auf jeder Seite zeigen", chatName: "Name, mit dem der Chat begrüßt (optional, z. B. Chris)", chatDests: "Wohin gesendet wird (mindestens einer)",
+        chatSave: "Chat speichern", chatSaved: "Chat gespeichert", chatInvalid: (n) => `Ungültig: ${n}`, chatNeedsDest: "Für einen Chat, der an ist, braucht es mindestens ein Ziel.",
         failed: "Speichern fehlgeschlagen", relogin: "Bitte melden Sie sich erneut an.",
     },
     en: {
@@ -35,8 +36,9 @@ const TEXT = {
         cookieTextNotice: "Notice text", cookieTextConsent: "Consent text", lang_de: "German", lang_en: "English",
         noteBlocked: "The preview could not load: the browser or a blocker stopped the bar's script. Saving still works.",
         cookiePreview: "Show preview", cookieSave: "Save notice", cookieSaved: "Cookie notice saved", cookieEmpty: "Please fill in both languages.",
-        chatTitle: "Where the chat sends", chatIntro: "For the whole site: every inquiry chat offers the ways set here. At least one, or a chat cannot be published.",
-        chatSave: "Save destinations", chatSaved: "Destinations saved", chatInvalid: (n) => `Not valid: ${n}`,
+        chatTitle: "Inquiry chat", chatIntro: "One chat for the whole site, at the bottom right of every page while it is on. It asks a few questions and lets visitors send their inquiry from their own app, through the ways set here.",
+        chatOn: "Show the chat on every page", chatName: "Name the chat greets with (optional, e.g. Chris)", chatDests: "Where it sends (at least one)",
+        chatSave: "Save chat", chatSaved: "Chat saved", chatInvalid: (n) => `Not valid: ${n}`, chatNeedsDest: "A chat that is on needs at least one destination.",
         failed: "Could not save", relogin: "Please log in again.",
     },
 };
@@ -64,6 +66,7 @@ export async function saveSiteBlocks(collab, rows, label) {
     if (error) throw error;
     rows.forEach((r) => setLocalContent(r.key, r.lang, r.content, "text"));
     collab.broadcast("content", { keys, color: collab.me.color });
+    document.dispatchEvent(new CustomEvent("kalq:site-settings", { detail: { keys } })); // e.g. the inquiry chat comes or goes
 }
 
 const failText = (error) => (error?.message === "relogin" ? t("relogin") : t("failed"));
@@ -134,6 +137,15 @@ export function cookiePanel(collab, { onPreview } = {}) {
 // The chat's send destinations: one field each (WhatsApp, Telegram, Threema, SMS, email), checked as typed
 export function chatPanel(collab) {
     const values = Object.fromEntries(SEND_DESTS.map((d) => [d.id, plainOf(CHAT_SITE_KEYS[d.id], "de")]));
+    let active = plainOf("site.chat.active", "de") === "on";
+    let name = plainOf("site.chat.name", "de");
+    const on = el("input", { type: "checkbox", id: "kalq-site-chat-active", className: "kalq-switch__input", checked: active });
+    on.setAttribute("role", "switch");
+    on.addEventListener("change", () => { active = on.checked; });
+    const onField = el("label", { className: "kalq-switch kalq-site__switch", htmlFor: "kalq-site-chat-active" }, on, el("span", { className: "kalq-switch__track", ariaHidden: "true" }), el("span", { textContent: t("chatOn") }));
+    const nameInput = el("input", { id: "kalq-site-chat-name", type: "text", className: "kalq-site__input", value: name, maxLength: 40, autocomplete: "off" });
+    nameInput.addEventListener("input", () => { name = nameInput.value; });
+    const nameField = el("label", { className: "kalq-site__field", htmlFor: "kalq-site-chat-name" }, el("span", { textContent: t("chatName") }), nameInput);
     const fields = SEND_DESTS.map((d) => {
         const id = `kalq-site-chat-${d.id}`;
         const input = el("input", { id, type: d.id === "email" ? "email" : "text", className: "kalq-site__input", value: values[d.id], placeholder: d.hint, autocomplete: "off" });
@@ -152,6 +164,10 @@ export function chatPanel(collab) {
     save.addEventListener("click", async () => {
         const bad = SEND_DESTS.filter((d) => values[d.id].trim() && !d.href(values[d.id].trim()));
         if (bad.length) return collab.toast(t("chatInvalid")(bad.map((d) => d.label).join(", ")), "error");
+        if (active && !SEND_DESTS.some((d) => values[d.id].trim())) {
+            collab.toast(t("chatNeedsDest"), "error");
+            return document.getElementById("kalq-site-chat-whatsapp")?.focus();
+        }
         save.disabled = true;
         try {
             // an emptied field is saved empty (the destination is gone); unchanged empty ones are left out
@@ -160,12 +176,15 @@ export function chatPanel(collab) {
                 if (!v && !plainOf(CHAT_SITE_KEYS[d.id], "de")) return [];
                 return ["de", "en"].map((lang) => ({ key: CHAT_SITE_KEYS[d.id], lang, content: v }));
             });
-            if (rows.length) await saveSiteBlocks(collab, rows, "Edited chat destinations");
+            const setting = (key, v, was) => (v === was ? [] : ["de", "en"].map((lang) => ({ key, lang, content: v })));
+            rows.push(...setting("site.chat.active", active ? "on" : "off", plainOf("site.chat.active", "de") || "off"), ...setting("site.chat.name", name.trim(), plainOf("site.chat.name", "de")));
+            if (rows.length) await saveSiteBlocks(collab, rows, "Edited the inquiry chat");
             collab.toast(t("chatSaved"));
         } catch (error) { console.error("chat destinations", error); collab.toast(failText(error), "error"); }
         finally { save.disabled = false; }
     });
     return el("section", { className: "kalq-site kalq-site--chat" },
         el("h3", { className: "kalq-site__title", textContent: t("chatTitle") }), el("p", { className: "kalq-site__intro", textContent: t("chatIntro") }),
+        onField, nameField, el("p", { className: "kalq-site__label", textContent: t("chatDests") }),
         el("div", { className: "kalq-site__grid" }, ...fields), el("div", { className: "kalq-site__actions" }, save));
 }

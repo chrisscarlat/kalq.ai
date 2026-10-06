@@ -193,7 +193,7 @@ certil.com redraws any style it does not have. The editor language is one consta
 
 ## 3. The builder's module set
 
-The page builder offers eight modules; every other module (the earlier library, the scroll story, contact, both
+The page builder offers eight modules (the inquiry chat is no module: see "The inquiry chat" below); every other module (the earlier library, the scroll story, contact, both
 plain testimonials) is deleted, recoverable from git before commit f87d847. Home's one live module, the central video
 (section `sb8z0z`), is kept unchanged; Platform, Company and the legal pages use built-in sections only.
 
@@ -204,7 +204,6 @@ plain testimonials) is deleted, recoverable from git before commit f87d847. Home
 | `content.image-text` | `image-left`, `image-right` | The picture bleeds to the top, bottom and its side of the page; the text beside it, vertically centred, left-aligned. |
 | `content.alternating` | `left-first`, `right-first` | Three picture and text pairs in a zigzag, the rows close together. |
 | `testimonials.stack` | `stack` | Harbor's stacking cards, centred, the next cards' edges peeking out below in their own colours; an optional h2 above, two editable h4 side labels at mid-height. Each card: top left the company's logo (SVG or image) or its name, nothing else; top right a larger portrait with little rounding; the quote (blockquote); name (bold), role, a company line ("at Amazon"); bottom right one optional link (a URL) drawn as its icon: LinkedIn, Wikipedia, else a globe. Per card a colour (picker) or a background picture behind a shade. The section pins and each scroll step flicks the top card away. 2–8 quotes. |
-| `interaction.inquiry` | `chat` | The inquiry chat, back (js/modules/chat.js, chatBehaviour.js, css/components/_chat.scss): questions to tap, sent from the visitor's own app. Its send destinations are site-wide (`site.chat.<id>`), set in the insert picker's Chat entry. |
 | `scroll.tether` | `tether` | Each card pins at the top and the next slides up over it, 20px lower. 2–6 cards. |
 | `scroll.horizontal` | `horizontal` | The section pins while its row of cards slides sideways until the last is in view. 2–12 cards. |
 
@@ -261,6 +260,17 @@ Colours & fonts, Menu and Navigation (`kalq:open-styles`).
 SVG logos (the testimonials' company logos) are uploaded as files but kept as sanitised SVG text in their
 block (`data-kalq-type="svg"`, lib/svg-sanitize.js on save, in the browser and in the server render): the storage
 bucket takes no SVG files.
+
+### The inquiry chat
+
+One chat for the whole site, floating at the bottom right of every page while it is on (`js/inquiry.js`,
+`css/components/_chat.scss`), modelled on scar.lat's Project Inquiry: a short, witty conversation in German and
+English that asks one thing at a time and waits for the answer (typing dots 0.6–1s after a 0.4s pause, each message
+rising in over 0.3s), collects name, company, role and a validated contact, and ends with an editable summary sent
+from the visitor's own app. Nothing is stored or sent by the site; what visitors type is shown as text, never markup.
+Reduced motion: no pause, no animation. Its settings are site blocks, set in the insert picker's Chat entry
+(`js/siteSettings.js`): `site.chat.active` ("on"/"off"), `site.chat.name`, `site.chat.<whatsapp|telegram|threema|sms|email>`;
+on needs at least one destination. `js/main.js` loads the script only while the chat is on.
 
 ### What certil.com will need to change
 

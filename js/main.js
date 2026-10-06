@@ -3,12 +3,18 @@ import { mouseMoveParallaxLine } from "./verticleLine.js";
 import { initHeader, refreshHeader } from "./header.js";
 import { logoAnimation } from "./logoAnimation.js";
 import { applyLanguage } from "./i18n.js";
-import { loadPageContent } from "./content.js";
+import { loadPageContent, storedEntry } from "./content.js";
 import { animateLines } from "./blocks.js";
 import { initVariants, refreshHeroMark } from "./variants.js";
 import { initHeroTone } from "./heroTone.js";
 import { initHeroReveal } from "./heroReveal.js";
 import { initModules } from "./moduleBehaviour.js";
+// The inquiry chat, floating on every page while it is on: loaded only then, and never in the way if a blocker stops it
+const inquiryOn = () => /on/.test(String(storedEntry("site.chat.active")?.de ?? storedEntry("site.chat.active")?.en ?? ""));
+const initInquiry = () => {
+    if (!inquiryOn() && !document.querySelector(".kalq-chat")) return; // off and not shown: nothing to load
+    import("./inquiry.js").then((m) => m.initChatWidget()).catch((e) => console.warn("inquiry", e.message));
+};
 
 // The magazine (the book of the gated pages) is loaded only on those pages: the public legal pages are seen without
 // the gate cookie, and js/magazine.js is gated (it carries the site's copy). Loaded once, on the first gated page.
@@ -32,7 +38,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     stayOnSamePage();
     // Counters, hover images and the video read their content, so they start after edited content is applied
     await loadPageContent();
-    [animateNumbering, expertiseHover, heroVideo, parallaxImg, animateLines, initModules, initMagazine].forEach(func => func());
+    [animateNumbering, expertiseHover, heroVideo, parallaxImg, animateLines, initModules, initMagazine, initInquiry].forEach(func => func());
+    // the inquiry chat follows its settings (the picker's Chat) and the language
+    ["kalq:content", "kalq:site-settings", "kalq:language"].forEach((ev) => document.addEventListener(ev, initInquiry));
     // The page builder changed the sections (an insert, a move, someone else's change): new modules start working,
     // the scroller and the scroll animations measure the page again
     document.addEventListener("kalq:layout", () => {

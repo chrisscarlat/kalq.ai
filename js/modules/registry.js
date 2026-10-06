@@ -83,12 +83,14 @@ export function renderModule(entry, ctx) {
 }
 
 // Required slots that are still placeholders (a section with any cannot go live)
-export function missingRequired(entry, page, store) {
+// mediaFilled(key): whether the shown style has a picture there (pictures are per style; js/styleMedia.js)
+export function missingRequired(entry, page, store, { mediaFilled = null } = {}) {
     const def = MODULES[entry.module];
     if (!def) return [];
     return [...Object.entries(def.slots).filter(([slot, s]) => {
         if (!s.required) return false;
         const e = store(`${page}.${entry.id}.${slot}`);
-        return !e || (s.kind === "media" ? !e.media : e.de == null && e.en == null);
+        if (s.kind === "media") return mediaFilled ? !mediaFilled(`${page}.${entry.id}.${slot}`) : !e?.media;
+        return !e || (e.de == null && e.en == null);
     }).map(([slot, s]) => s.label), ...(def.missing ? def.missing(entry, page, store) : [])]; // the module's own checks (e.g. the testimonials' quotes)
 }

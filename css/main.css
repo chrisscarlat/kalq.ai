@@ -1601,6 +1601,10 @@ footer #container .footer_bottom a {
     transition: none;
   }
 }
+.kalq-m-media.is-empty {
+  background: color-mix(in srgb, currentColor 9%, transparent);
+}
+
 /* The builder's module set (js/modules/final.js): the custom module, image and text, alternating rows, the stacking
    testimonials, the stacking pinned cards and the horizontal scroll cards; and what the site shares from the earlier
    library (the round arrow button, the underline link, text for screen readers, the editor's description field).

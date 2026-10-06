@@ -7,7 +7,8 @@ import { sanitizeSvg } from "../lib/svg-sanitize.js";
 import { EDITOR_LANG } from "./i18n.js";
 import { progressLine, showDone, uploadMedia } from "./upload.js";
 import { applyVariant, endPreview, getActive, loadVariants, logoNode } from "./variants.js";
-import { setLocalContent, storedEntry } from "./content.js";
+import { refreshStyleMedia, setLocalContent, storedEntry } from "./content.js";
+import { isStyleKey, styleKey } from "./styleMedia.js";
 import { footerPreview, menuPreview } from "./stylePreview.js";
 // The cookie bar's settings are in the insert picker's left menu now (js/siteSettings.js), with the chat's.
 
@@ -24,10 +25,10 @@ const TEXT = {
         footer: "Footer", footerClassic: "Klassisch", footerHarbor: "Kontakt und Links", footerWordmark: "Großer Schriftzug", footerGradient: "Bewegter Verlauf",
         heroMark: "Mitte im Hero (Start)", heroMarkLogo: "Logo", heroMarkLine: "Linie", heroLine: "Form der Linie",
         lines: { back: "Diagonal \\", forward: "Diagonal /", vertical: "Senkrecht", horizontal: "Waagerecht", circle: "Kreis" }, loadFailed: "Die Stile konnten nicht geladen werden.",
-        sitemap: "Seiten", replaceSlot: "Ersetzen", uploading: "Wird hochgeladen", spreadImages: "Auf alle Bildplätze übertragen", spreadHero: "Als Hero auf allen Seiten",
+        sitemap: "Seiten", replaceSlot: "Ersetzen", uploading: "Wird hochgeladen", spreadImages: "Auf alle Bildplätze übertragen", spreadHero: "Als Hero der Startseite",
         spreadDone: (n) => `Auf ${n} Plätze übertragen.`, addMedia: "+ Bild oder Video", resetSlot: "Zurück zum Standard",
         fillAll: "Alles füllen", fillHint: "Ein Video wird überall zum Hero, ein Bild füllt jeden Bildplatz. Danach einzeln ersetzbar.",
-        filledHero: (n) => `Video ist jetzt Hero auf ${n} Seiten.`, filledImages: (n) => `Bild in ${n} Bildplätzen.`,
+        filledHero: () => "Das Video ist jetzt der Hero der Startseite.", filledImages: (n) => `Bild in ${n} Bildplätzen.`,
         peek: "Seite ansehen", unsaved: "Nicht gespeichert",
         pages: { home: "Start", platform: "Plattform", company: "Unternehmen", impressum: "Impressum", datenschutz: "Datenschutz" }, preview: "Vorschau", endPreview: "Vorschau beenden", save: "Speichern", remove: "Löschen",
         history: "Versionen", restore: "Wiederherstellen", saved: "Gespeichert", failed: "Speichern fehlgeschlagen", confirmDelete: "Diese Variante löschen? Sie bleibt in den Versionen.",
@@ -52,10 +53,10 @@ const TEXT = {
         footer: "Footer", footerClassic: "Classic", footerHarbor: "Contact and links", footerWordmark: "Large wordmark", footerGradient: "Moving gradient",
         heroMark: "Centre of the hero (Home)", heroMarkLogo: "Logo", heroMarkLine: "Line", heroLine: "Line shape",
         lines: { back: "Diagonal \\", forward: "Diagonal /", vertical: "Vertical", horizontal: "Horizontal", circle: "Circle" }, loadFailed: "The styles could not be loaded.",
-        sitemap: "Pages", replaceSlot: "Replace", uploading: "Uploading", spreadImages: "Copy to all image slots", spreadHero: "Use as hero on every page",
+        sitemap: "Pages", replaceSlot: "Replace", uploading: "Uploading", spreadImages: "Copy to all image slots", spreadHero: "Use as Home's hero",
         spreadDone: (n) => `Copied to ${n} slots.`, addMedia: "+ Image or video", resetSlot: "Back to default",
         fillAll: "Fill all", fillHint: "A video becomes the hero everywhere, an image fills every image slot. Replace single slots afterwards.",
-        filledHero: (n) => `The video is now the hero on ${n} pages.`, filledImages: (n) => `Image in ${n} image slots.`,
+        filledHero: () => "The video is now Home's hero.", filledImages: (n) => `Image in ${n} image slots.`,
         peek: "View page", unsaved: "Not saved",
         pages: { home: "Home", platform: "Platform", company: "Company", impressum: "Legal notice", datenschutz: "Privacy" }, preview: "Preview", endPreview: "End preview", save: "Save", remove: "Delete",
         history: "Versions", restore: "Restore", saved: "Saved", failed: "Could not save", confirmDelete: "Delete this variant? It stays in the versions.",
@@ -322,7 +323,9 @@ function fontRow(part) {
 //=================================== Sitemap ===================================//
 // Every page side by side as a schematic in its real arrangement: hero on top, image slots as they sit on the
 // page (one full width, two or three side by side, list rows), text as grey lines. Slots are live thumbnails.
-const HERO_KEYS = ["home.hero.video", "platform.hero.media", "company.hero.media"];
+// Heroes: Home's hero (and every Hero card module's background, js/mediaSlots.js); Platform's and Company's top
+// pictures are ordinary images
+const HERO_KEYS = ["home.hero.video"];
 const CARDS = ["should-cost", "machine-intelligence", "supplier-fit", "manufacturing-cost", "rfq-award", "price-quote"]; // two columns, row by row
 const SITEMAP = [
     { page: "home", items: [{ hero: "home.hero.video" }, { text: 4 }, { list: CARDS.map((c) => `home.platform.${c}.image`) }, { text: 3 }] },
@@ -334,17 +337,34 @@ const SITEMAP = [
 const isVideo = (url) => /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url || "");
 const ACCEPT = "image/jpeg,image/png,image/webp,image/avif,image/gif,video/mp4,video/webm";
 
-// The home hero video is its own field, every other slot lives in images
-const slotUrl = (key) => (key === "home.hero.video" ? draft.hero_video : draft.images[key]) || "";
+// Pictures are the style's own blocks "<slot>@<style id>" (js/styleMedia.js), written at once (not with Save); until a
+// style has its own, it shows its old replacement (images / hero_video in its record) or the page's own
+const ownKey = (key) => styleKey(key, draft.id);
+const slotUrl = (key) => (ownKey(key) in defaults ? defaults[ownKey(key)] : (key === "home.hero.video" ? draft.hero_video : draft.images[key])) || "";
+const pending = new Map(); // slot → file, written by flushSlots
 function setSlot(key, url) {
-    if (key === "home.hero.video") draft.hero_video = url;
-    else if (url) draft.images[key] = url;
-    else delete draft.images[key];
-    dirty = true;
+    defaults[ownKey(key)] = url;
+    pending.set(key, url);
+}
+async function flushSlots(label) {
+    if (!pending.size) return;
+    const items = [...pending].map(([key, url]) => ({ key: ownKey(key), page: key.split(".")[0], type: isVideo(url) ? "video" : "image", content: url }));
+    pending.clear();
+    const { data } = await collab.sb.auth.getSession();
+    if (!data?.session) throw new Error("relogin");
+    const { error: blockError } = await collab.sb.from("blocks").upsert(items.map(({ key, page, type }) => ({ key, page, type })), { onConflict: "key", ignoreDuplicates: true });
+    if (blockError) throw blockError;
+    const batch = crypto.randomUUID();
+    const { error } = await collab.sb.from("revisions").insert(items.map(({ key, page, content }) => ({ block_key: key, page, lang: null, content, author_id: data.session.user.id,
+        batch_id: batch, batch_scope: "page", batch_label: `${label} (style ${draft.letter})` })));
+    if (error) throw error;
+    items.forEach(({ key, type, content }) => setLocalContent(key, null, content, type)); // this page shows it at once
+    collab.broadcast("content", { keys: items.map((i) => i.key), color: collab.me.color });
+    refreshStyleMedia(); // the page shows the shown style's new pictures
 }
 const inheritedUrl = (key) => defaults[key] || (key === "home.hero.video" ? DEFAULT_HERO : "");
-const imageKeys = () => [...new Set([...SITEMAP.flatMap((p) => p.items.flatMap((i) => i.list || i.grid || (i.full ? [i.full] : []))), ...slots.map((x) => x.key)])]
-    .filter((k) => !HERO_KEYS.includes(k));
+const imageKeys = () => [...new Set([...SITEMAP.flatMap((p) => p.items.flatMap((i) => [...(i.list || i.grid || (i.full ? [i.full] : [])), ...(i.hero ? [i.hero] : [])])), ...slots.map((x) => x.key)])]
+    .filter((k) => !HERO_KEYS.includes(k) && !isStyleKey(k));
 
 let dirty = false;
 let lastUpload = null; // { key, url }: offers to copy the newest upload to every slot of its kind
@@ -359,7 +379,7 @@ function spreadChip(key, url) {
         const keys = hero ? HERO_KEYS : imageKeys();
         keys.forEach((k) => setSlot(k, url));
         lastUpload = null;
-        changed();
+        flushSlots(hero ? "Used one file for every hero" : "Used one file for every image").catch((error) => collab.toast(errorText(error), "error"));
         render();
         collab.toast(t("spreadDone")(keys.length));
         document.querySelectorAll(".kalq-map__slot").forEach((slot) => { if (keys.includes(slot.dataset.key)) showDone(slot); });
@@ -388,7 +408,7 @@ function slotNode(key, shape) {
         if (own) {
             const reset = el("span", { className: "kalq-map__reset", textContent: "×", title: t("resetSlot") });
             reset.setAttribute("role", "button");
-            reset.addEventListener("click", (e) => { e.stopPropagation(); setSlot(key, ""); draw(); changed(); markDirty(); });
+            reset.addEventListener("click", (e) => { e.stopPropagation(); setSlot(key, ""); draw(); flushSlots(`Emptied ${key}`).catch((error) => collab.toast(errorText(error), "error")); });
             children.push(reset);
         }
         node.replaceChildren(...children);
@@ -400,8 +420,9 @@ function slotNode(key, shape) {
         try {
             const url = await upload(file, "media", progress.set);
             setSlot(key, url);
+            await flushSlots(`Edited ${key}`);
             lastUpload = { key, url };
-            draw(); changed(); markDirty();
+            draw();
             showDone(node);
             document.querySelectorAll(".kalq-map__spread").forEach((chip) => chip.remove());
             wrap.append(spreadChip(key, url));
@@ -453,7 +474,7 @@ function fillAllSection() {
             const url = await upload(file, "media", progress.set);
             if (isVideo(url)) { HERO_KEYS.forEach((k) => setSlot(k, url)); collab.toast(t("filledHero")(HERO_KEYS.length)); }
             else { const keys = imageKeys(); keys.forEach((k) => setSlot(k, url)); collab.toast(t("filledImages")(keys.length)); }
-            changed();
+            await flushSlots("Filled every slot of a kind");
             render();
         } catch (error) { collab.toast(errorText(error), "error"); }
         finally { progress.done(); btn.disabled = false; }

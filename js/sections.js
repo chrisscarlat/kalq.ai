@@ -5,7 +5,7 @@
 // batch, so it shows in Versions and can be restored. Undo and redo are such entries too: they write back the layout
 // before (or after) an action of this session; nothing is ever deleted. A removed section leaves the layout, its
 // blocks stay, so undo or a restore brings it back with them.
-import { applyStoredLayout, setLocalContent, storedEntry, storedKeys } from "./content.js";
+import { applyStoredLayout, setLocalContent, storedEntry, storedKeys, styleMediaOf } from "./content.js";
 import { EDITOR_LANG } from "./i18n.js";
 import { collectTemplates, copyKey, layoutKey, newSectionId, parseLayout, resolveLayout, sectionPrefix } from "./layout.js";
 import { MODULES, missingRequired } from "./modules/registry.js";
@@ -179,7 +179,7 @@ const setState = (id, state) => run(async () => {
     if (!entry || entry.state === state) return;
     // A section with required placeholders still empty cannot go live
     if (state === "live") {
-        const missing = missingRequired(entry, pageName(), storedEntry);
+        const missing = missingRequired(entry, pageName(), storedEntry, { mediaFilled: (k) => !!styleMediaOf(k) }); // the shown style's pictures
         if (missing.length) {
             // a missing piece set somewhere else (the chat's site-wide destinations): the message opens it
             const fix = missing.find((l) => l.fix)?.fix;
@@ -315,7 +315,7 @@ const undo = () => run(async () => {
     const page = pageName();
     const last = [...undoStack].reverse().find((a) => a.page === page);
     if (!last) return collab.toast(t("nothing"));
-    if (last.kind === "block") { // an edit: its text or picture back, the page not re-rendered
+    if (last.kind === "block" || last.kind === "batch") { // an edit (or one file used for many slots): back in place
         if (!(await blockStep(last, "undo"))) return collab.toast(t("changed"), "error");
         undoStack.splice(undoStack.lastIndexOf(last), 1);
         redoStack.push(last);
@@ -335,7 +335,7 @@ const redo = () => run(async () => {
     const page = pageName();
     const next = [...redoStack].reverse().find((a) => a.page === page);
     if (!next) return collab.toast(t("nothingRedo"));
-    if (next.kind === "block") {
+    if (next.kind === "block" || next.kind === "batch") {
         if (!(await blockStep(next, "redo"))) return collab.toast(t("changed"), "error");
         redoStack.splice(redoStack.lastIndexOf(next), 1);
         undoStack.push(next);

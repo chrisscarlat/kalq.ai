@@ -4020,3 +4020,32 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video))::after {
   height: 100%;
   object-fit: cover;
 }
+
+.kalq-use-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 5;
+  display: grid;
+  min-width: 13rem;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  background: rgba(16, 16, 16, 0.92);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+.kalq-use-menu button {
+  padding: 0.5rem 0.7rem;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: #fff;
+  font: 500 0.8rem/1.2 system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+.kalq-use-menu button:hover, .kalq-use-menu button:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+}

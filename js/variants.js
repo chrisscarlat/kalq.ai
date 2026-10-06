@@ -2,7 +2,7 @@
 // fonts, swaps the header logo and its images or hero video. No reload; :root and the header persist across Barba.
 // The choice is remembered in localStorage; the last applied look is also cached so the next page load starts in it.
 import { sanitizeSvg } from "../lib/svg-sanitize.js";
-import { applyDirect, setMediaOverride } from "./content.js";
+import { refreshStyleMedia, setMediaStyle } from "./content.js";
 
 const CHOICE_KEY = "kalq-variant";
 const MODE_KEY = "kalq-mode"; // "light" | "dark"
@@ -208,11 +208,9 @@ export function applyVariant(variant, { remember = false, preview = false } = {}
     root.classList.toggle("reveal-hero", reveal === "hero");
     root.classList.toggle("reveal-all", reveal === "all");
 
-    // Images and the hero video: the variant's replacement, otherwise the page's own
-    const images = { ...(variant.images || {}) };
-    if (variant.hero_video) images["home.hero.video"] = variant.hero_video;
-    setMediaOverride((key) => images[key] || null);
-    applyDirect(document);
+    // Pictures and videos are the style's own (js/styleMedia.js); modules are drawn again with them
+    setMediaStyle(variant);
+    refreshStyleMedia();
 
     if (preview) {
         previewing = variant;

@@ -176,3 +176,7 @@
         transition: none;
     }
 }
+
+// A picture slot this style has not filled yet (another style has): a plain grey box, the layout holds
+// (js/modules/kit.js mediaEl; pictures are per style, js/styleMedia.js)
+.kalq-m-media.is-empty { background: color-mix(in srgb, currentColor 9%, transparent); }

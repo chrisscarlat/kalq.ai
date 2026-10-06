@@ -15,7 +15,9 @@ export function textOf(ctx, slot) {
     return e[ctx.lang] ?? e.de ?? e.en ?? null;
 }
 
-export const mediaOf = (ctx, slot) => ctx.store.get(keyOf(ctx, slot))?.media || null;
+// A picture or video is the shown style's (js/styleMedia.js, ctx.mediaFor); without one (a test, an old caller) the
+// stored entry's
+export const mediaOf = (ctx, slot) => (ctx.mediaFor ? ctx.mediaFor(keyOf(ctx, slot)) : ctx.store.get(keyOf(ctx, slot))?.media) || null;
 
 // A slot's element: filled from its block, or for editors an empty placeholder with its label; for the public page
 // an empty slot is left out (null)
@@ -79,7 +81,14 @@ export const PLACEHOLDER_ART = '<svg class="kalq-ph-art" viewBox="0 0 160 100" p
 export function mediaEl(ctx, slot, className, { alt, label } = {}) {
     const url = mediaOf(ctx, slot);
     const def = ctx.def.slots[slot] || { label: label || { de: slot, en: slot } }; // a slot made per item brings its label
-    if (!url && !ctx.editor) return null;
+    if (!url && !ctx.editor) {
+        // a slot another style has filled but this one not yet: a plain grey box, so the layout holds; empty everywhere: out
+        if (!ctx.filled?.has(keyOf(ctx, slot))) return null;
+        const box = ctx.doc.createElement("div");
+        box.className = `${className} kalq-m-media is-empty`;
+        box.setAttribute("aria-hidden", "true");
+        return box;
+    }
     const box = ctx.doc.createElement("div");
     box.className = `${className} kalq-m-media`;
     let el;

@@ -5,6 +5,7 @@ import { applyLanguage, currentLang, setEditedContent } from "./i18n.js";
 import { renderBlock, sanitize } from "./blocks.js";
 import { applyLayout, layoutKey, parseLayout } from "./layout.js";
 import { renderModule } from "./modules/registry.js";
+import { filledSomewhere, mediaResolver } from "./styleMedia.js";
 import { PLACEHOLDER_ART } from "./modules/kit.js";
 import { sanitizeSvg } from "../lib/svg-sanitize.js";
 
@@ -87,14 +88,25 @@ export function setMedia(el, url) {
     }
 }
 
-// A style variant can replace any image or the hero video (js/variants.js); null keeps the page's own
-let mediaOverride = () => null;
-export const setMediaOverride = (fn) => { mediaOverride = fn; };
-export const styleMediaFor = (key) => mediaOverride(key); // the active style's replacement for a slot, or null
-// Edit mode shows the page's own media: what is edited and uploaded there, whatever the active style replaces
-let pageMediaOnly = false;
-export const setPageMediaOnly = (on) => { pageMediaOnly = !!on; };
-
+// Pictures and videos are the shown style's (js/styleMedia.js): js/variants.js says which style is shown. Everything
+// else on the page is shared by all styles.
+let mediaStyle = null;
+let mediaFor = mediaResolver((key) => store.get(key), null);
+export function setMediaStyle(style) {
+    mediaStyle = style ? { id: style.id, images: style.images || {}, hero_video: style.hero_video || "" } : null;
+    mediaFor = mediaResolver((key) => store.get(key), mediaStyle);
+}
+export const shownStyleId = () => mediaStyle?.id || null;
+let renderedStyle = null; // the style whose pictures the modules were last drawn with
+export const styleMediaOf = (key) => mediaFor(key); // what the shown style shows in a slot ("" for none)
+// after a style switch: the modules drawn again with its pictures, every picture slot set (only once the page's
+// content is here: before, the server's render stands)
+export function refreshStyleMedia() {
+    if (!store.size) return;
+    applyStoredLayout();
+    applyDirect(document);
+}
+const filled = () => filledSomewhere(store); // slots with a file in some style
 // What a media slot showed in the HTML, so switching back to a variant without a replacement restores it
 const defaultUrl = (el) => (isHolder(el) ? "" : el.getAttribute("data-image") ?? currentUrl(el) ?? "");
 
@@ -107,7 +119,9 @@ export function applyDirect(root) {
 
         if (type === "image" || type === "video") {
             if (el.dataset.kalqDefault === undefined) el.dataset.kalqDefault = defaultUrl(el);
-            const url = (!pageMediaOnly && mediaOverride(key)) || (entry && "media" in entry ? entry.media : el.dataset.kalqDefault);
+            // the shown style's file; a built-in slot never stored anywhere keeps the page's own (its HTML)
+            const stored = mediaFor(key);
+            const url = stored || (filled().has(key) ? "" : el.dataset.kalqDefault);
             setMedia(el, url || "");
         } else if (type === "svg") { // an SVG logo kept as text: drawn inline, sanitised again on the way in
             const clean = sanitizeSvg((entry && (entry.de ?? entry.en)) || "");
@@ -140,9 +154,12 @@ export function applyStoredLayout(container = currentContainer()) {
     const sig = (s) => s.dataset.section + (s.dataset.sectionState || "") + (s.dataset.sectionTheme || "") + (s.dataset.opts || "");
     const before = [...container.querySelectorAll(":scope > section[data-section]")].map(sig).join();
     const editor = !!container.querySelector(":scope > template.kalq-sections");
-    const modules = (entry, doc) => renderModule(entry, { doc, page, store, lang: currentLang(), editor });
+    const modules = (entry, doc) => renderModule(entry, { doc, page, store, lang: currentLang(), editor, mediaFor, filled: filled(), mediaStyle: mediaStyle?.id || "" });
+    // another style shown: the modules are drawn again with its pictures
+    const restyle = renderedStyle !== (mediaStyle?.id || "");
+    renderedStyle = mediaStyle?.id || "";
     const layout = applyLayout({ doc: document, container, page, stored: parseLayout(store.get(layoutKey(page))?.media), editor,
-        renderModule: modules, fresh: !editor });
+        renderModule: modules, fresh: !editor || restyle });
     const after = [...container.querySelectorAll(":scope > section[data-section]")].map(sig).join();
     if (before !== after) document.dispatchEvent(new CustomEvent("kalq:layout", { detail: { page, layout } }));
     return layout;

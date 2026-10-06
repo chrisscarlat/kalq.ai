@@ -2,7 +2,8 @@
 // Saves go straight to Supabase with the editor's own login (RLS: editors only, as themselves) and are live for
 // everyone at once: the page channel only says "this block changed", every browser then reloads it from the server.
 // While someone edits a block, the others see it locked (see setLock in collab.js).
-import { applyDirect, setLocalContent, setPageMediaOnly, storedEntry, styleMediaFor } from "./content.js";
+import { applyDirect, setLocalContent, shownStyleId, storedEntry, styleMediaOf } from "./content.js";
+import { styleKey } from "./styleMedia.js";
 import { recordUndo } from "./sections.js";
 import { getActive } from "./variants.js";
 import { editableHtml, renderBlock, serializeBlock } from "./blocks.js";
@@ -19,14 +20,18 @@ const TEXT = {
     de: {
         edit: "Bearbeiten (E)", saved: "Gespeichert", failed: "Speichern fehlgeschlagen",
         locked: (n) => `${n} bearbeitet gerade`, relogin: "Bitte melden Sie sich erneut an, um zu bearbeiten.",
-        styleMedia: (l) => `Stil ${l} zeigt hier ein eigenes Bild`, replace: "Ersetzen", add: "Bild oder Video hinzufügen", remove: "Entfernen", uploading: "Wird hochgeladen", tooLarge: "Die Datei ist größer als 50 MB.",
+        forStyle: (l) => `Stil ${l}`, useFor: "Verwenden für …", useOnly: "Nur dieses Feld", useHeroes: "Alle Heros", useImages: "Alle Bilder außer Heros", useAll: "Alles",
+        useConfirm: (n, l) => `${n} Felder in Stil ${l} mit dieser Datei füllen?`, useNone: "Hier ist noch keine Datei.", useDone: (n) => `${n} Felder gefüllt.`, useNothing: "Keine weiteren Felder dieser Art.",
+        replace: "Ersetzen", add: "Bild oder Video hinzufügen", remove: "Entfernen", uploading: "Wird hochgeladen", tooLarge: "Die Datei ist größer als 50 MB.",
         empty: "Leerer Text wird nicht gespeichert.", marquee: "Laufschrift",
         svgAdd: "SVG-Logo hochladen", svgBad: "Diese Datei ist kein verwendbares SVG.",
     },
     en: {
         edit: "Edit (E)", saved: "Saved", failed: "Could not save",
         locked: (n) => `${n} is editing`, relogin: "Please log in again to edit.",
-        styleMedia: (l) => `Style ${l} shows its own media here`, replace: "Replace", add: "Add image or video", remove: "Remove", uploading: "Uploading", tooLarge: "The file is larger than 50 MB.",
+        forStyle: (l) => `Style ${l}`, useFor: "Use for …", useOnly: "This slot only", useHeroes: "All heroes", useImages: "All images except heroes", useAll: "Everything",
+        useConfirm: (n, l) => `Fill ${n} slots in style ${l} with this file?`, useNone: "There is no file here yet.", useDone: (n) => `${n} slots filled.`, useNothing: "No other slots of this kind.",
+        replace: "Replace", add: "Add image or video", remove: "Remove", uploading: "Uploading", tooLarge: "The file is larger than 50 MB.",
         empty: "Empty text is not saved.", marquee: "Marquee text",
         svgAdd: "Upload SVG logo", svgBad: "This file is not a usable SVG.",
     },
@@ -87,6 +92,14 @@ async function save(key, type, langs, content, { undo = true, before = null, bat
 // Undo or redo of an edit (js/sections.js): only while the block still holds what that edit left; one new revision
 // per language with the other value, shown at once. false: the block changed since (someone else, or later).
 export async function restoreBlock(step, dir) {
+    if (step.kind === "batch") { // every slot as that fill left it, then all of them back
+        const fits = (st) => { const now = storedEntry(st.key)?.media ?? ""; return now === (dir === "undo" ? st.after : st.before.media); };
+        if (!step.steps.every(fits)) return false;
+        await saveMany(step.steps.map((st) => ({ key: st.key, type: st.type, content: dir === "undo" ? st.before.media : st.after })), `${dir === "undo" ? "Undo" : "Redo"}: ${step.label}`, { undo: false });
+        applyDirect(document);
+        replaceButtons();
+        return true;
+    }
     const now = storedEntry(step.key);
     const current = (lang) => (lang == null ? now?.media ?? "" : now?.[lang] ?? "");
     const target = (lang) => (dir === "undo" ? step.before[lang ?? "media"] : step.after);
@@ -211,7 +224,9 @@ async function onSettingChange(e) {
 // The slot element can be swapped (image <-> video), so always look it up by key
 const slot = (key) => document.querySelector(`[data-kalq-key="${CSS.escape(key)}"]`);
 // what a media slot shows now (for undo): its stored file, else the page's own (the HTML's)
-const shownUrl = (key) => { const n = slot(key); return storedEntry(key)?.media ?? n?.dataset.kalqDefault ?? n?.getAttribute("src") ?? n?.querySelector("video, img")?.getAttribute("src") ?? ""; };
+const shownUrl = (key) => { const n = slot(key); return styleMediaOf(key) || n?.dataset.kalqDefault || n?.getAttribute("src") || n?.querySelector("video, img")?.getAttribute("src") || ""; };
+// a picture or video is written for the shown style (js/styleMedia.js): "<slot>@<style id>"
+const mediaKey = (key) => (shownStyleId() ? styleKey(key, shownStyleId()) : key);
 const isHolderNode = (node) => node.classList.contains("hero_media") || node.classList.contains("kalq-media-slot");
 const isEmptySlot = (node) => isHolderNode(node) && !node.querySelector(":scope > img, :scope > video");
 
@@ -235,15 +250,18 @@ function replaceButtons() {
             tools.append(btn);
         };
         add(isEmptySlot(node) ? t("add") : t("replace"), "kalq-replace", (btn) => pickFile(key, btn));
-        // the active style shows its own image or video here (outside edit mode): say which, so nobody wonders
-        const style = styleMediaFor(key) ? getActive() : null;
+        // pictures are the shown style's own: say which style this slot is being filled for
+        const style = getActive();
         if (style) {
             const note = document.createElement("span");
             note.className = "kalq-media-style";
-            note.textContent = t("styleMedia")(style.letter);
+            note.textContent = t("forStyle")(style.letter);
             tools.append(note);
         }
-        if (isHolderNode(node) && !isEmptySlot(node)) add(t("remove"), "kalq-replace kalq-remove", () => setSlot(key, ""));
+        if (!isEmptySlot(node) && styleMediaOf(key)) {
+            add(t("remove"), "kalq-replace kalq-remove", () => setSlot(key, ""));
+            add(t("useFor"), "kalq-replace kalq-use", (btn) => useMenu(key, btn));
+        }
         host.append(tools);
     });
     // SVG logos (a module's data-kalq-type="svg" box): uploaded as a file, kept as sanitised SVG text in the block
@@ -298,13 +316,70 @@ async function setSlot(key, url) {
     if (locks.has(key)) return collab.toast(t("locked")(locks.get(key).name), "error");
     const node = slot(key);
     try {
-        await save(key, typeOf(node), [null], url, { before: shownUrl(key) });
+        await save(mediaKey(key), typeOf(node), [null], url, { before: shownUrl(key) });
         applyDirect(document);
         replaceButtons();
         collab.toast(t("saved"));
     } catch (error) {
         fail(error);
     }
+}
+
+// "Use for": this slot's file also in other slots, within the shown style only: all heroes (Home's and every Hero
+// card's background; a hero without a background is not one of them), all images except heroes, or everything.
+// People's and brands' pictures (portraits, logos) are never filled. One batch, one step of undo.
+function useMenu(key, btn) {
+    document.querySelector(".kalq-use-menu")?.remove();
+    const menu = document.createElement("div");
+    menu.className = "kalq-use-menu";
+    menu.setAttribute("role", "menu");
+    [["only", t("useOnly")], ["heroes", t("useHeroes")], ["images", t("useImages")], ["all", t("useAll")]].forEach(([target, text]) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.setAttribute("role", "menuitem");
+        b.dataset.target = target;
+        b.textContent = text;
+        b.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); menu.remove(); if (target !== "only") useFor(key, target); });
+        menu.append(b);
+    });
+    btn.closest(".kalq-media-tools").append(menu);
+    menu.querySelector("button").focus();
+    const off = (e) => { if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener("pointerdown", off, true); } };
+    document.addEventListener("pointerdown", off, true);
+}
+
+async function useFor(key, target) {
+    const url = styleMediaOf(key);
+    if (!url) return collab.toast(t("useNone"), "error");
+    const style = getActive();
+    const { siteMediaSlots, targetSlots } = await import("./mediaSlots.js");
+    const keys = targetSlots(await siteMediaSlots(), target).map((s) => s.key).filter((k) => k !== key && styleMediaOf(k) !== url);
+    if (!keys.length) return collab.toast(t("useNothing"));
+    if (!window.confirm(t("useConfirm")(keys.length, style?.letter || ""))) return;
+    try {
+        await saveMany(keys.map((k) => ({ key: mediaKey(k), type: /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url) ? "video" : "image", content: url, before: styleMediaOf(k) })), `Used one file for ${keys.length} slots`);
+        applyDirect(document);
+        replaceButtons();
+        collab.toast(t("useDone")(keys.length));
+    } catch (error) {
+        fail(error);
+    }
+}
+
+// Several picture slots in one batch (one version, one step of undo)
+async function saveMany(items, batchLabel, { undo = true } = {}) {
+    const session = await editorSession();
+    if (!session) throw new Error("relogin");
+    const blocks = items.map(({ key, type }) => ({ key, page: pageOf(key), type }));
+    const { error: blockError } = await collab.sb.from("blocks").upsert(blocks, { onConflict: "key", ignoreDuplicates: true });
+    if (blockError) throw blockError;
+    const batch = crypto.randomUUID();
+    const rows = items.map(({ key, content }) => ({ block_key: key, page: pageOf(key), lang: null, content, author_id: session.user.id, batch_id: batch, batch_scope: "page", batch_label: batchLabel }));
+    const { error } = await collab.sb.from("revisions").insert(rows);
+    if (error) throw error;
+    items.forEach(({ key, type, content }) => setLocalContent(key, null, content, type));
+    collab.broadcast("content", { keys: items.map((i) => i.key), color: collab.me.color });
+    if (undo) recordUndo({ kind: "batch", label: batchLabel, steps: items.map(({ key, type, content, before }) => ({ kind: "block", key, type, langs: [null], before: { media: before || "" }, after: content, label: label(key) })) });
 }
 
 function pickFile(key, btn) {
@@ -336,8 +411,9 @@ function pickFile(key, btn) {
                 progress.set(p);
                 btn.textContent = `${t("uploading")} ${Math.round(p * 100)} %`;
             });
-            await save(key, typeOf(slot(key)), [null], url, { before: shownUrl(key) });
+            await save(mediaKey(key), typeOf(slot(key)), [null], url, { before: shownUrl(key) });
             applyDirect(document);
+            replaceButtons();
             showDone(host);
             collab.toast(t("saved"));
         } catch (error) {
@@ -356,8 +432,6 @@ function setMode(next) {
     on = next;
     if (on) collab.setActiveMode("edit");
     document.body.classList.toggle("kalq-edit", on);
-    // editing shows the page's own images and videos (an upload shows at once); outside it the active style's again
-    setPageMediaOnly(on);
     applyDirect(document);
     button.setAttribute("aria-pressed", on);
     if (!on) stopEditing(true);

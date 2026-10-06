@@ -414,6 +414,7 @@ function testimonialCard(ctx, it, k, count, pos) {
         const svg = svgEl(ctx, `k_${it.id}`, "kalq-f-ts__mark is-logo", { label: L(`${nd}Logo als SVG`, `${n}logo as SVG`), name: company || null });
         const hasSvg = !!svg?.querySelector("svg");
         const img = hasSvg ? null : mediaEl(ctx, `m_${it.id}`, "kalq-f-ts__mark is-logo is-image", { alt: company, label: L(`${nd}Logo als Bild`, `${n}logo as image`) });
+        img?.querySelector("[data-kalq-key]")?.setAttribute("data-kalq-identity", ""); // a brand's, never filled from another slot
         if (!ctx.editor) mark = hasSvg ? svg : img;
         else mark = append(el(ctx, "div", "kalq-f-ts__mark-edit"), hasSvg ? svg : append(el(ctx, "div", "kalq-f-ts__mark-choices"), svg, img),
             slotEl(ctx, `b_${it.id}`, "span", { className: "kalq-m-alt-field", label: L(`${nd}Markenname (Alternativtext des Logos)`, `${n}brand name (the logo's alt text)`) }));
@@ -421,6 +422,7 @@ function testimonialCard(ctx, it, k, count, pos) {
     if (!mark) mark = slotEl(ctx, `b_${it.id}`, "span", { className: "kalq-f-ts__mark is-name", label: L(`${nd}Markenname`, `${n}brand name`) });
     // top right: the portrait
     const portrait = mediaEl(ctx, `p_${it.id}`, "kalq-f-ts__photo", { alt: "", label: L(`${nd}Porträt`, `${n}portrait`) });
+    portrait?.querySelector("[data-kalq-key]")?.setAttribute("data-kalq-identity", ""); // a person's, never filled from another slot
     portrait?.setAttribute("aria-hidden", "true"); // decorative: the name says who
     const who = plain(textOf(ctx, `n_${it.id}`));
     append(card, append(el(ctx, "div", "kalq-f-ts__top"), mark, portrait), quote,

@@ -6,6 +6,8 @@ import { sanitizeSvg } from "../lib/svg-sanitize.js";
 import { EDITOR_LANG } from "./i18n.js";
 import { logoAnimation } from "./logoAnimation.js";
 import { getVariants, loadVariants } from "./variants.js";
+import { storedEntry } from "./content.js";
+import { mediaResolver } from "./styleMedia.js";
 
 const HOLD_MS = 3000;
 const DEFAULT_VIDEO = "assets/video-hero-6mb-low.mp4";
@@ -92,7 +94,7 @@ function card(variant, active) {
     node.style.setProperty("--v-bg", c.dark || "#101010");
     node.style.setProperty("--v-text", c.light || "#fff");
     node.style.setProperty("--v-accent", c.accent || "#3b82f6");
-    const video = el("video", { className: "kalq-viewer__video", src: variant.hero_video || DEFAULT_VIDEO, muted: true, loop: true, playsInline: true, autoplay: active });
+    const video = el("video", { className: "kalq-viewer__video", src: mediaResolver((k) => storedEntry(k), variant)("home.hero.video") || DEFAULT_VIDEO, muted: true, loop: true, playsInline: true, autoplay: active });
     video.setAttribute("aria-hidden", "true");
     const headline = el("h3", { className: "kalq-viewer__headline", textContent: t("headline") });
     headline.style.fontFamily = fontOf(variant.fonts?.heading);

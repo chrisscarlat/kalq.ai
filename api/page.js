@@ -27,7 +27,9 @@ async function defaultLook() {
     const variants = rows.filter((r) => r.block_key.startsWith("variant.")).map((r) => { try { return JSON.parse(r.content); } catch { return null; } })
         .filter((v) => v && v.status === "published");
     const v = variants.find((x) => x.is_default) || variants.sort((a, b) => (a.sort ?? 50) - (b.sort ?? 50) || String(a.letter).localeCompare(String(b.letter)))[0];
-    return v ? { menu_style: v.menu_style, footer_style: v.footer_style, footer_wordmark: v.footer_wordmark, footer_gradient: v.footer_gradient } : null;
+    // its look, and what the page's pictures are drawn from (pictures are per style: js/styleMedia.js)
+    return v ? { id: v.id, menu_style: v.menu_style, footer_style: v.footer_style, footer_wordmark: v.footer_wordmark, footer_gradient: v.footer_gradient,
+        images: v.images || {}, hero_video: v.hero_video || "" } : null;
 }
 
 // The gate, with the cookie bar's stored mode and texts (the site blocks); as built if Supabase is not reachable

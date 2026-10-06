@@ -318,7 +318,7 @@ function stage(item) {
         row.append(fig);
         return f;
     });
-    const GAP = 12, ROW_H = 64; // a strip: the devices readable, the cards keep their room
+    const GAP = 16, ROW_H = 130; // the devices large enough to see the module on each screen
     const fit = () => {
         const room = row.clientWidth; // beside the label
         if (room <= 0) return;

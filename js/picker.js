@@ -42,7 +42,7 @@ export const DEVICE_GROUPS = [
         { id: "iphone-duo-horizontal", w: 890, h: 626, dpr: 3, body: [914, 650], radius: 40, segments: "stacked", gap: 0, derived: true, de: "iPhone Duo, waagerecht", en: "iPhone Duo horizontal" },
     ] },
     { id: "desktop", de: "Desktop", en: "Desktop", devices: [
-        { id: "macbook-air-13", w: 1470, h: 956, dpr: 2, kind: "laptop", bezel: [24, 30, 24, 24], radius: 12, de: "MacBook Air 13″", en: "MacBook Air 13″" },
+        { id: "macbook-pro-14", w: 1512, h: 982, dpr: 2, kind: "laptop", bezel: [24, 30, 24, 24], radius: 12, de: "MacBook Pro 14″", en: "MacBook Pro 14″" },
         { id: "studio-display-27", w: 2560, h: 1440, dpr: 2, kind: "display", bezel: [52, 52, 52, 52], radius: 0, de: "Studio Display 27″", en: "Studio Display 27″" },
     ] },
 ];
@@ -69,7 +69,16 @@ const SITE_IDS = new Set(SITE_ITEMS.map((x) => x.id));
 //=================================== Wireframes ===================================//
 // Images and videos as blue rectangles, text as thin blue lines, headings thicker, buttons as small pills
 const BLUE = "#3B82F6";
-function wireframe(wire, { large = false } = {}) {
+// A scroll module's card shows its motion in a loop (collab.scss .kalq-wf-*, still under reduced motion)
+const MOTION = {
+    // three cards on a pile, the top one flicks away
+    stack: () => [3, 2, 1].map((k) => `<g class="kalq-wf-card is-${k}"><rect x="${32 - k * 1.5}" y="${14 + k * 3}" width="${36 + k * 3}" height="30" rx="2.5" fill="${BLUE}" fill-opacity="${0.35 + 0.2 * (3 - k)}"/><rect x="${36}" y="${20 + k * 3}" width="22" height="1.6" rx=".8" fill="#fff"/><rect x="${36}" y="${24 + k * 3}" width="18" height="1.2" rx=".6" fill="#fff" fill-opacity=".8"/></g>`).join(""),
+    // cards slide up one over the other, each a little lower
+    tether: () => [0, 1, 2].map((k) => `<g class="kalq-wf-band is-${k}"><rect x="6" y="${8 + k * 4}" width="88" height="46" rx="3" fill="${BLUE}" fill-opacity="${0.45 + k * 0.2}"/><rect x="10" y="${15 + k * 4}" width="26" height="2" rx="1" fill="#fff"/><rect x="58" y="${13 + k * 4}" width="30" height="20" rx="1.5" fill="#fff" fill-opacity=".35"/></g>`).join(""),
+    // a row of cards slides sideways
+    slide: () => `<g class="kalq-wf-row">${[6, 34, 62, 90, 118, 146].map((x) => `<rect x="${x}" y="22" width="24" height="22" rx="1.5" fill="${BLUE}" fill-opacity=".25"/><rect x="${x}" y="47" width="14" height="2" rx="1" fill="${BLUE}"/><rect x="${x}" y="51" width="20" height="1.2" rx=".6" fill="${BLUE}" fill-opacity=".55"/>`).join("")}</g>`,
+};
+function wireframe(wire, { large = false, motion = null } = {}) {
     const parts = wire.map(([kind, x, y, w, h, opt]) => {
         const light = [h, opt].includes("light");
         const fill = light ? "#fff" : BLUE;
@@ -86,7 +95,8 @@ function wireframe(wire, { large = false } = {}) {
             default: return "";
         }
     }).join("");
-    return `<svg viewBox="0 0 100 60" ${large ? "" : 'preserveAspectRatio="xMidYMid meet"'} aria-hidden="true" focusable="false"><rect width="100" height="60" fill="#fff"/>${parts}</svg>`;
+    const moving = motion && MOTION[motion] ? MOTION[motion]() : "";
+    return `<svg viewBox="0 0 100 60" ${large ? "" : 'preserveAspectRatio="xMidYMid meet"'} aria-hidden="true" focusable="false"><rect width="100" height="60" fill="#fff"/>${parts}${moving}</svg>`;
 }
 
 // The one image placeholder, the same motif everywhere an image can go (js/modules/kit.js PLACEHOLDER_ART): here in the
@@ -208,7 +218,7 @@ function draw() {
             option.setAttribute("role", "option");
             option.setAttribute("aria-selected", i === state.index);
             option.tabIndex = i === state.index ? 0 : -1;
-            option.innerHTML = wireframe(item.v.wire);
+            option.innerHTML = wireframe(item.v.wire, { motion: item.v.motion });
             option.append(el("span", { className: "kalq-picker__name", textContent: item.v.name[L] }), el("span", { className: "kalq-picker__module", textContent: item.def.name[L] }));
             if (i === state.index) { // the selected card carries its Insert (out of the tab order: Enter inserts it)
                 const go = el("button", { type: "button", className: "kalq-picker__insert", textContent: t("insert"), tabIndex: -1 });
@@ -220,6 +230,7 @@ function draw() {
             return option;
         }));
         grid.setAttribute("aria-activedescendant", `kalq-pick-${state.index}`);
+        grid.style.setProperty("--cols", String(Math.min(5, Math.max(1, Math.ceil(list.length / 2))))); // the cards in two rows
     }
     if (siteItem && state.category === "chat" && state.collab) browse.append(el("div", { className: "kalq-picker__settings" }, chatPanel(state.collab)));
     detail(list[state.index]);
@@ -301,19 +312,20 @@ function stage(item) {
     const row = el("div", { className: "kalq-picker__row" });
     const frames = DEVICES.map((d) => {
         const f = deviceFrame(item, d);
-        row.append(el("figure", { className: "kalq-picker__dev" }, f.holder, el("figcaption", { className: "kalq-picker__device-name", textContent: d[L] })));
+        const fig = el("figure", { className: "kalq-picker__dev", title: d[L] }, f.holder, el("figcaption", { className: "kalq-picker__device-name", textContent: d[L] }));
+        row.append(fig);
         return f;
     });
-    const GAP = 14, ROW_H = 100; // a slim strip: the devices small, the cards get the room
+    const GAP = 10, ROW_H = 34; // a slim strip: the devices small, the cards get the room
     const fit = () => {
-        const room = box.clientWidth - 48;
+        const room = row.clientWidth; // beside the label
         if (room <= 0) return;
         const sumW = frames.reduce((a, f) => a + f.g.w, 0), maxH = Math.max(...frames.map((f) => f.g.h));
         const k = Math.min((room - GAP * (frames.length - 1)) / sumW, ROW_H / maxH);
         frames.forEach(({ holder, body, g }) => {
             body.style.transform = `scale(${k})`;
-            holder.style.width = `${Math.round(g.w * k)}px`;
-            holder.style.height = `${Math.round(g.h * k)}px`;
+            holder.style.width = `${g.w * k}px`; // not rounded: at this size a pixel is a model's difference
+            holder.style.height = `${g.h * k}px`;
         });
     };
     box.append(el("p", { className: "kalq-picker__label", textContent: t("devices") }), row);
@@ -383,12 +395,21 @@ function close() {
     back?.focus?.();
 }
 
-export function openPicker({ onInsert, collab = null, category = ALL_CATEGORY.id }) {
+// focus "chat-destinations": open on Chat, its send destinations in view with the first field focused (a publish
+// blocked for want of one links here)
+export function openPicker({ onInsert, collab = null, category = ALL_CATEGORY.id, focus = null }) {
     if (!root) build();
+    if (focus === "chat-destinations") category = "chat";
     state = { onInsert, collab, category, query: "", index: 0, returnFocus: document.activeElement };
     root.querySelector(".kalq-picker__search").value = "";
     draw();
     root.classList.add("is-open");
     document.documentElement.classList.add("kalq-scroll-lock"); // the page stays put underneath (js/collab.js)
+    if (focus === "chat-destinations") {
+        const panel = root.querySelector(".kalq-site--chat");
+        panel?.scrollIntoView({ block: "start" });
+        (panel?.querySelector("input") || root.querySelector(".kalq-picker__search")).focus({ preventScroll: true });
+        return;
+    }
     root.querySelector(".kalq-picker__search").focus();
 }

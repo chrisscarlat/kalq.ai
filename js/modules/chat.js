@@ -251,7 +251,7 @@ export const CHAT = {
             const out = [];
             const has = (slot) => { const e = get(`${page}.${entry.id}.${slot}`); return e && (e.de || e.en); };
             if (!chatItems(entry).some((it) => has(`q_${it.id}`))) out.push(L("eine Frage", "a question"));
-            if (!SEND_DESTS.some((d) => chatDest(get, d))) out.push(L("ein Ziel zum Senden für die Website (Einfügen-Fenster: Chat)", "a send destination for the site (insert panel: Chat)"));
+            if (!SEND_DESTS.some((d) => chatDest(get, d))) out.push({ ...L("ein Ziel zum Senden für die Website (Einfügen-Fenster: Chat)", "a send destination for the site (insert panel: Chat)"), fix: "chat-destinations" }); // the message links there
             return out;
         },
         magazine: {

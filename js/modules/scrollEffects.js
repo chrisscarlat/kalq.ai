@@ -5,6 +5,7 @@
 //   stack       the testimonials lie on a pile; the section pins and each scroll step flicks the top card away
 //   tether      each card pins at the top and the next slides up over it, 20px lower, an edge of each in view
 //   horizontal  the section pins while its row of cards slides sideways until the last is in view
+//   parallax    the hero card's picture drifts gently against the scroll
 const still = window.matchMedia("(prefers-reduced-motion: reduce)");
 const spanned = window.matchMedia("(horizontal-viewport-segments: 2)");
 const live = new Set();
@@ -79,7 +80,18 @@ function horizontal(sec) {
     return () => { track.removeEventListener("focusin", onFocus); st.kill(true); tween.kill(); window.gsap.set(track, { clearProps: "transform" }); };
 }
 
-const EFFECTS = { stack, tether, horizontal };
+//=================================== Parallax (hero card) ===================================//
+// The picture behind the card drifts a little slower than the page while the card passes the screen
+function parallax(sec) {
+    const media = sec.querySelector(".kalq-f-hc__media");
+    if (!media) return null;
+    sec.classList.add("is-armed");
+    const tween = window.gsap.fromTo(media, { yPercent: -7 }, { yPercent: 7, ease: "none" });
+    const st = window.ScrollTrigger.create({ trigger: sec, start: "top bottom", end: "bottom top", animation: tween, scrub: true, invalidateOnRefresh: true });
+    return () => { st.kill(); tween.kill(); window.gsap.set(media, { clearProps: "transform" }); };
+}
+
+const EFFECTS = { stack, tether, horizontal, parallax };
 
 //=================================== Arming ===================================//
 function sweep() {

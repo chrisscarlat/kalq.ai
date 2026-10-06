@@ -180,7 +180,12 @@ const setState = (id, state) => run(async () => {
     // A section with required placeholders still empty cannot go live
     if (state === "live") {
         const missing = missingRequired(entry, pageName(), storedEntry);
-        if (missing.length) return collab.toast(t("missing")(missing.map((l) => l[lang()]).join(", ")), "error");
+        if (missing.length) {
+            // a missing piece set somewhere else (the chat's site-wide destinations): the message opens it
+            const fix = missing.find((l) => l.fix)?.fix;
+            return collab.toast(t("missing")(missing.map((l) => l[lang()]).join(", ")), "error",
+                fix ? { onClick: () => openPicker(layout.sections.indexOf(entry) + 1, { focus: fix }) } : {});
+        }
     }
     entry.state = state;
     // A hero going live replaces the hero it was put above (one step: undo brings the old one back)
@@ -336,9 +341,10 @@ export const insertModule = (index, module, version) => run(async () => {
     reveal(entry.id);
 });
 
-async function openPicker(index) {
+// focus: open on a site-wide setting instead of the modules (e.g. "chat-destinations")
+async function openPicker(index, { focus } = {}) {
     const { openPicker: open } = await import("./picker.js");
-    open({ onInsert: (module, version) => insertModule(index, module, version), collab });
+    open({ onInsert: (module, version) => insertModule(index, module, version), collab, focus });
 }
 
 // Scroll the page so a section is in view, its bar clear below the header

@@ -656,6 +656,96 @@ div.kalq-f-ts__social { width: auto; height: auto; display: flex; gap: 0.4rem; a
     .kalq-f-hs.is-armed .kalq-f-hs__media { aspect-ratio: 4 / 5; }
 }
 
+//=================================== 7. Hero card ===================================//
+// A large rounded card, set in from the page's edges by a small margin; its picture fills it (a little taller than
+// the card, so the parallax never shows an edge); the label pill, title and button centred over a soft shade
+.kalq-m.kalq-f-hc { padding: clamp(0.6rem, 1.4cqi, 1.25rem); }
+
+.kalq-f-hc__card {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    min-height: min(86svh, 60rem);
+    overflow: hidden;
+    border-radius: clamp(18px, 2.6cqi, 36px);
+    background: var(--kalq-dark, #{$dark});
+    color: #fff;
+}
+
+.kalq-f-hc__media {
+    position: absolute;
+    inset: -8% 0;
+    z-index: -2;
+    border-radius: 0;
+    will-change: transform;
+}
+
+.kalq-f-hc__shade {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(120% 90% at 50% 50%, rgba(0, 0, 0, 0.55), #000);
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.kalq-f-hc__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(1rem, 2cqi, 1.6rem);
+    max-width: min(62rem, 100%);
+    padding: clamp(2rem, 5cqi, 4rem) clamp(1rem, 4cqi, 3rem);
+    text-align: center;
+}
+
+// the small label in a glass pill: translucent, blurred, a light border
+.kalq-f-hc__pill {
+    margin: 0;
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
+    color: #fff;
+    @include type(eyebrow);
+    text-transform: uppercase;
+}
+
+.kalq-f .kalq-f-hc__title {
+    margin: 0;
+    @include type(display);
+    color: #fff;
+    text-wrap: balance;
+}
+
+.kalq-f-hc__button { align-self: center; }
+
+@container (max-width: 599px) {
+    .kalq-f-hc__card { min-height: 78svh; }
+    .kalq-f .kalq-f-hc__title { @include type-size(h2); }
+}
+
+// The editor's slider for the darkening (kit.js rangeEl), only in edit mode
+.kalq-m-range {
+    display: none;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(29, 78, 216, 0.92);
+    color: #fff;
+    font: 500 0.8rem/1.2 system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+
+    input { width: 9rem; accent-color: #fff; }
+    output { min-width: 2.6rem; font-variant-numeric: tabular-nums; }
+}
+
+body.kalq-edit .kalq-m-range { display: inline-flex; }
+body .kalq-device.kalq-device .kalq-m-range { display: none; }
+
 //=================================== The picker's previews ===================================//
 // A picture of each scroll module as it moves (the preview never scrolls it): the pile, the overlapping cards, the row
 .kalq-device {
@@ -830,6 +920,11 @@ body.kalq-edit .kalq-f-ts__card > .kalq-f-tools { position: relative; z-index: 1
     .kalq-f-tether__text { align-self: center; padding: 2rem; }
     .kalq-f-tether__media { align-self: stretch; height: auto; aspect-ratio: auto; border-radius: 0; }
     .kalq-f-tether__card:nth-child(even) .kalq-f-tether__media { order: -1; } // the picture changes sides, so each screen alternates
+
+    // hero card: the title and its pill and button on the left screen, the picture across both
+    .kalq-f-hc__card { place-items: center start; }
+    .kalq-f-hc__content { width: var(--seg-l); max-width: none; }
+    .kalq-f .kalq-f-hc__title { @include type-size(h2); }
 
     // horizontal cards: one card a screen wide
     .kalq-f-hs.is-armed .kalq-f-hs__card { flex-basis: calc(var(--seg-l) - 4rem); }

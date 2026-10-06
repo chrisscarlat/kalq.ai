@@ -339,14 +339,21 @@ export const collab = {
     },
     // Edit and comment mode exclude each other
     setActiveMode(mode) { emit("mode", mode); },
-    toast(text, kind = "info") {
+    // onClick: the message is itself a link to where it is fixed (it stays longer, to be clicked)
+    toast(text, kind = "info", { onClick } = {}) {
         let node = document.querySelector(".kalq-toast");
         if (!node) { node = el("div", "kalq-toast", { role: "status", "aria-live": "polite" }); document.body.append(node); }
-        node.textContent = text;
         node.dataset.kind = kind;
+        node.classList.toggle("has-link", !!onClick);
+        if (onClick) {
+            const link = el("button", "kalq-toast__link", { type: "button" });
+            link.textContent = `${text} →`;
+            link.addEventListener("click", () => { node.classList.remove("is-shown"); onClick(); });
+            node.replaceChildren(link);
+        } else node.textContent = text;
         node.classList.add("is-shown");
         clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => node.classList.remove("is-shown"), 3200);
+        toastTimer = setTimeout(() => node.classList.remove("is-shown"), onClick ? 9000 : 3200);
     },
     textOn,
 };

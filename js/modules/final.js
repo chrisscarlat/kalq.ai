@@ -9,7 +9,7 @@
 // motion and in edit mode, each scroll module is a plain stacked list. Signed-in editors get the editor render with
 // edit mode on or off: its controls show only in edit mode (css), its effects run only outside it.
 import { renderBlock } from "../blocks.js";
-import { L, SAFE_HREF, altField, append, buttonEl, el, keyOf, mediaEl, mediaOf, picture, placeholder, plain, section, slotEl, textOf } from "./kit.js";
+import { L, SAFE_HREF, altField, append, buttonEl, el, keyOf, mediaEl, mediaOf, picture, placeholder, plain, rangeEl, rangeOf, section, slotEl, textOf } from "./kit.js";
 import { sanitizeSvg } from "../../lib/svg-sanitize.js";
 import { SEND_DESTS, destOf } from "./destinations.js";
 
@@ -513,6 +513,45 @@ function renderHorizontal(ctx) {
     return append(s, inner);
 }
 
+//=================================== 7. Hero card ===================================//
+// A large rounded card set in from the page's edges by a small margin, a picture or video behind it that drifts with a
+// gentle parallax as the page scrolls (js/modules/scrollEffects.js, off under reduced motion and while editing).
+// Centred on it: an optional small label in a glass pill, the big title (a real heading, the style's display size),
+// an optional button the editor can switch off. A soft dark shade keeps the light text readable; its strength is set
+// in edit mode. The picture is decorative unless the editor describes it.
+function heroCardAct(opts, action) {
+    if (action !== "button") return null;
+    opts.button = opts.button === false; // on unless switched off
+    return `button ${opts.button ? "on" : "off"}`;
+}
+
+function renderHeroCard(ctx) {
+    const withButton = ctx.entry.opts?.button !== false;
+    const s = section(ctx, "kalq-f kalq-f-hc");
+    s.setAttribute("data-scroll-effect", "parallax"); // armed outside edit mode only
+    const card = el(ctx, "div", "kalq-f-hc__card");
+    const media = mediaEl(ctx, "media", "kalq-f-hc__media");
+    if (media) {
+        if (!plain(textOf(ctx, "media_alt"))) media.setAttribute("aria-hidden", "true");
+        card.append(media);
+    }
+    const shade = el(ctx, "div", "kalq-f-hc__shade");
+    shade.setAttribute("aria-hidden", "true");
+    shade.setAttribute("style", `opacity: ${rangeOf(ctx, "shade") / 100}`);
+    card.append(shade);
+    const content = append(el(ctx, "div", "kalq-f-hc__content"),
+        slotEl(ctx, "label", "p", { className: "kalq-f-hc__pill" }),
+        slotEl(ctx, "heading", "h2", { className: "kalq-f-hc__title" }),
+        withButton ? linkTo(ctx, "button", "link", "page", "kalq-m-button is-light kalq-f-hc__button") : null);
+    if (ctx.editor) {
+        content.prepend(tools(ctx, "is-module", tool(ctx, "button", "Button", { pressed: withButton, label: "Button on or off" })));
+        content.append(rangeEl(ctx, "shade", ".kalq-f-hc__shade"), altField(ctx, "media"));
+    }
+    card.append(content);
+    if (!ctx.editor && !textOf(ctx, "heading")) return null;
+    return append(s, card);
+}
+
 //=================================== The book ===================================//
 const cardsUnit = (s, k, sel) => ({ layout: "E", cards: [...s.querySelectorAll(sel)].map((c) => ({ media: k.mediaUrl(c.querySelector(".kalq-m-media")), eyebrow: c.querySelector(".kalq-m-eyebrow"),
     title: c.querySelector(".kalq-f-title"), body: k.parasOf(c.querySelector(".kalq-f-text")) })).filter((c) => c.title) });
@@ -597,6 +636,27 @@ export const FINAL = {
         magazine: { layout: "E", unit: (s, k) => cardsUnit(s, k, ".kalq-f-alt__row") },
         render: renderAlternating,
     },
+    "content.hero-card": {
+        category: "content",
+        name: L("Hero-Karte", "Hero card"),
+        keywords: "hero card karte titel title image video bild parallax glass pill button tether",
+        slots: {
+            ...Object.fromEntries(picture("media", L("Hintergrund: Bild oder Video", "Background: image or video"), { required: true })),
+            label: { kind: "eyebrow", label: L("Kleines Etikett in der Glas-Pille (optional)", "Small label in the glass pill (optional)") },
+            heading: { kind: "heading", label: L("Titel", "Title"), required: true },
+            button: { kind: "button", label: L("Button-Text", "Button label") },
+            link: { kind: "link", label: L("Button-Link: eine Seite oder URL", "Button link: a page or URL") },
+            shade: { kind: "range", label: L("Abdunkelung", "Darkening"), min: 0, max: 85, step: 5, initial: 40, unit: "%" },
+        },
+        versions: {
+            card: { name: L("Große Karte mit Bild, Titel in der Mitte", "Large card over a picture, the title centred"),
+                wire: [["band", 3, 3, 94, 54], ["button", 42, 18, 16, "light"], ["heading", 22, 25, 56, "light"], ["heading", 30, 31, 40, "light"], ["button", 42, 40, 16, "light"]] },
+        },
+        initialOpts: () => ({ button: true }),
+        act: heroCardAct,
+        magazine: { layout: "C" },
+        render: renderHeroCard,
+    },
     "testimonials.stack": {
         category: "testimonials",
         name: L("Stimmen im Stapel", "Testimonials"),
@@ -608,7 +668,7 @@ export const FINAL = {
         },
         versions: {
             stack: { name: L("Karten im Stapel, die oberste fliegt beim Scrollen weg", "Stacked cards, the top one flicks away on scroll"),
-                wire: [["heading", 35, 5, 30], ["band", 33, 20, 34, 34], ["band", 31, 15, 38, 34], ["line", 4, 31, 14], ["line", 82, 31, 14], ["line", 35, 21, 6, "bold"], ["line", 35, 30, 28], ["line", 35, 34, 24], ["line", 35, 41, 10, "bold"]] },
+                wire: [["heading", 35, 5, 30], ["line", 4, 31, 14], ["line", 82, 31, 14]], motion: "stack" },
         },
         initialOpts: () => ({ items: Array.from({ length: 3 }, () => ({ id: newId() })) }),
         act: testimonialsAct,
@@ -630,7 +690,7 @@ export const FINAL = {
         slots: { heading: { kind: "heading", label: L("Überschrift (optional)", "Heading (optional)") } },
         versions: {
             tether: { name: L("Jede Karte bleibt stehen, die nächste schiebt sich darüber", "Each card pins, the next slides up over it"),
-                wire: [["band", 4, 6, 92, 44], ["band", 4, 10, 92, 44], ["band", 4, 14, 92, 44], ["line", 8, 22, 26, "light"], ["line", 8, 28, 34, "light"], ["media", 54, 18, 38, 30]] },
+                wire: [], motion: "tether" },
         },
         initialOpts: () => ({ items: Array.from({ length: 3 }, () => ({ id: newId() })) }),
         itemsEditor: { min: TETHER_MIN, max: TETHER_MAX, make: () => ({ id: newId() }) },
@@ -649,7 +709,7 @@ export const FINAL = {
         },
         versions: {
             horizontal: { name: L("Die Seite steht, die Karten gleiten seitwärts", "The page pins while the cards slide sideways"),
-                wire: [["heading", 6, 8, 30], ["line", 6, 14, 22], ...[6, 34, 62, 90].flatMap((x) => [["media", x, 22, 24, 22], ["line", x, 47, 14, "bold"], ["line", x, 51, 20]])] },
+                wire: [["heading", 6, 8, 30], ["line", 6, 14, 22]], motion: "slide" },
         },
         initialOpts: () => ({ items: Array.from({ length: 4 }, () => ({ id: newId() })) }),
         itemsEditor: { min: HCARDS_MIN, max: HCARDS_MAX, make: () => ({ id: newId() }) },

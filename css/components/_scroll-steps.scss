@@ -20,13 +20,10 @@
 
 .kalq-ss__title {
     max-width: 20ch;
-    font-size: clamp(2.2rem, 5cqi, 4.2rem);
-    font-weight: 400;
-    line-height: 1.05;
-    letter-spacing: -0.02em;
+    @include type(h2);
 }
 
-.kalq-ss__intro { max-width: 40rem; margin-top: 1rem; font-size: clamp(1.05rem, 1.4cqi, 1.25rem); line-height: 1.55; opacity: 0.8; }
+.kalq-ss__intro { max-width: 40rem; margin-top: 1rem; @include type(body); opacity: 0.8; }
 
 .kalq-ss__visual { position: relative; margin: 0; overflow: hidden; border-radius: 15px; background: color-mix(in srgb, var(--kalq-text, #101010) 6%, transparent); }
 .kalq-ss__poster, .kalq-ss__video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
@@ -38,14 +35,14 @@
 
 .kalq-ss__steps { display: grid; gap: 1.6rem; margin: 0; padding: 0; list-style: none; counter-reset: none; }
 .kalq-ss__step { display: grid; gap: 0.5rem; padding-top: 1.2rem; border-top: 1px solid color-mix(in srgb, var(--kalq-text, #101010) 15%, transparent); scroll-margin-top: 6rem; }
-.kalq-ss__step-title { margin: 0; font-size: clamp(1.25rem, 2cqi, 1.6rem); font-weight: 400; line-height: 1.2; }
+.kalq-ss__step-title { margin: 0; @include type(h5); }
 .kalq-ss__link { display: grid; gap: 0.35rem; color: inherit; text-decoration: none;
     &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 4px; border-radius: 4px; } }
-.kalq-ss__label { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.6; }
-.kalq-ss__text { max-width: 34rem; margin: 0; font-size: 1rem; line-height: 1.6; opacity: 0.8; }
+.kalq-ss__label { @include type(eyebrow); text-transform: uppercase; opacity: 0.6; }
+.kalq-ss__text { max-width: 34rem; margin: 0; @include type(body); opacity: 0.8; }
 
 .kalq-ss__end { display: grid; justify-items: start; gap: 1.2rem; }
-.kalq-ss__closing { max-width: 34rem; margin: 0; font-size: clamp(1.1rem, 1.6cqi, 1.35rem); line-height: 1.5; }
+.kalq-ss__closing { max-width: 34rem; margin: 0; @include type(body); }
 .kalq-ss__button {
     display: inline-flex;
     align-items: center;
@@ -81,7 +78,7 @@
     .kalq-ss__progress { display: block; }
     // the visual keeps its 16:9 shape, centred beside the steps (never cropped)
     .kalq-ss__visual { grid-column: 2; grid-row: 1 / -1; align-self: center; }
-    .kalq-ss__title { font-size: clamp(2rem, 3.6cqi, 3.4rem); }
+    .kalq-ss__title { @include type(h3); } // pinned beside the steps: one step down
 
     .kalq-ss__step { gap: 0; padding: 0.9rem 0 0; border-top-color: color-mix(in srgb, var(--kalq-text, #101010) 12%, transparent); }
 
@@ -92,11 +89,11 @@
         opacity: 0;
         transition: max-height 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
     }
-    .kalq-ss__step-title { font-size: 1rem; }
+    .kalq-ss__step-title { @include type(body); } // the list of steps, quiet; the active one below takes h5
     .kalq-ss__label { opacity: 0.5; transition: opacity 0.3s ease; }
     .kalq-ss__step.is-active {
         .kalq-ss__label { opacity: 1; }
-        .kalq-ss__heading { max-height: 8rem; opacity: 1; font-size: clamp(1.3rem, 2cqi, 1.7rem); }
+        .kalq-ss__heading { max-height: 8rem; opacity: 1; @include type(h5); }
         .kalq-ss__text { max-height: 12rem; opacity: 0.8; margin-top: 0.5rem; padding-bottom: 0.9rem; }
     }
 }

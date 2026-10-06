@@ -59,10 +59,7 @@ $ease-out: cubic-bezier(0.25, 1, 0.5, 1);
 //=================================== 2.1 Statement ===================================//
 .kalq-m-statement__text {
     max-width: 22ch;
-    font-size: max(32px, 5cqi);
-    font-weight: 400;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
+    @include type(h3);
 }
 
 .kalq-m-statement__below {
@@ -79,7 +76,7 @@ $ease-out: cubic-bezier(0.25, 1, 0.5, 1);
 
 .kalq-m-statement__label {
     margin-bottom: 1.2rem;
-    font-size: 0.95rem;
+    @include type(small);
     opacity: 0.7;
 
     &::before { content: "("; }
@@ -103,8 +100,8 @@ $ease-out: cubic-bezier(0.25, 1, 0.5, 1);
 
 .kalq-m-services.is-alternating .kalq-m-services__item:nth-child(even) .kalq-m-services__side { order: -1; }
 
-.kalq-m-services__num { display: block; margin-bottom: 1.2rem; font-size: clamp(3rem, 7cqi, 6rem); font-weight: 300; line-height: 1; letter-spacing: -0.03em; opacity: 0.35; }
-.kalq-m-services__title { font-size: clamp(1.5rem, 2.6cqi, 2.2rem); font-weight: 400; line-height: 1.15; }
+.kalq-m-services__num { display: block; margin-bottom: 1.2rem; @include type(figure); opacity: 0.35; }
+.kalq-m-services__title { @include type(h4); }
 .kalq-m-services__media { aspect-ratio: 4 / 3; border-radius: 15px; }
 
 //=================================== 2.3 Feature row ===================================//
@@ -120,7 +117,7 @@ $ease-out: cubic-bezier(0.25, 1, 0.5, 1);
 .kalq-m-featrow__pic:nth-child(2) { margin-top: 3rem; }
 .kalq-m-featrow__media { aspect-ratio: 3 / 4; border-radius: 15px; }
 .kalq-m-featrow__list { display: grid; gap: 2rem; margin: 0; padding: 0; list-style: none; }
-.kalq-m-featrow__title { font-size: 1.3rem; font-weight: 500; }
+.kalq-m-featrow__title { @include type(h5); }
 .kalq-m-featrow__item .kalq-m-text { margin-top: 0.5rem; }
 
 //=================================== 2.11 Three features ===================================//
@@ -136,7 +133,7 @@ $ease-out: cubic-bezier(0.25, 1, 0.5, 1);
     text-align: center;
 }
 
-.kalq-m-three__title { font-size: 1.35rem; font-weight: 500; }
+.kalq-m-three__title { @include type(h5); }
 .kalq-m-three__item .kalq-m-text { margin: 0.7rem auto 1.2rem; }
 
 //=================================== 2.4 Stats ===================================//
@@ -163,12 +160,12 @@ $ease-out: cubic-bezier(0.25, 1, 0.5, 1);
     background: color-mix(in srgb, currentColor 12%, transparent);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    font-size: 0.8rem;
+    @include type(eyebrow);
 }
 
 .kalq-m-stats.has-media .kalq-m-stats__label { background: rgba(255, 255, 255, 0.12); }
-.kalq-m-stats__figure { font-size: max(40px, 3vw); font-weight: 400; line-height: 1; letter-spacing: -0.02em; }
-.kalq-m-stats__context { max-width: 280px; margin-top: 0.8rem; font-size: 0.95rem; line-height: 1.5; opacity: 0.8; }
+.kalq-m-stats__figure { @include type(figure); }
+.kalq-m-stats__context { max-width: 280px; margin-top: 0.8rem; @include type(small); opacity: 0.8; }
 
 //=================================== 2.5 Pricing ===================================//
 .kalq-m-pricing__plans {
@@ -193,15 +190,15 @@ $ease-out: cubic-bezier(0.25, 1, 0.5, 1);
 .kalq-m-pricing.is-cards .kalq-m-pricing__plan.has-badge { background: var(--kalq-text, #101010); color: var(--kalq-bg, #fff); .kalq-m-button { background: var(--kalq-bg, #fff); color: var(--kalq-text, #101010); } }
 
 .kalq-m-pricing__top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.6rem; }
-.kalq-m-pricing__name { font-size: 1.4rem; font-weight: 500; }
-.kalq-m-pricing__badge { padding: 0.25rem 0.7rem; border: 1px solid currentColor; border-radius: 999px; font-size: 0.75rem; }
-.kalq-m-pricing__desc p { font-size: 0.95rem; line-height: 1.5; opacity: 0.8; }
+.kalq-m-pricing__name { @include type(h5); }
+.kalq-m-pricing__badge { padding: 0.25rem 0.7rem; border: 1px solid currentColor; border-radius: 999px; @include type(caption); }
+.kalq-m-pricing__desc p { @include type(small); opacity: 0.8; }
 .kalq-m-pricing__price { display: flex; align-items: baseline; gap: 0.4rem; }
-.kalq-m-pricing__amount { font-size: clamp(2rem, 3.4cqi, 2.8rem); line-height: 1; letter-spacing: -0.02em; }
-.kalq-m-pricing__period { font-size: 0.9rem; opacity: 0.7; }
+.kalq-m-pricing__amount { @include type(figure); }
+.kalq-m-pricing__period { @include type(small); opacity: 0.7; }
 .kalq-m-pricing__plan .kalq-m-actions { margin-top: 0; .kalq-m-button { width: 100%; justify-content: center; } }
 .kalq-m-pricing__rule { width: 100%; height: 1px; margin: 0.2rem 0; border: 0; background: color-mix(in srgb, currentColor 20%, transparent); }
-.kalq-m-pricing__includes { font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.65; }
+.kalq-m-pricing__includes { @include type(eyebrow); text-transform: uppercase; opacity: 0.65; }
 
 .kalq-m-pricing__features {
     display: grid;
@@ -209,7 +206,7 @@ $ease-out: cubic-bezier(0.25, 1, 0.5, 1);
     margin: 0;
     padding: 0;
     list-style: none;
-    font-size: 0.95rem;
+    @include type(small);
 
     li { position: relative; padding-left: 1.5rem; }
     li::before { content: ""; position: absolute; left: 0; top: 0.45em; width: 0.7rem; height: 0.4rem; border-left: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); }
@@ -225,10 +222,7 @@ $ease-out: cubic-bezier(0.25, 1, 0.5, 1);
 .kalq-m-ctaline__heading {
     max-width: 24ch;
     margin: 0 auto;
-    font-size: clamp(2.2rem, 5.6cqi, 5.2rem);
-    font-weight: 400;
-    line-height: 1.08;
-    letter-spacing: -0.02em;
+    @include type(h2);
 }
 
 // the one anchor, its area stretched over the whole band
@@ -247,9 +241,9 @@ $ease-out: cubic-bezier(0.25, 1, 0.5, 1);
 //=================================== Contact (2.8) ===================================//
 .kalq-m-contact .kalq-m-inner { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(3rem, 7cqi, 8rem); align-items: start; }
 .kalq-m-contact__right { display: grid; gap: 1.6rem; align-content: start; }
-.kalq-m-contact__email { font-size: clamp(1.6rem, 3.4cqi, 3rem); line-height: 1.1; letter-spacing: -0.015em; color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.18em; overflow-wrap: anywhere; }
+.kalq-m-contact__email { @include type(h4); color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.18em; overflow-wrap: anywhere; }
 .kalq-m-contact__social { display: grid; gap: 0.3rem; margin: 0; padding: 0; list-style: none; }
-.kalq-m-contact__word { font-size: clamp(1.6rem, 3cqi, 2.6rem); line-height: 1.15; color: inherit; text-decoration: none; &:hover, &:focus-visible { text-decoration: underline; text-decoration-thickness: 1px; } }
+.kalq-m-contact__word { @include type(h5); color: inherit; text-decoration: none; &:hover, &:focus-visible { text-decoration: underline; text-decoration-thickness: 1px; } }
 
 @container (max-width: 999px) { .kalq-m-contact .kalq-m-inner { grid-template-columns: 1fr; } }
 @container (max-width: 690px) { .kalq-m-contact .kalq-m-inner { padding: 0 1.25rem; } }
@@ -259,12 +253,12 @@ $ease-out: cubic-bezier(0.25, 1, 0.5, 1);
 .kalq-m-quotes__list { display: grid; gap: 4rem; margin: 0; padding: 0; list-style: none; }
 .kalq-m-quotes__figure { margin: 0; }
 .kalq-m-quotes__quote { margin: 0; }
-.kalq-m-quotes__text { max-width: 46rem; font-size: max(1.4rem, 2vw); line-height: 1.4; font-weight: 400; letter-spacing: -0.01em; }
+.kalq-m-quotes__text { max-width: 46rem; @include type(quote); }
 .kalq-m-quotes__who { display: flex; align-items: center; gap: 0.9rem; margin-top: 2rem; }
 .kalq-m-quotes__photo { flex: 0 0 auto; width: 56px; height: 56px; border-radius: 50%; }
 .kalq-m-quotes__person { display: grid; gap: 0.15rem; }
-.kalq-m-quotes__name { font-weight: 500; }
-.kalq-m-quotes__role { font-size: 0.9rem; opacity: 0.7; }
+.kalq-m-quotes__name { @include type(h5); }
+.kalq-m-quotes__role { @include type(small); opacity: 0.7; }
 
 // the slider (js/moduleBehaviour.js): one shown; the others visually hidden, still in the reading order
 .kalq-m-quotes.is-slider {
@@ -274,7 +268,7 @@ $ease-out: cubic-bezier(0.25, 1, 0.5, 1);
 @keyframes kalq-fade { from { opacity: 0; } }
 
 .kalq-m-quotes__controls { display: flex; align-items: center; gap: 1rem; margin-top: 2.5rem; }
-.kalq-m-quotes__count { min-width: 3.5rem; text-align: center; font-variant-numeric: tabular-nums; font-size: 0.95rem; }
+.kalq-m-quotes__count { min-width: 3.5rem; text-align: center; font-variant-numeric: tabular-nums; @include type(small); }
 .kalq-m-quotes__prev, .kalq-m-quotes__next {
     display: grid;
     place-items: center;
@@ -298,9 +292,9 @@ $ease-out: cubic-bezier(0.25, 1, 0.5, 1);
 .kalq-m-cards__photo { height: 100%; border-radius: 0; }
 .kalq-m-cards__fade { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 35%, color-mix(in srgb, var(--kalq-accent, #3b82f6) 50%, transparent) 100%); }
 .kalq-m-cards__body { display: grid; gap: 0.5rem; padding: 1.6rem; }
-.kalq-m-cards__name { font-size: 1.35rem; font-weight: 500; }
-.kalq-m-cards__detail { font-size: 0.9rem; opacity: 0.7; }
-.kalq-m-cards__rating { display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; }
+.kalq-m-cards__name { @include type(h5); }
+.kalq-m-cards__detail { @include type(small); opacity: 0.7; }
+.kalq-m-cards__rating { display: flex; align-items: center; gap: 0.6rem; @include type(caption); }
 .kalq-m-cards__stars {
     letter-spacing: 0.1em;
     background: linear-gradient(90deg, currentColor calc(var(--rating, 0) * 100%), color-mix(in srgb, currentColor 25%, transparent) 0);
@@ -308,7 +302,7 @@ $ease-out: cubic-bezier(0.25, 1, 0.5, 1);
     background-clip: text;
     -webkit-text-fill-color: transparent; // (not color: the gradient is drawn in the text colour)
 }
-.kalq-m-cards__quote { margin: 0.6rem 0 0; p { font-size: 1.05rem; line-height: 1.55; } }
+.kalq-m-cards__quote { margin: 0.6rem 0 0; p { @include type(body); } }
 
 @container (max-width: 690px) {
     .kalq-m-cards__list { grid-template-columns: 1fr; }
@@ -349,24 +343,24 @@ a.kalq-m-car__card:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6
 .kalq-m-car__media { aspect-ratio: 4 / 5; border-radius: 10px; img { transition: transform 0.7s $ease-out; } }
 a.kalq-m-car__card:hover .kalq-m-car__media img { transform: scale(1.04); }
 .kalq-m-car__body { display: grid; gap: 0.35rem; padding: 0.9rem 0.1rem 0; }
-.kalq-m-car__title { font-size: 1.1rem; font-weight: 500; line-height: 1.25; }
-.kalq-m-car__text { font-size: 0.92rem; line-height: 1.5; opacity: 0.75; }
+.kalq-m-car__title { @include type(body); } // several narrow cards to a row: the body size, an h3 by role
+.kalq-m-car__text { @include type(small); opacity: 0.75; }
 
 // tall cards: the title on top over the picture, the tags at the foot
 .kalq-m-car.is-tall .kalq-m-car__media { aspect-ratio: 3 / 5; }
 .kalq-m-car__over { position: absolute; left: 0; right: 0; padding: 1.1rem; color: #fff; display: grid; gap: 0.35rem; }
 .kalq-m-car__over.is-top { top: 0; background: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent); padding-bottom: 3rem; }
 .kalq-m-car__tags { position: absolute; left: 1.1rem; right: 1.1rem; bottom: 1.1rem; display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0; padding: 0; list-style: none;
-    li { padding: 0.25rem 0.65rem; border-radius: 999px; background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #fff; font-size: 0.75rem; } }
+    li { padding: 0.25rem 0.65rem; border-radius: 999px; background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #fff; @include type(caption); } }
 
 // drag cards (2.15): the text over the picture at the foot, a dark gradient behind it
 .kalq-m-car.is-drag .kalq-m-car__media { aspect-ratio: 3 / 4; }
 .kalq-m-car__shade { position: absolute; inset: 0; border-radius: 10px; background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.75)); }
 .kalq-m-car.is-drag .kalq-m-car__over { bottom: 0; }
-.kalq-m-car__pill { justify-self: start; padding: 0.2rem 0.6rem; border-radius: 999px; background: rgba(255, 255, 255, 0.2); font-size: 0.75rem; }
+.kalq-m-car__pill { justify-self: start; padding: 0.2rem 0.6rem; border-radius: 999px; background: rgba(255, 255, 255, 0.2); @include type(caption); }
 
 .kalq-m-car__controls { display: flex; align-items: center; gap: 0.9rem; margin-top: 1.6rem; &[hidden] { display: none; } }
-.kalq-m-car__count { min-width: 4.5rem; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.kalq-m-car__count { min-width: 4.5rem; @include type(small); font-variant-numeric: tabular-nums; }
 .kalq-m-car__progress { flex: 1; height: 1px; background: color-mix(in srgb, currentColor 20%, transparent); span { display: block; height: 1px; background: currentColor; transition: margin-left 0.2s linear; } }
 .kalq-m-car__prev, .kalq-m-car__next, .kalq-m-car__pause, .kalq-m-slides__prev, .kalq-m-slides__next, .kalq-m-slides__pause {
     display: grid;
@@ -396,7 +390,7 @@ a.kalq-m-car__card:hover .kalq-m-car__media img { transform: scale(1.04); }
     background: none;
     color: inherit;
     font: inherit;
-    font-size: 0.9rem;
+    @include type(small);
     cursor: pointer;
 
     &[aria-pressed="true"] { background: var(--kalq-text, #101010); border-color: var(--kalq-text, #101010); color: var(--kalq-bg, #fff); }
@@ -413,7 +407,7 @@ a.kalq-m-car__card:hover .kalq-m-car__media img { transform: scale(1.04); }
     border-radius: 999px;
     background: var(--kalq-text, #101010);
     color: var(--kalq-bg, #fff);
-    font-size: 0.8rem;
+    @include type(caption);
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.2s ease;
@@ -432,9 +426,9 @@ a.kalq-m-grid__card:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f
 // the drift moves the picture inside its frame (a little taller than the frame, so no edge ever shows)
 .kalq-m-grid__media img { height: 116%; margin-top: -8%; translate: 0 var(--depth-y, 0); }
 .kalq-m-grid__body { display: grid; gap: 0.5rem; justify-items: start; }
-.kalq-m-grid__pill { padding: 0.2rem 0.65rem; border: 1px solid color-mix(in srgb, currentColor 35%, transparent); border-radius: 999px; font-size: 0.75rem; }
-.kalq-m-grid__title { font-size: 1.15rem; font-weight: 500; line-height: 1.25; }
-.kalq-m-grid__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.6rem; font-size: 0.85rem; opacity: 0.8; }
+.kalq-m-grid__pill { padding: 0.2rem 0.65rem; border: 1px solid color-mix(in srgb, currentColor 35%, transparent); border-radius: 999px; @include type(caption); }
+.kalq-m-grid__title { @include type(body); } // small grid cards: the body size; the large card below takes h4
+.kalq-m-grid__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.6rem; @include type(small); opacity: 0.8; }
 .kalq-m-grid__avatar { width: 28px; height: 28px; border-radius: 50%; }
 .kalq-m-grid__date::before { content: "·"; margin-right: 0.6rem; }
 .kalq-m-grid__author:empty + .kalq-m-grid__date::before { content: none; }
@@ -446,7 +440,7 @@ a.kalq-m-grid__card:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f
     .kalq-m-grid__media { aspect-ratio: auto; min-height: 420px; }
     .kalq-m-grid__shade { position: absolute; inset: 0; background: radial-gradient(circle at 0 0, rgba(0, 0, 0, 0.72), transparent 70%); }
     .kalq-m-grid__body { position: absolute; top: 0; left: 0; right: 0; padding: 1.6rem; color: #fff; }
-    .kalq-m-grid__title { max-width: 22ch; font-size: clamp(1.4rem, 2.6cqi, 2.2rem); font-weight: 400; }
+    .kalq-m-grid__title { max-width: 22ch; @include type(h4); }
     .kalq-m-grid__pill { border-color: rgba(255, 255, 255, 0.5); }
 }
 
@@ -465,10 +459,10 @@ a.kalq-m-grid__card:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f
 .kalq-m-story__media { position: absolute; inset: -8% 0; border-radius: 0; img, video { translate: 0 var(--depth-y, 0); } }
 .kalq-m-story__shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.15) 70%); }
 .kalq-m-story__inner { position: relative; display: grid; align-content: end; justify-items: start; gap: 1rem; min-height: min(90svh, 760px); padding-top: 6rem; padding-bottom: 4rem; }
-.kalq-m-story__pill { padding: 0.25rem 0.7rem; border-radius: 999px; background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); font-size: 0.8rem; }
-.kalq-m-story__title { max-width: 18ch; font-size: clamp(2.2rem, 5cqi, 4.6rem); font-weight: 400; line-height: 1.05; letter-spacing: -0.02em; }
+.kalq-m-story__pill { padding: 0.25rem 0.7rem; border-radius: 999px; background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); @include type(caption); }
+.kalq-m-story__title { max-width: 18ch; @include type(h2); }
 .kalq-m-story__excerpt { margin-top: 0; }
-.kalq-m-story__meta { display: flex; gap: 0.6rem; font-size: 0.9rem; opacity: 0.85; }
+.kalq-m-story__meta { display: flex; gap: 0.6rem; @include type(small); opacity: 0.85; }
 .kalq-m-story__date::before { content: "·"; margin-right: 0.6rem; }
 .kalq-m-story__author:empty + .kalq-m-story__date::before { content: none; }
 .kalq-m-story:not(.has-media) { color: inherit; background: var(--kalq-bg, #fff); }
@@ -492,7 +486,7 @@ a.kalq-m-grid__card:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f
 .kalq-m-slides__media { position: absolute; inset: 0; border-radius: 0; }
 .kalq-m-slides__shade { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.6)); }
 .kalq-m-slides__body { position: relative; display: grid; justify-items: start; gap: 1rem; padding: 0 4rem 6rem; }
-.kalq-m-slides__headline { max-width: 20ch; font-size: clamp(2rem, 4.6cqi, 4.2rem); font-weight: 400; line-height: 1.05; letter-spacing: -0.02em; }
+.kalq-m-slides__headline { max-width: 20ch; @include type(h2); }
 
 .kalq-m-slides.is-slider {
     .kalq-m-slides__list { display: grid; }
@@ -565,7 +559,7 @@ a.kalq-m-grid__card:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f
 .kalq-m-chat .kalq-m-inner { display: grid; justify-items: center; }
 .kalq-m-chat.has-intro .kalq-m-inner { grid-template-columns: minmax(0, 1fr) minmax(0, 380px); justify-items: stretch; align-items: center; gap: clamp(2.5rem, 6cqi, 7rem); }
 // the heading beside the chat: the section's h2, at the chat's own small scale
-.kalq-m-chat__intro .kalq-m-heading { font-size: clamp(1.4rem, 2.4cqi, 1.9rem); line-height: 1.15; }
+.kalq-m-chat__intro .kalq-m-heading { @include type(h4); } // beside the compact window: a smaller heading token than a section's h2
 
 .kalq-m-chat__window {
     display: flex;
@@ -579,15 +573,14 @@ a.kalq-m-grid__card:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
     color: var(--kalq-text, #101010);
-    font-size: 0.8rem; // compact, as the scar.lat chat (12–13px); the site's own font
-    line-height: 1.55;
+    @include type(chat-text); // compact, as the scar.lat chat (12–13px): the chat's own tokens
 
     // real headings (the title h2, each question and the summary h3) at the chat's scale, not the site's
     :is(h2, h3) { margin: 0; font: inherit; letter-spacing: normal; text-transform: none; color: inherit; }
 }
 
 .kalq-m-chat__head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.75rem 1rem; border-bottom: 1px solid color-mix(in srgb, currentColor 10%, transparent); }
-.kalq-m-chat__window .kalq-m-chat__title { margin: 0; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.kalq-m-chat__window .kalq-m-chat__title { margin: 0; @include type(chat-title); text-transform: uppercase; }
 .kalq-m-chat__langs { display: flex; gap: 3px; padding: 3px; border-radius: 8px; background: color-mix(in srgb, currentColor 5%, transparent); }
 .kalq-m-chat__lang {
     padding: 0.25rem 0.55rem;
@@ -596,8 +589,7 @@ a.kalq-m-grid__card:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f
     background: none;
     color: color-mix(in srgb, currentColor 55%, transparent);
     font: inherit;
-    font-size: 0.7rem;
-    font-weight: 600;
+    @include type(chat-micro);
     cursor: pointer;
 
     &[aria-pressed="true"] { background: var(--kalq-text, #101010); color: var(--kalq-bg, #fff); }
@@ -628,7 +620,7 @@ a.kalq-m-grid__card:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f
     background: var(--kalq-bg, #fff);
     color: inherit;
     font: inherit;
-    font-size: 0.8rem;
+    @include type(chat-text);
     cursor: pointer;
     transition: border-color 0.2s ease, background-color 0.2s ease;
 
@@ -640,16 +632,16 @@ a.kalq-m-grid__card:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f
 .kalq-m-chat__script { display: grid; gap: 0.9rem; margin: 0; padding: 0 1rem 1rem 3.6rem; list-style: decimal; }
 .kalq-m-chat__window .kalq-m-chat__ask { margin: 0; font-weight: 500; }
 .kalq-m-chat__choices { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0 0; padding: 0; list-style: none;
-    li { padding: 0.35rem 0.75rem; border: 1px solid color-mix(in srgb, currentColor 22%, transparent); border-radius: 20px; font-size: 0.8rem; } }
+    li { padding: 0.35rem 0.75rem; border: 1px solid color-mix(in srgb, currentColor 22%, transparent); border-radius: 20px; @include type(chat-text); } }
 .kalq-m-chat.is-live .kalq-m-chat__script { display: none; }
 
 // the end: summary and the two ways to send
 .kalq-m-chat__finish { display: grid; gap: 0.75rem; padding: 0 1rem 1rem; &[hidden] { display: none; } } // until the last answer
 .kalq-m-chat__msg .kalq-m-chat__finish { padding: 0.75rem 0 0; }
 .kalq-m-chat:not(.is-live) .kalq-m-chat__summary-title, .kalq-m-chat:not(.is-live) .kalq-m-chat__summary { display: none; }
-.kalq-m-chat__window .kalq-m-chat__summary-title { margin: 0; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.7; }
+.kalq-m-chat__window .kalq-m-chat__summary-title { margin: 0; @include type(chat-micro); text-transform: uppercase; opacity: 0.7; }
 // the summary: each question above its answer (a narrow window never squeezes the answers)
-.kalq-m-chat__summary { display: grid; gap: 0.15rem; margin: 0; padding: 0.7rem 0.75rem; border: 1px solid color-mix(in srgb, currentColor 15%, transparent); border-radius: 10px; background: var(--kalq-bg, #fff); font-size: 0.78rem;
+.kalq-m-chat__summary { display: grid; gap: 0.15rem; margin: 0; padding: 0.7rem 0.75rem; border: 1px solid color-mix(in srgb, currentColor 15%, transparent); border-radius: 10px; background: var(--kalq-bg, #fff); @include type(chat-text);
     dt { opacity: 0.65; } dt:not(:first-child) { margin-top: 0.45rem; } dd { margin: 0; font-weight: 500; overflow-wrap: break-word; } }
 // the ways to send (each destination the editor set), side by side, two to a row (a long label wraps in its button)
 .kalq-m-chat__send { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
@@ -658,11 +650,9 @@ a.kalq-m-grid__card:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f
     display: grid;
     place-items: center;
     padding: 0.65rem 0.5rem;
-    line-height: 1.25;
     border-radius: 10px;
     color: #fff;
-    font-size: 0.78rem;
-    font-weight: 600;
+    @include type(chat-title);
     text-align: center;
     text-decoration: none;
 
@@ -674,7 +664,7 @@ a.kalq-m-grid__card:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f
     &:hover { filter: brightness(1.1); }
     &:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f6); outline-offset: 2px; }
 }
-.kalq-m-chat__note { margin: 0; font-size: 0.75rem; line-height: 1.5; opacity: 0.65; }
+.kalq-m-chat__note { margin: 0; @include type(chat-small); opacity: 0.65; }
 
 // the answer bar
 .kalq-m-chat__bar { display: flex; gap: 0.5rem; margin-top: auto; padding: 0.75rem 1rem; border-top: 1px solid color-mix(in srgb, currentColor 10%, transparent); &[hidden] { display: none; } }
@@ -698,9 +688,7 @@ a.kalq-m-grid__card:focus-visible { outline: 2px solid var(--kalq-accent, #3b82f
     background: var(--kalq-text, #101010);
     color: var(--kalq-bg, #fff);
     font: inherit;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
+    @include type(chat-micro);
     text-transform: uppercase;
     cursor: pointer;
 
@@ -785,7 +773,7 @@ body.kalq-edit {
 @mixin library2-two-screens {
     // Statement: the sentence on the left screen; label, paragraphs, link and portrait on the right
     .kalq-m.kalq-m-statement .kalq-m-inner { align-items: center; min-height: var(--seg-h); }
-    .kalq-m.kalq-m-statement .kalq-m-statement__text { grid-column: 1; margin: 0 2rem; font-size: clamp(2rem, calc(var(--seg-l) * 0.075), 3.6rem); }
+    .kalq-m.kalq-m-statement .kalq-m-statement__text { grid-column: 1; margin: 0 2rem; }
     .kalq-m.kalq-m-statement .kalq-m-statement__below { grid-column: 2; margin: 0 2rem; grid-template-columns: 1fr; }
     .kalq-m.kalq-m-statement .kalq-m-statement__copy { grid-column: 1; }
 
@@ -862,7 +850,6 @@ body.kalq-edit {
     .kalq-m.kalq-m-quotes .kalq-m-quotes__list { grid-column: 1 / -1; }
     .kalq-m.kalq-m-quotes .kalq-m-quotes__figure { display: grid; grid-template-columns: var(--seg-l) var(--seg-r); column-gap: var(--seg-hinge); align-items: center; }
     .kalq-m.kalq-m-quotes .kalq-m-quotes__quote { grid-column: 1; padding: 0 2rem; }
-    .kalq-m.kalq-m-quotes .kalq-m-quotes__text { font-size: clamp(1.3rem, calc(var(--seg-l) * 0.045), 2rem); }
     .kalq-m.kalq-m-quotes .kalq-m-quotes__who { grid-column: 2; margin: 0; padding: 0 2rem; }
     .kalq-m.kalq-m-quotes .kalq-m-quotes__controls { grid-column: 2; margin: 0; padding: 0 2rem 2rem; }
 
@@ -909,12 +896,10 @@ body.kalq-edit {
     // Featured story: the picture across both screens; the text on the left screen
     .kalq-m.kalq-m-story .kalq-m-story__inner { display: grid; grid-template-columns: var(--seg-l); padding: 4rem 0; }
     .kalq-m.kalq-m-story .kalq-m-story__inner > * { margin: 0 2rem; max-width: calc(var(--seg-l) - 4rem); }
-    .kalq-m.kalq-m-story .kalq-m-story__title { font-size: clamp(2rem, calc(var(--seg-l) * 0.07), 3.4rem); }
 
     // Full-width slider: the picture across; headline and link on the left screen, the controls on the right
     .kalq-m.kalq-m-slides .kalq-m-slides__slide { aspect-ratio: auto; min-height: var(--seg-h); }
     .kalq-m.kalq-m-slides .kalq-m-slides__body { max-width: var(--seg-l); padding: 0 2rem 3rem; }
-    .kalq-m.kalq-m-slides .kalq-m-slides__headline { font-size: clamp(2rem, calc(var(--seg-l) * 0.07), 3.4rem); }
     .kalq-m.kalq-m-slides .kalq-m-slides__controls { left: calc(var(--seg-l) + var(--seg-hinge) + 2rem); right: 2rem; }
 
     // Cascade: the picture on one screen, the text on the other, in the version's direction
@@ -926,5 +911,5 @@ body.kalq-edit {
 
     // CTA sentence: the sentence on the left screen; the right screen keeps the band's colour or picture
     .kalq-m.kalq-m-ctaline .kalq-m-inner { align-items: center; min-height: var(--seg-h); }
-    .kalq-m.kalq-m-ctaline .kalq-m-ctaline__heading { grid-column: 1; margin: 0 2rem; font-size: clamp(2rem, calc(var(--seg-l) * 0.07), 3.4rem); text-align: left; }
+    .kalq-m.kalq-m-ctaline .kalq-m-ctaline__heading { grid-column: 1; margin: 0 2rem; text-align: left; }
 }

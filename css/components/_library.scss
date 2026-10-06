@@ -24,7 +24,7 @@
     border-radius: 999px;
     background: var(--kalq-text, #101010);
     color: var(--kalq-bg, #fff);
-    font-size: 1rem;
+    @include type-size(body); // the body size; a pill keeps its own line height
     line-height: 1.2;
     text-decoration: none;
 
@@ -191,18 +191,15 @@ body.kalq-edit .kalq-m-belt {
     grid-column: 1;
     max-width: 16ch;
     margin: 0;
-    font-size: max(32px, 5vw);
-    font-weight: 400;
-    line-height: 1.02;
-    letter-spacing: -0.03em;
+    @include type(display);
 }
 
 // One short title across the whole width (Harbor): its size from its own length (--chars, set by the render)
 .kalq-m-hero.is-fit .kalq-m-hero__title {
     grid-column: 1 / -1;
     max-width: none;
-    font-size: clamp(32px, calc((100cqi - 8rem) / (var(--chars, 10) * 0.56)), 34vh);
-    line-height: 0.92;
+    // the display token's floor, then as large as its length allows across the width, at most 20rem
+    font-size: clamp(#{type-min(display)}, calc((100cqi - 8rem) / (var(--chars, 10) * 0.56)), 20rem);
     white-space: nowrap;
 }
 
@@ -257,8 +254,8 @@ body.kalq-edit .kalq-m-belt {
     color: #fff;
 
     .kalq-m-hero__glass-media { flex: 0 0 33%; aspect-ratio: 1; overflow: hidden; border-radius: 10px; img { width: 100%; height: 100%; object-fit: cover; } }
-    p { margin: 0 0 0.6rem; font-size: 0.95rem; line-height: 1.4; }
-    a { color: inherit; font-size: 0.9rem; text-decoration: underline; text-underline-offset: 3px; }
+    p { margin: 0 0 0.6rem; @include type(small); }
+    a { color: inherit; @include type(small); text-decoration: underline; text-underline-offset: 3px; }
 }
 
 // The bottom row: captions left, centre, right, and the way down
@@ -273,7 +270,7 @@ body.kalq-edit .kalq-m-belt {
     border-top-color: color-mix(in srgb, currentColor 30%, transparent);
 }
 
-.kalq-m-hero__caption { margin: 0; font-size: 0.85rem; line-height: 1.4; opacity: 0.85; &.is-2 { text-align: center; } &.is-3 { text-align: right; } }
+.kalq-m-hero__caption { margin: 0; @include type(caption); opacity: 0.85; &.is-2 { text-align: center; } &.is-3 { text-align: right; } }
 
 .kalq-m-hero__next, .kalq-m-hero__pause {
     display: grid;
@@ -303,7 +300,11 @@ body.kalq-edit .kalq-m-belt {
 
 @media (max-width: 690px) {
     .kalq-m-hero__content { padding: 6rem 1.25rem 1.25rem; }
-    .kalq-m.kalq-m-hero.is-fit .kalq-m-hero__title { white-space: normal; font-size: max(32px, 11vw); }
+}
+
+// A narrow module (a phone, a narrow frame): the fitted title takes the display size and wraps
+@container (max-width: 690px) {
+    .kalq-m.kalq-m-hero.is-fit .kalq-m-hero__title { white-space: normal; @include type-size(display); }
 }
 
 // Reduced motion: no rise, the real word in place of the turning list, a still video (its first frame)

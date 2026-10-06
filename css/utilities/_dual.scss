@@ -15,6 +15,9 @@
 
 // Page builder modules
 @mixin modules-two-screens {
+    // the type tokens measure one screen, not the whole spread: their unit is a hundredth of a screen's width
+    .kalq-m { --cq: calc(var(--seg-l) / 100); }
+
     @include library2-two-screens; // batch 2 modules (css/components/_library2.scss)
     @include scroll-steps-two-screens; // media.scroll-steps (css/components/_scroll-steps.scss)
 
@@ -37,7 +40,7 @@
         max-width: calc(var(--seg-l) - 4rem);
         margin-left: 2rem;
         white-space: normal;
-        font-size: clamp(2.2rem, calc(var(--seg-l) * 0.09), 4.2rem);
+        @include type-size(h3); // one screen is narrow: the h3 size of that screen (--cq), so whole words fit
     }
     .kalq-m.kalq-m-hero .kalq-m-hero__actions { grid-column: 1; margin-left: 2rem; }
     .kalq-m.kalq-m-hero .kalq-m-hero__glass { grid-column: 2; grid-row: 1 / span 2; margin: 0 2rem; }
@@ -140,7 +143,6 @@
 
     .kalq-m.kalq-m-cta .kalq-m-heading {
         max-width: none;
-        font-size: clamp(2.2rem, 5cqi, 3.6rem);
     }
 
     .kalq-m.kalq-m-cta .kalq-m-cta__screen2 {

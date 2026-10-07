@@ -603,8 +603,66 @@ function renderPageHero(ctx) {
     return append(s, content);
 }
 
-const heroUnit = (s, k) => ({ layout: "C", title: s.querySelector(".kalq-f-hero__title"), body: k.parasOf(s.querySelector(".kalq-f-hero__slogan, .kalq-f-hero__intro")).filter(Boolean),
-    media: [k.mediaUrl(s.querySelector(".kalq-f-hero__media"))] });
+// Signal's: a huge bold title on the accent colour, three short lines along the bottom (left, middle, right)
+function renderStatementHero(ctx) {
+    const s = section(ctx, "kalq-f kalq-f-hero is-statement");
+    s.setAttribute("data-hero", "statement");
+    const title = slotEl(ctx, "heading", "h1", { className: "kalq-f-hero__title" });
+    const row = append(el(ctx, "div", "kalq-f-hero__row"),
+        slotEl(ctx, "left", "p", { className: "kalq-f-hero__caption is-left" }),
+        slotEl(ctx, "middle", "p", { className: "kalq-f-hero__caption is-middle" }),
+        slotEl(ctx, "right", "p", { className: "kalq-f-hero__caption is-right" }));
+    if (!ctx.editor && !textOf(ctx, "heading")) return null;
+    return append(s, append(el(ctx, "div", "kalq-f-hero__content"), title), row.childNodes.length ? row : null);
+}
+
+// Tether's: the title centred, a line, two buttons; below, three cards side by side: one with words on a dark ground,
+// two pictures
+function renderCentredHero(ctx) {
+    const s = section(ctx, "kalq-f kalq-f-hero is-centred");
+    s.setAttribute("data-hero", "centred");
+    const buttons = append(el(ctx, "div", "kalq-f-hero__buttons"),
+        linkTo(ctx, "button", "link", "page", "kalq-m-button kalq-f-hero__button is-primary"),
+        linkTo(ctx, "button2", "link2", "page", "kalq-m-button kalq-f-hero__button is-secondary", { n: "2. " }));
+    const head = append(el(ctx, "div", "kalq-f-hero__content"),
+        slotEl(ctx, "heading", "h1", { className: "kalq-f-hero__title" }),
+        slotEl(ctx, "intro", "p", { className: "kalq-f-hero__intro" }),
+        buttons.childNodes.length ? buttons : null);
+    // the cards are optional: visitors get only those filled (no empty boxes), sharing the row
+    const show = (has) => ctx.editor || has;
+    const cards = append(el(ctx, "div", "kalq-f-hero__cards"),
+        show(!!textOf(ctx, "card")) ? append(el(ctx, "div", "kalq-f-hero__card is-words"), slotEl(ctx, "card", "p", { className: "kalq-f-hero__card-text" })) : null,
+        show(!!mediaOf(ctx, "media")) ? append(el(ctx, "div", "kalq-f-hero__card is-picture is-accent"), mediaEl(ctx, "media", "kalq-f-hero__card-media"), ctx.editor ? altField(ctx, "media") : null) : null,
+        show(!!mediaOf(ctx, "media2")) ? append(el(ctx, "div", "kalq-f-hero__card is-picture"), mediaEl(ctx, "media2", "kalq-f-hero__card-media"), ctx.editor ? altField(ctx, "media2") : null) : null);
+    cards.setAttribute("style", `--cards: ${Math.max(1, cards.childNodes.length)}`);
+    if (!ctx.editor && !textOf(ctx, "heading")) return null;
+    return append(s, head, cards.childNodes.length ? cards : null);
+}
+
+// Harbor's: a picture or video behind, the title large and low on the left; along the bottom a glass card (a small
+// picture, a line, a button) and a label with a few words
+function renderGlassHero(ctx) {
+    const s = section(ctx, "kalq-f kalq-f-hero is-glass");
+    s.setAttribute("data-hero", "glass");
+    const isVideo = VIDEO_URL.test(mediaOf(ctx, "media") || "");
+    const card = append(el(ctx, "div", "kalq-f-hero__glass"),
+        mediaEl(ctx, "cardMedia", "kalq-f-hero__glass-media"),
+        append(el(ctx, "div", "kalq-f-hero__glass-body"),
+            slotEl(ctx, "cardText", "p", { className: "kalq-f-hero__glass-text" }),
+            linkTo(ctx, "button", "link", "page", "kalq-m-button is-light kalq-f-hero__glass-button")));
+    if (ctx.editor) card.append(altField(ctx, "cardMedia"));
+    const bottom = append(el(ctx, "div", "kalq-f-hero__bottom"), card,
+        append(el(ctx, "div", "kalq-f-hero__note"), slotEl(ctx, "label", "p", { className: "kalq-f-hero__label" }), slotEl(ctx, "text", "p", { className: "kalq-f-hero__text" })));
+    const content = append(el(ctx, "div", "kalq-f-hero__content"), slotEl(ctx, "heading", "h1", { className: "kalq-f-hero__title" }));
+    if (ctx.editor) content.append(rangeEl(ctx, "shade", ".kalq-f-hero__shade"), altField(ctx, "media"));
+    const pause = isVideo ? el(ctx, "button", "kalq-f-hero__pause") : null;
+    if (pause) { pause.setAttribute("type", "button"); pause.setAttribute("data-label-pause", ctx.lang === "en" ? "Pause the video" : "Video anhalten"); pause.setAttribute("data-label-play", ctx.lang === "en" ? "Play the video" : "Video abspielen"); pause.setAttribute("aria-label", pause.getAttribute("data-label-pause")); }
+    if (!ctx.editor && !textOf(ctx, "heading")) return null;
+    return append(s, heroMedia(ctx, "kalq-f-hero__media"), heroShade(ctx, "kalq-f-hero__shade"), content, bottom, pause);
+}
+
+const heroUnit = (s, k) => ({ layout: "C", title: s.querySelector(".kalq-f-hero__title"), body: k.parasOf(s.querySelector(".kalq-f-hero__slogan, .kalq-f-hero__intro, .kalq-f-hero__text, .kalq-f-hero__caption.is-middle")).filter(Boolean),
+    media: [k.mediaUrl(s.querySelector(".kalq-f-hero__media, .kalq-f-hero__card-media"))] });
 
 //=================================== The book ===================================//
 const cardsUnit = (s, k, sel) => ({ layout: "E", cards: [...s.querySelectorAll(sel)].map((c) => ({ media: k.mediaUrl(c.querySelector(".kalq-m-media")), eyebrow: c.querySelector(".kalq-m-eyebrow"),
@@ -726,6 +784,67 @@ export const FINAL = {
         },
         magazine: { layout: "C", unit: heroUnit },
         render: renderPageHero,
+    },
+    "heroes.statement": {
+        category: "heroes",
+        name: L("Großer Titel auf Farbe", "Big title on colour"),
+        keywords: "hero statement signal big bold title titel farbe colour color captions zeilen h1",
+        slots: {
+            heading: { kind: "heading", label: L("Titel (die Überschrift der Seite), kurz", "Title (the page's heading), short"), required: true },
+            left: { kind: "eyebrow", label: L("Zeile unten links (optional)", "Line at the bottom left (optional)") },
+            middle: { kind: "text", label: L("Zeile unten in der Mitte (optional)", "Line at the bottom middle (optional)") },
+            right: { kind: "eyebrow", label: L("Zeile unten rechts (optional)", "Line at the bottom right (optional)") },
+        },
+        versions: {
+            statement: { name: L("Riesiger Titel auf der Akzentfarbe, drei Zeilen unten", "A huge title on the accent colour, three lines below"),
+                wire: [["band", 0, 0, 100, 60], ["heading", 12, 20, 76, "light"], ["heading", 18, 27, 64, "light"], ["eyebrow", 5, 54, 14, "light"], ["line", 38, 54, 24, "light"], ["eyebrow", 81, 54, 14, "light"]] },
+        },
+        magazine: { layout: "C", unit: heroUnit },
+        render: renderStatementHero,
+    },
+    "heroes.centred": {
+        category: "heroes",
+        name: L("Titel mit drei Karten", "Title with three cards"),
+        keywords: "hero tether centred centered mitte titel title buttons karten cards bilder pictures h1",
+        slots: {
+            heading: { kind: "heading", label: L("Titel (die Überschrift der Seite)", "Title (the page's heading)"), required: true },
+            intro: { kind: "text", label: L("Eine Zeile darunter (optional)", "A line below (optional)") },
+            button: { kind: "button", label: L("Erster Button: Text", "First button: label") },
+            link: { kind: "link", label: L("Erster Button: Seite oder URL", "First button: a page or URL") },
+            button2: { kind: "button", label: L("Zweiter Button: Text (optional)", "Second button: label (optional)") },
+            link2: { kind: "link", label: L("Zweiter Button: Seite oder URL", "Second button: a page or URL") },
+            card: { kind: "text", label: L("Erste Karte: ein paar Worte", "First card: a few words") },
+            ...Object.fromEntries(picture("media", L("Zweite Karte: Bild", "Second card: picture"))),
+            ...Object.fromEntries(picture("media2", L("Dritte Karte: Bild", "Third card: picture"))),
+        },
+        versions: {
+            centred: { name: L("Titel in der Mitte, zwei Buttons, drei Karten", "The title centred, two buttons, three cards"),
+                wire: [["heading", 26, 8, 48], ["heading", 32, 13, 36], ["line", 36, 19, 28], ["button", 38, 24, 11], ["button", 51, 24, 11], ["band", 4, 33, 29, 25], ["media", 35.5, 33, 29, 25], ["media", 67, 33, 29, 25]] },
+        },
+        magazine: { layout: "C", unit: heroUnit },
+        render: renderCentredHero,
+    },
+    "heroes.glass": {
+        category: "heroes",
+        name: L("Bild mit Glaskarte", "Picture with a glass card"),
+        keywords: "hero harbor bild picture video glass glas karte card titel title unten bottom h1",
+        slots: {
+            ...Object.fromEntries(picture("media", L("Hintergrund: Bild oder Video", "Background: picture or video"), { required: true })),
+            heading: { kind: "heading", label: L("Titel (die Überschrift der Seite), kurz", "Title (the page's heading), short"), required: true },
+            ...Object.fromEntries(picture("cardMedia", L("Glaskarte: kleines Bild", "Glass card: small picture"))),
+            cardText: { kind: "text", label: L("Glaskarte: eine Zeile", "Glass card: one line") },
+            button: { kind: "button", label: L("Glaskarte: Button-Text", "Glass card: button label") },
+            link: { kind: "link", label: L("Glaskarte: Seite oder URL", "Glass card: a page or URL") },
+            label: { kind: "eyebrow", label: L("Kleines Etikett (optional)", "Small label (optional)") },
+            text: { kind: "text", label: L("Ein, zwei Sätze daneben (optional)", "A sentence or two beside it (optional)") },
+            shade: { kind: "range", label: L("Abdunkelung", "Darkening"), min: 0, max: 85, step: 5, initial: 35, unit: "%" },
+        },
+        versions: {
+            glass: { name: L("Großer Titel unten links, Glaskarte darunter", "A large title low on the left, a glass card below"),
+                wire: [["media", 0, 0, 100, 60], ["heading", 5, 30, 60, "light"], ["band", 5, 44, 26, 11], ["line", 44, 46, 30, "light"], ["line", 44, 50, 24, "light"]] },
+        },
+        magazine: { layout: "C", unit: heroUnit },
+        render: renderGlassHero,
     },
     "content.hero-card": {
         category: "content",

@@ -55,10 +55,10 @@ function setupHeroVideo(section) {
 export function initModules(root = document) {
     if (!document.body.classList.contains("kalq-edit")) root.querySelectorAll(".kalq-f[data-scroll-effect]").forEach(setupScrollEffect);
     root.querySelectorAll('[data-barba="container"] > section.expertise').forEach(setupListPanel);
-    root.querySelectorAll('section[data-hero="video"]').forEach(setupHeroVideo);
+    root.querySelectorAll('section[data-hero]').forEach(setupHeroVideo);
     if (!initModules.listening) {
         initModules.listening = true;
         spanned.addEventListener("change", () => initModules()); // the device folded or unfolded
-        document.addEventListener("kalq:layout", () => document.querySelectorAll('section[data-hero="video"]').forEach(setupHeroVideo)); // a hero just inserted
+        document.addEventListener("kalq:layout", () => document.querySelectorAll('section[data-hero]').forEach(setupHeroVideo)); // a hero just inserted
     }
 }

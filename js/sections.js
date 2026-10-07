@@ -410,6 +410,13 @@ function addSiteButton() {
     collab.addTool(b, 36);
 }
 
+// The pencil: edit mode comes on and the editor opens at once, showing the modules (js/edit.js). A module picked there
+// goes to the end of the page.
+export async function openModules() {
+    const { openPicker: open } = await import("./picker.js");
+    open({ collab, onInsert: (module, version) => insertModule(currentLayout().sections.length, module, version) });
+}
+
 // One entry of the whole-site group (js/picker.js SITE_ITEMS): the Styles panel at its tab for admins where it has
 // one, else the picker at that entry (the chat, the cookie bar; for other editors the note saying where it is set).
 // The toolbar's button and a click on the logo, the menu or the footer in edit mode (js/edit.js) come here.

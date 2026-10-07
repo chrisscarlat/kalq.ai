@@ -76,6 +76,14 @@ export const footerOf = (root) => {
             links: $$(h, ".footer-harbor__legal a"), small: $(h, ".footer-harbor__legal > span"),
         };
     }
+    // Tether's: its line as the closing words, the pages as buttons, the legal links and the rights small
+    const tether = document.documentElement.classList.contains("foot-tether") && $(f, ".footer-tether");
+    if (tether) return { closing: $(tether, ".footer-tether__tagline"), sub: null, buttons: [...$$(tether, ".footer-tether__col:first-child a"), ...$$(tether, ".footer-tether__social a")],
+        links: $$(tether, ".footer-tether__col:last-child a"), small: $(tether, ".footer-tether__legal") };
+    // Signal's: "say hello" and the email (the form stays on the page: the book is for reading), the links
+    const signal = document.documentElement.classList.contains("foot-signal") && $(f, ".footer-signal");
+    if (signal) return { closing: $(signal, ".footer-signal__label"), sub: null, buttons: [$(signal, ".footer-signal__email"), ...$$(signal, ".footer-signal__social a")].filter(Boolean),
+        links: $$(signal, ".footer-signal__legal a"), small: $(signal, ".footer-signal__legal > span") };
     return {
         closing: $(f, ".footer_heading h2"), sub: $(f, ".footer_sub"), buttons: $$(f, ".footer_btns_wrapper a"),
         links: $$(f, ".footer_bottom a"), small: $(f, ".footer_bottom span"),

@@ -185,6 +185,7 @@ SOCIAL = f'''
 # (html.footer-harbor). One <footer> either way: one contentinfo landmark. Empty lines (the address) render nothing.
 LINKEDIN = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9.5h3V19H5zM6.5 5a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5zM10.5 9.5h2.9v1.3h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.6V19h-3v-4.6c0-1.1-.02-2.5-1.52-2.5-1.52 0-1.76 1.19-1.76 2.42V19h-3z" fill="currentColor"/></svg>'
 FOOTER_HARBOR = f'''                    <div class="footer-harbor">
+                        <p class="footer-harbor__cta"><a href="mailto:office@kalq.ai?subject=Kalq%20pilot" data-i18n="footer.cta" data-kalq-key="site.footer2.cta">Ready to prove it? Apply for the pilot.</a></p>
                         <div class="footer-harbor__top">
                             <div class="footer-harbor__contact">
                                 <h2 class="footer-harbor__heading" data-i18n="footer.contactHeading" data-kalq-key="site.footer2.heading">Contact</h2>
@@ -206,6 +207,55 @@ FOOTER_HARBOR = f'''                    <div class="footer-harbor">
                         </div>
                         <p class="footer-harbor__legal"><span>© <span data-current-year>2026</span> Kalq</span><span aria-hidden="true">·</span><a href="impressum.html" data-i18n="footer.impressum" data-kalq-key="site.footer2.impressum">Legal notice</a><span aria-hidden="true">·</span><a href="datenschutz.html" data-i18n="footer.privacy" data-kalq-key="site.footer2.privacy">Privacy</a></p>
                         <div class="footer-harbor__wordmark" aria-hidden="true">{WORD}</div>
+                    </div>'''
+
+# Tether's footer (the library, style variant: footer "tether"): the site's line large on the left, the pages and the
+# legal links in two columns, the year and the rights below, the social links on the right
+FOOTER_TETHER = f'''                    <div class="footer-tether">
+                        <p class="footer-tether__tagline" data-i18n="footer.tagline" data-kalq-key="site.footer3.tagline">One technical core. Two commercial engines.</p>
+                        <nav class="footer-tether__nav" aria-label="Footer links" data-i18n-aria="aria.footerNav">
+                            <div class="footer-tether__col">
+                                <p class="footer-tether__label" data-i18n="footer.pages" data-kalq-key="site.footer3.pages">Pages</p>
+                                <ul>
+                                    <li><a href="index.html" data-i18n="nav.home" data-kalq-key="site.footer3.home">Home</a></li>
+                                    <li><a href="platform.html" data-i18n="nav.platform" data-kalq-key="site.footer3.platform">Platform</a></li>
+                                    <li><a href="company.html" data-i18n="nav.company" data-kalq-key="site.footer3.company">Company</a></li>
+                                </ul>
+                            </div>
+                            <div class="footer-tether__col">
+                                <p class="footer-tether__label" data-i18n="footer.legal" data-kalq-key="site.footer3.legal">Legal</p>
+                                <ul>
+                                    <li><a href="impressum.html" data-i18n="footer.impressum" data-kalq-key="site.footer3.impressum">Legal notice</a></li>
+                                    <li><a href="datenschutz.html" data-i18n="footer.privacy" data-kalq-key="site.footer3.privacy">Privacy</a></li>
+                                </ul>
+                            </div>
+                        </nav>
+                        <p class="footer-tether__legal"><span>© <span data-current-year>2026</span> Kalq.</span> <span data-i18n="footer.rights" data-kalq-key="site.footer3.rights">All rights reserved.</span></p>
+                        <ul class="footer-tether__social">
+                            <li><a href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener">{LINKEDIN}<span class="kalq-sr">LinkedIn</span></a></li>
+                        </ul>
+                    </div>'''
+
+# Signal's footer (style variant: footer "signal"): a short message form on the left that opens the visitor's own
+# email app (a mailto form: nothing is sent through the site), "say hello" with the email and the social links on the
+# right, the wordmark across the bottom (decoration)
+FOOTER_SIGNAL = f'''                    <div class="footer-signal">
+                        <form class="footer-signal__form" action="mailto:office@kalq.ai" method="post" enctype="text/plain">
+                            <label class="footer-signal__field"><span data-i18n="footer.formName" data-kalq-key="site.footer4.formName">Name</span><input type="text" name="name" autocomplete="name"></label>
+                            <label class="footer-signal__field"><span data-i18n="footer.formEmail" data-kalq-key="site.footer4.formEmail">Email</span><input type="email" name="email" autocomplete="email"></label>
+                            <label class="footer-signal__field is-wide"><span data-i18n="footer.formMessage" data-kalq-key="site.footer4.formMessage">Message</span><textarea name="message" rows="3"></textarea></label>
+                            <button type="submit" class="footer-signal__send" data-i18n="footer.formSend" data-kalq-key="site.footer4.formSend">Send from your email app</button>
+                        </form>
+                        <div class="footer-signal__contact">
+                            <p class="footer-signal__label" data-i18n="footer.sayHello" data-kalq-key="site.footer4.hello">Say hello</p>
+                            <a class="footer-signal__email" href="mailto:office@kalq.ai" data-kalq-key="site.footer4.email">office@kalq.ai</a>
+                            <p class="footer-signal__label" data-i18n="footer.social" data-kalq-key="site.footer4.follow">Follow</p>
+                            <ul class="footer-signal__social">
+                                <li><a href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener">LinkedIn</a></li>
+                            </ul>
+                            <p class="footer-signal__legal"><span>© <span data-current-year>2026</span> Kalq</span><span aria-hidden="true">·</span><a href="impressum.html" data-i18n="footer.impressum" data-kalq-key="site.footer4.impressum">Legal notice</a><span aria-hidden="true">·</span><a href="datenschutz.html" data-i18n="footer.privacy" data-kalq-key="site.footer4.privacy">Privacy</a></p>
+                        </div>
+                        <div class="footer-signal__wordmark" aria-hidden="true">{WORD}</div>
                     </div>'''
 
 FOOTER = '''
@@ -240,6 +290,8 @@ FOOTER = '''
                         </div>
                     </div>
 ''' + FOOTER_HARBOR + '''
+''' + FOOTER_TETHER + '''
+''' + FOOTER_SIGNAL + '''
                 </footer>
 '''
 

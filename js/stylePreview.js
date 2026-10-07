@@ -100,6 +100,21 @@ export function footerPreview({ style, wordmark, gradient }, label) {
                 h("span", "kalq-wire__col is-social", h("span", "kalq-wire__circle"))),
             h("div", "kalq-wire__legal", bar(36, "is-faint")),
             wordmark ? h("div", "kalq-wire__wordmark", word || bar(100, "is-huge")) : null);
+    } else if (style === "tether") {
+        foot = h("div", "kalq-wire__foot is-tether",
+            h("div", "kalq-wire__foot-cols",
+                h("span", "kalq-wire__col", bar(80, "is-big"), bar(60, "is-big")),
+                h("span", "kalq-wire__col", bar(40, "is-faint"), bar(44), bar(50), bar(38)),
+                h("span", "kalq-wire__col", bar(40, "is-faint"), bar(56), bar(46))),
+            h("div", "kalq-wire__legal", bar(36, "is-faint"), h("span", "kalq-wire__circle")));
+    } else if (style === "signal") {
+        const word = document.querySelector(".site-logo__word svg")?.cloneNode(true);
+        word?.removeAttribute("class");
+        foot = h("div", "kalq-wire__foot is-signal",
+            h("div", "kalq-wire__foot-cols",
+                h("span", "kalq-wire__col is-form", h("span", "kalq-wire__outline", bar(40, "is-faint")), h("span", "kalq-wire__outline", bar(40, "is-faint")), h("span", "kalq-wire__outline is-tall", bar(30, "is-faint")), h("span", "kalq-wire__pill", bar("60%"))),
+                h("span", "kalq-wire__col", bar(30, "is-faint"), bar(70, "is-big"), bar(30, "is-faint"), bar(50))),
+            h("div", "kalq-wire__wordmark", word || bar(100, "is-huge")));
     } else {
         foot = h("div", "kalq-wire__foot is-classic",
             bar(52, "is-huge"), bar(40, "is-huge"), bar(46, "is-faint is-sub"),

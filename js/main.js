@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     stayOnSamePage();
     // Counters, hover images and the video read their content, so they start after edited content is applied
     await loadPageContent();
-    [animateNumbering, expertiseHover, heroVideo, parallaxImg, animateLines, initModules, initMagazine, initInquiry].forEach(func => func());
+    [animateNumbering, expertiseHover, heroVideo, parallaxImg, animateLines, initModules, initMagazine, initInquiry, footerForm].forEach(func => func());
     // the inquiry chat follows its settings (the picker's Chat) and the language
     ["kalq:content", "kalq:site-settings", "kalq:language"].forEach((ev) => document.addEventListener(ev, initInquiry));
     // The page builder changed the sections (an insert, a move, someone else's change): new modules start working,
@@ -147,7 +147,8 @@ function barbaPageTransition() {
             initModules,
             initMagazine,
             parallaxImg,
-            animateLines].forEach(func => func());
+            animateLines,
+            footerForm].forEach(func => func());
     }
 
     const scrollToTop = () => bodyScrollBar ? bodyScrollBar.scrollTo(0, 0, 0) : window.scrollTo(0, 0);
@@ -166,6 +167,26 @@ function animateNumbering() {
                 onUpdate: () => h2.textContent = Math.ceil(gsap.getProperty(h2, "innerText")),
                 onComplete: () => { h2.textContent = endValue; delete h2.dataset.kalqFinal; } // counted: the text itself is right
             });
+    });
+}
+
+// Signal's footer (style: footer "signal"): the form opens the visitor's own email app with the message, to the email
+// the footer shows (as edited); nothing goes through the site. Without this script the form's mailto does the same.
+function footerForm() {
+    const form = document.querySelector(".footer-signal__form");
+    if (!form || form.dataset.ready) return;
+    form.dataset.ready = "true";
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const to = document.querySelector(".footer-signal__email")?.textContent.trim() || "office@kalq.ai";
+        const data = new FormData(form);
+        const [name, email, message] = ["name", "email", "message"].map((k) => String(data.get(k) || "").trim());
+        const body = [message, [name, email].filter(Boolean).join(", ")].filter(Boolean).join("\n\n");
+        const link = Object.assign(document.createElement("a"), { href: `mailto:${to}?subject=${encodeURIComponent(`Kalq: ${name || email || "Message"}`)}&body=${encodeURIComponent(body)}` });
+        link.className = "footer-signal__open";
+        document.body.append(link);
+        link.click(); // the email app opens
+        link.remove();
     });
 }
 

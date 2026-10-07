@@ -206,6 +206,8 @@ export function applyVariant(variant, { remember = false, preview = false } = {}
     ["minimal", "plain", "mega", "overlay"].forEach((m) => root.classList.toggle(`nav-${m}`, variant.menu_style === m));
     root.classList.toggle("nav-bar", ["minimal", "plain", "mega"].includes(variant.menu_style));
     root.classList.toggle("foot-harbor", variant.footer_style === "harbor");
+    root.classList.toggle("foot-tether", variant.footer_style === "tether");
+    root.classList.toggle("foot-signal", variant.footer_style === "signal");
     root.classList.toggle("foot-wordmark", variant.footer_style === "harbor" && variant.footer_wordmark === true);
     root.classList.toggle("foot-gradient", variant.footer_style === "harbor" && variant.footer_gradient === true);
     const reveal = ["hero", "all"].includes(variant.reveal) ? variant.reveal : variant.hero_reveal === true ? "hero" : "off";

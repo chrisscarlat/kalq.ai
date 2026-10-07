@@ -307,5 +307,49 @@
     "aria.footerNav": {
         "en": "Footer links",
         "de": "Footer-Links"
+    },
+    "footer.cta": {
+        "en": "Ready to prove it? Apply for the pilot.",
+        "de": "Bereit für den Beweis? Bewerben Sie sich für das Pilotprojekt."
+    },
+    "footer.tagline": {
+        "en": "One technical core. Two commercial engines.",
+        "de": "Ein technischer Kern. Zwei kommerzielle Engines."
+    },
+    "footer.rights": {
+        "en": "All rights reserved.",
+        "de": "Alle Rechte vorbehalten."
+    },
+    "footer.sayHello": {
+        "en": "Say hello",
+        "de": "Schreiben Sie uns"
+    },
+    "footer.social": {
+        "en": "Follow",
+        "de": "Folgen"
+    },
+    "footer.formName": {
+        "en": "Name",
+        "de": "Name"
+    },
+    "footer.formEmail": {
+        "en": "Email",
+        "de": "E-Mail"
+    },
+    "footer.formMessage": {
+        "en": "Message",
+        "de": "Nachricht"
+    },
+    "footer.formSend": {
+        "en": "Send from your email app",
+        "de": "Aus Ihrem Mailprogramm senden"
+    },
+    "footer.pages": {
+        "en": "Pages",
+        "de": "Seiten"
+    },
+    "footer.legal": {
+        "en": "Legal",
+        "de": "Rechtliches"
     }
 }

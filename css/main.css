@@ -4320,6 +4320,329 @@ html.foot-gradient footer {
     width: calc(var(--seg-l) - 4rem);
     margin-left: 2rem;
   }
+  .footer-harbor__cta {
+    max-width: calc(var(--seg-l) - 4rem);
+    margin-left: 2rem;
+    text-align: left;
+  }
+}
+.footer-harbor__cta {
+  margin: 0 0 1rem;
+  font-size: clamp(1.6rem, 3.4vw, 2.8rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+.footer-harbor__cta a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+}
+.footer-harbor__cta a:hover, .footer-harbor__cta a:focus-visible {
+  text-decoration-color: currentColor;
+}
+
+.footer-harbor__cta:has(a:empty) {
+  display: none;
+}
+
+.footer-tether, .footer-signal {
+  display: none;
+}
+
+html.foot-tether footer > #container {
+  display: none;
+}
+html.foot-tether footer {
+  padding: 0;
+}
+html.foot-tether .footer-tether {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  grid-template-areas: "tag nav" "legal social";
+  gap: 4rem 3rem;
+  padding: 5.5rem 4rem 2.5rem;
+}
+
+.footer-tether__tagline {
+  grid-area: tag;
+  max-width: 20ch;
+  margin: 0;
+  font-size: clamp(1.5rem, 2.6vw, 2.3rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.footer-tether__nav {
+  grid-area: nav;
+  display: flex;
+  justify-content: flex-end;
+  gap: clamp(2rem, 6vw, 6rem);
+}
+
+.footer-tether__col ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer-tether__col a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: color-mix(in srgb, currentColor 30%, transparent);
+}
+.footer-tether__col a:hover, .footer-tether__col a:focus-visible {
+  text-decoration-color: currentColor;
+}
+
+.footer-tether__label {
+  margin: 0 0 0.9rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.footer-tether__legal {
+  grid-area: legal;
+  align-self: end;
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.footer-tether__social {
+  grid-area: social;
+  justify-self: end;
+  display: flex;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.footer-tether__social a {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-radius: 50%;
+  color: inherit;
+}
+.footer-tether__social a svg {
+  width: 15px;
+  height: 15px;
+}
+.footer-tether__social a:hover, .footer-tether__social a:focus-visible {
+  border-color: currentColor;
+}
+.footer-tether__social a:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 2px;
+}
+
+html.foot-signal footer > #container {
+  display: none;
+}
+html.foot-signal footer {
+  padding: 0;
+  overflow: hidden;
+  background: var(--kalq-accent, #3b82f6);
+  color: var(--kalq-dark, #101010);
+}
+html.foot-signal .footer-signal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 3rem clamp(3rem, 8vw, 9rem);
+  padding: 6rem 4rem 0;
+}
+
+.footer-signal__form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+  align-content: start;
+}
+
+.footer-signal__field {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+}
+.footer-signal__field.is-wide {
+  grid-column: 1/-1;
+}
+.footer-signal__field input, .footer-signal__field textarea {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid currentColor;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 1rem;
+}
+.footer-signal__field input:focus-visible, .footer-signal__field textarea:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+.footer-signal__field textarea {
+  resize: vertical;
+}
+
+.footer-signal__send {
+  grid-column: 1/-1;
+  margin-top: 0.6rem;
+  padding: 0.95rem 1.4rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--kalq-dark, #101010);
+  color: var(--kalq-light, #fff);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+.footer-signal__send:hover {
+  opacity: 0.88;
+}
+.footer-signal__send:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.footer-signal__contact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.footer-signal__label {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.footer-signal__label + .footer-signal__social, .footer-signal__email {
+  margin-bottom: 2.6rem;
+}
+
+.footer-signal__email {
+  color: inherit;
+  font-size: clamp(1.4rem, 2.6vw, 2.2rem);
+  text-decoration: none;
+}
+.footer-signal__email:hover, .footer-signal__email:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+
+.footer-signal__social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.footer-signal__social a {
+  color: inherit;
+  font-size: clamp(1.4rem, 2.6vw, 2.2rem);
+  text-decoration: none;
+}
+.footer-signal__social a:hover, .footer-signal__social a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+
+.footer-signal__legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.9rem;
+  margin: auto 0 0;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+.footer-signal__legal a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.footer-signal__wordmark {
+  grid-column: 1/-1;
+  margin: 1rem 0 -0.06em;
+  line-height: 0;
+}
+.footer-signal__wordmark svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@media (max-width: 999px) {
+  html.foot-tether .footer-tether {
+    padding: 4rem 2rem 2rem;
+    grid-template-columns: 1fr;
+    grid-template-areas: "tag" "nav" "legal" "social";
+    gap: 2.4rem;
+  }
+  .footer-tether__nav {
+    justify-content: flex-start;
+  }
+  .footer-tether__social {
+    justify-self: start;
+  }
+  html.foot-signal .footer-signal {
+    padding: 4rem 2rem 0;
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 690px) {
+  html.foot-tether .footer-tether {
+    padding: 3.5rem 1.25rem 1.6rem;
+  }
+  html.foot-signal .footer-signal {
+    padding: 3.5rem 1.25rem 0;
+  }
+  .footer-signal__form {
+    grid-template-columns: 1fr;
+  }
+}
+@media (horizontal-viewport-segments: 2) {
+  html.foot-tether .footer-tether {
+    grid-template-columns: var(--seg-l) var(--seg-r);
+    column-gap: var(--seg-hinge);
+    padding: 4rem 0 2rem;
+  }
+  .footer-tether__tagline, .footer-tether__legal {
+    padding: 0 2rem;
+  }
+  .footer-tether__nav, .footer-tether__social {
+    padding: 0 2rem;
+    justify-self: start;
+    justify-content: flex-start;
+  }
+  html.foot-signal .footer-signal {
+    grid-template-columns: var(--seg-l) var(--seg-r);
+    column-gap: var(--seg-hinge);
+    padding: 4rem 0 0;
+  }
+  .footer-signal__form, .footer-signal__contact {
+    padding: 0 2rem;
+  }
+  .footer-signal__wordmark {
+    width: calc(var(--seg-l) - 4rem);
+    margin-left: 2rem;
+  }
 }
 /* Magazine mode (js/magazine.js): the site as one book, every section its own spread (js/book/layouts.js). It sits on
    the site's own background and colours: no table, no paper texture. */

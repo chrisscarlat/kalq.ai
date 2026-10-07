@@ -15,7 +15,7 @@ const TEXT = {
         builtInLogo: "Standard: Kalq-Logo", heroMark: "Mitte im Hero (Start)", heroMarkLogo: "Logo", heroMarkLine: "Linie", heroLine: "Form der Linie",
         lines: { back: "Diagonal \\", forward: "Diagonal /", vertical: "Senkrecht", horizontal: "Waagerecht", circle: "Kreis" },
         menu: "Menü", menuDropdown: "Dropdown", menuPanels: "Panels", menuMinimal: "Leiste mit Button", menuPlain: "Leiste", menuMega: "Mega-Menü", menuOverlay: "Vollbild",
-        footer: "Footer", footerClassic: "Klassisch", footerHarbor: "Kontakt und Links", footerWordmark: "Großer Schriftzug", footerGradient: "Bewegter Verlauf",
+        footer: "Footer", footerClassic: "Klassisch", footerHarbor: "Kontakt und Links", footerTether: "Leitsatz und Spalten", footerSignal: "Nachricht und Schriftzug", footerWordmark: "Großer Schriftzug", footerGradient: "Bewegter Verlauf",
         colors: "Farben", c_bg: "Hintergrund", c_text: "Text", c_accent: "Akzent", c_light: "Hell", c_dark: "Dunkel",
         fonts: "Schriften", heading: "Hauptschrift: Logo, H1 bis H3", body: "Zweitschrift: Unterzeilen, H4, H5, Text", builtIn: "Clash Grotesk (Standard)", google: "Google Fonts", ownFont: "Eigene woff2",
         wirePreview: "Vorschau", wireMenu: (n) => `Vorschau: Menü ${n}`, wireFooter: (n) => `Vorschau: Footer ${n}`, sample: "Vorschau",
@@ -38,7 +38,7 @@ const TEXT = {
         builtInLogo: "Default: Kalq logo", heroMark: "Centre of the hero (Home)", heroMarkLogo: "Logo", heroMarkLine: "Line", heroLine: "Line shape",
         lines: { back: "Diagonal \\", forward: "Diagonal /", vertical: "Vertical", horizontal: "Horizontal", circle: "Circle" },
         menu: "Menu", menuDropdown: "Dropdown", menuPanels: "Panels", menuMinimal: "Bar with button", menuPlain: "Bar", menuMega: "Mega menu", menuOverlay: "Fullscreen",
-        footer: "Footer", footerClassic: "Classic", footerHarbor: "Contact and links", footerWordmark: "Large wordmark", footerGradient: "Moving gradient",
+        footer: "Footer", footerClassic: "Classic", footerHarbor: "Contact and links", footerTether: "Line and columns", footerSignal: "Message and wordmark", footerWordmark: "Large wordmark", footerGradient: "Moving gradient",
         colors: "Colours", c_bg: "Background", c_text: "Text", c_accent: "Accent", c_light: "Light", c_dark: "Dark",
         fonts: "Fonts", heading: "Main font: logo, H1 to H3", body: "Secondary font: sub-lines, H4, H5, text", builtIn: "Clash Grotesk (default)", google: "Google Fonts", ownFont: "Own woff2",
         wirePreview: "Preview", wireMenu: (n) => `Preview: menu ${n}`, wireFooter: (n) => `Preview: footer ${n}`, sample: "Preview",
@@ -62,6 +62,7 @@ const t = (key) => TEXT[EDITOR_LANG][key];
 export const COLORS = ["bg", "text", "accent", "light", "dark"];
 export const DEFAULT_COLORS = { bg: "#ffffff", text: "#101010", accent: "#3b82f6", light: "#ffffff", dark: "#101010" };
 export const GOOGLE_SUGGESTIONS = ["Inter", "Space Grotesk", "Manrope", "DM Sans", "Sora", "Outfit", "Archivo", "IBM Plex Sans", "Work Sans", "Syne", "Playfair Display", "Fraunces", "Instrument Serif", "JetBrains Mono"];
+const FOOTERS = [["classic", "footerClassic"], ["harbor", "footerHarbor"], ["tether", "footerTether"], ["signal", "footerSignal"]];
 const MENUS = [["dropdown", "menuDropdown"], ["panels", "menuPanels"], ["minimal", "menuMinimal"], ["plain", "menuPlain"], ["mega", "menuMega"], ["overlay", "menuOverlay"]];
 
 // Every field present, whatever the server sent: empty means "the site's own" (logo, fonts, video, images)
@@ -77,7 +78,7 @@ export function normalize(v) {
         hero_line: ["back", "forward", "vertical", "horizontal", "circle"].includes(v.hero_line) ? v.hero_line : "back",
         reveal: ["off", "hero", "all"].includes(v.reveal) ? v.reveal : v.hero_reveal === true ? "hero" : "off",
         menu_style: MENUS.some(([m]) => m === v.menu_style) ? v.menu_style : "dropdown",
-        footer_style: v.footer_style === "harbor" ? "harbor" : "classic",
+        footer_style: FOOTERS.some(([f]) => f === v.footer_style) ? v.footer_style : "classic",
         footer_wordmark: v.footer_wordmark === true,
         footer_gradient: v.footer_gradient === true,
         colors: { ...DEFAULT_COLORS, ...(v.colors || {}) },
@@ -191,7 +192,8 @@ export function footerControls(ctx) {
         return b;
     };
     const extras = el("div", { className: "kalq-seg", role: "group" }, toggle("footer_wordmark", t("footerWordmark")), toggle("footer_gradient", t("footerGradient")));
-    const footer = seg([["classic", t("footerClassic")], ["harbor", t("footerHarbor")]], draft.footer_style, (v) => { draft.footer_style = v; extras.hidden = v !== "harbor"; ctx.changed(); ctx.redraw?.(); });
+    const footer = seg(FOOTERS.map(([v, k]) => [v, t(k)]), draft.footer_style, (v) => { draft.footer_style = v; extras.hidden = v !== "harbor"; ctx.changed(); ctx.redraw?.(); });
+    footer.classList.add("is-wrap");
     extras.hidden = draft.footer_style !== "harbor";
     return el("section", {}, el("h4", { textContent: t("footer") }), footer, extras);
 }
@@ -252,7 +254,7 @@ export function lookWire(kind, draft) {
     if (kind === "footer") {
         const extras = draft.footer_style === "harbor" ? [draft.footer_wordmark && name("footerWordmark"), draft.footer_gradient && name("footerGradient")].filter(Boolean) : [];
         return footerPreview({ style: draft.footer_style, wordmark: !!draft.footer_wordmark, gradient: !!draft.footer_gradient },
-            t("wireFooter")([name(draft.footer_style === "harbor" ? "footerHarbor" : "footerClassic"), ...extras].join(", ")));
+            t("wireFooter")([name(FOOTERS.find(([f]) => f === draft.footer_style)?.[1] || "footerClassic"), ...extras].join(", ")));
     }
     return null;
 }

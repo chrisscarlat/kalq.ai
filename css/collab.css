@@ -3958,6 +3958,54 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video))::after {
   border-radius: 50%;
 }
 
+.kalq-wire__foot.is-tether {
+  justify-content: space-between;
+  padding: 26px 26px 14px;
+}
+.kalq-wire__foot.is-tether .kalq-wire__foot-cols {
+  grid-template-columns: 1.6fr 1fr 1fr;
+}
+.kalq-wire__foot.is-tether .kalq-wire__legal {
+  justify-content: space-between;
+  align-items: center;
+  width: auto;
+  margin: 0;
+}
+
+.kalq-wire__foot.is-signal {
+  gap: 18px;
+  padding: 24px 26px 0;
+  background: rgba(255, 255, 255, 0.1);
+}
+.kalq-wire__foot.is-signal .kalq-wire__foot-cols {
+  grid-template-columns: 1fr 1fr;
+}
+.kalq-wire__foot.is-signal .kalq-wire__col.is-form {
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.kalq-wire__foot.is-signal .kalq-wire__col.is-form .kalq-wire__outline.is-tall, .kalq-wire__foot.is-signal .kalq-wire__col.is-form .kalq-wire__pill {
+  grid-column: 1/-1;
+}
+.kalq-wire__foot.is-signal .kalq-wire__outline {
+  width: auto;
+  height: 20px;
+  border-radius: 0;
+}
+.kalq-wire__foot.is-signal .kalq-wire__outline.is-tall {
+  height: 34px;
+}
+.kalq-wire__foot.is-signal .kalq-wire__pill {
+  display: grid;
+  place-items: center;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+}
+.kalq-wire__foot.is-signal .kalq-wire__wordmark {
+  padding-inline: 0;
+}
+
 .kalq-wire__wordmark {
   margin-top: auto;
   padding-inline: 6%;

@@ -3086,7 +3086,7 @@ body.kalq-edit .kalq-f-ts__card > .kalq-f-tools {
   position: fixed;
   right: max(1.25rem, env(safe-area-inset-right, 0px));
   bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
-  z-index: 45;
+  z-index: 65;
   color: var(--kalq-text, #101010);
 }
 

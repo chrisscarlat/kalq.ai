@@ -175,7 +175,8 @@ function build() {
 
     const state = { step: "intro", topic: null, details: [], info: {}, method: "", count: 0, started: false, busy: 0, lang: lang() };
     const self = { root, toggle, win, title, head, close, log, input, send, label, state, said: [] };
-    const setOpen = (on) => {
+    const setOpen = (on, { quiet = false } = {}) => {
+        if (on && !document.dispatchEvent(new CustomEvent("kalq:layer", { detail: "chat", cancelable: true }))) return; // one layer at a time: the editors' panels close
         win.hidden = !on;
         root.classList.toggle("is-open", on);
         toggle.setAttribute("aria-expanded", String(on));
@@ -183,8 +184,10 @@ function build() {
         if (on) {
             if (!state.started) { state.started = true; begin(self); }
             setTimeout(() => input.focus(), still.matches ? 0 : 320);
-        } else toggle.focus();
+        } else if (!quiet) toggle.focus();
     };
+    // another layer opened (an editor's panel): the chat folds back to its button, leaving the focus where it is
+    document.addEventListener("kalq:layer", (e) => { if (e.detail !== "chat" && e.detail !== "page" && !win.hidden) setOpen(false, { quiet: true }); });
     toggle.addEventListener("click", () => setOpen(win.hidden));
     close.addEventListener("click", () => setOpen(false));
     win.addEventListener("keydown", (e) => { e.stopPropagation(); if (e.key === "Escape") setOpen(false); });

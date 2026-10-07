@@ -32,11 +32,13 @@ export function initInvite(collab) {
     document.body.append(form);
 
     const setOpen = (open) => {
+        if (open && !document.dispatchEvent(new CustomEvent("kalq:layer", { detail: "invite", cancelable: true }))) return; // one layer at a time
         form.hidden = !open;
         button.setAttribute("aria-expanded", open);
         if (open) input.focus();
     };
     button.addEventListener("click", () => setOpen(form.hidden));
+    document.addEventListener("kalq:layer", (e) => { if (e.detail !== "invite" && e.detail !== "page" && !form.hidden) setOpen(false); });
     input.addEventListener("keydown", (e) => { e.stopPropagation(); if (e.key === "Escape") setOpen(false); });
     document.addEventListener("pointerdown", (e) => { if (!form.hidden && !form.contains(e.target) && !button.contains(e.target)) setOpen(false); });
 

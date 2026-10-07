@@ -137,6 +137,9 @@ const el = (tag, props = {}, ...children) => {
 
 function build() {
     root = el("div", { className: "kalq-picker" });
+    // another layer opened, or edit mode went off ("page"): the editor closes (asking first when modules wait to be saved)
+    // declined (modules wait to be saved): the editor stays and the other layer does not open
+    document.addEventListener("kalq:layer", (e) => { if (e.detail !== "editor" && state && !close()) e.preventDefault(); });
     root.innerHTML = `
         <div class="kalq-picker__backdrop" data-close></div>
         <div class="kalq-picker__window" role="dialog" aria-modal="true" aria-labelledby="kalq-picker-title">
@@ -494,8 +497,8 @@ function dragCard(e, item) {
 }
 
 function close({ force = false } = {}) {
-    if (!state) return;
-    if (!force && state.pending?.length && !window.confirm(t("discard")(state.pending.length))) return;
+    if (!state) return true;
+    if (!force && state.pending?.length && !window.confirm(t("discard")(state.pending.length))) return false;
     root.classList.remove("is-open");
     root.querySelector(".kalq-picker__detail").replaceChildren(); // no previews left in the page
     root.querySelector(".kalq-picker__settings")?.remove(); // nor the chat's preview (a second .kalq-chat)
@@ -504,6 +507,7 @@ function close({ force = false } = {}) {
     const back = state.returnFocus;
     state = null;
     back?.focus?.();
+    return true;
 }
 
 // focus "chat-destinations": open on Chat, its send destinations in view with the first field focused (a publish
@@ -512,6 +516,7 @@ function close({ force = false } = {}) {
 // "+", where Insert puts a module at once
 export function openPicker({ onInsert, collab = null, category = ALL_CATEGORY.id, focus = null, plan = null }) {
     if (!root) build();
+    document.dispatchEvent(new CustomEvent("kalq:layer", { detail: "editor" })); // one layer at a time: the others close
     if (focus === "chat-destinations") category = "chat";
     const marker = plan ? (plan.at ?? plan.outline.sections.length) : null;
     state = { onInsert, collab, category, query: "", index: 0, returnFocus: document.activeElement, plan, pending: [], marker };

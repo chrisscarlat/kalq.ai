@@ -40,6 +40,7 @@ export const panel = {
         renderTabs();
     },
     open(id = active) {
+        if (!document.dispatchEvent(new CustomEvent("kalq:layer", { detail: "panel", cancelable: true }))) return; // one layer at a time
         root.classList.add("is-open");
         root.removeAttribute("inert");
         button.setAttribute("aria-pressed", "true");
@@ -63,6 +64,7 @@ export function initPanel(api) {
     tabBar = root.querySelector(".kalq-panel__tabs");
     body = root.querySelector(".kalq-panel__body");
     root.querySelector(".kalq-panel__close").addEventListener("click", () => panel.close());
+    document.addEventListener("kalq:layer", (e) => { if (e.detail !== "panel" && e.detail !== "page" && panel.isOpen) panel.close(); });
     document.body.append(root);
 
     button = document.createElement("button");

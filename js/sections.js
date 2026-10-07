@@ -449,6 +449,7 @@ async function openPicker(index, { focus, category } = {}) {
 let placing = null;
 function placeOnPage(module, version, point = null) {
     stopPlacing();
+    if (!document.dispatchEvent(new CustomEvent("kalq:layer", { detail: "placing", cancelable: true }))) return; // one layer at a time
     if (!editing()) document.dispatchEvent(new CustomEvent("kalq:edit-on"));
     const def = MODULES[module], v = def?.versions[version];
     if (!v) return;
@@ -942,6 +943,7 @@ export function render() {
 
 export function initSections(api) {
     collab = api;
+    document.addEventListener("kalq:layer", (e) => { if (e.detail !== "placing") stopPlacing(); });
     addUndoButtons();
     addSiteButton();
     // Edit mode on or off, a page change, a layout change (own, someone else's, a restore), a language switch

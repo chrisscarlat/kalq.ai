@@ -514,6 +514,7 @@ function togglePreview(on) {
 }
 
 function setOpen(open, { keepPreview = false } = {}) {
+    if (open && !document.dispatchEvent(new CustomEvent("kalq:layer", { detail: "styles", cancelable: true }))) return; // one layer at a time (the editor may keep unsaved modules)
     const wasMinimized = root.classList.contains("is-minimized");
     root.classList.toggle("is-open", open);
     root.classList.remove("is-minimized");
@@ -543,6 +544,7 @@ export function initStyles(api_) {
         el("div", { className: "kalq-styles__content" }, el("div", { className: "kalq-styles__settings" }), el("div", { className: "kalq-styles__map" })),
     );
     root.addEventListener("keydown", (e) => { if (e.key === "Escape") setOpen(false); });
+    document.addEventListener("kalq:layer", (e) => { if (e.detail !== "styles" && e.detail !== "page" && root.classList.contains("is-open")) setOpen(false); });
     document.body.append(root);
 
     button = el("button", { type: "button", className: "kalq-toolbar__btn" });

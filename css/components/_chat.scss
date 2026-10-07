@@ -8,7 +8,7 @@
     position: fixed;
     right: max(1.25rem, env(safe-area-inset-right, 0px));
     bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
-    z-index: 45; // above the page, below the editor's toolbar and toasts
+    z-index: 65; // a fixed spot: above the page and every editor layer, below the toolbar, the toasts, the book and the viewer
     color: var(--kalq-text, #101010);
 }
 

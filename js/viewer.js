@@ -161,6 +161,7 @@ function go(i) {
 //=================================== Open, close, navigate ===================================//
 function open() {
     if (root) return;
+    if (!document.dispatchEvent(new CustomEvent("kalq:layer", { detail: "viewer", cancelable: true }))) return; // one layer at a time
     root = el("div", { className: "kalq-viewer" });
     root.setAttribute("role", "dialog");
     root.setAttribute("aria-modal", "true");
@@ -231,6 +232,7 @@ function initLongPress() {
 
 export function initViewer(api) {
     collab = api;
+    document.addEventListener("kalq:layer", (e) => { if (e.detail !== "viewer" && e.detail !== "page") closeViewer(); });
     initLongPress();
     collab.on("variants", () => { if (root) load(); });
     document.addEventListener("kalq:language", () => render());

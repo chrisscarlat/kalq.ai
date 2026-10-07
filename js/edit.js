@@ -440,7 +440,7 @@ function setMode(next) {
     applyDirect(document);
     labelSiteParts();
     button.setAttribute("aria-pressed", on);
-    if (!on) stopEditing(true);
+    if (!on) { stopEditing(true); document.dispatchEvent(new CustomEvent("kalq:layer", { detail: "page" })); } // the editor and placing close
     replaceButtons();
 }
 

@@ -202,7 +202,7 @@ function draw() {
     if (settingsOnly) {
         root.querySelector(".kalq-picker__heading").textContent = t(state.category);
         root.querySelector(".kalq-picker__grid").replaceChildren();
-        const panel = !state.collab ? null : state.category === "chat" ? chatPanel(state.collab) : cookiePanel(state.collab, { onPreview: close });
+        const panel = !state.collab ? null : state.category === "chat" ? chatPanel(state.collab) : cookiePanel(state.collab);
         browse.append(el("div", { className: "kalq-picker__settings" }, panel));
         detail(null);
         return;

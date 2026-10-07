@@ -2812,6 +2812,40 @@ body:not(.kalq-edit) .kalq-undo-btn {
   gap: 0.5rem;
 }
 
+.kalq-site__dock {
+  position: sticky;
+  bottom: -1.4rem;
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  margin: 0.4rem -1.3rem -1.4rem;
+  padding: 0.9rem 1rem 1.4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0 0 14px 14px;
+  background: linear-gradient(#f4f4f2, #e9e9e6);
+}
+
+.kalq-site__dock-label {
+  justify-self: start;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.kalq-site__dock .dontpanic-bar.is-docked {
+  position: static;
+  max-width: 100%;
+  margin: 0;
+  opacity: 1;
+  transform: none;
+  transition: none;
+  z-index: auto;
+}
+.kalq-site__dock .dontpanic-bar.is-docked .dontpanic-bar__line {
+  animation: none;
+}
+
 .kalq-picker__title {
   margin: 0 0.4rem 1rem;
   font-size: 1.15rem;

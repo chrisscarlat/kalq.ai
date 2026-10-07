@@ -23,8 +23,7 @@ const TEXT = {
         cookieNoticeHint: "Es werden keine Daten erhoben: eine Zeile ohne Buttons, nach 5 Sekunden verschwindet sie von selbst.",
         cookieConsentHint: "Es werden Daten erhoben: mit Akzeptieren und Ablehnen; bleibt, bis gewählt wird. Optionales lädt erst nach Akzeptieren.",
         cookieTextNotice: "Text des Hinweises", cookieTextConsent: "Text der Einwilligung", lang_de: "Deutsch", lang_en: "Englisch",
-        noteBlocked: "Die Vorschau konnte nicht laden: Der Browser oder ein Blocker hat das Skript der Leiste verhindert. Speichern geht trotzdem.",
-        cookiePreview: "Vorschau zeigen", cookieSave: "Hinweis speichern", cookieSaved: "Cookie-Hinweis gespeichert", cookieEmpty: "Bitte beide Sprachen ausfüllen.",
+        cookieLive: "So sieht die Leiste aus", cookieSave: "Hinweis speichern", cookieSaved: "Cookie-Hinweis gespeichert", cookieEmpty: "Bitte beide Sprachen ausfüllen.",
         chatTitle: "Anfrage-Chat", chatIntro: "Ein Chat für die ganze Website, unten rechts auf jeder Seite, solange er an ist. Er stellt ein paar Fragen und lässt die Besucher ihre Anfrage aus der eigenen App senden, über die Wege, die hier eingetragen sind.",
         chatOn: "Chat auf jeder Seite zeigen", chatName: "Name, mit dem der Chat begrüßt (optional, z. B. Chris)", chatDests: "Wohin gesendet wird (mindestens einer)",
         chatPhoto: "Foto im Chat (rund, z. B. die Person, die antwortet)", chatPhotoAdd: "Foto hochladen", chatPhotoReplace: "Foto ersetzen", chatPhotoRemove: "Entfernen", chatPhotoSaved: "Foto gespeichert", uploading: "Wird hochgeladen", chatPreview: "Vorschau", chatPreviewOff: "Aus: Besucher sehen den Chat nicht",
@@ -37,8 +36,7 @@ const TEXT = {
         cookieNoticeHint: "No data is collected: one line, no buttons; after 5 seconds it goes by itself.",
         cookieConsentHint: "Data is collected: with Accept and Deny; it stays until one is chosen. Optional content loads only after Accept.",
         cookieTextNotice: "Notice text", cookieTextConsent: "Consent text", lang_de: "German", lang_en: "English",
-        noteBlocked: "The preview could not load: the browser or a blocker stopped the bar's script. Saving still works.",
-        cookiePreview: "Show preview", cookieSave: "Save notice", cookieSaved: "Cookie notice saved", cookieEmpty: "Please fill in both languages.",
+        cookieLive: "The bar as visitors see it", cookieSave: "Save notice", cookieSaved: "Cookie notice saved", cookieEmpty: "Please fill in both languages.",
         chatTitle: "Inquiry chat", chatIntro: "One chat for the whole site, at the bottom right of every page while it is on. It asks a few questions and lets visitors send their inquiry from their own app, through the ways set here.",
         chatOn: "Show the chat on every page", chatName: "Name the chat greets with (optional, e.g. Chris)", chatDests: "Where it sends (at least one)",
         chatPhoto: "Photo in the chat (round, e.g. the person who answers)", chatPhotoAdd: "Upload photo", chatPhotoReplace: "Replace photo", chatPhotoRemove: "Remove", chatPhotoSaved: "Photo saved", uploading: "Uploading", chatPreview: "Preview", chatPreviewOff: "Off: visitors don't see the chat",
@@ -89,21 +87,39 @@ function seg(items, current, onPick) {
     return box;
 }
 
-// The cookie bar: mode, both texts in both languages, a preview on the page, its own save. onPreview: the picker
-// steps aside so the bar can be seen.
-export function cookiePanel(collab, { onPreview } = {}) {
+// The cookie bar: mode, both texts in both languages, its own save, and the real bar live below, docked at the bottom
+// of the panel as it sits at the bottom of the page: it follows the mode and every keystroke, no preview to press
+export function cookiePanel(collab) {
     const bar = document.querySelector(".dontpanic-bar");
     const builtIn = (mode, lang) => bar?.querySelector(`.dontpanic-bar__text[data-for="${PAGE_MODE[mode]}"] [lang="${lang}"]`)?.textContent.trim() || "";
     const draft = { mode: plainOf(NOTE_KEYS.mode, "de") === "consent" ? "consent" : "notice", texts: {} };
     ["notice", "consent"].forEach((m) => ["de", "en"].forEach((l) => { draft.texts[`${m}.${l}`] = plainOf(NOTE_KEYS[m], l) || builtIn(m, l); }));
     const hint = el("p", { className: "kalq-site__hint" });
     const showHint = () => { hint.textContent = draft.mode === "consent" ? t("cookieConsentHint") : t("cookieNoticeHint"); };
-    const mode = seg([["notice", t("cookieNotice")], ["consent", t("cookieConsent")]], draft.mode, (v) => { draft.mode = v; showHint(); });
+    // the page's own bar, copied: a picture of it (no live region, no clicks), shown in the page's language
+    const live = bar?.cloneNode(true) || null;
+    if (live) {
+        live.hidden = false;
+        live.className = "dontpanic-bar is-docked"; // none of the page bar's moment (sliding in, folding away, its sizes)
+        live.removeAttribute("style");
+        ["role", "aria-live", "aria-label", "data-ready"].forEach((a) => live.removeAttribute(a));
+        live.setAttribute("aria-hidden", "true");
+        live.inert = true;
+    }
+    const showLive = () => {
+        if (!live) return;
+        live.dataset.mode = PAGE_MODE[draft.mode];
+        ["notice", "consent"].forEach((m) => ["de", "en"].forEach((l) => {
+            const span = live.querySelector(`.dontpanic-bar__text[data-for="${PAGE_MODE[m]}"] [lang="${l}"]`);
+            if (span) span.textContent = draft.texts[`${m}.${l}`]?.trim() || builtIn(m, l);
+        }));
+    };
+    const mode = seg([["notice", t("cookieNotice")], ["consent", t("cookieConsent")]], draft.mode, (v) => { draft.mode = v; showHint(); showLive(); });
     showHint();
     const text = (m, l) => {
         const id = `kalq-site-dontpanic-${PAGE_MODE[m]}-${l}`;
         const area = el("textarea", { id, className: "kalq-site__input", rows: 2, maxLength: 200, value: draft.texts[`${m}.${l}`] || "", spellcheck: true });
-        area.addEventListener("input", () => { draft.texts[`${m}.${l}`] = area.value; });
+        area.addEventListener("input", () => { draft.texts[`${m}.${l}`] = area.value; showLive(); });
         return el("label", { className: "kalq-site__field", htmlFor: id }, el("span", { textContent: `${t(m === "notice" ? "cookieTextNotice" : "cookieTextConsent")} · ${t(`lang_${l}`)}` }), area);
     };
     // the page's bar shows what is set here (before saving too)
@@ -111,11 +127,6 @@ export function cookiePanel(collab, { onPreview } = {}) {
         if (key === NOTE_KEYS.mode) return { de: draft.mode, en: draft.mode };
         const m = key === NOTE_KEYS.notice ? "notice" : "consent";
         return { de: draft.texts[`${m}.de`], en: draft.texts[`${m}.en`] };
-    });
-    const preview = el("button", { type: "button", className: "kalq-btn", textContent: t("cookiePreview") });
-    preview.addEventListener("click", async () => {
-        try { await toPage(); onPreview?.(); (await loadDontPanic()).previewDontPanic(); }
-        catch (error) { console.error("dontpanic", error); collab.toast(t("noteBlocked"), "error"); }
     });
     const save = el("button", { type: "button", className: "kalq-btn kalq-btn--primary", textContent: t("cookieSave") });
     save.addEventListener("click", async () => {
@@ -132,11 +143,14 @@ export function cookiePanel(collab, { onPreview } = {}) {
         } catch (error) { console.error("cookie", error); collab.toast(failText(error), "error"); }
         finally { save.disabled = false; }
     });
-    return el("section", { className: "kalq-site kalq-site--dontpanic" },
+    const panel = el("section", { className: "kalq-site kalq-site--dontpanic" },
         el("h3", { className: "kalq-site__title", textContent: t("cookieTitle") }), el("p", { className: "kalq-site__intro", textContent: t("cookieIntro") }),
         el("div", { className: "kalq-site__field" }, el("span", { textContent: t("cookieMode") }), mode), hint,
         el("div", { className: "kalq-site__grid" }, text("notice", "de"), text("notice", "en"), text("consent", "de"), text("consent", "en")),
-        el("div", { className: "kalq-site__actions" }, preview, save));
+        el("div", { className: "kalq-site__actions" }, save),
+        live && el("div", { className: "kalq-site__dock" }, el("span", { className: "kalq-site__dock-label", textContent: t("cookieLive") }), live));
+    showLive();
+    return panel;
 }
 
 // The chat's send destinations: one field each (WhatsApp, Telegram, Threema, SMS, email), checked as typed

@@ -532,6 +532,37 @@ function minimize() {
     root.classList.add("is-minimized");
 }
 
+// The header's style switcher (js/variants.js), for admins: a duplicate icon after each style's dot and a + after the
+// last. Each makes the new style (a draft) and opens it here at Colours & fonts, to finish, publish and save.
+const DUP_ICON = '<svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true"><path d="M5.5 5.5h7v7h-7zM3.5 10.5v-7h7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+function decorateSwitcher() {
+    const sw = document.querySelector(".kalq-switcher");
+    if (!sw) return;
+    sw.querySelectorAll(".kalq-switcher__dup, .kalq-switcher__add").forEach((n) => n.remove());
+    if (!setupOn()) return;
+    sw.querySelectorAll(".kalq-switcher__dot").forEach((dot) => {
+        const letter = dot.textContent;
+        const dup = el("button", { type: "button", className: "kalq-switcher__dup", innerHTML: DUP_ICON, title: `${t("duplicate")}: ${letter}` });
+        dup.setAttribute("aria-label", `${t("duplicate")}: ${letter}`);
+        dup.addEventListener("click", (e) => { e.stopPropagation(); fromSwitcher(dot.dataset.id); });
+        dot.after(dup);
+    });
+    if (sw.querySelector(".kalq-switcher__dot")) sw.hidden = false; // an admin sees it with one style too, to add the next
+    const add = el("button", { type: "button", className: "kalq-switcher__add", textContent: "+", title: t("create") });
+    add.setAttribute("aria-label", t("create"));
+    add.addEventListener("click", (e) => { e.stopPropagation(); fromSwitcher(null); });
+    sw.append(add);
+}
+async function fromSwitcher(id) {
+    activeTab = "look";
+    if (!root.classList.contains("is-open")) setOpen(true);
+    if (!root.classList.contains("is-open")) return; // another layer kept the page (modules waiting in the editor)
+    await refresh();
+    if (id) { const source = variants.find((v) => v.id === id); if (source) return createFrom(source, t("copyOf")(source.name)); }
+    const base = variants.find((v) => v.is_default) || variants[0];
+    createFrom(base || normalize({ letter: "A" }), null, { menu_style: "minimal" });
+}
+
 export function initStyles(api_) {
     collab = api_;
     root = el("aside", { className: "kalq-styles" });
@@ -559,6 +590,8 @@ export function initStyles(api_) {
     const followSetup = () => { button.hidden = !setupOn(); if (!setupOn() && root.classList.contains("is-open")) setOpen(false); };
     onVariantsChange(followSetup);
     followSetup();
+    document.addEventListener("kalq:switcher", decorateSwitcher);
+    decorateSwitcher();
     collab.on("variants", () => { if (root.classList.contains("is-open") && !previewOn) refresh(); });
     document.addEventListener("kalq:language", () => { if (root.classList.contains("is-open")) render(); });
     // the insert picker's Style, Navigation and Footers: this panel at that tab

@@ -4155,3 +4155,24 @@ body.kalq-placing .kalq-insert-zone.is-target .kalq-insert-line { left: -200px; 
 .kalq-look__wire { position: sticky; top: 0; }
 .kalq-look__which { color: rgba(255, 255, 255, 0.75); }
 .kalq-picker__settings:has(.kalq-site--look.is-navigation, .kalq-site--look.is-footers, .kalq-site--look.is-logo) { max-width: 1120px; }
+
+//=================================== The header's style switcher, for admins (js/styles.js decorateSwitcher) ===================================//
+// a duplicate icon after each style's dot and a + after the last, in the switcher's own ink
+.kalq-switcher__dup, .kalq-switcher__add {
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 24px;
+    margin-right: 4px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    opacity: 0.5;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+
+    &:hover, &:focus-visible { opacity: 1; }
+    &:focus-visible { outline: 1px solid var(--ink); outline-offset: 1px; border-radius: 4px; }
+}
+.kalq-switcher__add { margin: 0 0 0 4px; font: 300 17px/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif; opacity: 0.7; }

@@ -287,6 +287,7 @@ function renderSwitcher() {
         const dot = document.createElement("button");
         dot.type = "button";
         dot.className = "kalq-switcher__dot";
+        dot.dataset.id = v.id;
         dot.textContent = v.letter;
         dot.title = `${v.letter} · ${v.name || ""}`.trim();
         dot.setAttribute("aria-label", `Style ${v.letter}${v.name ? `, ${v.name}` : ""}`);
@@ -294,6 +295,7 @@ function renderSwitcher() {
         dot.addEventListener("click", () => applyVariant(v, { remember: true }));
         return dot;
     }));
+    document.dispatchEvent(new CustomEvent("kalq:switcher")); // admins add their controls (js/styles.js)
     placeSwitcher();
 }
 

@@ -4607,3 +4607,32 @@ body.kalq-placing .kalq-insert-zone.is-target .kalq-insert-line {
 .kalq-picker__settings:has(.kalq-site--look.is-navigation, .kalq-site--look.is-footers, .kalq-site--look.is-logo) {
   max-width: 1120px;
 }
+
+.kalq-switcher__dup, .kalq-switcher__add {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 24px;
+  margin-right: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  opacity: 0.5;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.kalq-switcher__dup:hover, .kalq-switcher__dup:focus-visible, .kalq-switcher__add:hover, .kalq-switcher__add:focus-visible {
+  opacity: 1;
+}
+.kalq-switcher__dup:focus-visible, .kalq-switcher__add:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 1px;
+  border-radius: 4px;
+}
+
+.kalq-switcher__add {
+  margin: 0 0 0 4px;
+  font: 300 17px/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+  opacity: 0.7;
+}

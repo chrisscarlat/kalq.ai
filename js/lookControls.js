@@ -6,7 +6,7 @@
 import { sanitizeSvg } from "../lib/svg-sanitize.js";
 import { EDITOR_LANG } from "./i18n.js";
 import { uploadMedia } from "./upload.js";
-import { getActive, loadVariants, logoNode } from "./variants.js";
+import { getActive, loadVariants, logoNode, setupOn } from "./variants.js";
 import { footerPreview, menuPreview } from "./stylePreview.js";
 
 const TEXT = {
@@ -25,6 +25,11 @@ const TEXT = {
             footers: ["Navigation", "Der Footer am Ende jeder Seite: Kontakt, Links und Schriftzug."],
             style: ["Farben und Schrift", "Die Farben und Schriften der ganzen Website."],
         },
+        setupTitle: "Stil-Setup", setupSwitch: "Mehrere Stile zur Auswahl",
+        setupIntro: "Solange es an ist, hat die Website mehrere Stile: die Umschaltung neben dem Logo, die Stil-Galerie mit Stimmen, die wechselnden Logos am Eingang und das Stile-Panel. Aus: die Website hat einen Stil, für immer.",
+        setupOnNow: (l, n) => `An. Aus würde Stil ${l} (${n}) behalten, den Standard.`, setupOffNow: (l, n) => `Aus: Stil ${l} (${n}) ist der Stil der Website. Logo, Menü, Navigation, Farben und Schrift bleiben hier im Editor.`,
+        setupConfirm: (l, n) => `Stil ${l} (${n}) als einzigen Stil der Website festlegen? Die anderen Stile bleiben gespeichert und kommen zurück, wenn das Setup wieder an ist.`,
+        setupSaved: (on) => (on ? "Stil-Setup an" : "Stil festgelegt"), noDefault: "Erst einen veröffentlichten Standard-Stil festlegen.",
         forStyle: (l, n) => `Gilt für Stil ${l} (${n}), den die Seite gerade zeigt.`, save: "Speichern", saved: "Gespeichert", failed: "Speichern fehlgeschlagen",
         loading: "Wird geladen …", loadFailed: "Konnte nicht geladen werden.", adminsOnly: "Das stellen Admins ein.", none: "Noch kein Stil angelegt.",
     },
@@ -43,6 +48,11 @@ const TEXT = {
             footers: ["Navigation", "The footer at the end of every page: contact, links and wordmark."],
             style: ["Colours & fonts", "The colours and fonts of the whole site."],
         },
+        setupTitle: "Style setup", setupSwitch: "Several styles to choose from",
+        setupIntro: "While it is on, the site has several styles: the switcher next to the logo, the style gallery with votes, the logos changing on the gate, and the Styles panel. Off: the site has one style, for good.",
+        setupOnNow: (l, n) => `On. Off would keep style ${l} (${n}), the default.`, setupOffNow: (l, n) => `Off: style ${l} (${n}) is the site's style. Logo, menu, navigation, colours and fonts stay here in the editor.`,
+        setupConfirm: (l, n) => `Make style ${l} (${n}) the site's only style? The other styles stay stored and come back when the setup is on again.`,
+        setupSaved: (on) => (on ? "Style setup on" : "Style locked"), noDefault: "Make a published style the default first.",
         forStyle: (l, n) => `For style ${l} (${n}), the one the page shows.`, save: "Save", saved: "Saved", failed: "Could not save",
         loading: "Loading …", loadFailed: "Could not be loaded.", adminsOnly: "Admins set this.", none: "No style yet.",
     },
@@ -301,5 +311,36 @@ export function lookPanel(kind, collab) {
         body.replaceChildren(...[which, el("div", { className: `kalq-look__grid${wireKind ? " has-wire" : ""}` }, el("div", { className: "kalq-look__controls" }, ...controls), wireKind ? wireBox : null),
             el("div", { className: "kalq-site__actions" }, save)].filter(Boolean));
     })();
+    return panel;
+}
+
+// The style setup (admins): on while several styles are tried, off to keep the default style for good (the lock). Here,
+// in the editor, so it can always be turned on again: with the setup off there is no Styles panel.
+export function setupPanel(collab) {
+    const body = el("div", { className: "kalq-look__body" }, el("p", { className: "kalq-site__hint", textContent: t("loading") }));
+    const panel = el("section", { className: "kalq-site kalq-site--setup" },
+        el("h3", { className: "kalq-site__title", textContent: t("setupTitle") }), el("p", { className: "kalq-site__intro", textContent: t("setupIntro") }), body);
+    const draw = (data) => {
+        if (!data.admin) return body.replaceChildren(el("p", { className: "kalq-site__hint", textContent: t("adminsOnly") }));
+        const keep = (data.variants || []).find((v) => v.is_default && v.status === "published") || (data.variants || []).find((v) => v.status === "published");
+        const on = data.setup !== false;
+        const input = el("input", { type: "checkbox", className: "kalq-switch__input", checked: on });
+        input.setAttribute("role", "switch");
+        const state = el("p", { className: "kalq-site__hint kalq-setup__state", textContent: keep ? (on ? t("setupOnNow")(keep.letter, keep.name) : t("setupOffNow")(keep.letter, keep.name)) : t("noDefault") });
+        input.addEventListener("change", async () => {
+            const next = input.checked;
+            if (!next && (!keep || !window.confirm(t("setupConfirm")(keep.letter, keep.name)))) { input.checked = true; if (!keep) collab.toast(t("noDefault"), "error"); return; }
+            input.disabled = true;
+            try {
+                await api({ action: "setup", on: next });
+                collab.broadcast("variants", { at: Date.now() }, { site: true });
+                await loadVariants(); // the page follows: one style, or several again
+                collab.toast(t("setupSaved")(next));
+                draw(await api());
+            } catch (error) { console.error("setup", error); collab.toast(t("failed"), "error"); input.checked = !next; input.disabled = false; }
+        });
+        body.replaceChildren(el("label", { className: "kalq-switch" }, input, el("span", { className: "kalq-switch__track", ariaHidden: "true" }), el("span", { textContent: t("setupSwitch") })), state);
+    };
+    api().then(draw).catch(() => body.replaceChildren(el("p", { className: "kalq-site__hint", textContent: t("loadFailed") })));
     return panel;
 }

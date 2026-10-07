@@ -6,6 +6,10 @@
 //   POST { action: "delete", id }             admins: mark deleted (stays in history, restorable)
 //   POST { action: "restore", id, batch_id }  admins: back to that version
 //   POST { action: "vote", id }               everyone through the gate: toggle own vote
+//   POST { action: "setup", on }              admins: the style setup on (several styles to choose from) or off (the
+//                                             default style only, for good; the others stay stored and come back on)
+// While the style setup is off (block "setup.styles" = "off"), every GET answers with the default style only and
+// setup: false; with no such block the setup is on.
 import { randomUUID } from "node:crypto";
 import { readCookie, verifyGate } from "../lib/gate-token.js";
 import { json, readJson } from "../lib/http.js";
@@ -18,9 +22,15 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const gate = (request) => verifyGate(readCookie(request.headers.get("cookie")), process.env.GATE_COOKIE_SECRET);
 
+const SETUP_KEY = "setup.styles";
+// Is the style setup on? (no block yet: on)
+const setupOf = (rows) => rows.find((r) => r.block_key === SETUP_KEY)?.content !== "off";
+// Locked: only the default style (else the first published)
+const lockedTo = (variants) => { const one = variants.find((v) => v.is_default && v.status === "published") || variants.find((v) => v.status === "published"); return one ? [one] : []; };
+
 // Latest state of every variant
-async function allVariants() {
-    const rows = await rpc("latest_content", { page: "variants" });
+async function allVariants(rows = null) {
+    rows ||= await rpc("latest_content", { page: "variants" });
     return rows
         .filter((r) => r.block_key.startsWith("variant."))
         .map((r) => { try { return { id: r.block_key.slice(8), ...JSON.parse(r.content), updated_at: r.created_at }; } catch { return null; } })
@@ -62,11 +72,14 @@ export async function GET(request) {
         return json({ versions, people: await people([...new Set(rows.map((r) => r.author_id).filter(Boolean))]) });
     }
 
-    const variants = (await allVariants()).filter((v) => admin || v.status === "published");
+    const rows = await rpc("latest_content", { page: "variants" });
+    const setup = setupOf(rows);
+    const all = (await allVariants(rows)).filter((v) => admin || v.status === "published");
+    const variants = setup ? all : lockedTo(all);
     if (!session) {
         // The gate page: only what its logo cycle needs. Never cached by the CDN: a shared cache served this reduced
         // answer to signed-in visitors too (json() sends Cache-Control: no-store).
-        return json({ variants: variants.map(({ id, letter, logo_svg, colors, is_default }) => ({ id, letter, logo_svg, colors, is_default })) });
+        return json({ setup, variants: variants.map(({ id, letter, logo_svg, colors, is_default }) => ({ id, letter, logo_svg, colors, is_default })) });
     }
     const votes = await select("variant_votes", `select=variant_key,voter_id,created_at&order=created_at.asc`).catch(() => []);
     const byVariant = {};
@@ -81,7 +94,7 @@ export async function GET(request) {
             rows.filter((r) => r.type === "image" || r.type === "video").forEach((r) => { defaults[r.block_key] = r.content; });
         }
     }
-    return json({ variants, votes: byVariant, people: await people([...new Set(votes.map((v) => v.voter_id))]), admin, me: session.uid, slots, defaults: admin ? defaults : undefined });
+    return json({ setup, variants, votes: byVariant, people: await people([...new Set(votes.map((v) => v.voter_id))]), admin, me: session.uid, slots, defaults: admin ? defaults : undefined });
 }
 
 export async function POST(request) {
@@ -106,6 +119,15 @@ export async function POST(request) {
 
     if (!(await isAdmin(session))) return json({ error: "forbidden" }, 403);
     const variants = await allVariants();
+
+    if (body.action === "setup") {
+        const on = body.on === true;
+        if (!on && !lockedTo(variants).length) return json({ error: "no_default" }, 400);
+        await insert("blocks", { key: SETUP_KEY, page: "variants", type: "text" }, { ignoreDuplicates: true });
+        await insert("revisions", [{ block_key: SETUP_KEY, page: "variants", lang: null, content: on ? "on" : "off",
+            author_id: UUID.test(session.uid) ? session.uid : null, batch_id: randomUUID(), batch_scope: "block", batch_label: on ? "Style setup on" : `Style setup off: ${lockedTo(variants)[0].letter} for good` }]);
+        return json({ setup: on });
+    }
 
     if (body.action === "save") {
         let data;

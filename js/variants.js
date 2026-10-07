@@ -26,6 +26,10 @@ const store = {
 };
 
 export const getVariants = () => variants;
+// The style setup (api/variants.js): on while several styles are tried (the switcher, the viewer, Styles); off, the
+// site has the default style only, for good
+let setup = true;
+export const setupOn = () => setup;
 
 //=================================== Light and dark ===================================//
 // Dark: every section uses the variant's dark set (dark background, light text); the dark sections lift a little
@@ -239,6 +243,8 @@ export async function loadVariants() {
     if (!res?.ok) { res?.body?.cancel(); return variants; }
     const data = await res.json();
     variants = data.variants || [];
+    setup = data.setup !== false;
+    document.documentElement.classList.toggle("kalq-setup-off", !setup);
     const chosen = store.get(CHOICE_KEY);
     const next = variants.find((v) => v.id === chosen && v.status === "published")
         || variants.find((v) => v.is_default) || variants[0];
@@ -275,7 +281,7 @@ function renderSwitcher() {
         if (header) new MutationObserver(() => { const until = performance.now() + 700; const step = () => { placeSwitcher(); if (performance.now() < until) requestAnimationFrame(step); }; step(); }).observe(header, { attributes: true, attributeFilter: ["class"] });
         window.addEventListener("resize", placeSwitcher);
     }
-    switcher.hidden = published.length < 2;
+    switcher.hidden = !setup || published.length < 2;
     const current = getActive();
     switcher.replaceChildren(...published.map((v) => {
         const dot = document.createElement("button");

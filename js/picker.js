@@ -9,13 +9,14 @@
 import { EDITOR_LANG } from "./i18n.js";
 import { CATEGORIES, MODULES, renderModule } from "./modules/registry.js";
 import { chatPanel, cookiePanel } from "./siteSettings.js";
-import { LOOK_PANELS, lookPanel } from "./lookControls.js";
+import { LOOK_PANELS, lookPanel, setupPanel } from "./lookControls.js";
+import { setupOn } from "./variants.js";
 
 const TEXT = {
     de: { title: "Modul einfügen", search: "Module suchen", insert: "Einfügen", cancel: "Abbrechen", close: "Schließen",
         none: "Keine Module gefunden.", results: "Suchergebnisse", hint: "Pfeiltasten zum Blättern, Enter fügt ein, Esc schließt.",
         all: "Alle", devices: "So passt es sich an", site: "Für die ganze Website",
-        chat: "Chat", dontpanic: "Cookie-Leiste", style: "Farben und Schrift", logo: "Logo", navigation: "Menü", footers: "Navigation", images: "Bilder der Seite",
+        setup: "Stil-Setup", chat: "Chat", dontpanic: "Cookie-Leiste", style: "Farben und Schrift", logo: "Logo", navigation: "Menü", footers: "Navigation", images: "Bilder der Seite",
         styleHint: "Öffnet die Stile", noteOnly: "Wird im Stil gewählt; Stile bearbeiten nur Admins.",
         plan: "Diese Seite", planHint: "Klicken Sie zwischen zwei Blöcke, um die Stelle zu wählen. Einfügen, Enter oder eine hierher gezogene Karte setzt das Modul dort ein.",
         add: "Zur Seite hinzufügen", save: (n) => (n ? `Speichern (${n})` : "Speichern"), onPage: "Auf die Seite ziehen", discard: (n) => `${n === 1 ? "1 Modul" : `${n} Module`} nicht gespeichert. Verwerfen?`,
@@ -23,7 +24,7 @@ const TEXT = {
     en: { title: "Insert a module", search: "Search modules", insert: "Insert", cancel: "Cancel", close: "Close",
         none: "No modules found.", results: "Search results", hint: "Arrow keys to browse, Enter inserts, Esc closes.",
         all: "All", devices: "How it adapts", site: "For the whole site",
-        chat: "Chat", dontpanic: "Cookie bar", style: "Colours & fonts", logo: "Logo", navigation: "Menu", footers: "Navigation", images: "Site images",
+        setup: "Style setup", chat: "Chat", dontpanic: "Cookie bar", style: "Colours & fonts", logo: "Logo", navigation: "Menu", footers: "Navigation", images: "Site images",
         styleHint: "Opens Styles", noteOnly: "Chosen in the style; only admins edit styles.",
         plan: "This page", planHint: "Click between two blocks to choose the spot. Insert, Enter or a card dragged here puts the module there.",
         add: "Add to the page", save: (n) => (n ? `Save (${n})` : "Save"), onPage: "Drag onto the page", discard: (n) => `${n === 1 ? "1 module" : `${n} modules`} not saved. Discard?`,
@@ -68,7 +69,8 @@ const ALL = Object.entries(MODULES).filter(([, def]) => !def.retired).flatMap(([
 // chat's settings (on or off, the name it greets with, where it sends); Cookie bar is its settings with the bar live.
 // Logo, Menu, Navigation (the footer) and Colours & fonts are panels here for good (js/lookControls.js): they edit the
 // style the page shows and stay when Styles goes with the lock. Site images opens the Styles panel's image map (admins;
-// other editors are told where it is set). In edit mode a click on the logo, the menu or the footer opens its entry
+// other editors are told where it is set), only while the style setup is on. Style setup (admins) turns the setup of
+// several styles on or off (the lock). In edit mode a click on the logo, the menu or the footer opens its entry
 // (js/sections.js openWholeSite).
 const ICON = (d) => `<svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" focusable="false"><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 export const SITE_ITEMS = [
@@ -78,7 +80,8 @@ export const SITE_ITEMS = [
     { id: "navigation", icon: ICON("M3.5 5.5h13M3.5 10h13M3.5 14.5h8") },
     { id: "footers", icon: ICON("M3 3.5h14v13H3zM3 12.5h14M6 14.5h4") },
     { id: "style", icon: ICON("M10 2.8a7.2 7.2 0 1 0 0 14.4c1 0 1.5-.7 1.5-1.5 0-1.1-.9-1.4-.9-2.3 0-.8.7-1.4 1.5-1.4h1.8a3.3 3.3 0 0 0 3.3-3.3C17.2 5.4 14 2.8 10 2.8ZM6.4 9.2v.1M8.8 6.2v.1M12.6 6.4v.1") },
-    { id: "images", tab: "images", note: true, icon: ICON("M3 4.5h14v11H3zM3 13l4-4 3 3 2.5-2.5L17 14M13.2 7.6v.1") },
+    { id: "images", tab: "images", note: true, setup: true, icon: ICON("M3 4.5h14v11H3zM3 13l4-4 3 3 2.5-2.5L17 14M13.2 7.6v.1") },
+    { id: "setup", admin: true, icon: ICON("M4 6h8M15 6h1M4 14h1M8 14h8M12 4v4M5 12v4") },
 ];
 const SITE_IDS = new Set(SITE_ITEMS.map((x) => x.id));
 
@@ -199,7 +202,7 @@ function draw() {
     const admin = !!state.collab?.me?.is_admin;
     const site = root.querySelector(".kalq-picker__site");
     site.setAttribute("aria-label", t("site"));
-    site.replaceChildren(el("p", { className: "kalq-picker__site-label", textContent: t("site") }), ...SITE_ITEMS.filter((x) => !x.admin || admin).map((x) => {
+    site.replaceChildren(el("p", { className: "kalq-picker__site-label", textContent: t("site") }), ...SITE_ITEMS.filter((x) => (!x.admin || admin) && (!x.setup || setupOn())).map((x) => { // setup: only while the style setup is on (it opens Styles)
         const opens = x.tab && admin; // opens the Styles panel
         const b = el("button", { type: "button", className: `kalq-picker__cat is-site${opens ? " is-link" : ""}` }, el("span", { className: "kalq-picker__icon", innerHTML: x.icon }), el("span", { textContent: t(x.id) }));
         if (opens) { b.title = t("styleHint"); b.append(el("span", { className: "kalq-picker__count", textContent: "↗" })); }
@@ -215,12 +218,12 @@ function draw() {
     const browse = root.querySelector(".kalq-picker__browse");
     browse.querySelector(".kalq-picker__settings")?.remove();
     const siteItem = !state.query && SITE_ITEMS.find((x) => x.id === state.category);
-    const settingsOnly = !!siteItem && ["dontpanic", "chat", ...LOOK_PANELS].includes(state.category); // settings, no cards
+    const settingsOnly = !!siteItem && ["dontpanic", "chat", "setup", ...LOOK_PANELS].includes(state.category); // settings, no cards
     root.classList.toggle("is-settings", settingsOnly);
     if (settingsOnly) {
         root.querySelector(".kalq-picker__heading").textContent = t(state.category);
         root.querySelector(".kalq-picker__grid").replaceChildren();
-        const panel = !state.collab ? null : state.category === "chat" ? chatPanel(state.collab) : state.category === "dontpanic" ? cookiePanel(state.collab) : lookPanel(state.category, state.collab);
+        const panel = !state.collab ? null : state.category === "chat" ? chatPanel(state.collab) : state.category === "dontpanic" ? cookiePanel(state.collab) : state.category === "setup" ? setupPanel(state.collab) : lookPanel(state.category, state.collab);
         // focus stays in the editor (the entry pressed was just redrawn), so Escape closes it and not edit mode
         const settings = el("div", { className: "kalq-picker__settings", tabIndex: -1 }, panel);
         browse.append(settings);

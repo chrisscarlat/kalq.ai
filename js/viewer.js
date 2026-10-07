@@ -5,7 +5,7 @@
 import { sanitizeSvg } from "../lib/svg-sanitize.js";
 import { EDITOR_LANG } from "./i18n.js";
 import { logoAnimation } from "./logoAnimation.js";
-import { getVariants, loadVariants } from "./variants.js";
+import { getVariants, loadVariants, setupOn } from "./variants.js";
 import { storedEntry } from "./content.js";
 import { mediaResolver } from "./styleMedia.js";
 
@@ -223,7 +223,7 @@ function initLongPress() {
         const r = logo.querySelector(".site-logo__mark, .site-logo__custom").getBoundingClientRect();
         ring.style.transform = `translate(${r.left + r.width / 2}px, ${r.top + r.height / 2}px) translate(-50%, -50%)`;
         ring.classList.add("is-filling");
-        timer = setTimeout(() => { opened = true; reset(); open(); }, HOLD_MS);
+        timer = setTimeout(() => { if (!setupOn()) return reset(); opened = true; reset(); open(); }, HOLD_MS);
     });
     ["pointerup", "pointerleave", "pointercancel"].forEach((ev) => logo.addEventListener(ev, reset));
     logo.addEventListener("click", (e) => { if (opened) { e.preventDefault(); e.stopImmediatePropagation(); opened = false; } }, true);

@@ -5,7 +5,7 @@
 // Images, Logos, Menu, Navigation, Colours and fonts. The insert picker's left menu opens it at a tab (kalq:open-styles).
 import { EDITOR_LANG } from "./i18n.js";
 import { progressLine, showDone, uploadMedia } from "./upload.js";
-import { applyVariant, endPreview, getActive, loadVariants } from "./variants.js";
+import { applyVariant, endPreview, getActive, loadVariants, onVariantsChange, setupOn } from "./variants.js";
 import { refreshStyleMedia, setLocalContent, storedEntry } from "./content.js";
 import { isStyleKey, styleKey } from "./styleMedia.js";
 import { colourControls, fontControl, footerControls, fontSuggestions, heroMarkControls, logoControls, lookWire, menuControls, normalize } from "./lookControls.js";
@@ -554,12 +554,17 @@ export function initStyles(api_) {
     button.setAttribute("aria-pressed", "false");
     button.addEventListener("click", () => setOpen(!root.classList.contains("is-open")));
     collab.addTool(button, 35);
-    collab.on("key:s", () => button.click());
+    collab.on("key:s", () => { if (setupOn()) button.click(); });
+    // the style setup off (the lock): no Styles panel, its button and shortcut gone; on again, back
+    const followSetup = () => { button.hidden = !setupOn(); if (!setupOn() && root.classList.contains("is-open")) setOpen(false); };
+    onVariantsChange(followSetup);
+    followSetup();
     collab.on("variants", () => { if (root.classList.contains("is-open") && !previewOn) refresh(); });
     document.addEventListener("kalq:language", () => { if (root.classList.contains("is-open")) render(); });
     // the insert picker's Style, Navigation and Footers: this panel at that tab
     document.addEventListener("kalq:open-styles", (e) => {
         const tab = e.detail?.tab;
+        if (!setupOn()) return;
         if (["images", "logos", "menu", "navigation", "look"].includes(tab)) activeTab = tab;
         if (root.classList.contains("is-open")) render(); else setOpen(true);
     });

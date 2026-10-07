@@ -9,10 +9,13 @@ import { layoutKey, parseLayout } from "./layout.js";
 import { HERO_MODULES, HOME_HERO, mediaResolver } from "./styleMedia.js";
 
 const CARDS = ["should-cost", "machine-intelligence", "supplier-fit", "manufacturing-cost", "rfq-award", "price-quote"];
+// The site images: the menu's pictures (the mega menu's card and one per product), the same on every page
+export const SITE_MEDIA = ["site.nav.mega.card.image", ...CARDS.map((c) => `site.nav.mega.${c}.image`)];
 export const BUILTIN_MEDIA = [
     HOME_HERO, ...CARDS.map((c) => `home.platform.${c}.image`),
     "platform.hero.media", "platform.header.image", ...CARDS.map((c) => `platform.cards.${c}.image`),
     "company.hero.media", "company.header.image", "company.why.image1", "company.why.image2", "company.shared.image", "company.prices.image",
+    ...SITE_MEDIA,
 ];
 const PAGES = ["home", "platform", "company", "impressum", "datenschutz"];
 
@@ -39,7 +42,7 @@ export async function siteMediaSlots(style = null) {
         }
     }
     return out.filter((x, i) => out.findIndex((y) => y.key === x.key) === i)
-        .map((x) => ({ ...x, file: resolvers[x.key.split(".")[0]]?.(x.key) || "" }));
+        .map((x) => ({ ...x, file: (resolvers[x.key.split(".")[0]] || resolvers.home)?.(x.key) || "" })); // site blocks come with every page
 }
 
 // The pictures a style has somewhere on the site to lend an empty slot: its own files (no videos), never a portrait's

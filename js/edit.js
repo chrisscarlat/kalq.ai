@@ -4,7 +4,7 @@
 // While someone edits a block, the others see it locked (see setLock in collab.js).
 import { applyDirect, setLocalContent, shownStyleId, storedEntry, styleMediaOf } from "./content.js";
 import { styleKey } from "./styleMedia.js";
-import { recordUndo } from "./sections.js";
+import { openWholeSite, recordUndo } from "./sections.js";
 import { getActive } from "./variants.js";
 import { editableHtml, renderBlock, serializeBlock } from "./blocks.js";
 import { applyLanguage, currentLang, EDITOR_LANG } from "./i18n.js";
@@ -15,6 +15,9 @@ const MAX_BYTES = 50 * 1024 * 1024;
 // Every slot takes an image or a video
 const ACCEPT = "image/jpeg,image/png,image/webp,image/avif,image/gif,video/mp4,video/webm";
 const HERO = ".header, .expertise_header, .about_header";
+// Set for the whole site, opened in place: a click on one of these in edit mode opens its entry of the whole-site group
+// (js/picker.js SITE_ITEMS); the texts and pictures in them are still edited where they are
+const SITE_PARTS = [["logo", ".site-logo"], ["navigation", ".site-nav"], ["footers", '[data-barba="container"] > footer']];
 
 const TEXT = {
     de: {
@@ -25,6 +28,7 @@ const TEXT = {
         replace: "Ersetzen", add: "Bild oder Video hinzufügen", remove: "Entfernen", uploading: "Wird hochgeladen", tooLarge: "Die Datei ist größer als 50 MB.",
         empty: "Leerer Text wird nicht gespeichert.", marquee: "Laufschrift",
         svgAdd: "SVG-Logo hochladen", svgBad: "Diese Datei ist kein verwendbares SVG.",
+        site: { logo: "Logo · für die ganze Seite", navigation: "Menü · für die ganze Seite", footers: "Footer · für die ganze Seite" },
     },
     en: {
         edit: "Edit (E)", saved: "Saved", failed: "Could not save",
@@ -34,6 +38,7 @@ const TEXT = {
         replace: "Replace", add: "Add image or video", remove: "Remove", uploading: "Uploading", tooLarge: "The file is larger than 50 MB.",
         empty: "Empty text is not saved.", marquee: "Marquee text",
         svgAdd: "Upload SVG logo", svgBad: "This file is not a usable SVG.",
+        site: { logo: "Logo · for the whole site", navigation: "Menu · for the whole site", footers: "Footer · for the whole site" },
     },
 };
 const t = (key) => TEXT[EDITOR_LANG][key];
@@ -433,16 +438,34 @@ function setMode(next) {
     if (on) collab.setActiveMode("edit");
     document.body.classList.toggle("kalq-edit", on);
     applyDirect(document);
+    labelSiteParts();
     button.setAttribute("aria-pressed", on);
     if (!on) stopEditing(true);
     replaceButtons();
 }
 
-// In edit mode a click on a keyed text block edits it, links and Barba do not fire
+// The logo, the menu and the footer say in edit mode that they are set for the whole site (css/collab.scss)
+function labelSiteParts() {
+    SITE_PARTS.forEach(([id, selector]) => document.querySelectorAll(selector).forEach((part) => {
+        if (on) { part.dataset.kalqSite = id; part.dataset.kalqSiteLabel = t("site")[id]; }
+        else { delete part.dataset.kalqSite; delete part.dataset.kalqSiteLabel; }
+    }));
+}
+
+// In edit mode a click on a keyed text block edits it, links and Barba do not fire. A click elsewhere on the logo, the
+// menu or the footer opens its whole-site setting; a picture in them keeps its own buttons and does not follow its link
 function onClick(e) {
     if (!on) return;
+    if (e.target.closest?.(".kalq-media-tools, .kalq-toolbar")) return;
     const node = e.target.closest?.("[data-kalq-key]");
-    if (!node || e.target.closest(".kalq-media-tools, .kalq-toolbar")) return;
+    const part = e.target.closest?.("[data-kalq-site]");
+    if (part && (!node || typeOf(node) !== "text" || !part.contains(node))) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!node || !part.contains(node)) openWholeSite(part.dataset.kalqSite);
+        return;
+    }
+    if (!node) return;
     if (typeOf(node) !== "text") return;
     e.preventDefault();
     e.stopPropagation();
@@ -484,13 +507,13 @@ export async function initEditing(api) {
     document.addEventListener("click", onClick, true); // capture: before links and Barba
     document.addEventListener("input", onSettingInput);
     document.addEventListener("change", onSettingChange);
-    document.addEventListener("kalq:language", () => { labelButton(); replaceButtons(); });
+    document.addEventListener("kalq:language", () => { labelButton(); replaceButtons(); labelSiteParts(); });
     collab.on("key:e", () => button.click());
     document.addEventListener("kalq:edit-on", () => { if (!on) setMode(true); }); // e.g. a module inserted from the toolbar's whole-site picker
     collab.on("escape", () => { if (on) setMode(false); });
     collab.on("locks", showLocks);
     collab.on("mode", (mode) => { if (mode !== "edit" && on) setMode(false); });
     collab.on("leave", () => stopEditing(true));
-    collab.on("page", () => replaceButtons());
+    collab.on("page", () => { replaceButtons(); labelSiteParts(); }); // a new page's footer
     document.addEventListener("kalq:layout", () => replaceButtons()); // inserted or copied sections get their media buttons
 }

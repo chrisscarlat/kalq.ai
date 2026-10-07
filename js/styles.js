@@ -30,7 +30,7 @@ const TEXT = {
         fillAll: "Alles füllen", fillHint: "Ein Video wird überall zum Hero, ein Bild füllt jeden Bildplatz. Danach einzeln ersetzbar.",
         filledHero: () => "Das Video ist jetzt der Hero der Startseite.", filledImages: (n) => `Bild in ${n} Bildplätzen.`,
         peek: "Seite ansehen", unsaved: "Nicht gespeichert",
-        pages: { home: "Start", platform: "Plattform", company: "Unternehmen", impressum: "Impressum", datenschutz: "Datenschutz" }, preview: "Vorschau", endPreview: "Vorschau beenden", save: "Speichern", remove: "Löschen",
+        pages: { home: "Start", platform: "Plattform", company: "Unternehmen", impressum: "Impressum", datenschutz: "Datenschutz", site: "Ganze Seite: Menü" }, preview: "Vorschau", endPreview: "Vorschau beenden", save: "Speichern", remove: "Löschen",
         history: "Versionen", restore: "Wiederherstellen", saved: "Gespeichert", failed: "Speichern fehlgeschlagen", confirmDelete: "Diese Variante löschen? Sie bleibt in den Versionen.",
         tabs: { images: "Bilder", logos: "Logos", menu: "Menü", navigation: "Navigation", look: "Farben und Schrift" },
         tabTitles: { images: "Hero-Video, die Bildplätze aller Seiten und die Enthüllung über den Bildern", logos: "Das Logo der Variante und was in der Mitte des Heros steht",
@@ -58,7 +58,7 @@ const TEXT = {
         fillAll: "Fill all", fillHint: "A video becomes the hero everywhere, an image fills every image slot. Replace single slots afterwards.",
         filledHero: () => "The video is now Home's hero.", filledImages: (n) => `Image in ${n} image slots.`,
         peek: "View page", unsaved: "Not saved",
-        pages: { home: "Home", platform: "Platform", company: "Company", impressum: "Legal notice", datenschutz: "Privacy" }, preview: "Preview", endPreview: "End preview", save: "Save", remove: "Delete",
+        pages: { home: "Home", platform: "Platform", company: "Company", impressum: "Legal notice", datenschutz: "Privacy", site: "Whole site: menu" }, preview: "Preview", endPreview: "End preview", save: "Save", remove: "Delete",
         history: "Versions", restore: "Restore", saved: "Saved", failed: "Could not save", confirmDelete: "Delete this variant? It stays in the versions.",
         tabs: { images: "Images", logos: "Logos", menu: "Menu", navigation: "Navigation", look: "Colours & fonts" },
         tabTitles: { images: "Hero video, the image slots of every page and the reveal over the images", logos: "The variant's logo and what sits in the middle of the hero",
@@ -333,6 +333,7 @@ const SITEMAP = [
     { page: "company", items: [{ hero: "company.hero.media" }, { text: 2 }, { full: "company.header.image" }, { text: 3 }, { grid: ["company.why.image1", "company.why.image2"], cols: 2 }, { text: 3 }, { full: "company.shared.image" }, { text: 2 }, { full: "company.prices.image" }] },
     { page: "impressum", items: [{ text: 9 }] },
     { page: "datenschutz", items: [{ text: 5 }] },
+    { page: "site", items: [{ full: "site.nav.mega.card.image" }, { list: CARDS.map((c) => `site.nav.mega.${c}.image`) }] }, // the menu's pictures, on every page
 ];
 const isVideo = (url) => /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url || "");
 const ACCEPT = "image/jpeg,image/png,image/webp,image/avif,image/gif,video/mp4,video/webm";

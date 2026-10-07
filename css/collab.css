@@ -230,6 +230,47 @@ html.kalq-magazine-open .kalq-switcher {
   outline-offset: 4px;
 }
 
+body.kalq-edit [data-kalq-site] {
+  cursor: pointer;
+}
+body.kalq-edit [data-kalq-site]:hover {
+  outline: 1.5px dashed #3B82F6;
+  outline-offset: 6px;
+}
+body.kalq-edit [data-kalq-site]::after {
+  content: attr(data-kalq-site-label);
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 10px);
+  left: 0;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #3B82F6;
+  color: #fff;
+  font: 500 11px/1.3 system-ui, sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+body.kalq-edit [data-kalq-site]:hover::after {
+  opacity: 1;
+}
+
+body.kalq-edit [data-kalq-site=footers] {
+  position: relative;
+}
+body.kalq-edit [data-kalq-site=footers]::after {
+  top: 10px;
+  left: 10px;
+}
+
+body.kalq-edit [data-kalq-site=logo] {
+  position: relative;
+}
+
 .kalq-is-editing {
   outline: 2px solid #3B82F6 !important;
   outline-offset: 4px;

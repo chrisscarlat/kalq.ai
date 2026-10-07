@@ -76,7 +76,7 @@ export async function GET(request) {
     // What each slot shows on the site right now: the look variant A (and anything left empty) inherits
     const defaults = {};
     if (admin) {
-        for (const page of ["home", "platform", "company"]) {
+        for (const page of ["home", "platform", "company", "site"]) { // site: the menu's pictures
             const rows = await rpc("latest_content", { page }).catch(() => []);
             rows.filter((r) => r.type === "image" || r.type === "video").forEach((r) => { defaults[r.block_key] = r.content; });
         }

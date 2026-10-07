@@ -406,14 +406,21 @@ function addSiteButton() {
     const label = () => { b.title = t("site"); b.setAttribute("aria-label", t("site")); };
     label();
     document.addEventListener("kalq:language", label);
-    b.addEventListener("click", async () => {
-        const { openPicker: open } = await import("./picker.js");
-        open({ collab, category: "chat", onInsert: (module, version) => {
-            if (!editing()) document.dispatchEvent(new CustomEvent("kalq:edit-on"));
-            insertModule(currentLayout().sections.length, module, version);
-        } });
-    });
+    b.addEventListener("click", () => openWholeSite("chat"));
     collab.addTool(b, 36);
+}
+
+// One entry of the whole-site group (js/picker.js SITE_ITEMS): the Styles panel at its tab for admins where it has
+// one, else the picker at that entry (the chat, the cookie bar; for other editors the note saying where it is set).
+// The toolbar's button and a click on the logo, the menu or the footer in edit mode (js/edit.js) come here.
+export async function openWholeSite(id) {
+    const { openPicker: open, SITE_ITEMS } = await import("./picker.js");
+    const item = SITE_ITEMS.find((x) => x.id === id);
+    if (item?.tab && collab.me?.is_admin) return document.dispatchEvent(new CustomEvent("kalq:open-styles", { detail: { tab: item.tab } }));
+    open({ collab, category: item ? id : "chat", onInsert: (module, version) => {
+        if (!editing()) document.dispatchEvent(new CustomEvent("kalq:edit-on"));
+        insertModule(currentLayout().sections.length, module, version);
+    } });
 }
 
 // Scroll the page so a section is in view, its bar clear below the header

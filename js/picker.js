@@ -10,12 +10,12 @@ const TEXT = {
     de: { title: "Modul einfügen", search: "Module suchen", insert: "Einfügen", cancel: "Abbrechen", close: "Schließen",
         none: "Keine Module gefunden.", results: "Suchergebnisse", hint: "Pfeiltasten zum Blättern, Enter fügt ein, Esc schließt.",
         all: "Alle", devices: "So passt es sich an", site: "Für die ganze Website",
-        chat: "Chat", dontpanic: "Cookie-Leiste", style: "Stil der Seite", navigation: "Navigation", footers: "Footer",
+        chat: "Chat", dontpanic: "Cookie-Leiste", style: "Stil der Seite", logo: "Logo", navigation: "Navigation", footers: "Footer", images: "Bilder der Seite",
         styleHint: "Öffnet die Stile", noteOnly: "Wird im Stil gewählt; Stile bearbeiten nur Admins." },
     en: { title: "Insert a module", search: "Search modules", insert: "Insert", cancel: "Cancel", close: "Close",
         none: "No modules found.", results: "Search results", hint: "Arrow keys to browse, Enter inserts, Esc closes.",
         all: "All", devices: "How it adapts", site: "For the whole site",
-        chat: "Chat", dontpanic: "Cookie bar", style: "Page style", navigation: "Navigation", footers: "Footers",
+        chat: "Chat", dontpanic: "Cookie bar", style: "Page style", logo: "Logo", navigation: "Navigation", footers: "Footers", images: "Site images",
         styleHint: "Opens Styles", noteOnly: "Chosen in the style; only admins edit styles." },
 };
 const lang = () => EDITOR_LANG;
@@ -54,15 +54,18 @@ const ALL_CATEGORY = { id: "all", de: TEXT.de.all, en: TEXT.en.all };
 const ALL = Object.entries(MODULES).filter(([, def]) => !def.retired).flatMap(([module, def]) => Object.entries(def.versions).map(([version, v]) => ({ module, version, def, v })));
 
 // The bottom of the left menu: what is set for the whole site, each with its icon. Chat is the floating inquiry
-// chat's settings (on or off, the name it greets with, where it sends); Cookie bar is its settings; Style, Navigation and Footers open the Styles panel at
-// their tab (admins; for other editors Navigation and Footers say where they are set).
+// chat's settings (on or off, the name it greets with, where it sends); Cookie bar is its settings; Style, Logo,
+// Navigation, Footers and Site images open the Styles panel at their tab (admins; for other editors they say where they
+// are set). In edit mode a click on the logo, the menu or the footer opens its entry (js/sections.js openWholeSite).
 const ICON = (d) => `<svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" focusable="false"><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-const SITE_ITEMS = [
+export const SITE_ITEMS = [
     { id: "chat", icon: ICON("M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v6.5A1.5 1.5 0 0 1 16 14H9l-4 3v-3H4a1.5 1.5 0 0 1-1.5-1.5V6A1.5 1.5 0 0 1 4 4.5Z") },
     { id: "dontpanic", icon: ICON("M10 2.8a7.2 7.2 0 1 0 7.2 7.6 2.6 2.6 0 0 1-3.2-2.6 2.6 2.6 0 0 1-3.4-3.3A2.4 2.4 0 0 1 10 2.8ZM7 8.2v.1M6.8 12.4v.1M10.5 12.8v.1M13.4 12.2v.1") },
     { id: "style", admin: true, tab: "look", icon: ICON("M10 2.8a7.2 7.2 0 1 0 0 14.4c1 0 1.5-.7 1.5-1.5 0-1.1-.9-1.4-.9-2.3 0-.8.7-1.4 1.5-1.4h1.8a3.3 3.3 0 0 0 3.3-3.3C17.2 5.4 14 2.8 10 2.8ZM6.4 9.2v.1M8.8 6.2v.1M12.6 6.4v.1") },
+    { id: "logo", tab: "logos", note: true, icon: ICON("M10 3v14M3 10h14M5.1 5.1l9.8 9.8M14.9 5.1l-9.8 9.8") },
     { id: "navigation", tab: "menu", note: true, icon: ICON("M3.5 5.5h13M3.5 10h13M3.5 14.5h8") },
     { id: "footers", tab: "navigation", note: true, icon: ICON("M3 3.5h14v13H3zM3 12.5h14M6 14.5h4") },
+    { id: "images", tab: "images", note: true, icon: ICON("M3 4.5h14v11H3zM3 13l4-4 3 3 2.5-2.5L17 14M13.2 7.6v.1") },
 ];
 const SITE_IDS = new Set(SITE_ITEMS.map((x) => x.id));
 

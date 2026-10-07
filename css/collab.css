@@ -1201,8 +1201,33 @@ html.kalq-magazine-open .kalq-switcher {
   min-width: 0;
   max-width: 100%;
 }
-.kalq-styles__styles .kalq-styles__create {
-  margin-bottom: 0.2rem;
+
+.kalq-styles__add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 46px;
+  padding: 0.4rem 0.8rem;
+  border: 1px dashed rgba(255, 255, 255, 0.35);
+  border-radius: 14px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.kalq-styles__add.kalq-styles__create {
+  font-size: 1.3rem;
+  line-height: 1;
+  font-weight: 300;
+}
+.kalq-styles__add:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+.kalq-styles__add:focus-visible {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
 }
 
 .kalq-styles__current {

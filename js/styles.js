@@ -531,9 +531,17 @@ function renderPanel() {
         b.addEventListener("click", () => { selectedId = v.id; draft = clone(v); dirty = false; if (previewOn) applyVariant(draft, { preview: true }); render(); });
         return b;
     }));
-    // A new variant starts from the default one (A: today's look)
-    const create = el("button", { type: "button", className: "kalq-btn kalq-styles__create", textContent: `+ ${t("create")}` });
+    // Right after the styles, in the list itself: + a new style (from the default one, A: today's look) and Duplicate
+    // the selected one
+    const create = el("button", { type: "button", className: "kalq-styles__add kalq-styles__create", textContent: "+", title: t("create") });
+    create.setAttribute("aria-label", t("create"));
     create.addEventListener("click", () => { const base = variants.find((v) => v.is_default) || variants[0]; createFrom(base || normalize({ letter: "A" }), null, { menu_style: "minimal" }); });
+    list.append(create);
+    if (draft) {
+        const copy = el("button", { type: "button", className: "kalq-styles__add kalq-styles__duplicate", textContent: t("duplicate"), title: `${t("duplicate")}: ${draft.letter} ${draft.name || ""}` });
+        copy.addEventListener("click", () => createFrom(draft, t("copyOf")(draft.name)));
+        list.append(copy);
+    }
     // The head names the style being edited; a click opens its editor (Colours & fonts: the styles, add, switch, edit)
     const current = variants.find((v) => v.id === selectedId);
     const chip = current ? el("button", { type: "button", className: "kalq-styles__current", title: t("stylesOpen") },
@@ -547,7 +555,7 @@ function renderPanel() {
     const settings = root.querySelector(".kalq-styles__settings");
     const map = root.querySelector(".kalq-styles__map");
     // no style yet: the editor still offers to make the first one
-    if (!draft) { settings.replaceChildren(el("section", { className: "kalq-styles__styles" }, el("h4", { textContent: t("styles") }), list, create)); map.replaceChildren(); return; }
+    if (!draft) { settings.replaceChildren(el("section", { className: "kalq-styles__styles" }, el("h4", { textContent: t("styles") }), list)); map.replaceChildren(); return; }
 
     const history = el("section", { className: "kalq-styles__history" });
     const save = el("button", { type: "button", className: "kalq-btn kalq-btn--primary kalq-btn--save", textContent: t("save") });
@@ -578,7 +586,7 @@ function renderPanel() {
         menu: () => [menuSection()],
         navigation: () => [footerSection()],
         // the style editor: every style (switch by a click), a new one, this one's letter, name and switches; then its look
-        look: () => [el("section", { className: "kalq-styles__styles" }, el("h4", { textContent: t("styles") }), list, create, headerSection()),
+        look: () => [el("section", { className: "kalq-styles__styles" }, el("h4", { textContent: t("styles") }), list, headerSection()),
             colorSection(), el("section", {}, el("h4", { textContent: t("fonts") }), fontRow("heading"), fontRow("body"))],
     };
     const ids = Object.keys(SECTIONS);

@@ -23,6 +23,7 @@ const TEXT = {
         themeChoose: "Darstellung wählen",
         failed: "Das hat nicht geklappt.", refused: (why) => `Nicht gespeichert: Die Datenbank lehnt es ab (${why}). Nichts wurde geändert.`, denied: "Nicht gespeichert: Ihre Anmeldung darf das nicht. Nichts wurde geändert.", relogin: "Bitte melden Sie sich erneut an.", copyOf: "Kopie", section: "Abschnitt",
         heroInserted: "Der neue Hero steht als Entwurf oben. Beim Veröffentlichen ersetzt er den bisherigen.",
+        place: "Klicken Sie, wo das Modul hin soll · ↑↓ und Enter · Esc bricht ab", inserted: (n) => (n === 1 ? "1 Modul eingefügt" : `${n} Module eingefügt`),
         insert: "Modul hier einfügen", insertAfter: "Modul darunter einfügen", site: "Für die ganze Website", missing: (list) => `Erst ausfüllen: ${list}`,
         borrowed: (n) => (n === 1 ? "1 leeres Bild mit einem Bild dieses Stils gefüllt" : `${n} leere Bilder mit Bildern dieses Stils gefüllt`),
         names: { header: "Hero", about: "Über Kalq", expertise: "Plattform-Liste", belief: "Haltung", social: "Social", "expertise-header": "Kopf",
@@ -39,6 +40,7 @@ const TEXT = {
         themeChoose: "Choose appearance",
         failed: "That did not work.", refused: (why) => `Not saved: the database refused it (${why}). Nothing was changed.`, denied: "Not saved: your login is not allowed to do this. Nothing was changed.", relogin: "Please log in again.", copyOf: "copy", section: "Section",
         heroInserted: "The new hero is on top as a draft. Publishing it replaces the current one.",
+        place: "Click where the module should go · ↑↓ and Enter · Esc cancels", inserted: (n) => (n === 1 ? "1 module inserted" : `${n} modules inserted`),
         insert: "Insert a module here", insertAfter: "Insert a module below", site: "For the whole site", missing: (list) => `Fill in first: ${list}`,
         borrowed: (n) => (n === 1 ? "1 empty picture filled with one of this style's" : `${n} empty pictures filled with this style's pictures`),
         names: { header: "Hero", about: "About Kalq", expertise: "Platform list", belief: "Belief", social: "Social", "expertise-header": "Header",
@@ -390,10 +392,124 @@ export const insertModule = (index, module, version) => run(async () => {
     reveal(entry.id);
 });
 
+// Several new modules in one save (the editor's page plan, js/picker.js): each at its position in the layout as it
+// stands, in the order they were added; one history entry
+export const insertModules = (items) => run(async () => {
+    const layout = currentLayout();
+    const first = firstMovable(layout);
+    const entries = [];
+    // from the last position up, so the earlier positions still mean what they meant; at one position in added order
+    [...items.map((x, order) => ({ ...x, order }))].sort((a, b) => b.index - a.index || b.order - a.order).forEach(({ index, module, version }) => {
+        if (!MODULES[module]?.versions[version]) return;
+        const entry = { id: newSectionId(), module, version, state: "draft" };
+        if (MODULES[module].initialOpts) entry.opts = MODULES[module].initialOpts();
+        const hero = MODULES[module].category === "heroes";
+        layout.sections.splice(hero ? 0 : Math.max(first, Math.min(index, layout.sections.length)), 0, entry);
+        entries.unshift(entry);
+    });
+    if (!entries.length) return;
+    await write(layout, entries.length === 1 ? `Section inserted: ${sectionName(entries[0])}` : `Sections inserted: ${entries.map(sectionName).join(", ")}`);
+    if (entries.length > 1) collab.toast(t("inserted")(entries.length));
+    selected = entries[0].id;
+    reveal(entries[0].id);
+});
+
+// The page for the editor's plan: every section in order (its name, its height on screen, whether it is the fixed top
+// hero), where new ones may go, and the footer that closes the page
+function pageOutline() {
+    const layout = currentLayout();
+    return {
+        first: firstMovable(layout),
+        sections: layout.sections.map((entry, i) => ({ id: entry.id, label: sectionName(entry), height: sectionNode(entry.id)?.offsetHeight || 400,
+            fixed: i === 0 && isTopHero(layout, entry.id), draft: entry.state === "draft" })),
+        footer: t("footer"),
+    };
+}
+
+// The editor (js/picker.js) with the page plan on its right: modules go into the plan where they are dropped and in
+// with Save; or one is taken onto the page itself (placeOnPage). at: a "+" between two sections, where a picked module
+// goes at once.
+async function openEditor({ at = null, category = null, focus = null } = {}) {
+    const { openPicker: open } = await import("./picker.js");
+    const toEnd = () => currentLayout().sections.length;
+    open({ collab, focus, ...(category ? { category } : {}),
+        onInsert: (module, version) => { if (!editing()) document.dispatchEvent(new CustomEvent("kalq:edit-on")); insertModule(at ?? toEnd(), module, version); },
+        plan: { outline: pageOutline(), at, onSave: (items) => { if (!editing()) document.dispatchEvent(new CustomEvent("kalq:edit-on")); insertModules(items); },
+            onPlaceOnPage: (module, version, point) => placeOnPage(module, version, point) } });
+}
+
 // focus: open on a site-wide setting instead of the modules (e.g. "chat-destinations"); category: open on that entry
 async function openPicker(index, { focus, category } = {}) {
-    const { openPicker: open } = await import("./picker.js");
-    open({ onInsert: (module, version) => insertModule(index, module, version), collab, focus, ...(category ? { category } : {}) });
+    return openEditor({ at: index, focus, category });
+}
+
+//=================================== A module onto the page itself ===================================//
+// Taken out of the editor onto the page: it follows the pointer as a small card, the seam nearest to it lights up; a
+// click (or letting go after a drag) puts it there. ↑↓ move between the seams, Enter places, Escape cancels.
+let placing = null;
+function placeOnPage(module, version, point = null) {
+    stopPlacing();
+    if (!editing()) document.dispatchEvent(new CustomEvent("kalq:edit-on"));
+    const def = MODULES[module], v = def?.versions[version];
+    if (!v) return;
+    const ghost = document.createElement("div");
+    ghost.className = "kalq-place-ghost";
+    ghost.innerHTML = `<strong></strong><span></span>`;
+    ghost.querySelector("strong").textContent = `${def.name[lang()]} · ${v.name[lang()]}`;
+    ghost.querySelector("span").textContent = t("place");
+    document.body.append(ghost);
+    document.body.classList.add("kalq-placing");
+    placing = { module, version, ghost, target: null, x: point?.x ?? innerWidth / 2, y: point?.y ?? innerHeight / 2 };
+    const zones = () => [...(insertLayer?.children || [])];
+    const mark = (zone) => {
+        zones().forEach((z) => z.classList.toggle("is-target", z === zone));
+        placing.target = zone ? Number(zone.dataset.index) : null;
+    };
+    const nearest = (y) => {
+        let best = null, dist = Infinity;
+        zones().forEach((z) => { const r = z.getBoundingClientRect(); const d = Math.abs(r.top + r.height / 2 - y); if (d < dist) { dist = d; best = z; } });
+        return best;
+    };
+    const follow = (x, y) => { placing.x = x; placing.y = y; ghost.style.transform = `translate(${Math.round(x + 14)}px, ${Math.round(y + 14)}px)`; mark(nearest(y)); };
+    const put = () => { const { target } = placing; const m = placing.module, ver = placing.version; stopPlacing(); if (target != null) insertModule(target, m, ver); };
+    const onMove = (e) => follow(e.clientX, e.clientY);
+    const onClick = (e) => { if (e.target.closest?.(".kalq-toolbar")) return; e.preventDefault(); e.stopPropagation(); follow(e.clientX, e.clientY); put(); };
+    const onUp = (e) => { if (placing?.dragging) { placing.dragging = false; e.preventDefault(); follow(e.clientX, e.clientY); put(); } };
+    const onKey = (e) => {
+        if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); return stopPlacing(); }
+        if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); return put(); }
+        if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+        e.preventDefault(); e.stopPropagation();
+        const list = zones(), i = list.findIndex((z) => z.classList.contains("is-target"));
+        const next = list[Math.max(0, Math.min(list.length - 1, (i < 0 ? 0 : i) + (e.key === "ArrowDown" ? 1 : -1)))];
+        mark(next);
+        if (!next) return;
+        // into view through the site's smooth scroller when there is one
+        const scroller = document.querySelector(".scrollbar-container");
+        const bar = scroller && window.Scrollbar ? Scrollbar.get(scroller) : null;
+        if (bar) bar.scrollIntoView(next, { offsetTop: Math.round(innerHeight / 2) }); else next.scrollIntoView({ block: "center" });
+    };
+    // the page scrolled under a still pointer: the nearest seam again
+    const onScroll = () => placing && follow(placing.x, placing.y);
+    placing.dragging = !!point?.dragging; // still held from the editor: letting go places it
+    placing.off = () => { document.removeEventListener("pointermove", onMove, true); document.removeEventListener("click", onClick, true); document.removeEventListener("pointerup", onUp, true); document.removeEventListener("keydown", onKey, true); smooth?.removeListener(onScroll); window.removeEventListener("scroll", onScroll); };
+    const smoothEl = document.querySelector(".scrollbar-container");
+    const smooth = smoothEl && window.Scrollbar ? Scrollbar.get(smoothEl) : null;
+    if (smooth) smooth.addListener(onScroll); else window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("pointermove", onMove, true);
+    document.addEventListener("click", onClick, true);
+    document.addEventListener("pointerup", onUp, true);
+    document.addEventListener("keydown", onKey, true);
+    // the seams are drawn with edit mode: follow once they are there
+    requestAnimationFrame(() => requestAnimationFrame(() => follow(placing.x, placing.y)));
+}
+function stopPlacing() {
+    if (!placing) return;
+    placing.off();
+    placing.ghost.remove();
+    document.querySelectorAll(".kalq-insert-zone.is-target").forEach((z) => z.classList.remove("is-target"));
+    document.body.classList.remove("kalq-placing");
+    placing = null;
 }
 
 // The toolbar's "For the whole site": the picker straight at its whole-site group (the chat first), without edit mode
@@ -410,24 +526,17 @@ function addSiteButton() {
     collab.addTool(b, 36);
 }
 
-// The pencil: edit mode comes on and the editor opens at once, showing the modules (js/edit.js). A module picked there
-// goes to the end of the page.
-export async function openModules() {
-    const { openPicker: open } = await import("./picker.js");
-    open({ collab, onInsert: (module, version) => insertModule(currentLayout().sections.length, module, version) });
-}
+// The pencil: edit mode comes on and the editor opens at once, showing the modules and the page plan (js/edit.js)
+export const openModules = () => openEditor();
 
 // One entry of the whole-site group (js/picker.js SITE_ITEMS): the Styles panel at its tab for admins where it has
 // one, else the picker at that entry (the chat, the cookie bar; for other editors the note saying where it is set).
 // The toolbar's button and a click on the logo, the menu or the footer in edit mode (js/edit.js) come here.
 export async function openWholeSite(id) {
-    const { openPicker: open, SITE_ITEMS } = await import("./picker.js");
+    const { SITE_ITEMS } = await import("./picker.js");
     const item = SITE_ITEMS.find((x) => x.id === id);
     if (item?.tab && collab.me?.is_admin) return document.dispatchEvent(new CustomEvent("kalq:open-styles", { detail: { tab: item.tab } }));
-    open({ collab, category: item ? id : "chat", onInsert: (module, version) => {
-        if (!editing()) document.dispatchEvent(new CustomEvent("kalq:edit-on"));
-        insertModule(currentLayout().sections.length, module, version);
-    } });
+    openEditor({ category: item ? id : "chat" });
 }
 
 // Scroll the page so a section is in view, its bar clear below the header
@@ -772,6 +881,7 @@ function onPointerDown(e) {
 const typing = (target) => !!target.closest?.("input, textarea, select, [contenteditable='true']");
 
 function onKey(e) {
+    if (placing) return; // a module being placed onto the page has the keys (Esc, ↑↓, Enter); nothing acts on the selected section
     if (!editing() || typing(e.target) || e.target.closest?.(".kalq-picker, .kalq-outline")) return;
     const mod = e.metaKey || e.ctrlKey;
     if (mod && e.key.toLowerCase() === "z") { e.preventDefault(); e.stopImmediatePropagation(); return e.shiftKey ? redo() : undo(); }

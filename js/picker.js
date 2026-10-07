@@ -1,6 +1,10 @@
 // Module picker (editors, edit mode): opened by a plus button between sections. Left the categories ("All" first) and
 // a search; on top schematic cards of every version, the selected card with its Insert button; below, on a dark grey
-// stage, the selected version on all eight devices in one row at their real sizes relative to each other.
+// stage, the selected version on all eight devices in one row at their real sizes relative to each other. On the right,
+// from the top of the window down, the page plan: the page's sections from the hero to the footer, labelled, with a
+// marker where new modules go; a card's Insert (Enter, a double click) or a card dragged into the plan adds its module
+// there, as many as wanted, and Save puts them in. A card dragged out of the window goes onto the page itself. Opened
+// from a "+" between two sections, Insert puts the module right there at once.
 // Keyboard: arrows browse the cards, Enter inserts, Esc closes, Tab moves between the areas.
 import { EDITOR_LANG } from "./i18n.js";
 import { CATEGORIES, MODULES, renderModule } from "./modules/registry.js";
@@ -11,12 +15,18 @@ const TEXT = {
         none: "Keine Module gefunden.", results: "Suchergebnisse", hint: "Pfeiltasten zum Blättern, Enter fügt ein, Esc schließt.",
         all: "Alle", devices: "So passt es sich an", site: "Für die ganze Website",
         chat: "Chat", dontpanic: "Cookie-Leiste", style: "Stil der Seite", logo: "Logo", navigation: "Navigation", footers: "Footer", images: "Bilder der Seite",
-        styleHint: "Öffnet die Stile", noteOnly: "Wird im Stil gewählt; Stile bearbeiten nur Admins." },
+        styleHint: "Öffnet die Stile", noteOnly: "Wird im Stil gewählt; Stile bearbeiten nur Admins.",
+        plan: "Diese Seite", planHint: "Klicken Sie zwischen zwei Blöcke, um die Stelle zu wählen. Einfügen, Enter oder eine hierher gezogene Karte setzt das Modul dort ein.",
+        add: "Zur Seite hinzufügen", save: (n) => (n ? `Speichern (${n})` : "Speichern"), onPage: "Auf die Seite ziehen", discard: (n) => `${n === 1 ? "1 Modul" : `${n} Module`} nicht gespeichert. Verwerfen?`,
+        fixed: "fixiert", draft: "Entwurf", fresh: "neu", remove: "Entfernen", here: "Hier", dropPage: "Loslassen: auf der Seite platzieren" },
     en: { title: "Insert a module", search: "Search modules", insert: "Insert", cancel: "Cancel", close: "Close",
         none: "No modules found.", results: "Search results", hint: "Arrow keys to browse, Enter inserts, Esc closes.",
         all: "All", devices: "How it adapts", site: "For the whole site",
         chat: "Chat", dontpanic: "Cookie bar", style: "Page style", logo: "Logo", navigation: "Navigation", footers: "Footers", images: "Site images",
-        styleHint: "Opens Styles", noteOnly: "Chosen in the style; only admins edit styles." },
+        styleHint: "Opens Styles", noteOnly: "Chosen in the style; only admins edit styles.",
+        plan: "This page", planHint: "Click between two blocks to choose the spot. Insert, Enter or a card dragged here puts the module there.",
+        add: "Add to the page", save: (n) => (n ? `Save (${n})` : "Save"), onPage: "Drag onto the page", discard: (n) => `${n === 1 ? "1 module" : `${n} modules`} not saved. Discard?`,
+        fixed: "fixed", draft: "draft", fresh: "new", remove: "Remove", here: "Here", dropPage: "Let go: place it on the page" },
 };
 const lang = () => EDITOR_LANG;
 const t = (key) => TEXT[lang()][key];
@@ -139,6 +149,7 @@ function build() {
                     <div class="kalq-picker__grid" role="listbox"></div>
                 </div>
                 <section class="kalq-picker__detail" aria-live="polite"></section>
+                <aside class="kalq-picker__plan"></aside>
             </div>
             <button type="button" class="kalq-picker__close" data-close></button>
         </div>`;
@@ -194,6 +205,7 @@ function draw() {
         return b;
     }));
 
+    drawPlan();
     const browse = root.querySelector(".kalq-picker__browse");
     browse.querySelector(".kalq-picker__settings")?.remove();
     const siteItem = !state.query && SITE_ITEMS.find((x) => x.id === state.category);
@@ -225,14 +237,16 @@ function draw() {
             option.innerHTML = wireframe(item.v.wire, { motion: item.v.motion });
             option.append(el("span", { className: "kalq-picker__name", textContent: item.v.name[L] }), el("span", { className: "kalq-picker__module", textContent: item.def.name[L] }));
             if (i === state.index) { // the selected card carries its Insert (out of the tab order: Enter inserts it)
-                const go = el("button", { type: "button", className: "kalq-picker__insert", tabIndex: -1, title: t("insert"),
+                const adds = state.plan && state.plan.at == null; // into the plan
+                const go = el("button", { type: "button", className: "kalq-picker__insert", tabIndex: -1, title: adds ? t("add") : t("insert"),
                     innerHTML: '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" focusable="false"><path d="M10 3.5v11M5 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' });
-                go.setAttribute("aria-label", `${t("insert")}: ${item.v.name[L]}`);
+                go.setAttribute("aria-label", `${adds ? t("add") : t("insert")}: ${item.v.name[L]}`);
                 go.addEventListener("click", (e) => { e.stopPropagation(); insert(item); });
                 option.append(go);
             }
             option.addEventListener("click", () => { if (state.index === i) return; state.index = i; draw(); focusGrid(); });
             option.addEventListener("dblclick", () => insert(item));
+            option.addEventListener("pointerdown", (e) => dragCard(e, item));
             return option;
         }));
         grid.setAttribute("aria-activedescendant", `kalq-pick-${state.index}`);
@@ -383,14 +397,99 @@ function trap(e) {
     focusable[next]?.focus();
 }
 
+// Insert: from a "+", right there at once; otherwise into the plan at its marker
 function insert(item) {
-    const done = state.onInsert;
-    close();
-    done(item.module, item.version);
+    if (state.plan && state.plan.at == null) return addToPlan(item, state.marker);
+    const done = state.onInsert, at = state.plan ? state.marker : null;
+    close({ force: true });
+    done(item.module, item.version, at);
 }
 
-function close() {
+//=================================== The page plan ===================================//
+const PX = 0.075; // a section's height on the page → its block in the plan (clamped)
+function addToPlan(item, index) {
+    state.pending.push({ index, module: item.module, version: item.version, label: `${item.def.name[lang()]} · ${item.v.name[lang()]}` });
+    drawPlan();
+    root.querySelector(`.kalq-plan__gap[data-index="${index}"] .kalq-plan__new:last-of-type`)?.scrollIntoView({ block: "nearest" });
+}
+
+function drawPlan() {
+    const box = root.querySelector(".kalq-picker__plan");
+    root.classList.toggle("has-plan", !!state.plan);
+    if (!state.plan) return box.replaceChildren();
+    const { outline } = state.plan;
+    box.setAttribute("aria-label", t("plan"));
+    const list = el("ol", { className: "kalq-plan__list" });
+    const gap = (i) => {
+        const g = el("li", { className: "kalq-plan__gap" });
+        g.dataset.index = i;
+        state.pending.forEach((p, k) => {
+            if (p.index !== i) return;
+            const x = el("button", { type: "button", className: "kalq-plan__remove", textContent: "×", title: t("remove") });
+            x.setAttribute("aria-label", `${t("remove")}: ${p.label}`);
+            x.addEventListener("click", (e) => { e.stopPropagation(); state.pending.splice(k, 1); drawPlan(); });
+            g.append(el("div", { className: "kalq-plan__new" }, el("span", { textContent: p.label }), el("small", { textContent: t("fresh") }), x));
+        });
+        if (state.marker === i) g.append(el("div", { className: "kalq-plan__marker" }, el("span", { textContent: t("here") })));
+        g.classList.toggle("is-marked", state.marker === i);
+        g.addEventListener("click", () => { state.marker = i; drawPlan(); });
+        return g;
+    };
+    outline.sections.forEach((sec, i) => {
+        if (i >= outline.first) list.append(gap(i));
+        const b = el("li", { className: `kalq-plan__block${sec.fixed ? " is-fixed" : ""}${sec.draft ? " is-draft" : ""}` },
+            el("span", { textContent: sec.label }), sec.fixed || sec.draft ? el("small", { textContent: sec.fixed ? t("fixed") : t("draft") }) : null);
+        b.style.height = `${Math.round(Math.min(110, Math.max(26, sec.height * PX)))}px`;
+        list.append(b);
+    });
+    list.append(gap(outline.sections.length));
+    list.append(el("li", { className: "kalq-plan__block is-footer" }, el("span", { textContent: outline.footer }), el("small", { textContent: t("fixed") })));
+    const save = el("button", { type: "button", className: "kalq-plan__save", textContent: t("save")(state.pending.length), disabled: !state.pending.length });
+    save.addEventListener("click", () => { const items = state.pending.map(({ index, module, version }) => ({ index, module, version })); const done = state.plan.onSave; close({ force: true }); done(items); });
+    const page = el("button", { type: "button", className: "kalq-plan__page", textContent: t("onPage") });
+    page.addEventListener("click", () => { const item = items()[state.index]; if (item) toPage(item, null); });
+    const scroll = box.querySelector(".kalq-plan__list")?.parentElement?.scrollTop || 0;
+    box.replaceChildren(el("div", { className: "kalq-plan__head" }, el("h3", { className: "kalq-plan__title", textContent: t("plan") }), el("p", { className: "kalq-plan__hint", textContent: t("planHint") })),
+        el("div", { className: "kalq-plan__scroll" }, list), el("div", { className: "kalq-plan__actions" }, page, save));
+    box.querySelector(".kalq-plan__scroll").scrollTop = scroll;
+}
+
+// The selected module onto the page itself (js/sections.js placeOnPage); point: where the pointer is, held or not
+function toPage(item, point) {
+    if (state.pending.length && !window.confirm(t("discard")(state.pending.length))) return;
+    const done = state.plan.onPlaceOnPage;
+    close({ force: true });
+    done(item.module, item.version, point);
+}
+
+// A card dragged: over the plan the nearest gap lights up and a drop adds it there; out of the window it goes onto the
+// page (the editor closes, the card stays with the pointer, letting go places it)
+function dragCard(e, item) {
+    if (!state.plan || e.button !== 0) return;
+    const x0 = e.clientX, y0 = e.clientY;
+    let ghost = null, over = null;
+    const gaps = () => [...root.querySelectorAll(".kalq-plan__gap")];
+    const nearest = (y) => gaps().reduce((best, g) => { const r = g.getBoundingClientRect(); const d = Math.abs(r.top + r.height / 2 - y); return !best || d < best.d ? { g, d } : best; }, null)?.g || null;
+    const end = () => { document.removeEventListener("pointermove", move, true); document.removeEventListener("pointerup", up, true); ghost?.remove(); root.classList.remove("is-dragging"); gaps().forEach((g) => g.classList.remove("is-over")); };
+    const move = (ev) => {
+        if (!ghost && Math.hypot(ev.clientX - x0, ev.clientY - y0) < 6) return;
+        if (!ghost) { ghost = el("div", { className: "kalq-plan__ghost", textContent: `${item.def.name[lang()]} · ${item.v.name[lang()]}` }); root.append(ghost); root.classList.add("is-dragging"); }
+        ghost.style.transform = `translate(${ev.clientX + 12}px, ${ev.clientY + 12}px)`;
+        const win = root.querySelector(".kalq-picker__window").getBoundingClientRect();
+        if (ev.clientX < win.left || ev.clientX > win.right || ev.clientY < win.top || ev.clientY > win.bottom) { end(); return toPage(item, { x: ev.clientX, y: ev.clientY, dragging: true }); }
+        const plan = root.querySelector(".kalq-picker__plan").getBoundingClientRect();
+        const inPlan = ev.clientX >= plan.left && ev.clientX <= plan.right && ev.clientY >= plan.top && ev.clientY <= plan.bottom;
+        over = inPlan ? nearest(ev.clientY) : null;
+        gaps().forEach((g) => g.classList.toggle("is-over", g === over));
+    };
+    const up = () => { const target = over; const moved = !!ghost; end(); if (moved && target) { state.marker = Number(target.dataset.index); addToPlan(item, state.marker); } };
+    document.addEventListener("pointermove", move, true);
+    document.addEventListener("pointerup", up, true);
+}
+
+function close({ force = false } = {}) {
     if (!state) return;
+    if (!force && state.pending?.length && !window.confirm(t("discard")(state.pending.length))) return;
     root.classList.remove("is-open");
     root.querySelector(".kalq-picker__detail").replaceChildren(); // no previews left in the page
     root.querySelector(".kalq-picker__settings")?.remove(); // nor the chat's preview (a second .kalq-chat)
@@ -403,10 +502,13 @@ function close() {
 
 // focus "chat-destinations": open on Chat, its send destinations in view with the first field focused (a publish
 // blocked for want of one links here)
-export function openPicker({ onInsert, collab = null, category = ALL_CATEGORY.id, focus = null }) {
+// plan: { outline, at, onSave, onPlaceOnPage } (js/sections.js openEditor): the page plan on the right; at: opened from a
+// "+", where Insert puts a module at once
+export function openPicker({ onInsert, collab = null, category = ALL_CATEGORY.id, focus = null, plan = null }) {
     if (!root) build();
     if (focus === "chat-destinations") category = "chat";
-    state = { onInsert, collab, category, query: "", index: 0, returnFocus: document.activeElement };
+    const marker = plan ? (plan.at ?? plan.outline.sections.length) : null;
+    state = { onInsert, collab, category, query: "", index: 0, returnFocus: document.activeElement, plan, pending: [], marker };
     root.querySelector(".kalq-picker__search").value = "";
     draw();
     root.classList.add("is-open");

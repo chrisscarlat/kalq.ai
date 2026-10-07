@@ -3021,10 +3021,10 @@ $kalq-image-art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/
     letter-spacing: 0;
 }
 
-// the cards in two rows: as many columns as half the cards (js/picker.js sets --cols)
+// six cards on a line, always: the six places stay when there are fewer cards (one keeps the width of one of six)
 .kalq-picker__grid {
     display: grid;
-    grid-template-columns: repeat(var(--cols, 4), minmax(0, 168px)); // small cards
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 10px;
 }
 
@@ -4008,8 +4008,9 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video)) {
 //=================================== The editor's page plan (js/picker.js drawPlan) ===================================//
 // The cards keep their five columns; the devices strip runs over the cards only; the plan fills the right from the top
 // of the window to the bottom
+// the plan always the same width (a share of the window); the cards, and the devices strip over them, the rest
 .kalq-picker.has-plan:not(.is-settings) .kalq-picker__main {
-    grid-template-columns: minmax(0, auto) minmax(280px, 1fr);
+    grid-template-columns: minmax(0, 1fr) clamp(280px, 24%, 380px);
     grid-template-rows: auto minmax(0, 1fr);
 }
 .kalq-picker.has-plan:not(.is-settings) {

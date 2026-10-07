@@ -262,7 +262,6 @@ function draw() {
             return option;
         }));
         grid.setAttribute("aria-activedescendant", `kalq-pick-${state.index}`);
-        grid.style.setProperty("--cols", String(Math.min(5, Math.max(1, Math.ceil(list.length / 2))))); // the cards in two rows
     }
     detail(list[state.index]);
 }

@@ -4412,6 +4412,35 @@ body.kalq-edit .kalq-media-slot:not(:has(> img, > video))::after {
   opacity: 0.8;
 }
 
+.kalq-plan__new {
+  cursor: grab;
+  touch-action: none;
+}
+
+.kalq-plan__new.is-moving {
+  opacity: 0.4;
+}
+
+.kalq-plan__step {
+  width: 22px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #fff;
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.kalq-plan__step:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.kalq-plan__step:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
 .kalq-plan__remove {
   width: 24px;
   height: 24px;

@@ -20,7 +20,7 @@ const TEXT = {
         styleHint: "Öffnet die Stile", noteOnly: "Wird im Stil gewählt; Stile bearbeiten nur Admins.",
         plan: "Diese Seite", planHint: "Klicken Sie zwischen zwei Blöcke, um die Stelle zu wählen. Einfügen, Enter oder eine hierher gezogene Karte setzt das Modul dort ein.",
         add: "Zur Seite hinzufügen", save: (n) => (n ? `Speichern (${n})` : "Speichern"), onPage: "Auf die Seite ziehen", discard: (n) => `${n === 1 ? "1 Modul" : `${n} Module`} nicht gespeichert. Verwerfen?`,
-        fixed: "fixiert", draft: "Entwurf", fresh: "neu", remove: "Entfernen", here: "Hier", dropPage: "Loslassen: auf der Seite platzieren" },
+        fixed: "fixiert", draft: "Entwurf", fresh: "neu", remove: "Entfernen", up: "Nach oben", down: "Nach unten", here: "Hier", dropPage: "Loslassen: auf der Seite platzieren" },
     en: { title: "Insert a module", search: "Search modules", insert: "Insert", cancel: "Cancel", close: "Close",
         none: "No modules found.", results: "Search results", hint: "Arrow keys to browse, Enter inserts, Esc closes.",
         all: "All", devices: "How it adapts", site: "For the whole site",
@@ -28,7 +28,7 @@ const TEXT = {
         styleHint: "Opens Styles", noteOnly: "Chosen in the style; only admins edit styles.",
         plan: "This page", planHint: "Click between two blocks to choose the spot. Insert, Enter or a card dragged here puts the module there.",
         add: "Add to the page", save: (n) => (n ? `Save (${n})` : "Save"), onPage: "Drag onto the page", discard: (n) => `${n === 1 ? "1 module" : `${n} modules`} not saved. Discard?`,
-        fixed: "fixed", draft: "draft", fresh: "new", remove: "Remove", here: "Here", dropPage: "Let go: place it on the page" },
+        fixed: "fixed", draft: "draft", fresh: "new", remove: "Remove", up: "Move up", down: "Move down", here: "Here", dropPage: "Let go: place it on the page" },
 };
 const lang = () => EDITOR_LANG;
 const t = (key) => TEXT[lang()][key];
@@ -440,7 +440,16 @@ function drawPlan() {
             const x = el("button", { type: "button", className: "kalq-plan__remove", textContent: "×", title: t("remove") });
             x.setAttribute("aria-label", `${t("remove")}: ${p.label}`);
             x.addEventListener("click", (e) => { e.stopPropagation(); state.pending.splice(k, 1); drawPlan(); });
-            g.append(el("div", { className: "kalq-plan__new" }, el("span", { textContent: p.label }), el("small", { textContent: t("fresh") }), x));
+            // until Save it can still move: dragged up or down in the plan, or a step with its arrows
+            const step = (dir) => {
+                const b = el("button", { type: "button", className: "kalq-plan__step", textContent: dir < 0 ? "↑" : "↓", title: t(dir < 0 ? "up" : "down") });
+                b.setAttribute("aria-label", `${t(dir < 0 ? "up" : "down")}: ${p.label}`);
+                b.addEventListener("click", (e) => { e.stopPropagation(); movePending(p, dir); });
+                return b;
+            };
+            const block = el("div", { className: "kalq-plan__new" }, el("span", { textContent: p.label }), el("small", { textContent: t("fresh") }), step(-1), step(1), x);
+            block.addEventListener("pointerdown", (e) => { if (!e.target.closest("button")) dragPending(e, p); });
+            g.append(block);
         });
         if (state.marker === i) g.append(el("div", { className: "kalq-plan__marker" }, el("span", { textContent: t("here") })));
         g.classList.toggle("is-marked", state.marker === i);
@@ -464,6 +473,66 @@ function drawPlan() {
     box.replaceChildren(el("div", { className: "kalq-plan__head" }, el("h3", { className: "kalq-plan__title", textContent: t("plan") }), el("p", { className: "kalq-plan__hint", textContent: t("planHint") })),
         el("div", { className: "kalq-plan__scroll" }, list), el("div", { className: "kalq-plan__actions" }, page, save));
     box.querySelector(".kalq-plan__scroll").scrollTop = scroll;
+}
+
+// A module waiting in the plan, one step up or down: past the next waiting module, or past the section to the next
+// spot (nothing above the fixed hero, nothing below the footer)
+function movePending(p, dir) {
+    const { first, sections } = state.plan.outline;
+    const same = state.pending.filter((q) => q.index === p.index);
+    const neighbour = same[same.indexOf(p) + dir];
+    const k = state.pending.indexOf(p);
+    if (neighbour) {
+        const j = state.pending.indexOf(neighbour);
+        [state.pending[k], state.pending[j]] = [state.pending[j], state.pending[k]];
+    } else {
+        const next = p.index + dir;
+        if (next < first || next > sections.length) return;
+        state.pending.splice(k, 1);
+        p.index = next;
+        // up: the last at the spot above; down: the first at the spot below
+        if (dir < 0) state.pending.push(p); else state.pending.unshift(p);
+    }
+    drawPlan();
+    // the focus stays on the arrow just pressed, on the module's new place
+    const moved = [...root.querySelectorAll(".kalq-plan__gap")].flatMap((g) => [...g.querySelectorAll(".kalq-plan__new")].map((n, i) => ({ n, g: +g.dataset.index, i })))
+        .find(({ g, i }) => g === p.index && i === state.pending.filter((q) => q.index === p.index).indexOf(p));
+    moved?.n.querySelectorAll(".kalq-plan__step")[dir < 0 ? 0 : 1]?.focus();
+}
+
+// A module waiting in the plan, dragged to another spot (or another place among the waiting ones at a spot)
+function dragPending(e, p) {
+    if (e.button !== 0) return;
+    const x0 = e.clientX, y0 = e.clientY;
+    let ghost = null, target = null;
+    const gaps = () => [...root.querySelectorAll(".kalq-plan__gap")];
+    const nearest = (y) => gaps().reduce((best, g) => { const r = g.getBoundingClientRect(); const d = y < r.top ? r.top - y : y > r.bottom ? y - r.bottom : 0; return !best || d < best.d ? { g, d } : best; }, null)?.g || null;
+    const end = () => { document.removeEventListener("pointermove", move, true); document.removeEventListener("pointerup", up, true); ghost?.remove(); root.classList.remove("is-dragging"); gaps().forEach((g) => g.classList.remove("is-over")); root.querySelectorAll(".kalq-plan__new.is-moving").forEach((n) => n.classList.remove("is-moving")); };
+    const move = (ev) => {
+        if (!ghost && Math.hypot(ev.clientX - x0, ev.clientY - y0) < 6) return;
+        if (!ghost) { ghost = el("div", { className: "kalq-plan__ghost", textContent: p.label }); root.append(ghost); root.classList.add("is-dragging"); e.target.closest(".kalq-plan__new")?.classList.add("is-moving"); }
+        ghost.style.transform = `translate(${ev.clientX + 12}px, ${ev.clientY + 12}px)`;
+        const g = nearest(ev.clientY);
+        gaps().forEach((x) => x.classList.toggle("is-over", x === g));
+        // where among the waiting ones at that spot: before the first whose middle is below the pointer
+        const others = g ? [...g.querySelectorAll(".kalq-plan__new:not(.is-moving)")] : [];
+        const before = others.findIndex((n) => { const r = n.getBoundingClientRect(); return ev.clientY < r.top + r.height / 2; });
+        target = g ? { index: +g.dataset.index, before } : null;
+    };
+    const up = () => {
+        const to = target, moved = !!ghost;
+        end();
+        if (!moved || !to) return;
+        state.pending.splice(state.pending.indexOf(p), 1);
+        const at = state.pending.filter((q) => q.index === to.index);
+        p.index = to.index;
+        if (to.before >= 0 && at[to.before]) state.pending.splice(state.pending.indexOf(at[to.before]), 0, p);
+        else if (at.length) state.pending.splice(state.pending.indexOf(at.at(-1)) + 1, 0, p);
+        else state.pending.push(p);
+        drawPlan();
+    };
+    document.addEventListener("pointermove", move, true);
+    document.addEventListener("pointerup", up, true);
 }
 
 // The selected module onto the page itself (js/sections.js placeOnPage); point: where the pointer is, held or not

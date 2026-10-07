@@ -532,7 +532,7 @@ function minimize() {
     root.classList.add("is-minimized");
 }
 
-// The header's style switcher (js/variants.js), for admins: a duplicate icon after each style's dot and a + after the
+// The header's style switcher (js/variants.js), for admins: a duplicate icon after the style shown and a + after the
 // last. Each makes the new style (a draft) and opens it here at Colours & fonts, to finish, publish and save.
 const DUP_ICON = '<svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true"><path d="M5.5 5.5h7v7h-7zM3.5 10.5v-7h7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>';
 function decorateSwitcher() {
@@ -540,7 +540,8 @@ function decorateSwitcher() {
     if (!sw) return;
     sw.querySelectorAll(".kalq-switcher__dup, .kalq-switcher__add").forEach((n) => n.remove());
     if (!setupOn()) return;
-    sw.querySelectorAll(".kalq-switcher__dot").forEach((dot) => {
+    // one duplicate icon: after the style shown (it follows a switch)
+    sw.querySelectorAll('.kalq-switcher__dot[aria-pressed="true"]').forEach((dot) => {
         const letter = dot.textContent;
         const dup = el("button", { type: "button", className: "kalq-switcher__dup", innerHTML: DUP_ICON, title: `${t("duplicate")}: ${letter}` });
         dup.setAttribute("aria-label", `${t("duplicate")}: ${letter}`);

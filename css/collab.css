@@ -1243,6 +1243,51 @@ body.kalq-edit [data-kalq-site=logo] {
   max-width: 100%;
 }
 
+.kalq-styles__dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.kalq-styles__dot {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: var(--dot);
+  background-clip: padding-box;
+  color: #fff;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.kalq-styles__dot[aria-pressed=true] {
+  box-shadow: 0 0 0 2px #121212, 0 0 0 4px #fff;
+}
+.kalq-styles__dot:hover {
+  filter: brightness(1.15);
+}
+.kalq-styles__dot:focus-visible {
+  outline: 2px solid #3B82F6;
+  outline-offset: 3px;
+}
+
+.kalq-styles__variants .kalq-styles__add {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 0.7rem;
+}
+
+.kalq-styles__variants .kalq-styles__create {
+  width: 34px;
+  padding: 0;
+  border-radius: 50%;
+}
+
 .kalq-styles__add {
   display: inline-flex;
   align-items: center;
@@ -1275,7 +1320,7 @@ body.kalq-edit [data-kalq-site=logo] {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.3rem 0.75rem 0.3rem 0.3rem;
+  padding: 0.4rem 0.8rem;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
   background: none;

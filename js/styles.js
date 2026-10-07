@@ -524,34 +524,41 @@ function render() {
 }
 
 function renderPanel() {
+    const pick = (v) => { selectedId = v.id; draft = clone(v); dirty = false; if (previewOn) applyVariant(draft, { preview: true }); render(); };
     const list = el("div", { className: "kalq-styles__list" }, ...variants.map((v) => {
         const b = el("button", { type: "button", className: "kalq-styles__card" }, el("span", { className: "kalq-styles__letter", textContent: v.letter }), el("span", { textContent: v.name || "" }),
             el("small", { textContent: `${v.status === "published" ? t("published") : t("draft")}${v.is_default ? ` · ${t("isDefault")}` : ""}` }));
         b.style.setProperty("--dot", v.colors?.accent || "#3b82f6");
         b.setAttribute("aria-pressed", v.id === selectedId);
-        b.addEventListener("click", () => { selectedId = v.id; draft = clone(v); dirty = false; if (previewOn) applyVariant(draft, { preview: true }); render(); });
+        b.addEventListener("click", () => pick(v));
         return b;
     }));
-    // Right after the styles, in the list itself: + a new style (from the default one, A: today's look) and Duplicate
-    // the selected one
-    const create = el("button", { type: "button", className: "kalq-styles__add kalq-styles__create", textContent: "+", title: t("create") });
-    create.setAttribute("aria-label", t("create"));
-    create.addEventListener("click", () => { const base = variants.find((v) => v.is_default) || variants[0]; createFrom(base || normalize({ letter: "A" }), null, { menu_style: "minimal" }); });
-    list.append(create);
-    if (draft) {
+    // Right after the styles: + a new style (from the default one, A: today's look) and Duplicate the selected one; in
+    // the head on every tab and in the Colours & fonts list
+    const addButtons = () => {
+        const create = el("button", { type: "button", className: "kalq-styles__add kalq-styles__create", textContent: "+", title: t("create") });
+        create.setAttribute("aria-label", t("create"));
+        create.addEventListener("click", () => { const base = variants.find((v) => v.is_default) || variants[0]; createFrom(base || normalize({ letter: "A" }), null, { menu_style: "minimal" }); });
+        if (!draft) return [create];
         const copy = el("button", { type: "button", className: "kalq-styles__add kalq-styles__duplicate", textContent: t("duplicate"), title: `${t("duplicate")}: ${draft.letter} ${draft.name || ""}` });
         copy.addEventListener("click", () => createFrom(draft, t("copyOf")(draft.name)));
-        list.append(copy);
-    }
-    // The head names the style being edited; a click opens its editor (Colours & fonts: the styles, add, switch, edit)
+        return [create, copy];
+    };
+    list.append(...addButtons());
+    // The head: every style as its letter on its colour (a click switches to it), then + and Duplicate, then the name of
+    // the one being edited (a click opens its editor: Colours & fonts)
+    const dots = variants.map((v) => {
+        const d = el("button", { type: "button", className: "kalq-styles__dot", textContent: v.letter, title: `${v.letter} ${v.name || ""}${v.status === "published" ? "" : ` · ${t("draft")}`}` });
+        d.style.setProperty("--dot", v.colors?.accent || "#3b82f6");
+        d.setAttribute("aria-pressed", v.id === selectedId);
+        d.setAttribute("aria-label", d.title);
+        d.addEventListener("click", () => pick(v));
+        return d;
+    });
     const current = variants.find((v) => v.id === selectedId);
-    const chip = current ? el("button", { type: "button", className: "kalq-styles__current", title: t("stylesOpen") },
-        el("span", { className: "kalq-styles__letter", textContent: current.letter }), el("span", { textContent: `${t("editing")} ${current.name || ""}` })) : null;
-    if (chip) {
-        chip.style.setProperty("--dot", current.colors?.accent || "#3b82f6");
-        chip.addEventListener("click", () => { activeTab = "look"; render(); root.querySelector("#kalq-styles-tab-look")?.focus(); });
-    }
-    root.querySelector(".kalq-styles__variants").replaceChildren(...(chip ? [chip] : []));
+    const chip = current ? el("button", { type: "button", className: "kalq-styles__current", title: t("stylesOpen"), textContent: `${t("editing")} ${current.name || ""}` }) : null;
+    chip?.addEventListener("click", () => { activeTab = "look"; render(); root.querySelector("#kalq-styles-tab-look")?.focus(); });
+    root.querySelector(".kalq-styles__variants").replaceChildren(el("div", { className: "kalq-styles__dots", role: "group", ariaLabel: t("styles") }, ...dots), ...addButtons(), ...(chip ? [chip] : []));
 
     const settings = root.querySelector(".kalq-styles__settings");
     const map = root.querySelector(".kalq-styles__map");

@@ -930,3 +930,82 @@ body.kalq-edit .kalq-f-ts__card > .kalq-f-tools { position: relative; z-index: 1
     .kalq-f-hs.is-armed .kalq-f-hs__card { flex-basis: calc(var(--seg-l) - 4rem); }
     .kalq-f-hs.is-armed .kalq-f-hs__track { gap: calc(var(--seg-hinge) + 4rem); padding-inline: 2rem; }
 }
+
+//=================================== Heroes (js/modules/final.js) ===================================//
+// The page's opening, its h1. Hero with video: full height, a video or picture behind, a shade, the title and the
+// slogan centred, a pause at the bottom right. Page hero: as on Platform and Company, the full screen with the title
+// on the left in the middle of its height in the site's h2 type, a picture behind it optional.
+.kalq-m.kalq-f-hero {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    min-height: 100svh;
+    padding: 0;
+    overflow: hidden;
+}
+.kalq-f-hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    border-radius: 0;
+
+    video, img { width: 100%; height: 100%; object-fit: cover; }
+}
+.kalq-f-hero__shade {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: #000;
+    pointer-events: none;
+}
+.kalq-f-hero__content { display: flex; flex-direction: column; gap: clamp(0.8rem, 1.6cqi, 1.4rem); }
+.kalq-f-hero__title { margin: 0; }
+
+.kalq-f-hero.is-video {
+    place-items: center;
+    background: var(--kalq-dark, #{$dark});
+    color: #fff;
+
+    .kalq-f-hero__content { align-items: center; max-width: min(70rem, 92%); padding: 6rem 1rem; text-align: center; }
+    .kalq-f-hero__title { font-size: clamp(2.6rem, 8vw, 7.5rem); font-weight: 500; letter-spacing: -0.02em; line-height: 0.98; }
+    .kalq-f-hero__slogan { margin: 0; font-size: clamp(1.1rem, 2.2vw, 1.9rem); line-height: 1.3; opacity: 0.92; }
+}
+.kalq-f-hero__pause {
+    position: absolute;
+    right: clamp(1rem, 2.4cqi, 2rem);
+    bottom: clamp(1rem, 2.4cqi, 2rem);
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.35);
+    color: #fff;
+    cursor: pointer;
+
+    // two bars (playing: pause it) or a triangle (paused: play it)
+    &::before { content: ""; width: 10px; height: 12px; border-left: 3px solid currentColor; border-right: 3px solid currentColor; box-sizing: border-box; }
+    &.is-paused::before { width: 0; height: 0; border-style: solid; border-width: 6px 0 6px 10px; border-color: transparent transparent transparent currentColor; margin-left: 3px; }
+    &:hover { background: rgba(0, 0, 0, 0.55); }
+    &:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+}
+
+.kalq-f-hero.is-page {
+    min-height: 100svh; // as on Platform and Company: the full screen, the title in the middle of its height
+    align-items: center;
+
+    .kalq-f-hero__content { max-width: min(960px + 2 * 4rem, 100%); padding: 7rem clamp(1.25rem, 5vw, 4rem) 4rem; }
+    .kalq-f-hero__eyebrow { margin: 0; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+    .kalq-f-hero__title { @include type(h2); } // the site's own h2 type, as their titles have
+    .kalq-f-hero__intro { margin: 0; max-width: 42ch; font-size: clamp(1rem, 1.5vw, 1.3rem); line-height: 1.45; opacity: 0.85; }
+    &.has-media { color: #fff; background: var(--kalq-dark, #{$dark}); }
+}
+
+// two screens: the words stay on the left screen, the picture may span both
+@media (horizontal-viewport-segments: 2) {
+    .kalq-f-hero .kalq-f-hero__content { max-width: calc(var(--seg-l, 50vw) - 2.5rem); }
+    .kalq-f-hero.is-video { place-items: center start; .kalq-f-hero__content { align-items: flex-start; text-align: left; padding-left: 2rem; } }
+}
+// still: no video plays on its own (js/moduleBehaviour.js pauses it), nothing moves
+@media (prefers-reduced-motion: reduce) { .kalq-f-hero__media video { animation: none; } }

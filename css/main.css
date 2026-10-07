@@ -3077,6 +3077,167 @@ body.kalq-edit .kalq-f-ts__card > .kalq-f-tools {
     transition: none;
   }
 }
+.kalq-m.kalq-f-hero {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  min-height: 100svh;
+  padding: 0;
+  overflow: hidden;
+}
+
+.kalq-f-hero__media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: 0;
+}
+.kalq-f-hero__media video, .kalq-f-hero__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kalq-f-hero__shade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #000;
+  pointer-events: none;
+}
+
+.kalq-f-hero__content {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.8rem, 1.6cqi, 1.4rem);
+}
+
+.kalq-f-hero__title {
+  margin: 0;
+}
+
+.kalq-f-hero.is-video {
+  place-items: center;
+  background: var(--kalq-dark, #101010);
+  color: #fff;
+}
+.kalq-f-hero.is-video .kalq-f-hero__content {
+  align-items: center;
+  max-width: min(70rem, 92%);
+  padding: 6rem 1rem;
+  text-align: center;
+}
+.kalq-f-hero.is-video .kalq-f-hero__title {
+  font-size: clamp(2.6rem, 8vw, 7.5rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 0.98;
+}
+.kalq-f-hero.is-video .kalq-f-hero__slogan {
+  margin: 0;
+  font-size: clamp(1.1rem, 2.2vw, 1.9rem);
+  line-height: 1.3;
+  opacity: 0.92;
+}
+
+.kalq-f-hero__pause {
+  position: absolute;
+  right: clamp(1rem, 2.4cqi, 2rem);
+  bottom: clamp(1rem, 2.4cqi, 2rem);
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  cursor: pointer;
+}
+.kalq-f-hero__pause::before {
+  content: "";
+  width: 10px;
+  height: 12px;
+  border-left: 3px solid currentColor;
+  border-right: 3px solid currentColor;
+  box-sizing: border-box;
+}
+.kalq-f-hero__pause.is-paused::before {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 6px 0 6px 10px;
+  border-color: transparent transparent transparent currentColor;
+  margin-left: 3px;
+}
+.kalq-f-hero__pause:hover {
+  background: rgba(0, 0, 0, 0.55);
+}
+.kalq-f-hero__pause:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.kalq-f-hero.is-page {
+  min-height: 100svh;
+  align-items: center;
+}
+.kalq-f-hero.is-page .kalq-f-hero__content {
+  max-width: min(960px + 8rem, 100%);
+  padding: 7rem clamp(1.25rem, 5vw, 4rem) 4rem;
+}
+.kalq-f-hero.is-page .kalq-f-hero__eyebrow {
+  margin: 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.kalq-f-hero.is-page .kalq-f-hero__title {
+  font-family: var(--kalq-font-heading, "Clash Grotesk", "Helvetica Neue", Arial, sans-serif);
+  font-size: clamp(3.8rem, 9 * var(--cq, 1cqi), 7rem);
+  font-weight: var(--kalq-weight-light-heading, 300);
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  word-spacing: 0.1em;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+@container (max-width: 320px) {
+  .kalq-f-hero.is-page .kalq-f-hero__title {
+    font-size: clamp(3rem, 9 * var(--cq, 1cqi), 7rem);
+  }
+}
+.kalq-f-hero.is-page .kalq-f-hero__intro {
+  margin: 0;
+  max-width: 42ch;
+  font-size: clamp(1rem, 1.5vw, 1.3rem);
+  line-height: 1.45;
+  opacity: 0.85;
+}
+.kalq-f-hero.is-page.has-media {
+  color: #fff;
+  background: var(--kalq-dark, #101010);
+}
+
+@media (horizontal-viewport-segments: 2) {
+  .kalq-f-hero .kalq-f-hero__content {
+    max-width: calc(var(--seg-l, 50vw) - 2.5rem);
+  }
+  .kalq-f-hero.is-video {
+    place-items: center start;
+  }
+  .kalq-f-hero.is-video .kalq-f-hero__content {
+    align-items: flex-start;
+    text-align: left;
+    padding-left: 2rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kalq-f-hero__media video {
+    animation: none;
+  }
+}
 /* The inquiry chat (js/inquiry.js): one chat for the whole site, floating at the bottom right of every page while it is
    on, opened from its round button. The look of scar.lat's Project Inquiry at Kalq's compact size and its own type
    scale (the chat tokens, css/utilities/_type.scss): a frosted window, small caps title with the language pill, a

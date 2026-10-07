@@ -33,12 +33,32 @@ function setupListPanel(section) {
     });
 }
 
+//=================================== Heroes ===================================//
+// The hero with video (js/modules/final.js): it plays on its own, so it has a pause; under reduced motion it stays
+// still (the pause then plays it)
+const still = window.matchMedia("(prefers-reduced-motion: reduce)");
+function setupHeroVideo(section) {
+    const video = section.querySelector(".kalq-f-hero__media video");
+    const button = section.querySelector(".kalq-f-hero__pause");
+    if (!video || !button || button.dataset.ready) return;
+    button.dataset.ready = "true";
+    const show = () => { const paused = video.paused; button.classList.toggle("is-paused", paused); button.setAttribute("aria-label", button.dataset[paused ? "labelPlay" : "labelPause"]); button.setAttribute("aria-pressed", String(paused)); };
+    if (still.matches) { video.removeAttribute("autoplay"); video.pause(); }
+    else { video.muted = true; video.play()?.catch?.(() => { }); }
+    button.addEventListener("click", () => { if (video.paused) video.play()?.catch?.(() => { }); else video.pause(); });
+    video.addEventListener("play", show);
+    video.addEventListener("pause", show);
+    show();
+}
+
 //=================================== Start ===================================//
 export function initModules(root = document) {
     if (!document.body.classList.contains("kalq-edit")) root.querySelectorAll(".kalq-f[data-scroll-effect]").forEach(setupScrollEffect);
     root.querySelectorAll('[data-barba="container"] > section.expertise').forEach(setupListPanel);
+    root.querySelectorAll('section[data-hero="video"]').forEach(setupHeroVideo);
     if (!initModules.listening) {
         initModules.listening = true;
         spanned.addEventListener("change", () => initModules()); // the device folded or unfolded
+        document.addEventListener("kalq:layout", () => document.querySelectorAll('section[data-hero="video"]').forEach(setupHeroVideo)); // a hero just inserted
     }
 }

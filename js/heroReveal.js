@@ -6,7 +6,7 @@
 const MASK_SCALE = 0.5; // the trail is drawn at half size, the shader smooths it
 const FADE = 0.045; // how fast the trail dissolves per frame
 const IDLE_FRAMES = 140; // keep drawing this long after the last move, until the trail is gone
-const HOSTS = '[data-barba="container"] > section.header, [data-barba="container"] .parallax_img';
+const HOSTS = '[data-barba="container"] > section.header, [data-barba="container"] > section[data-hero="video"], [data-barba="container"] .parallax_img'; // the hero with video module too
 
 const VERT = `attribute vec2 p; varying vec2 uv; void main() { uv = p * 0.5 + 0.5; gl_Position = vec4(p, 0.0, 1.0); }`;
 const FRAG = `precision mediump float;
@@ -182,7 +182,7 @@ function hostAt(x, y) {
     for (const node of document.elementsFromPoint(x, y)) {
         const host = node.closest?.(HOSTS);
         if (!host) continue;
-        if (m === "hero" && !host.matches("section.header")) return null;
+        if (m === "hero" && !host.matches('section.header, section[data-hero="video"]')) return null;
         return host.querySelector("video, img") ? host : null;
     }
     return null;

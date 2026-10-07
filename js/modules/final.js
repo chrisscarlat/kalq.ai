@@ -9,7 +9,7 @@
 // motion and in edit mode, each scroll module is a plain stacked list. Signed-in editors get the editor render with
 // edit mode on or off: its controls show only in edit mode (css), its effects run only outside it.
 import { renderBlock } from "../blocks.js";
-import { L, SAFE_HREF, altField, append, buttonEl, el, keyOf, mediaEl, mediaOf, picture, placeholder, plain, rangeEl, rangeOf, section, slotEl, textOf } from "./kit.js";
+import { L, SAFE_HREF, VIDEO_URL, altField, append, buttonEl, el, keyOf, mediaEl, mediaOf, picture, placeholder, plain, rangeEl, rangeOf, section, slotEl, textOf } from "./kit.js";
 import { sanitizeSvg } from "../../lib/svg-sanitize.js";
 import { SEND_DESTS, destOf } from "./destinations.js";
 
@@ -552,6 +552,60 @@ function renderHeroCard(ctx) {
     return append(s, card);
 }
 
+//=================================== Heroes ===================================//
+// The page's opening, with its h1. A hero goes on top of the page as a draft; publishing it replaces the hero there
+// (js/sections.js). Two, from the site's own: Home's (a video or picture behind the title, the slogan lines below,
+// a pause for the video) and the secondary pages' (Platform, Company: the title on the left in the middle of the
+// screen, a line under it, a picture behind it optional).
+function heroMedia(ctx, className) {
+    const media = mediaEl(ctx, "media", className);
+    if (media && !plain(textOf(ctx, "media_alt"))) media.setAttribute("aria-hidden", "true"); // a backdrop unless described
+    return media;
+}
+function heroShade(ctx, className) {
+    const shade = el(ctx, "div", className);
+    shade.setAttribute("aria-hidden", "true");
+    shade.setAttribute("style", `opacity: ${rangeOf(ctx, "shade") / 100}`);
+    return shade;
+}
+
+function renderVideoHero(ctx) {
+    const s = section(ctx, "kalq-f kalq-f-hero is-video");
+    s.setAttribute("data-hero", "video");
+    const media = heroMedia(ctx, "kalq-f-hero__media");
+    const isVideo = VIDEO_URL.test(mediaOf(ctx, "media") || "");
+    const content = append(el(ctx, "div", "kalq-f-hero__content"),
+        slotEl(ctx, "heading", "h1", { className: "kalq-f-hero__title" }),
+        slotEl(ctx, "slogan", "p", { className: "kalq-f-hero__slogan", format: "lines" }));
+    if (ctx.editor) content.append(rangeEl(ctx, "shade", ".kalq-f-hero__shade"), altField(ctx, "media"));
+    // a video that plays on its own has a visible pause (js/moduleBehaviour.js); under reduced motion it stays still
+    const pause = isVideo ? el(ctx, "button", "kalq-f-hero__pause") : null;
+    if (pause) { pause.setAttribute("type", "button"); pause.setAttribute("data-label-pause", ctx.lang === "en" ? "Pause the video" : "Video anhalten"); pause.setAttribute("data-label-play", ctx.lang === "en" ? "Play the video" : "Video abspielen"); pause.setAttribute("aria-label", pause.getAttribute("data-label-pause")); }
+    if (!ctx.editor && !textOf(ctx, "heading")) return null;
+    return append(s, media, heroShade(ctx, "kalq-f-hero__shade"), content, pause);
+}
+
+function renderPageHero(ctx) {
+    const s = section(ctx, "kalq-f kalq-f-hero is-page");
+    s.setAttribute("data-hero", "page");
+    // the picture is optional: without one the hero is the page's own colour (editors see where it would go)
+    const withPicture = !!mediaOf(ctx, "media");
+    if (withPicture || ctx.editor) {
+        s.classList.toggle("has-media", withPicture);
+        append(s, heroMedia(ctx, "kalq-f-hero__media"), withPicture ? heroShade(ctx, "kalq-f-hero__shade") : null);
+    }
+    const content = append(el(ctx, "div", "kalq-f-hero__content"),
+        slotEl(ctx, "eyebrow", "p", { className: "kalq-f-hero__eyebrow" }),
+        slotEl(ctx, "heading", "h1", { className: "kalq-f-hero__title" }),
+        slotEl(ctx, "intro", "p", { className: "kalq-f-hero__intro" }));
+    if (ctx.editor) content.append(rangeEl(ctx, "shade", ".kalq-f-hero__shade"), altField(ctx, "media"));
+    if (!ctx.editor && !textOf(ctx, "heading")) return null;
+    return append(s, content);
+}
+
+const heroUnit = (s, k) => ({ layout: "C", title: s.querySelector(".kalq-f-hero__title"), body: k.parasOf(s.querySelector(".kalq-f-hero__slogan, .kalq-f-hero__intro")).filter(Boolean),
+    media: [k.mediaUrl(s.querySelector(".kalq-f-hero__media"))] });
+
 //=================================== The book ===================================//
 const cardsUnit = (s, k, sel) => ({ layout: "E", cards: [...s.querySelectorAll(sel)].map((c) => ({ media: k.mediaUrl(c.querySelector(".kalq-m-media")), eyebrow: c.querySelector(".kalq-m-eyebrow"),
     title: c.querySelector(".kalq-f-title"), body: k.parasOf(c.querySelector(".kalq-f-text")) })).filter((c) => c.title) });
@@ -559,6 +613,7 @@ const cardsUnit = (s, k, sel) => ({ layout: "E", cards: [...s.querySelectorAll(s
 //=================================== Definitions ===================================//
 export const FINAL_CATEGORIES = [
     { id: "custom", de: "Eigenes Modul", en: "Custom" },
+    { id: "heroes", de: "Heros", en: "Heroes" },
     { id: "testimonials", de: "Stimmen", en: "Testimonials" },
     { id: "scroll", de: "Scroll-Effekte", en: "Scroll effects" },
 ];
@@ -636,6 +691,41 @@ export const FINAL = {
         },
         magazine: { layout: "E", unit: (s, k) => cardsUnit(s, k, ".kalq-f-alt__row") },
         render: renderAlternating,
+    },
+    "heroes.video": {
+        category: "heroes",
+        name: L("Hero mit Video", "Hero with video"),
+        keywords: "hero video background hintergrund film start home titel title slogan h1 vollbild full",
+        slots: {
+            ...Object.fromEntries(picture("media", L("Hintergrund: Video oder Bild", "Background: video or picture"), { required: true })),
+            heading: { kind: "heading", label: L("Titel (die Überschrift der Seite)", "Title (the page's heading)"), required: true },
+            slogan: { kind: "text", label: L("Slogan, eine Zeile pro Zeile", "Slogan, one line per line") },
+            shade: { kind: "range", label: L("Abdunkelung", "Darkening"), min: 0, max: 85, step: 5, initial: 35, unit: "%" },
+        },
+        versions: {
+            video: { name: L("Video hinter dem Titel, Slogan darunter", "Video behind the title, the slogan below"),
+                wire: [["media", 0, 0, 100, 60, "play"], ["heading", 22, 24, 56, "light"], ["line", 30, 32, 40, "light"], ["line", 34, 36, 32, "light"]] },
+        },
+        magazine: { layout: "C", unit: heroUnit },
+        render: renderVideoHero,
+    },
+    "heroes.page": {
+        category: "heroes",
+        name: L("Seitenkopf", "Page hero"),
+        keywords: "hero page seite kopf header titel title intro platform company unterseite secondary h1",
+        slots: {
+            ...Object.fromEntries(picture("media", L("Bild dahinter (optional)", "Picture behind it (optional)"))),
+            eyebrow: { kind: "eyebrow", label: L("Kleine Überschrift (optional)", "Eyebrow (optional)") },
+            heading: { kind: "heading", label: L("Titel (die Überschrift der Seite)", "Title (the page's heading)"), required: true },
+            intro: { kind: "text", label: L("Einleitung (optional)", "Introduction (optional)") },
+            shade: { kind: "range", label: L("Abdunkelung des Bildes", "Darkening of the picture"), min: 0, max: 85, step: 5, initial: 45, unit: "%" },
+        },
+        versions: {
+            page: { name: L("Großer Titel links, wie Plattform und Unternehmen", "Large title on the left, as on Platform and Company"),
+                wire: [["eyebrow", 6, 20, 14], ["heading", 6, 25, 70], ["heading", 6, 31, 52], ["line", 6, 39, 40]] },
+        },
+        magazine: { layout: "C", unit: heroUnit },
+        render: renderPageHero,
     },
     "content.hero-card": {
         category: "content",

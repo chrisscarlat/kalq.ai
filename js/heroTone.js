@@ -106,7 +106,7 @@ function updateHeader() {
 //=================================== Setup ===================================//
 function watchMedia() {
     clearInterval(timer);
-    const el = hero?.querySelector("video, img.hero_media__el, .hero_media img, .hero_video") || null;
+    const el = hero?.querySelector("video, img.hero_media__el, .hero_media img, .hero_video, .kalq-f-hero__media img") || null; // a hero module's too
     media = el && (el.tagName === "VIDEO" || el.tagName === "IMG") ? el : null;
     if (!media) {
         if (hero) { delete hero.dataset.tone; ["--hero-scrim", "--hero-scrim-top", "--hero-scrim-mid"].forEach((p) => hero.style.removeProperty(p)); }

@@ -15,8 +15,9 @@ const NOTES = [
 ];
 export const CATEGORIES = [
     FINAL_CATEGORIES.find((c) => c.id === "custom"),
+    FINAL_CATEGORIES.find((c) => c.id === "heroes"),
     { id: "content", de: "Inhalt", en: "Content" },
-    ...FINAL_CATEGORIES.filter((c) => c.id !== "custom"),
+    ...FINAL_CATEGORIES.filter((c) => c.id !== "custom" && c.id !== "heroes"),
     ...NOTES,
 ];
 

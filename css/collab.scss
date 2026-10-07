@@ -924,35 +924,9 @@ $pin-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
 }
 
 // Styles panel (admins)
-.kalq-styles {
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    right: 1rem;
-    bottom: 5.5rem;
-    display: flex;
-    flex-direction: column;
-    background: rgba(16, 16, 16, 0.86);
-    -webkit-backdrop-filter: blur(22px) saturate(140%);
-    backdrop-filter: blur(22px) saturate(140%);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 22px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-    color: #fff;
-    font: 400 0.88rem/1.4 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
-    z-index: 47;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateX(-16px);
-    transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.65, 0, 0.35, 1), visibility 0s linear 0.3s;
-
-    &.is-open {
-        opacity: 1;
-        visibility: visible;
-        transform: none;
-        transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.65, 0, 0.35, 1);
-    }
-
+// The look's fields (headings with a hairline, text fields, selects): the Styles panel and the editor's look panels
+// (js/lookControls.js)
+@mixin look-fields {
     // a section's heading: small capitals, and a hairline from its text to the end of the column marking the area
     h4 {
         display: flex;
@@ -998,6 +972,38 @@ $pin-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
         font-size: 0.75rem;
         resize: vertical;
     }
+}
+
+.kalq-styles {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    bottom: 5.5rem;
+    display: flex;
+    flex-direction: column;
+    background: rgba(16, 16, 16, 0.86);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    backdrop-filter: blur(22px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 22px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    color: #fff;
+    font: 400 0.88rem/1.4 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+    z-index: 47;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-16px);
+    transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.65, 0, 0.35, 1), visibility 0s linear 0.3s;
+
+    &.is-open {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    @include look-fields;
 
     input[type="file"] {
         font-size: 0.75rem;
@@ -4139,3 +4145,13 @@ body.kalq-placing .kalq-insert-zone.is-target .kalq-insert-line { left: -200px; 
     pointer-events: none;
     span { font-size: 0.68rem; opacity: 0.85; }
 }
+
+//=================================== The editor's look panels (js/lookControls.js lookPanel) ===================================//
+.kalq-look__controls { @include look-fields; min-width: 0; color: #fff; font-size: 0.85rem; }
+.kalq-look__controls section:first-child h4 { margin-top: 0.2rem; }
+.kalq-look__grid { display: grid; gap: 1.4rem; align-items: start; }
+.kalq-look__grid.has-wire { grid-template-columns: minmax(0, 1fr) minmax(240px, 340px); }
+@media (max-width: 900px) { .kalq-look__grid.has-wire { grid-template-columns: minmax(0, 1fr); } }
+.kalq-look__wire { position: sticky; top: 0; }
+.kalq-look__which { color: rgba(255, 255, 255, 0.75); }
+.kalq-picker__settings:has(.kalq-site--look.is-navigation, .kalq-site--look.is-footers, .kalq-site--look.is-logo) { max-width: 1120px; }

@@ -4528,3 +4528,82 @@ body.kalq-placing .kalq-insert-zone.is-target .kalq-insert-line {
   font-size: 0.68rem;
   opacity: 0.85;
 }
+
+.kalq-look__controls h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 1.2rem 0 0.55rem;
+  font: 500 0.66rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+.kalq-look__controls h4::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.16);
+}
+.kalq-look__controls input[type=text],
+.kalq-look__controls select,
+.kalq-look__controls textarea {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font: inherit;
+  outline: none;
+}
+.kalq-look__controls input[type=text]:focus,
+.kalq-look__controls select:focus,
+.kalq-look__controls textarea:focus {
+  border-color: rgba(255, 255, 255, 0.55);
+}
+.kalq-look__controls select option {
+  color: #101010;
+}
+.kalq-look__controls textarea {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.75rem;
+  resize: vertical;
+}
+.kalq-look__controls {
+  min-width: 0;
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+.kalq-look__controls section:first-child h4 {
+  margin-top: 0.2rem;
+}
+
+.kalq-look__grid {
+  display: grid;
+  gap: 1.4rem;
+  align-items: start;
+}
+
+.kalq-look__grid.has-wire {
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 340px);
+}
+
+@media (max-width: 900px) {
+  .kalq-look__grid.has-wire {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.kalq-look__wire {
+  position: sticky;
+  top: 0;
+}
+
+.kalq-look__which {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.kalq-picker__settings:has(.kalq-site--look.is-navigation, .kalq-site--look.is-footers, .kalq-site--look.is-logo) {
+  max-width: 1120px;
+}

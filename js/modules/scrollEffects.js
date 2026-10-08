@@ -6,6 +6,8 @@
 //   tether      each card pins at the top and the next slides up over it, 20px lower, an edge of each in view
 //   horizontal  the section pins while its row of cards slides sideways until the last is in view
 //   parallax    the hero card's picture drifts gently against the scroll
+//   lit         a statement's words light up one after another as it crosses the screen
+//   pill        the video's "Play video" pill travels down its picture while the video passes
 const still = window.matchMedia("(prefers-reduced-motion: reduce)");
 const spanned = window.matchMedia("(horizontal-viewport-segments: 2)");
 const live = new Set();
@@ -91,7 +93,50 @@ function parallax(sec) {
     return () => { st.kill(); tween.kill(); window.gsap.set(media, { clearProps: "transform" }); };
 }
 
-const EFFECTS = { stack, tether, horizontal, parallax };
+//=================================== Lit (statements) ===================================//
+// Each word is wrapped for the effect only (the sentence stays the heading's own text, its pictures untouched) and
+// unwrapped again when the effect stops
+function lit(sec) {
+    const host = sec.querySelector(".kalq-f-lit__words");
+    if (!host) return null;
+    const before = host.innerHTML;
+    const words = [];
+    const walk = (node) => [...node.childNodes].forEach((n) => {
+        if (n.nodeType === 3) {
+            const frag = document.createDocumentFragment();
+            n.textContent.split(/(\s+)/).forEach((part) => {
+                if (!part) return;
+                if (/^\s+$/.test(part)) return frag.append(part);
+                const w = document.createElement("span");
+                w.className = "kalq-f-lit__word";
+                w.textContent = part;
+                words.push(w);
+                frag.append(w);
+            });
+            n.replaceWith(frag);
+        } else if (n.nodeType === 1 && !n.matches(".kalq-m-media, img, video")) walk(n);
+    });
+    walk(host);
+    if (!words.length) { host.innerHTML = before; return null; }
+    sec.classList.add("is-armed");
+    const set = (p) => { const k = p * words.length; words.forEach((w, i) => { w.style.opacity = String(0.2 + 0.8 * Math.min(1, Math.max(0, k - i))); }); };
+    set(0);
+    const st = window.ScrollTrigger.create({ trigger: host, start: "top 80%", end: "bottom 40%", scrub: 0.3, invalidateOnRefresh: true, onUpdate: (self) => set(self.progress) });
+    return () => { st.kill(); host.innerHTML = before; };
+}
+
+//=================================== Pill (video) ===================================//
+function pill(sec) {
+    const frame = sec.querySelector(".kalq-f-pv__frame");
+    const button = sec.querySelector(".kalq-f-pv__pill");
+    if (!frame || !button) return null;
+    sec.classList.add("is-armed");
+    const tween = window.gsap.to(button, { y: () => Math.max(0, frame.clientHeight - button.offsetHeight - 2 * button.offsetTop), ease: "none" });
+    const st = window.ScrollTrigger.create({ trigger: frame, start: "top 60%", end: "bottom 60%", animation: tween, scrub: true, invalidateOnRefresh: true });
+    return () => { st.kill(); tween.kill(); window.gsap.set(button, { clearProps: "transform" }); };
+}
+
+const EFFECTS = { stack, tether, horizontal, parallax, lit, pill };
 
 //=================================== Arming ===================================//
 function sweep() {

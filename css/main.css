@@ -3480,6 +3480,317 @@ body.kalq-edit .kalq-f-ts__card > .kalq-f-tools {
     column-gap: calc(var(--seg-hinge) + 4rem);
   }
 }
+.kalq-m.kalq-f-lit {
+  position: relative;
+  isolation: isolate;
+  padding: clamp(5rem, 10vw, 9rem) clamp(1.25rem, 4vw, 4rem) clamp(2rem, 4vw, 3rem);
+  overflow: hidden;
+}
+.kalq-m.kalq-f-lit.has-media {
+  min-height: 92svh;
+  display: grid;
+  background: var(--kalq-dark, #101010);
+  color: #fff;
+}
+
+.kalq-f-lit__media, .kalq-f-sentence__pic {
+  border-radius: 0;
+}
+.kalq-f-lit__media video, .kalq-f-lit__media img, .kalq-f-sentence__pic video, .kalq-f-sentence__pic img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kalq-f-lit__media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+
+.kalq-f-lit__shade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #000;
+  pointer-events: none;
+}
+
+.kalq-f-lit__inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(4rem, 9vw, 8rem);
+}
+
+.kalq-f-lit__words {
+  margin: 0;
+  max-width: 26ch;
+  font-size: clamp(2rem, 4.6vw, 4.4rem);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.kalq-f-lit__word {
+  transition: opacity 0.25s linear;
+}
+
+.kalq-f-lit__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 2rem;
+}
+
+.kalq-f-lit__stat {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: "label label" "value text";
+  align-items: center;
+  gap: 0.7rem 1rem;
+}
+
+.kalq-f-lit__label {
+  grid-area: label;
+  justify-self: start;
+  margin: 0;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 16%, transparent);
+  font-size: 0.75rem;
+}
+
+.kalq-f-lit__value {
+  grid-area: value;
+  margin: 0;
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  line-height: 1;
+}
+
+.kalq-f-lit__text {
+  grid-area: text;
+  margin: 0;
+  max-width: 24ch;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  opacity: 0.85;
+}
+
+.kalq-m.kalq-f-sentence {
+  padding: clamp(5rem, 10vw, 9rem) clamp(1.25rem, 4vw, 4rem);
+}
+
+.kalq-f-sentence__words {
+  max-width: 20ch;
+  margin: 0 auto;
+  font-size: clamp(2.2rem, 6.2vw, 6rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.kalq-f-sentence__pic {
+  display: inline-block;
+  width: 1.5em;
+  height: 0.92em;
+  margin: 0 0.18em;
+  vertical-align: -0.06em;
+  overflow: hidden;
+  border-radius: 0.12em;
+}
+
+.kalq-m.kalq-f-pv {
+  padding: clamp(2rem, 4vw, 4rem) clamp(1rem, 4vw, 4rem);
+}
+
+.kalq-f-pv__frame {
+  position: relative;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  border-radius: clamp(12px, 1.6vw, 20px);
+  background: var(--kalq-dark, #101010);
+}
+
+.kalq-f-pv__video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kalq-f-pv__pill {
+  position: absolute;
+  top: clamp(0.8rem, 1.6vw, 1.4rem);
+  left: clamp(0.8rem, 1.6vw, 1.4rem);
+  z-index: 2;
+  padding: 0.55rem 1.05rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  color: #fff;
+  font: 500 0.75rem/1 "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.kalq-f-pv__pill:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+.kalq-f-pv__pill:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.kalq-f-pv__pill.is-playing {
+  opacity: 0.75;
+}
+
+.kalq-f-pv__caption {
+  margin: 0.9rem 0 0;
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+
+.kalq-f-pv__empty {
+  position: absolute;
+  inset: 0;
+}
+
+.kalq-f-pv__editor {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 3;
+  display: flex;
+  gap: 0.5rem;
+}
+.kalq-f-pv__editor > * {
+  width: 150px;
+  aspect-ratio: 16/9;
+}
+
+.kalq-m.kalq-f-sw {
+  padding: clamp(4rem, 8vw, 7rem) 0;
+  overflow: hidden;
+}
+
+.kalq-f-sw__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem 2rem;
+  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.kalq-f-sw__heading {
+  max-width: 22ch;
+  margin: 0;
+}
+
+.kalq-f-sw__track {
+  display: flex;
+  gap: clamp(0.75rem, 1.4vw, 1.25rem);
+  margin: 0;
+  padding: 0 clamp(1.25rem, 4vw, 4rem);
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: clamp(1.25rem, 4vw, 4rem);
+  scrollbar-width: none;
+  cursor: grab;
+}
+.kalq-f-sw__track::-webkit-scrollbar {
+  display: none;
+}
+.kalq-f-sw__track.is-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  user-select: none;
+}
+
+.kalq-f-sw__card {
+  position: relative;
+  flex: 0 0 clamp(15rem, 23vw, 21rem);
+  display: flex;
+  flex-direction: column;
+  aspect-ratio: 2/3;
+  overflow: hidden;
+  border-radius: clamp(10px, 1.2vw, 16px);
+  scroll-snap-align: start;
+  background: var(--kalq-dark, #101010);
+  color: #fff;
+}
+.kalq-f-sw__card:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 3px;
+}
+
+.kalq-f-sw__media {
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+}
+.kalq-f-sw__media img, .kalq-f-sw__media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kalq-f-sw__title {
+  position: relative;
+  margin: 0;
+  padding: 1.2rem 1.25rem;
+  font-size: clamp(1.3rem, 2vw, 1.9rem);
+  font-weight: 400;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.35);
+}
+
+.kalq-f-sw__tags {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: auto 0 0;
+  padding: 2rem 1.25rem 1.25rem;
+  list-style: none;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.45));
+}
+
+.kalq-f-sw__tag {
+  padding: 0.32rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  font-size: 0.72rem;
+}
+
+.kalq-f-sw__tags-field {
+  position: relative;
+  margin: auto 1.25rem 1.25rem;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 690px) {
+  .kalq-f-lit__stats {
+    grid-template-columns: 1fr;
+  }
+  .kalq-f-sw__card {
+    flex-basis: 72vw;
+  }
+}
+@media (horizontal-viewport-segments: 2) {
+  .kalq-f-lit__words, .kalq-f-sentence__words {
+    max-width: calc(var(--seg-l) - 4rem);
+    margin-left: 0;
+    text-align: left;
+  }
+}
 /* The inquiry chat (js/inquiry.js): one chat for the whole site, floating at the bottom right of every page while it is
    on, opened from its round button. The look of scar.lat's Project Inquiry at Kalq's compact size and its own type
    scale (the chat tokens, css/utilities/_type.scss): a frosted window, small caps title with the language pill, a

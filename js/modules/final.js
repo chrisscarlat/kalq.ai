@@ -664,6 +664,121 @@ function renderGlassHero(ctx) {
 const heroUnit = (s, k) => ({ layout: "C", title: s.querySelector(".kalq-f-hero__title"), body: k.parasOf(s.querySelector(".kalq-f-hero__slogan, .kalq-f-hero__intro, .kalq-f-hero__text, .kalq-f-hero__caption.is-middle")).filter(Boolean),
     media: [k.mediaUrl(s.querySelector(".kalq-f-hero__media, .kalq-f-hero__card-media"))] });
 
+//=================================== Statements that light up ===================================//
+// Harbor's: one large statement, a picture behind it optional; its words light up one after another as the section
+// passes (js/modules/scrollEffects.js "lit"; all lit while editing and under reduced motion). Up to three figures
+// along the bottom, each a small label, a value and a line: only those filled are shown (no invented numbers).
+const STAT_KEYS = ["1", "2", "3"];
+function renderLitStatement(ctx) {
+    const s = section(ctx, "kalq-f kalq-f-lit");
+    s.setAttribute("data-scroll-effect", "lit");
+    const withPicture = !!mediaOf(ctx, "media");
+    if (withPicture || ctx.editor) {
+        s.classList.toggle("has-media", withPicture);
+        append(s, heroMedia(ctx, "kalq-f-lit__media"), withPicture ? heroShade(ctx, "kalq-f-lit__shade") : null);
+    }
+    const statement = slotEl(ctx, "statement", "h2", { className: "kalq-f-lit__words" });
+    const stats = append(el(ctx, "div", "kalq-f-lit__stats"), ...STAT_KEYS.map((k) => {
+        const value = slotEl(ctx, `value${k}`, "p", { className: "kalq-f-lit__value", label: L(`Zahl ${k}`, `Figure ${k}`) });
+        if (!ctx.editor && !value) return null;
+        return append(el(ctx, "div", "kalq-f-lit__stat"),
+            slotEl(ctx, `label${k}`, "p", { className: "kalq-f-lit__label", label: L(`Zahl ${k}: Etikett`, `Figure ${k}: label`) }), value,
+            slotEl(ctx, `text${k}`, "p", { className: "kalq-f-lit__text", label: L(`Zahl ${k}: eine Zeile`, `Figure ${k}: one line`) }));
+    }));
+    if (ctx.editor) s.append(append(el(ctx, "div", "kalq-f-inner"), rangeEl(ctx, "shade", ".kalq-f-lit__shade"), altField(ctx, "media")));
+    if (!ctx.editor && !textOf(ctx, "statement")) return null;
+    return append(s, append(el(ctx, "div", "kalq-f-lit__inner"), statement, stats.childNodes.length ? stats : null));
+}
+
+// Signal's: a sentence in large capitals with two small pictures set between its words; it lights up word by word too
+function renderPictureSentence(ctx) {
+    const s = section(ctx, "kalq-f kalq-f-sentence");
+    s.setAttribute("data-scroll-effect", "lit");
+    const pic = (slot) => {
+        const m = mediaEl(ctx, slot, "kalq-f-sentence__pic");
+        if (!m) return null;
+        if (!ctx.editor && !mediaOf(ctx, slot)) return null; // no grey box in the middle of a sentence
+        m.setAttribute("aria-hidden", plain(textOf(ctx, `${slot}_alt`)) ? "false" : "true");
+        return m;
+    };
+    const words = el(ctx, "h2", "kalq-f-lit__words kalq-f-sentence__words");
+    // real spaces between the parts and the pictures: the sentence reads whole
+    const space = () => ctx.doc.createTextNode(" ");
+    const pieces = [slotEl(ctx, "part1", "span", { className: "kalq-f-sentence__part" }), pic("pic1"),
+        slotEl(ctx, "part2", "span", { className: "kalq-f-sentence__part" }), pic("pic2"),
+        slotEl(ctx, "part3", "span", { className: "kalq-f-sentence__part" })].filter(Boolean);
+    pieces.forEach((p, i) => { if (i) words.append(space()); words.append(p); });
+    if (ctx.editor) s.append(append(el(ctx, "div", "kalq-f-inner"), altField(ctx, "pic1"), altField(ctx, "pic2")));
+    if (!ctx.editor && !textOf(ctx, "part1")) return null;
+    return append(s, append(el(ctx, "div", "kalq-f-lit__inner"), words));
+}
+
+//=================================== Video with a play pill ===================================//
+// Signal's and Tether's: a large rounded video, still until asked: its first picture (or a picture set for it) and a
+// glass pill "Play video" that stays in view while the video passes. Pressed, the video plays with its sound and its
+// own controls; pressed again, it pauses (js/moduleBehaviour.js). Nothing plays on its own.
+function renderPillVideo(ctx) {
+    const s = section(ctx, "kalq-f kalq-f-pv");
+    s.setAttribute("data-pill-video", "");
+    s.setAttribute("data-scroll-effect", "pill"); // the pill travels down the picture (outside edit mode, with motion)
+    const url = mediaOf(ctx, "media");
+    const frame = el(ctx, "div", "kalq-f-pv__frame");
+    if (url && VIDEO_URL.test(url)) {
+        const video = el(ctx, "video", "kalq-f-pv__video");
+        video.setAttribute("src", url);
+        video.setAttribute("preload", "metadata");
+        video.setAttribute("playsinline", "");
+        const poster = mediaOf(ctx, "poster");
+        if (poster) video.setAttribute("poster", poster);
+        frame.append(video);
+        const pill = el(ctx, "button", "kalq-f-pv__pill");
+        pill.setAttribute("type", "button");
+        pill.setAttribute("data-label-play", ctx.lang === "en" ? "Play video" : "Video abspielen");
+        pill.setAttribute("data-label-pause", ctx.lang === "en" ? "Pause video" : "Video anhalten");
+        const label = el(ctx, "span", "kalq-f-pv__pill-text", pill.getAttribute("data-label-play"));
+        pill.append(label);
+        frame.append(pill);
+    } else if (ctx.editor) {
+        frame.append(mediaEl(ctx, "media", "kalq-f-pv__empty")); // the slot to add the video to
+    } else return null;
+    if (ctx.editor) frame.append(append(el(ctx, "div", "kalq-f-pv__editor"), mediaEl(ctx, "poster", "kalq-f-pv__poster-slot"), url ? mediaEl(ctx, "media", "kalq-f-pv__video-slot") : null));
+    const caption = slotEl(ctx, "caption", "p", { className: "kalq-f-pv__caption" });
+    return append(s, append(el(ctx, "div", "kalq-f-pv__inner"), frame, caption));
+}
+
+//=================================== Cards to swipe ===================================//
+// Signal's: a heading with a link on the right; below, a row of tall picture cards that runs off the edge and is
+// swiped or dragged sideways (and scrolled with the keyboard: each card can take the focus). Each card: its title on
+// the picture, a few tags as small pills along the bottom (written as a list, one per line).
+export const SWIPE_MIN = 2, SWIPE_MAX = 12;
+const DEFAULT_SWIPE = [{ id: "s1" }, { id: "s2" }, { id: "s3" }, { id: "s4" }];
+export const swipeItems = (entry) => itemsOf(entry, SWIPE_MAX, DEFAULT_SWIPE);
+function renderSwipeCards(ctx) {
+    const items = swipeItems(ctx.entry);
+    const s = section(ctx, "kalq-f kalq-f-sw");
+    s.setAttribute("data-swipe", "");
+    const head = append(el(ctx, "div", "kalq-f-inner kalq-f-sw__head"), slotEl(ctx, "heading", "h2", { className: "kalq-f-heading kalq-f-sw__heading" }),
+        linkTo(ctx, "button", "link", "page", "kalq-link-underline kalq-f-link kalq-f-sw__link"));
+    const track = el(ctx, "ul", "kalq-f-sw__track");
+    items.forEach((it, k) => {
+        const n = `Card ${k + 1}: `, nd = `Karte ${k + 1}: `;
+        const title = slotEl(ctx, `t_${it.id}`, "h3", { className: "kalq-f-sw__title", label: L(`${nd}Titel`, `${n}title`) });
+        if (!ctx.editor && !title) return;
+        const card = el(ctx, "li", "kalq-f-sw__card");
+        card.setAttribute("tabindex", "0");
+        if (ctx.editor) card.append(itemTools(ctx, it.id, k + 1, items.length, SWIPE_MIN, "Card"));
+        const tags = textOf(ctx, `g_${it.id}`);
+        const pills = el(ctx, "ul", "kalq-f-sw__tags");
+        if (!ctx.editor && tags) plain(tags.replace(/<br\s*\/?>/gi, "\n")).split(/\n|,/).map((x) => x.trim()).filter(Boolean).slice(0, 8).forEach((x) => pills.append(el(ctx, "li", "kalq-f-sw__tag", x)));
+        append(card, mediaEl(ctx, `p_${it.id}`, "kalq-f-sw__media", { label: L(`${nd}Bild`, `${n}picture`) }), title,
+            ctx.editor ? slotEl(ctx, `g_${it.id}`, "p", { className: "kalq-f-sw__tags-field", format: "lines", label: L(`${nd}Stichworte, eins pro Zeile`, `${n}tags, one per line`) }) : (pills.childNodes.length ? pills : null),
+            ctx.editor ? altField(ctx, `p_${it.id}`, L(`${nd}Bildbeschreibung`, `${n}image description (alt text)`)) : null);
+        track.append(card);
+    });
+    if (!track.children.length && !ctx.editor) return null;
+    return append(s, head, track, ctx.editor ? append(el(ctx, "div", "kalq-f-inner"), addTool(ctx, "card", items.length, SWIPE_MAX)) : null);
+}
+
 //=================================== The book ===================================//
 const cardsUnit = (s, k, sel) => ({ layout: "E", cards: [...s.querySelectorAll(sel)].map((c) => ({ media: k.mediaUrl(c.querySelector(".kalq-m-media")), eyebrow: c.querySelector(".kalq-m-eyebrow"),
     title: c.querySelector(".kalq-f-title"), body: k.parasOf(c.querySelector(".kalq-f-text")) })).filter((c) => c.title) });
@@ -927,5 +1042,76 @@ export const FINAL = {
             ? [] : [L(`mindestens ${HCARDS_MIN} Karten mit Titel`, `at least ${HCARDS_MIN} cards with a title`)]),
         magazine: { layout: "E", unit: (s, k) => cardsUnit(s, k, ".kalq-f-hs__card") },
         render: renderHorizontal,
+    },
+    "content.lit": {
+        category: "content",
+        name: L("Aussage, die aufleuchtet", "Statement that lights up"),
+        keywords: "statement aussage lit leuchten scroll words wörter harbor background hintergrund stats zahlen figures",
+        slots: {
+            statement: { kind: "heading", label: L("Die Aussage", "The statement"), required: true },
+            ...Object.fromEntries(picture("media", L("Bild dahinter (optional)", "Picture behind it (optional)"))),
+            ...Object.fromEntries(STAT_KEYS.flatMap((k) => [[`label${k}`, { kind: "eyebrow", label: L(`Zahl ${k}: Etikett`, `Figure ${k}: label`) }], [`value${k}`, { kind: "heading", label: L(`Zahl ${k}`, `Figure ${k}`) }], [`text${k}`, { kind: "text", label: L(`Zahl ${k}: eine Zeile`, `Figure ${k}: one line`) }]])),
+            shade: { kind: "range", label: L("Abdunkelung des Bildes", "Darkening of the picture"), min: 0, max: 85, step: 5, initial: 30, unit: "%" },
+        },
+        versions: {
+            lit: { name: L("Große Aussage, Wort für Wort beim Scrollen", "A large statement, lit word by word as you scroll"),
+                wire: [["media", 0, 0, 100, 60], ["heading", 5, 12, 86, "light"], ["heading", 5, 19, 70, "light"], ["line", 5, 46, 18, "light"], ["line", 38, 46, 18, "light"], ["line", 71, 46, 18, "light"]] },
+        },
+        magazine: { layout: "B", unit: (s, k) => ({ layout: "B", title: s.querySelector(".kalq-f-lit__words"), body: [...s.querySelectorAll(".kalq-f-lit__stat")].map((x) => k.textOf(x, "p", "bk-body")).filter(Boolean) }) },
+        render: renderLitStatement,
+    },
+    "content.sentence": {
+        category: "content",
+        name: L("Satz mit Bildern", "Sentence with pictures"),
+        keywords: "sentence satz bilder pictures inline signal big capitals großbuchstaben lit leuchten scroll",
+        slots: {
+            part1: { kind: "heading", label: L("Satz: erster Teil", "Sentence: first part"), required: true },
+            ...Object.fromEntries(picture("pic1", L("Erstes kleines Bild", "First small picture"))),
+            part2: { kind: "heading", label: L("Satz: zweiter Teil", "Sentence: second part") },
+            ...Object.fromEntries(picture("pic2", L("Zweites kleines Bild", "Second small picture"))),
+            part3: { kind: "heading", label: L("Satz: dritter Teil", "Sentence: third part") },
+        },
+        versions: {
+            sentence: { name: L("Großer Satz, kleine Bilder zwischen den Wörtern", "A large sentence, small pictures between its words"),
+                wire: [["heading", 12, 14, 20], ["media", 35, 12, 14, 7], ["heading", 52, 14, 36], ["heading", 14, 24, 72], ["heading", 12, 34, 30], ["media", 45, 32, 14, 7], ["heading", 62, 34, 26]] },
+        },
+        magazine: { layout: "B", unit: (s) => ({ layout: "B", title: s.querySelector(".kalq-f-sentence__words"), body: [] }) },
+        render: renderPictureSentence,
+    },
+    "content.pill-video": {
+        category: "content",
+        name: L("Video mit Abspiel-Pille", "Video with a play pill"),
+        keywords: "video play abspielen pill pille glass glas signal tether film large groß rounded",
+        slots: {
+            media: { kind: "media", label: L("Das Video", "The video"), required: true },
+            poster: { kind: "media", label: L("Standbild davor (optional)", "Still picture before it (optional)") },
+            caption: { kind: "text", label: L("Bildunterschrift (optional)", "Caption (optional)") },
+        },
+        versions: {
+            pill: { name: L("Großes Video, Glas-Pille „Video abspielen“", "A large video, a glass pill \u201cPlay video\u201d"),
+                wire: [["media", 4, 6, 92, 48, "play"], ["button", 7, 9, 14, "light"]] },
+        },
+        magazine: { layout: "C" },
+        render: renderPillVideo,
+    },
+    "scroll.swipe": {
+        category: "scroll",
+        name: L("Karten zum Wischen", "Cards to swipe"),
+        keywords: "cards karten swipe wischen drag ziehen scroll sideways seitwärts tags stichworte pills signal services",
+        slots: {
+            heading: { kind: "heading", label: L("Überschrift", "Heading") },
+            button: { kind: "button", label: L("Link rechts: Text (optional)", "Link on the right: label (optional)") },
+            link: { kind: "link", label: L("Link rechts: Seite oder URL", "Link on the right: a page or URL") },
+        },
+        versions: {
+            swipe: { name: L("Hohe Bildkarten, seitwärts wischen", "Tall picture cards, swiped sideways"),
+                wire: [["heading", 5, 8, 40], ["heading", 5, 14, 30], ["line", 80, 16, 14], ["media", 0, 22, 22, 34], ["media", 24, 22, 22, 34], ["media", 48, 22, 22, 34], ["media", 72, 22, 22, 34]], motion: "slide" },
+        },
+        initialOpts: () => ({ items: Array.from({ length: 4 }, () => ({ id: newId() })) }),
+        itemsEditor: { min: SWIPE_MIN, max: SWIPE_MAX, make: () => ({ id: newId() }) },
+        missing: (entry, page, get) => (swipeItems(entry).filter((it) => has(get, page, entry, `t_${it.id}`)).length >= SWIPE_MIN
+            ? [] : [L(`mindestens ${SWIPE_MIN} Karten mit Titel`, `at least ${SWIPE_MIN} cards with a title`)]),
+        magazine: { layout: "E", unit: (s, k) => ({ layout: "E", cards: [...s.querySelectorAll(".kalq-f-sw__card")].map((c) => ({ media: k.mediaUrl(c.querySelector(".kalq-m-media")), title: c.querySelector(".kalq-f-sw__title"), body: [] })).filter((c) => c.title) }) },
+        render: renderSwipeCards,
     },
 };

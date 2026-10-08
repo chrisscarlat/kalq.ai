@@ -51,14 +51,65 @@ function setupHeroVideo(section) {
     show();
 }
 
+//=================================== Video with a play pill ===================================//
+// Nothing plays on its own: the pill plays the video with its sound and its controls, and pauses it
+function setupPillVideo(section) {
+    const video = section.querySelector(".kalq-f-pv__video");
+    const pill = section.querySelector(".kalq-f-pv__pill");
+    if (!video || !pill || pill.dataset.ready) return;
+    pill.dataset.ready = "true";
+    const text = pill.querySelector(".kalq-f-pv__pill-text");
+    const show = () => { const playing = !video.paused; text.textContent = pill.dataset[playing ? "labelPause" : "labelPlay"]; pill.classList.toggle("is-playing", playing); pill.setAttribute("aria-pressed", String(playing)); };
+    pill.addEventListener("click", () => { if (video.paused) { video.muted = false; video.controls = true; video.play()?.catch?.(() => { }); } else video.pause(); });
+    video.addEventListener("play", show);
+    video.addEventListener("pause", show);
+    show();
+}
+
+//=================================== Cards to swipe ===================================//
+// The row scrolls sideways natively (touch, trackpad, shift and wheel, the keyboard through the cards' focus); with a
+// mouse it is dragged. A gesture that is mostly sideways is kept from the page's smooth scroller (which takes every
+// wheel and touch move for the page); one mostly up or down still scrolls the page.
+function setupSwipe(section) {
+    const track = section.querySelector(".kalq-f-sw__track");
+    if (!track || track.dataset.ready) return;
+    track.dataset.ready = "true";
+    let drag = null;
+    track.addEventListener("pointerdown", (e) => { if (e.pointerType !== "mouse" || e.button !== 0) return; drag = { x: e.clientX, left: track.scrollLeft, moved: false }; });
+    window.addEventListener("pointermove", (e) => { if (!drag) return; const dx = e.clientX - drag.x; if (Math.abs(dx) > 4) { drag.moved = true; track.classList.add("is-dragging"); } track.scrollLeft = drag.left - dx; });
+    window.addEventListener("pointerup", () => { if (!drag) return; const moved = drag.moved; drag = null; track.classList.remove("is-dragging"); if (moved) track.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); }, { capture: true, once: true }); });
+    track.addEventListener("focusin", (e) => e.target.closest?.(".kalq-f-sw__card")?.scrollIntoView({ inline: "nearest", block: "nearest" }));
+    track.addEventListener("dragstart", (e) => e.preventDefault()); // the pictures: the row moves, not a picture
+}
+let swipeGuard = false;
+function guardSwipes() {
+    if (swipeGuard) return;
+    swipeGuard = true;
+    let touch = null;
+    window.addEventListener("wheel", (e) => { if (e.target instanceof Element && e.target.closest(".kalq-f-sw__track") && Math.abs(e.deltaX) > Math.abs(e.deltaY)) e.stopPropagation(); }, { capture: true, passive: true });
+    window.addEventListener("touchstart", (e) => { touch = e.target instanceof Element && e.target.closest(".kalq-f-sw__track") ? { x: e.touches[0].clientX, y: e.touches[0].clientY, side: null } : null; }, { capture: true, passive: true });
+    window.addEventListener("touchmove", (e) => {
+        if (!touch) return;
+        if (touch.side === null) touch.side = Math.abs(e.touches[0].clientX - touch.x) > Math.abs(e.touches[0].clientY - touch.y);
+        if (touch.side) e.stopPropagation();
+    }, { capture: true, passive: true });
+}
+
 //=================================== Start ===================================//
 export function initModules(root = document) {
     if (!document.body.classList.contains("kalq-edit")) root.querySelectorAll(".kalq-f[data-scroll-effect]").forEach(setupScrollEffect);
     root.querySelectorAll('[data-barba="container"] > section.expertise').forEach(setupListPanel);
     root.querySelectorAll('section[data-hero]').forEach(setupHeroVideo);
+    root.querySelectorAll("section[data-pill-video]").forEach(setupPillVideo);
+    root.querySelectorAll("section[data-swipe]").forEach(setupSwipe);
+    guardSwipes();
     if (!initModules.listening) {
         initModules.listening = true;
         spanned.addEventListener("change", () => initModules()); // the device folded or unfolded
-        document.addEventListener("kalq:layout", () => document.querySelectorAll('section[data-hero]').forEach(setupHeroVideo)); // a hero just inserted
+        document.addEventListener("kalq:layout", () => { // a module just inserted
+            document.querySelectorAll("section[data-hero]").forEach(setupHeroVideo);
+            document.querySelectorAll("section[data-pill-video]").forEach(setupPillVideo);
+            document.querySelectorAll("section[data-swipe]").forEach(setupSwipe);
+        });
     }
 }

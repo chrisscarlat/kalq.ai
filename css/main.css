@@ -3791,6 +3791,433 @@ body.kalq-edit .kalq-f-ts__card > .kalq-f-tools {
     text-align: left;
   }
 }
+.kalq-m.kalq-f-faq {
+  padding: clamp(4rem, 8vw, 7rem) 0;
+}
+
+.kalq-f-faq__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: start;
+}
+
+.kalq-f-faq__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.2rem;
+}
+.kalq-f-faq__side .kalq-f-heading {
+  margin: 0;
+}
+
+.kalq-f-faq__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.kalq-f-faq__item {
+  border-radius: 14px;
+  background: color-mix(in srgb, currentColor 5%, transparent);
+  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+}
+.kalq-f-faq__item[open] .kalq-f-faq__icon {
+  transform: rotate(45deg);
+}
+
+.kalq-f-faq__summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+  font-size: clamp(1rem, 1.3vw, 1.15rem);
+  cursor: pointer;
+  list-style: none;
+}
+.kalq-f-faq__summary::-webkit-details-marker {
+  display: none;
+}
+.kalq-f-faq__summary:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 2px;
+  border-radius: 14px;
+}
+
+.kalq-f-faq__icon {
+  flex: 0 0 auto;
+  position: relative;
+  width: 26px;
+  height: 26px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  transition: transform 0.25s ease;
+}
+.kalq-f-faq__icon::before, .kalq-f-faq__icon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 1.5px;
+  margin: -0.75px 0 0 -5px;
+  background: currentColor;
+}
+.kalq-f-faq__icon::after {
+  transform: rotate(90deg);
+}
+
+.kalq-f-faq__a {
+  padding: 0 1.25rem 1.2rem;
+  font-size: 1rem;
+  line-height: 1.55;
+  opacity: 0.85;
+}
+.kalq-f-faq__a p {
+  margin: 0 0 0.6em;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kalq-f-faq__icon {
+    transition: none;
+  }
+}
+.kalq-m.kalq-f-logos {
+  position: relative;
+  padding: clamp(3rem, 6vw, 5rem) 0;
+  overflow: hidden;
+}
+
+.kalq-f-logos__heading {
+  margin: 0 0 clamp(1.5rem, 3vw, 2.5rem);
+  font-size: clamp(1.2rem, 2vw, 1.7rem);
+  font-weight: 400;
+  text-align: center;
+}
+
+.kalq-f-logos__track {
+  display: flex;
+  justify-content: center;
+}
+
+.kalq-f-logos__list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  margin: 0;
+  padding: 0 clamp(1.25rem, 4vw, 4rem);
+  list-style: none;
+}
+
+.kalq-f-logos__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.kalq-f-logos__mark {
+  height: clamp(22px, 2.4vw, 32px);
+  color: currentColor;
+}
+.kalq-f-logos__mark svg {
+  display: block;
+  height: 100%;
+  width: auto;
+  max-width: 9rem;
+}
+
+.kalq-f-logos__name {
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.kalq-f-logos.is-belt .kalq-f-logos__track {
+  justify-content: flex-start;
+  width: max-content;
+  animation: kalq-logos-run 40s linear infinite;
+}
+.kalq-f-logos.is-belt .kalq-f-logos__list {
+  flex-wrap: nowrap;
+  padding-right: clamp(1.5rem, 4vw, 3.5rem);
+}
+.kalq-f-logos.is-belt.is-paused .kalq-f-logos__track {
+  animation-play-state: paused;
+}
+
+@keyframes kalq-logos-run {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.kalq-f-logos__pause {
+  position: absolute;
+  right: clamp(1rem, 3vw, 2rem);
+  bottom: 0.75rem;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.kalq-f-logos__pause::before {
+  content: "";
+  width: 8px;
+  height: 10px;
+  border-left: 2.5px solid currentColor;
+  border-right: 2.5px solid currentColor;
+  box-sizing: border-box;
+}
+.kalq-f-logos__pause[aria-pressed=true]::before {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 5px 0 5px 8px;
+  border-color: transparent transparent transparent currentColor;
+  margin-left: 2px;
+}
+.kalq-f-logos__pause:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kalq-f-logos.is-belt .kalq-f-logos__track {
+    animation: none;
+    width: auto;
+    justify-content: center;
+  }
+  .kalq-f-logos.is-belt .kalq-f-logos__list {
+    flex-wrap: wrap;
+  }
+  .kalq-f-logos.is-belt .kalq-f-logos__list[aria-hidden=true], .kalq-f-logos__pause {
+    display: none;
+  }
+}
+.kalq-m.kalq-f-pl {
+  position: relative;
+  padding: clamp(4rem, 8vw, 7rem) 0;
+  overflow: hidden;
+}
+
+.kalq-f-pl__label {
+  margin: 0 0 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kalq-f-pl__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid currentColor;
+}
+
+.kalq-f-pl__row {
+  border-bottom: 1px solid currentColor;
+}
+
+.kalq-f-pl__link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: clamp(0.9rem, 1.6vw, 1.4rem) 0;
+  color: inherit;
+  text-decoration: none;
+}
+.kalq-f-pl__link:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 2px;
+}
+
+.kalq-f-pl__title {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 3.4rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  transition: transform 0.3s ease;
+}
+
+a.kalq-f-pl__link:hover .kalq-f-pl__title {
+  transform: translateX(0.4rem);
+}
+
+.kalq-f-pl__arrow {
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
+}
+
+.kalq-f-pl__follow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: clamp(12rem, 18vw, 16rem);
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: 12px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.kalq-f-pl__follow.is-on {
+  opacity: 1;
+}
+
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .kalq-f-pl__follow {
+    display: none;
+  }
+  a.kalq-f-pl__link:hover .kalq-f-pl__title {
+    transform: none;
+  }
+}
+.kalq-m.kalq-f-sl {
+  padding: clamp(4rem, 8vw, 7rem) 0;
+}
+
+.kalq-f-sl__inner {
+  position: relative;
+  max-width: 64rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.kalq-f-sl__list {
+  margin: 0;
+  padding: 0 clamp(2.5rem, 6vw, 5rem);
+  list-style: none;
+  display: grid;
+  gap: 3rem;
+}
+
+.kalq-f-sl__slide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+.kalq-f-sl__slide[hidden] {
+  display: none;
+}
+
+.kalq-f-sl__face {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.kalq-f-sl__face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kalq-f-sl__quote {
+  margin: 0;
+  font-size: clamp(1.25rem, 2.3vw, 2rem);
+  line-height: 1.35;
+}
+.kalq-f-sl__quote p {
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.kalq-f-sl__who {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.kalq-f-sl__name {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.kalq-f-sl__role {
+  margin: 0;
+  font-size: 0.85rem;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.kalq-f-sl__arrow {
+  position: absolute;
+  top: 45%;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+.kalq-f-sl__arrow::before {
+  content: "";
+  display: block;
+  width: 11px;
+  height: 11px;
+  margin: auto;
+  border-left: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+}
+.kalq-f-sl__arrow.is-prev {
+  left: 0;
+}
+.kalq-f-sl__arrow.is-next {
+  right: 0;
+}
+.kalq-f-sl__arrow.is-next::before {
+  transform: rotate(-135deg);
+}
+.kalq-f-sl__arrow:focus-visible {
+  outline: 2px solid var(--kalq-accent, #3b82f6);
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+.kalq-f-sl__count {
+  margin: 1.6rem 0 0;
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+}
+
+@media (max-width: 690px) {
+  .kalq-f-faq__grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (horizontal-viewport-segments: 2) {
+  .kalq-f-faq__grid {
+    grid-template-columns: calc(var(--seg-l) - 4rem) minmax(0, 1fr);
+    column-gap: calc(var(--seg-hinge) + 4rem);
+  }
+  .kalq-f-sl__inner {
+    max-width: calc(var(--seg-l) - 2rem);
+    margin-left: 1rem;
+  }
+}
+body.kalq-edit .kalq-f-sl__slide[hidden] {
+  display: flex !important;
+}
+
+body.kalq-edit .kalq-f-sl__arrow, body.kalq-edit .kalq-f-sl__count {
+  display: none;
+}
+
 /* The inquiry chat (js/inquiry.js): one chat for the whole site, floating at the bottom right of every page while it is
    on, opened from its round button. The look of scar.lat's Project Inquiry at Kalq's compact size and its own type
    scale (the chat tokens, css/utilities/_type.scss): a frosted window, small caps title with the language pill, a

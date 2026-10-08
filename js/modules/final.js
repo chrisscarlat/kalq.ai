@@ -779,6 +779,135 @@ function renderSwipeCards(ctx) {
     return append(s, head, track, ctx.editor ? append(el(ctx, "div", "kalq-f-inner"), addTool(ctx, "card", items.length, SWIPE_MAX)) : null);
 }
 
+//=================================== Questions and answers ===================================//
+// Tether's: the heading and an optional button on the left, the questions on the right, each opening its answer
+// (a real <details>: works without script, by keyboard and for screen readers; the first open). Editors see all open.
+export const FAQ_MIN = 1, FAQ_MAX = 12;
+const DEFAULT_FAQ = [{ id: "q1" }, { id: "q2" }, { id: "q3" }];
+export const faqItems = (entry) => itemsOf(entry, FAQ_MAX, DEFAULT_FAQ);
+function renderFaq(ctx) {
+    const items = faqItems(ctx.entry);
+    const s = section(ctx, "kalq-f kalq-f-faq");
+    const side = append(el(ctx, "div", "kalq-f-faq__side"), slotEl(ctx, "heading", "h2", { className: "kalq-f-heading" }),
+        linkTo(ctx, "button", "link", "page", "kalq-m-button kalq-f-faq__button"));
+    const list = el(ctx, "div", "kalq-f-faq__list");
+    let first = true;
+    items.forEach((it, k) => {
+        const n = `Question ${k + 1}: `, nd = `Frage ${k + 1}: `;
+        const q = slotEl(ctx, `q_${it.id}`, "span", { className: "kalq-f-faq__q", label: L(`${nd}die Frage`, `${n}the question`) });
+        const a = slotEl(ctx, `a_${it.id}`, "div", { className: "kalq-f-faq__a kalq-f-text", format: "paragraphs", label: L(`${nd}die Antwort`, `${n}the answer`) });
+        if (!ctx.editor && (!q || !a)) return;
+        if (ctx.editor) { list.append(append(el(ctx, "div", "kalq-f-faq__item is-open"), itemTools(ctx, it.id, k + 1, items.length, FAQ_MIN, "Question"), append(el(ctx, "div", "kalq-f-faq__summary"), q), a)); return; }
+        const d = el(ctx, "details", "kalq-f-faq__item");
+        if (first) { d.setAttribute("open", ""); first = false; }
+        const sum = append(el(ctx, "summary", "kalq-f-faq__summary"), q, el(ctx, "span", "kalq-f-faq__icon"));
+        sum.lastChild.setAttribute("aria-hidden", "true");
+        list.append(append(d, sum, a));
+    });
+    if (!list.children.length && !ctx.editor) return null;
+    return append(s, append(el(ctx, "div", "kalq-f-inner kalq-f-faq__grid"), side, append(list, ctx.editor ? addTool(ctx, "question", items.length, FAQ_MAX) : null)));
+}
+
+//=================================== Logo belt ===================================//
+// Tether's and Harbor's: the companies' logos, each an SVG (uploaded, sanitised, its name read out), in a still row or
+// a slowly moving belt. The belt runs only with motion allowed and has a pause; its second run is decoration.
+export const LOGOS_MIN = 2, LOGOS_MAX = 16;
+const DEFAULT_LOGOS = [{ id: "g1" }, { id: "g2" }, { id: "g3" }, { id: "g4" }, { id: "g5" }];
+export const logoItems = (entry) => itemsOf(entry, LOGOS_MAX, DEFAULT_LOGOS);
+function renderLogos(ctx) {
+    const items = logoItems(ctx.entry);
+    const belt = ctx.entry.version === "belt";
+    const s = section(ctx, `kalq-f kalq-f-logos${belt ? " is-belt" : ""}`);
+    const list = el(ctx, "ul", "kalq-f-logos__list");
+    items.forEach((it, k) => {
+        const n = `Logo ${k + 1}: `;
+        const name = plain(textOf(ctx, `n_${it.id}`));
+        const svg = svgEl(ctx, `k_${it.id}`, "kalq-f-logos__mark", { label: L(`${n}SVG`, `${n}SVG`), name: name || null });
+        if (!ctx.editor && (!svg || !name)) return; // a logo needs its SVG and the company's name
+        const li = el(ctx, "li", "kalq-f-logos__item");
+        if (ctx.editor) li.append(itemTools(ctx, it.id, k + 1, items.length, LOGOS_MIN, "Logo"), slotEl(ctx, `n_${it.id}`, "p", { className: "kalq-f-logos__name", label: L(`${n}Name der Firma`, `${n}the company's name`) }));
+        li.prepend(svg);
+        list.append(li);
+    });
+    if (!list.children.length && !ctx.editor) return null;
+    const track = append(el(ctx, "div", "kalq-f-logos__track"), list);
+    if (belt && !ctx.editor) {
+        const copy = list.cloneNode(true);
+        copy.setAttribute("aria-hidden", "true");
+        copy.querySelectorAll("[role]").forEach((n) => n.removeAttribute("role"));
+        track.append(copy);
+    }
+    const pause = belt && !ctx.editor ? el(ctx, "button", "kalq-f-logos__pause") : null;
+    if (pause) { pause.setAttribute("type", "button"); pause.setAttribute("aria-pressed", "false"); pause.setAttribute("aria-label", ctx.lang === "en" ? "Pause the logos" : "Logos anhalten"); }
+    return append(s, append(el(ctx, "div", "kalq-f-inner"), slotEl(ctx, "heading", "h2", { className: "kalq-f-logos__heading" })), track, pause, ctx.editor ? append(el(ctx, "div", "kalq-f-inner"), addTool(ctx, "logo", items.length, LOGOS_MAX)) : null);
+}
+
+//=================================== Project list ===================================//
+// Signal's: a small label, then rows of large titles between thin lines, each a link with an arrow; on a desktop a
+// row's picture follows the pointer while it is over it (decoration: the title is the link)
+export const PROJECTS_MIN = 1, PROJECTS_MAX = 12;
+const DEFAULT_PROJECTS = [{ id: "r1" }, { id: "r2" }, { id: "r3" }];
+export const projectItems = (entry) => itemsOf(entry, PROJECTS_MAX, DEFAULT_PROJECTS);
+function renderProjects(ctx) {
+    const items = projectItems(ctx.entry);
+    const s = section(ctx, "kalq-f kalq-f-pl");
+    s.setAttribute("data-follow", "");
+    const list = el(ctx, "ul", "kalq-f-pl__list");
+    items.forEach((it, k) => {
+        const n = `Row ${k + 1}: `, nd = `Zeile ${k + 1}: `;
+        const title = textOf(ctx, `t_${it.id}`);
+        if (!ctx.editor && !title) return;
+        const li = el(ctx, "li", "kalq-f-pl__row");
+        if (ctx.editor) {
+            append(li, itemTools(ctx, it.id, k + 1, items.length, PROJECTS_MIN, "Row"), slotEl(ctx, `t_${it.id}`, "p", { className: "kalq-f-pl__title", label: L(`${nd}Titel`, `${n}title`) }),
+                slotEl(ctx, `l_${it.id}`, "span", { className: "kalq-m-link-field", label: L(`${nd}Seite oder URL (optional)`, `${n}a page or URL (optional)`) }),
+                mediaEl(ctx, `p_${it.id}`, "kalq-f-pl__pic", { label: L(`${nd}Bild, das dem Zeiger folgt (optional)`, `${n}picture following the pointer (optional)`) }));
+        } else {
+            const raw = plain(textOf(ctx, `l_${it.id}`));
+            const href = SAFE_HREF.test(raw) ? raw : null;
+            const row = el(ctx, href ? "a" : "div", "kalq-f-pl__link");
+            if (href) { row.setAttribute("href", href); if (/^https?:/i.test(href)) { row.setAttribute("target", "_blank"); row.setAttribute("rel", "noopener"); } }
+            const t = el(ctx, "span", "kalq-f-pl__title");
+            renderBlock(t, title);
+            append(row, t, href ? el(ctx, "span", "kalq-f-pl__arrow", "↗") : null);
+            row.lastChild?.setAttribute?.("aria-hidden", "true");
+            const pic = mediaOf(ctx, `p_${it.id}`);
+            if (pic && !VIDEO_URL.test(pic)) li.setAttribute("data-follow-src", pic);
+            li.append(row);
+        }
+        list.append(li);
+    });
+    if (!list.children.length && !ctx.editor) return null;
+    return append(s, append(el(ctx, "div", "kalq-f-inner"), slotEl(ctx, "label", "p", { className: "kalq-f-pl__label" }), list, ctx.editor ? addTool(ctx, "row", items.length, PROJECTS_MAX) : null));
+}
+
+//=================================== Testimonial slider ===================================//
+// Signal's: one quote at a time, centred: the person's picture, the quote, the name and role; arrows and "1 / 3" to go
+// to the others (nothing moves on its own). Without script every quote shows, one under the other.
+export const SLIDES_MIN = 1, SLIDES_MAX = 10;
+const DEFAULT_SLIDES = [{ id: "t1" }, { id: "t2" }, { id: "t3" }];
+export const slideItems = (entry) => itemsOf(entry, SLIDES_MAX, DEFAULT_SLIDES);
+function renderSlider(ctx) {
+    const items = slideItems(ctx.entry);
+    const s = section(ctx, "kalq-f kalq-f-sl");
+    s.setAttribute("data-slider", "");
+    const list = el(ctx, "ul", "kalq-f-sl__list");
+    items.forEach((it, k) => {
+        const n = `Quote ${k + 1}: `, nd = `Zitat ${k + 1}: `;
+        const quote = slotEl(ctx, `q_${it.id}`, "blockquote", { className: "kalq-f-sl__quote", format: "paragraphs", label: L(`${nd}das Zitat`, `${n}the quote`) });
+        const name = slotEl(ctx, `n_${it.id}`, "p", { className: "kalq-f-sl__name", label: L(`${nd}Name`, `${n}name`) });
+        if (!ctx.editor && (!quote || !name)) return;
+        const li = el(ctx, "li", "kalq-f-sl__slide");
+        if (ctx.editor) li.append(itemTools(ctx, it.id, k + 1, items.length, SLIDES_MIN, "Quote"));
+        append(li, mediaEl(ctx, `p_${it.id}`, "kalq-f-sl__face", { identity: true, label: L(`${nd}Foto der Person (optional)`, `${n}the person's photo (optional)`), alt: "" }), quote,
+            append(el(ctx, "div", "kalq-f-sl__who"), name, slotEl(ctx, `r_${it.id}`, "p", { className: "kalq-f-sl__role", label: L(`${nd}Rolle (optional)`, `${n}role (optional)`) })));
+        list.append(li);
+    });
+    if (!list.children.length && !ctx.editor) return null;
+    const nav = ctx.editor ? addTool(ctx, "quote", items.length, SLIDES_MAX) : null;
+    return append(s, append(el(ctx, "div", "kalq-f-inner kalq-f-sl__inner"), list, nav));
+}
+
 //=================================== The book ===================================//
 const cardsUnit = (s, k, sel) => ({ layout: "E", cards: [...s.querySelectorAll(sel)].map((c) => ({ media: k.mediaUrl(c.querySelector(".kalq-m-media")), eyebrow: c.querySelector(".kalq-m-eyebrow"),
     title: c.querySelector(".kalq-f-title"), body: k.parasOf(c.querySelector(".kalq-f-text")) })).filter((c) => c.title) });
@@ -1042,6 +1171,72 @@ export const FINAL = {
             ? [] : [L(`mindestens ${HCARDS_MIN} Karten mit Titel`, `at least ${HCARDS_MIN} cards with a title`)]),
         magazine: { layout: "E", unit: (s, k) => cardsUnit(s, k, ".kalq-f-hs__card") },
         render: renderHorizontal,
+    },
+    "content.faq": {
+        category: "content",
+        name: L("Fragen und Antworten", "Questions and answers"),
+        keywords: "faq fragen antworten questions answers accordion akkordeon tether help hilfe",
+        slots: {
+            heading: { kind: "heading", label: L("Überschrift", "Heading"), required: true },
+            button: { kind: "button", label: L("Button: Text (optional)", "Button: label (optional)") },
+            link: { kind: "link", label: L("Button: Seite oder URL", "Button: a page or URL") },
+        },
+        versions: {
+            split: { name: L("Überschrift links, Fragen rechts", "The heading on the left, the questions on the right"),
+                wire: [["heading", 5, 10, 26], ["button", 5, 18, 10], ["band", 40, 8, 55, 14], ["line", 42, 12, 40, "light"], ["line", 42, 15, 48, "light"], ["rule", 40, 27, 55], ["line", 42, 30, 40], ["rule", 40, 35, 55], ["line", 42, 38, 36], ["rule", 40, 43, 55]] },
+        },
+        initialOpts: () => ({ items: Array.from({ length: 3 }, () => ({ id: newId() })) }),
+        itemsEditor: { min: FAQ_MIN, max: FAQ_MAX, make: () => ({ id: newId() }) },
+        missing: (entry, page, get) => (faqItems(entry).some((it) => has(get, page, entry, `q_${it.id}`) && has(get, page, entry, `a_${it.id}`)) ? [] : [L("mindestens eine Frage mit Antwort", "at least one question with its answer")]),
+        magazine: { layout: "B", unit: (s, k) => ({ layout: "B", title: s.querySelector(".kalq-f-heading"), body: [...s.querySelectorAll(".kalq-f-faq__item")].flatMap((d) => [k.textOf(d.querySelector(".kalq-f-faq__q"), "h3", "bk-subtitle"), ...k.parasOf(d.querySelector(".kalq-f-faq__a"))]).filter(Boolean) }) },
+        render: renderFaq,
+    },
+    "content.logos": {
+        category: "content",
+        name: L("Logo-Band", "Logo belt"),
+        keywords: "logos logo belt band marquee laufband partner kunden clients brands marken svg trusted",
+        slots: { heading: { kind: "heading", label: L("Überschrift (optional)", "Heading (optional)") } },
+        versions: {
+            row: { name: L("Logos in einer Reihe", "The logos in a row"),
+                wire: [["heading", 30, 16, 40], ...[8, 25, 42, 59, 76].map((x) => ["band", x, 30, 13, 6])] },
+            belt: { name: L("Logos als langsames Laufband, mit Pause", "The logos as a slow moving belt, with a pause"),
+                wire: [["heading", 30, 16, 40], ...[-6, 11, 28, 45, 62, 79, 96].map((x) => ["band", x, 30, 13, 6])], motion: "slide" },
+        },
+        initialOpts: () => ({ items: Array.from({ length: 5 }, () => ({ id: newId() })) }),
+        itemsEditor: { min: LOGOS_MIN, max: LOGOS_MAX, make: () => ({ id: newId() }) },
+        missing: (entry, page, get) => (logoItems(entry).filter((it) => has(get, page, entry, `k_${it.id}`) && has(get, page, entry, `n_${it.id}`)).length >= LOGOS_MIN ? [] : [L(`mindestens ${LOGOS_MIN} Logos mit Namen`, `at least ${LOGOS_MIN} logos with their names`)]),
+        magazine: { layout: "B", unit: (s) => ({ layout: "B", title: s.querySelector(".kalq-f-logos__heading"), body: [] }) },
+        render: renderLogos,
+    },
+    "content.projects": {
+        category: "content",
+        name: L("Projektliste", "Project list"),
+        keywords: "projects projekte work arbeiten list liste rows zeilen arrow pfeil signal featured links",
+        slots: { label: { kind: "eyebrow", label: L("Kleines Etikett (optional)", "Small label (optional)") } },
+        versions: {
+            list: { name: L("Große Titel in Zeilen, je ein Pfeil", "Large titles in rows, each with an arrow"),
+                wire: [["eyebrow", 5, 8, 14], ["rule", 5, 12, 90], ["heading", 5, 16, 34], ["line", 91, 17, 3], ["rule", 5, 24, 90], ["heading", 5, 28, 28], ["line", 91, 29, 3], ["rule", 5, 36, 90], ["heading", 5, 40, 22], ["line", 91, 41, 3], ["rule", 5, 48, 90]] },
+        },
+        initialOpts: () => ({ items: Array.from({ length: 3 }, () => ({ id: newId() })) }),
+        itemsEditor: { min: PROJECTS_MIN, max: PROJECTS_MAX, make: () => ({ id: newId() }) },
+        missing: (entry, page, get) => (projectItems(entry).some((it) => has(get, page, entry, `t_${it.id}`)) ? [] : [L("mindestens eine Zeile mit Titel", "at least one row with a title")]),
+        magazine: { layout: "B", unit: (s, k) => ({ layout: "B", title: s.querySelector(".kalq-f-pl__label"), body: [...s.querySelectorAll(".kalq-f-pl__title")].map((t) => k.textOf(t, "h3", "bk-subtitle")).filter(Boolean) }) },
+        render: renderProjects,
+    },
+    "testimonials.paging": {
+        category: "testimonials",
+        name: L("Zitate zum Blättern", "Quotes to page through"),
+        keywords: "testimonials stimmen zitate quotes slider blättern arrows pfeile signal one at a time",
+        slots: {},
+        versions: {
+            slider: { name: L("Ein Zitat in der Mitte, Pfeile und Zähler", "One quote centred, arrows and a counter"),
+                wire: [["media", 46, 8, 8, 8], ["line", 22, 22, 56, "bold"], ["line", 26, 26, 48, "bold"], ["line", 30, 30, 40, "bold"], ["line", 42, 37, 16], ["plus", 8, 24], ["plus", 89, 24], ["line", 46, 44, 8]] },
+        },
+        initialOpts: () => ({ items: Array.from({ length: 3 }, () => ({ id: newId() })) }),
+        itemsEditor: { min: SLIDES_MIN, max: SLIDES_MAX, make: () => ({ id: newId() }) },
+        missing: (entry, page, get) => (slideItems(entry).some((it) => has(get, page, entry, `q_${it.id}`) && has(get, page, entry, `n_${it.id}`)) ? [] : [L("mindestens ein Zitat mit Namen", "at least one quote with a name")]),
+        magazine: { layout: "B", unit: (s, k) => ({ layout: "B", title: null, body: [...s.querySelectorAll(".kalq-f-sl__slide")].flatMap((li) => [...k.parasOf(li.querySelector(".kalq-f-sl__quote")), k.textOf(li.querySelector(".kalq-f-sl__name"), "p", "bk-small")]).filter(Boolean) }) },
+        render: renderSlider,
     },
     "content.lit": {
         category: "content",

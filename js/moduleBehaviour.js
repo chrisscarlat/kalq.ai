@@ -95,6 +95,65 @@ function guardSwipes() {
     }, { capture: true, passive: true });
 }
 
+//=================================== Logo belt ===================================//
+// The belt moves by CSS only with motion allowed; its pause stops and restarts it
+function setupLogoBelt(section) {
+    const pause = section.querySelector(".kalq-f-logos__pause");
+    if (!pause || pause.dataset.ready) return;
+    pause.dataset.ready = "true";
+    const labels = { de: ["Logos anhalten", "Logos weiterlaufen lassen"], en: ["Pause the logos", "Play the logos"] }[document.documentElement.lang === "en" ? "en" : "de"];
+    pause.addEventListener("click", () => {
+        const stopped = section.classList.toggle("is-paused");
+        pause.setAttribute("aria-pressed", String(stopped));
+        pause.setAttribute("aria-label", labels[stopped ? 1 : 0]);
+    });
+}
+
+//=================================== Project list ===================================//
+// A row's picture follows the pointer while it is over the row (a mouse only; decoration, the title is the link)
+function setupFollow(section) {
+    if (section.dataset.followReady) return;
+    section.dataset.followReady = "true";
+    const img = Object.assign(document.createElement("img"), { alt: "", className: "kalq-f-pl__follow" });
+    img.setAttribute("aria-hidden", "true");
+    section.append(img);
+    section.addEventListener("pointermove", (e) => {
+        if (e.pointerType !== "mouse") return;
+        const row = e.target.closest?.("[data-follow-src]");
+        if (!row) { img.classList.remove("is-on"); return; }
+        if (img.getAttribute("src") !== row.dataset.followSrc) img.setAttribute("src", row.dataset.followSrc);
+        const r = section.getBoundingClientRect();
+        img.style.transform = `translate(${Math.round(e.clientX - r.left)}px, ${Math.round(e.clientY - r.top)}px) translate(-50%, -50%)`;
+        img.classList.add("is-on");
+    });
+    section.addEventListener("pointerleave", () => img.classList.remove("is-on"));
+}
+
+//=================================== Testimonial slider ===================================//
+// One quote at a time: the arrows and the counter; the others stay in the page, hidden (nothing moves by itself)
+function setupSlider(section) {
+    const slides = [...section.querySelectorAll(".kalq-f-sl__slide")];
+    if (slides.length < 2 || section.dataset.sliderReady || document.body.classList.contains("kalq-edit")) return;
+    section.dataset.sliderReady = "true";
+    const en = document.documentElement.lang === "en";
+    const button = (dir) => { const b = document.createElement("button"); b.type = "button"; b.className = `kalq-f-sl__arrow is-${dir}`; b.setAttribute("aria-label", dir === "prev" ? (en ? "Previous quote" : "Vorheriges Zitat") : (en ? "Next quote" : "Nächstes Zitat")); return b; };
+    const prev = button("prev"), next = button("next");
+    const count = document.createElement("p");
+    count.className = "kalq-f-sl__count";
+    count.setAttribute("aria-live", "polite");
+    let at = 0;
+    const show = (i) => {
+        at = (i + slides.length) % slides.length;
+        slides.forEach((sl, k) => { sl.hidden = k !== at; });
+        count.textContent = `${at + 1} / ${slides.length}`;
+    };
+    prev.addEventListener("click", () => show(at - 1));
+    next.addEventListener("click", () => show(at + 1));
+    section.querySelector(".kalq-f-sl__inner").append(prev, next, count);
+    section.classList.add("is-sliding");
+    show(0);
+}
+
 //=================================== Start ===================================//
 export function initModules(root = document) {
     if (!document.body.classList.contains("kalq-edit")) root.querySelectorAll(".kalq-f[data-scroll-effect]").forEach(setupScrollEffect);
@@ -103,6 +162,9 @@ export function initModules(root = document) {
     root.querySelectorAll("section[data-pill-video]").forEach(setupPillVideo);
     root.querySelectorAll("section[data-swipe]").forEach(setupSwipe);
     guardSwipes();
+    root.querySelectorAll(".kalq-f-logos.is-belt").forEach(setupLogoBelt);
+    root.querySelectorAll("section[data-follow]").forEach(setupFollow);
+    root.querySelectorAll("section[data-slider]").forEach(setupSlider);
     if (!initModules.listening) {
         initModules.listening = true;
         spanned.addEventListener("change", () => initModules()); // the device folded or unfolded
@@ -110,6 +172,9 @@ export function initModules(root = document) {
             document.querySelectorAll("section[data-hero]").forEach(setupHeroVideo);
             document.querySelectorAll("section[data-pill-video]").forEach(setupPillVideo);
             document.querySelectorAll("section[data-swipe]").forEach(setupSwipe);
+            document.querySelectorAll(".kalq-f-logos.is-belt").forEach(setupLogoBelt);
+            document.querySelectorAll("section[data-follow]").forEach(setupFollow);
+            document.querySelectorAll("section[data-slider]").forEach(setupSlider);
         });
     }
 }

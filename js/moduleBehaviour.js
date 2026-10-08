@@ -154,6 +154,25 @@ function setupSlider(section) {
     show(0);
 }
 
+//=================================== Person cards with video ===================================//
+// A card's play button puts the person's video in the card, with its controls, and plays it (nothing plays on its own)
+function setupVideoCards(section) {
+    if (section.dataset.vcReady) return;
+    section.dataset.vcReady = "true";
+    section.addEventListener("click", (e) => {
+        const play = e.target.closest?.(".kalq-f-vc__play");
+        if (!play) return;
+        const card = play.closest(".kalq-f-vc__card");
+        const video = Object.assign(document.createElement("video"), { src: play.dataset.video, controls: true, playsInline: true, className: "kalq-f-vc__video" });
+        card.querySelector(".kalq-f-vc__media")?.remove();
+        card.prepend(video);
+        card.classList.add("is-playing");
+        play.remove();
+        video.play()?.catch?.(() => { });
+        video.focus();
+    });
+}
+
 //=================================== Start ===================================//
 export function initModules(root = document) {
     if (!document.body.classList.contains("kalq-edit")) root.querySelectorAll(".kalq-f[data-scroll-effect]").forEach(setupScrollEffect);
@@ -165,6 +184,7 @@ export function initModules(root = document) {
     root.querySelectorAll(".kalq-f-logos.is-belt").forEach(setupLogoBelt);
     root.querySelectorAll("section[data-follow]").forEach(setupFollow);
     root.querySelectorAll("section[data-slider]").forEach(setupSlider);
+    root.querySelectorAll(".kalq-f-vc").forEach(setupVideoCards);
     if (!initModules.listening) {
         initModules.listening = true;
         spanned.addEventListener("change", () => initModules()); // the device folded or unfolded
@@ -175,6 +195,7 @@ export function initModules(root = document) {
             document.querySelectorAll(".kalq-f-logos.is-belt").forEach(setupLogoBelt);
             document.querySelectorAll("section[data-follow]").forEach(setupFollow);
             document.querySelectorAll("section[data-slider]").forEach(setupSlider);
+            document.querySelectorAll(".kalq-f-vc").forEach(setupVideoCards);
         });
     }
 }

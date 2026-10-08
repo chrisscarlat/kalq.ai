@@ -908,6 +908,132 @@ function renderSlider(ctx) {
     return append(s, append(el(ctx, "div", "kalq-f-inner kalq-f-sl__inner"), list, nav));
 }
 
+//=================================== Results grid ===================================//
+// Tether's: a heading and a line centred; below, a grid of up to five tiles: a tall picture, a tile of words, two
+// figures (a value and a line), a picture on the accent colour. Only tiles with content show (no invented figures).
+function renderResults(ctx) {
+    const s = section(ctx, "kalq-f kalq-f-rs");
+    const head = append(el(ctx, "div", "kalq-f-inner kalq-f-rs__head"), slotEl(ctx, "heading", "h2", { className: "kalq-f-heading" }), slotEl(ctx, "intro", "p", { className: "kalq-f-rs__intro" }));
+    const tile = (cls, has, ...children) => (ctx.editor || has ? append(el(ctx, "div", `kalq-f-rs__tile ${cls}`), ...children) : null);
+    const figure = (k) => tile(`is-figure is-f${k}`, !!textOf(ctx, `value${k}`),
+        slotEl(ctx, `value${k}`, "p", { className: "kalq-f-rs__value", label: L(`Zahl ${k}`, `Figure ${k}`) }),
+        slotEl(ctx, `line${k}`, "p", { className: "kalq-f-rs__line", label: L(`Zahl ${k}: eine Zeile`, `Figure ${k}: one line`) }));
+    const grid = append(el(ctx, "div", "kalq-f-inner kalq-f-rs__grid"),
+        tile("is-picture is-tall", !!mediaOf(ctx, "media"), mediaEl(ctx, "media", "kalq-f-rs__media"), ctx.editor ? altField(ctx, "media") : null),
+        tile("is-words", !!textOf(ctx, "title"), slotEl(ctx, "title", "h3", { className: "kalq-f-rs__title" }), slotEl(ctx, "text", "p", { className: "kalq-f-rs__text" })),
+        figure("1"),
+        tile("is-picture is-accent", !!mediaOf(ctx, "media2"), mediaEl(ctx, "media2", "kalq-f-rs__media"), ctx.editor ? altField(ctx, "media2") : null),
+        figure("2"));
+    if (!ctx.editor && !textOf(ctx, "heading")) return null;
+    return append(s, head, grid.childNodes.length ? grid : null);
+}
+
+//=================================== Video testimonials ===================================//
+// Tether's: a heading centred; a row of person cards to swipe (js/moduleBehaviour.js, as Cards to swipe): a card with a
+// quote is a quote card on the accent colour; one with a photo shows the person; a card with a video has a play button
+// and plays it in place, with its controls. Nothing plays on its own.
+export const VCARDS_MIN = 1, VCARDS_MAX = 12;
+const DEFAULT_VCARDS = [{ id: "v1" }, { id: "v2" }, { id: "v3" }, { id: "v4" }];
+export const vcardItems = (entry) => itemsOf(entry, VCARDS_MAX, DEFAULT_VCARDS);
+function renderVideoCards(ctx) {
+    const items = vcardItems(ctx.entry);
+    const s = section(ctx, "kalq-f kalq-f-vc");
+    s.setAttribute("data-swipe", "");
+    const track = el(ctx, "ul", "kalq-f-sw__track kalq-f-vc__track");
+    items.forEach((it, k) => {
+        const n = `Card ${k + 1}: `, nd = `Karte ${k + 1}: `;
+        const name = slotEl(ctx, `n_${it.id}`, "p", { className: "kalq-f-vc__name", label: L(`${nd}Name`, `${n}name`) });
+        const quote = textOf(ctx, `q_${it.id}`);
+        const photo = mediaOf(ctx, `p_${it.id}`);
+        const video = mediaOf(ctx, `v_${it.id}`);
+        if (!ctx.editor && (!name || (!quote && !photo))) return;
+        const card = el(ctx, "li", `kalq-f-vc__card${quote ? " is-quote" : " is-photo"}`);
+        card.setAttribute("tabindex", "0");
+        if (ctx.editor) card.append(itemTools(ctx, it.id, k + 1, items.length, VCARDS_MIN, "Card"));
+        if (ctx.editor || (!quote && photo)) card.append(mediaEl(ctx, `p_${it.id}`, "kalq-f-vc__media", { identity: true, label: L(`${nd}Foto der Person`, `${n}the person's photo`), alt: "" }));
+        if (ctx.editor || quote) card.append(slotEl(ctx, `q_${it.id}`, "blockquote", { className: "kalq-f-vc__quote", format: "paragraphs", label: L(`${nd}Zitat (optional: macht eine Zitatkarte)`, `${n}quote (optional: makes a quote card)`) }));
+        const foot = append(el(ctx, "div", "kalq-f-vc__foot"), append(el(ctx, "div", "kalq-f-vc__who"), name, slotEl(ctx, `r_${it.id}`, "p", { className: "kalq-f-vc__role", label: L(`${nd}Rolle (optional)`, `${n}role (optional)`) })));
+        if (video && VIDEO_URL.test(video) && !ctx.editor) {
+            const play = el(ctx, "button", "kalq-f-vc__play");
+            play.setAttribute("type", "button");
+            play.setAttribute("data-video", video);
+            play.setAttribute("aria-label", `${ctx.lang === "en" ? "Play the video of" : "Video abspielen von"} ${plain(textOf(ctx, `n_${it.id}`))}`);
+            foot.append(play);
+        }
+        card.append(foot);
+        if (ctx.editor) card.append(mediaEl(ctx, `v_${it.id}`, "kalq-f-vc__video-slot", { label: L(`${nd}Video (optional)`, `${n}video (optional)`) }));
+        track.append(card);
+    });
+    if (!track.children.length && !ctx.editor) return null;
+    return append(s, append(el(ctx, "div", "kalq-f-inner kalq-f-vc__head"), slotEl(ctx, "heading", "h2", { className: "kalq-f-heading" })), track,
+        ctx.editor ? append(el(ctx, "div", "kalq-f-inner"), addTool(ctx, "card", items.length, VCARDS_MAX)) : null);
+}
+
+//=================================== Numbered services ===================================//
+// Harbor's: a heading, then large cards numbered 01, 02, 03 (their order), each on a colour of the style with its
+// title, a few words and a picture; the section pins while they slide sideways (the horizontal effect); stacked under
+// reduced motion and while editing
+export const SERVICES_MIN = 1, SERVICES_MAX = 8;
+const DEFAULT_SERVICES = [{ id: "n1" }, { id: "n2" }, { id: "n3" }];
+export const serviceItems = (entry) => itemsOf(entry, SERVICES_MAX, DEFAULT_SERVICES);
+function renderServices(ctx) {
+    const items = serviceItems(ctx.entry);
+    const s = section(ctx, "kalq-f kalq-f-hs kalq-f-sv");
+    s.setAttribute("data-scroll-effect", "horizontal");
+    const track = el(ctx, "div", "kalq-f-hs__track kalq-f-sv__track");
+    let shown = 0;
+    items.forEach((it, k) => {
+        const n = `Service ${k + 1}: `, nd = `Leistung ${k + 1}: `;
+        const title = slotEl(ctx, `t_${it.id}`, "h3", { className: "kalq-f-sv__title", label: L(`${nd}Titel`, `${n}title`) });
+        if (!ctx.editor && !title) return;
+        shown += 1;
+        const card = el(ctx, "article", `kalq-f-sv__card is-c${(shown - 1) % 3}`);
+        if (ctx.editor) card.append(itemTools(ctx, it.id, k + 1, items.length, SERVICES_MIN, "Service"));
+        const words = append(el(ctx, "div", "kalq-f-sv__words"), el(ctx, "p", "kalq-f-sv__num", String(shown).padStart(2, "0")), title,
+            slotEl(ctx, `x_${it.id}`, "p", { className: "kalq-f-sv__text", label: L(`${nd}ein paar Sätze`, `${n}a few sentences`) }));
+        words.firstChild.setAttribute("aria-hidden", "true");
+        append(card, words, mediaEl(ctx, `p_${it.id}`, "kalq-f-sv__media", { label: L(`${nd}Bild`, `${n}picture`) }), ctx.editor ? altField(ctx, `p_${it.id}`) : null);
+        track.append(card);
+    });
+    if (!track.children.length && !ctx.editor) return null;
+    const pin = append(el(ctx, "div", "kalq-f-hs__pin"), append(el(ctx, "div", "kalq-f-inner kalq-f-hs__head"), slotEl(ctx, "heading", "h2", { className: "kalq-f-heading" })), track,
+        ctx.editor ? append(el(ctx, "div", "kalq-f-inner"), addTool(ctx, "service", items.length, SERVICES_MAX)) : null);
+    return append(s, pin);
+}
+
+//=================================== Pricing ===================================//
+// Harbor's: a small label and a heading centred; the plans side by side in one frame: each its name, an optional
+// pill ("Recommended"), a line, the price as written (nothing shown when left empty), a button, and what it includes
+export const PLANS_MIN = 1, PLANS_MAX = 4;
+const DEFAULT_PLANS = [{ id: "a" }, { id: "b" }, { id: "c" }];
+export const planItems = (entry) => itemsOf(entry, PLANS_MAX, DEFAULT_PLANS);
+function renderPricing(ctx) {
+    const items = planItems(ctx.entry);
+    const s = section(ctx, "kalq-f kalq-f-pr");
+    const plans = el(ctx, "div", "kalq-f-pr__plans");
+    items.forEach((it, k) => {
+        const n = `Plan ${k + 1}: `, nd = `Paket ${k + 1}: `;
+        const name = slotEl(ctx, `n_${it.id}`, "h3", { className: "kalq-f-pr__name", label: L(`${nd}Name`, `${n}name`) });
+        if (!ctx.editor && !name) return;
+        const plan = el(ctx, "article", "kalq-f-pr__plan");
+        if (ctx.editor) plan.append(itemTools(ctx, it.id, k + 1, items.length, PLANS_MIN, "Plan"));
+        const includes = textOf(ctx, `i_${it.id}`);
+        const list = el(ctx, "ul", "kalq-f-pr__includes");
+        if (!ctx.editor && includes) plain(includes.replace(/<br\s*\/?>/gi, "\n")).split("\n").map((x) => x.trim()).filter(Boolean).slice(0, 12).forEach((x) => list.append(el(ctx, "li", "", x)));
+        append(plan, append(el(ctx, "div", "kalq-f-pr__top"), name, slotEl(ctx, `b_${it.id}`, "span", { className: "kalq-f-pr__badge", label: L(`${nd}Pille, z. B. Empfohlen (optional)`, `${n}pill, e.g. Recommended (optional)`) })),
+            slotEl(ctx, `d_${it.id}`, "p", { className: "kalq-f-pr__desc", label: L(`${nd}eine Zeile`, `${n}one line`) }),
+            append(el(ctx, "p", "kalq-f-pr__price"), slotEl(ctx, `p_${it.id}`, "span", { className: "kalq-f-pr__amount", label: L(`${nd}Preis, wie er dastehen soll`, `${n}price, as it should read`) }),
+                ctx.doc.createTextNode(" "), slotEl(ctx, `u_${it.id}`, "span", { className: "kalq-f-pr__unit", label: L(`${nd}pro … (optional)`, `${n}per … (optional)`) })),
+            linkTo(ctx, `c_${it.id}`, `l_${it.id}`, "page", "kalq-m-button kalq-f-pr__button", { n }),
+            ctx.editor ? slotEl(ctx, `i_${it.id}`, "p", { className: "kalq-f-pr__includes-field", format: "lines", label: L(`${nd}Enthalten, eins pro Zeile`, `${n}includes, one per line`) }) : (list.childNodes.length ? list : null));
+        plans.append(plan);
+    });
+    if (!plans.children.length && !ctx.editor) return null;
+    plans.setAttribute("style", `--plans: ${Math.max(1, plans.children.length)}`);
+    return append(s, append(el(ctx, "div", "kalq-f-inner"), append(el(ctx, "div", "kalq-f-pr__head"), slotEl(ctx, "label", "p", { className: "kalq-f-pr__label" }), slotEl(ctx, "heading", "h2", { className: "kalq-f-heading" })),
+        plans, ctx.editor ? addTool(ctx, "plan", items.length, PLANS_MAX) : null));
+}
+
 //=================================== The book ===================================//
 const cardsUnit = (s, k, sel) => ({ layout: "E", cards: [...s.querySelectorAll(sel)].map((c) => ({ media: k.mediaUrl(c.querySelector(".kalq-m-media")), eyebrow: c.querySelector(".kalq-m-eyebrow"),
     title: c.querySelector(".kalq-f-title"), body: k.parasOf(c.querySelector(".kalq-f-text")) })).filter((c) => c.title) });
@@ -1237,6 +1363,75 @@ export const FINAL = {
         missing: (entry, page, get) => (slideItems(entry).some((it) => has(get, page, entry, `q_${it.id}`) && has(get, page, entry, `n_${it.id}`)) ? [] : [L("mindestens ein Zitat mit Namen", "at least one quote with a name")]),
         magazine: { layout: "B", unit: (s, k) => ({ layout: "B", title: null, body: [...s.querySelectorAll(".kalq-f-sl__slide")].flatMap((li) => [...k.parasOf(li.querySelector(".kalq-f-sl__quote")), k.textOf(li.querySelector(".kalq-f-sl__name"), "p", "bk-small")]).filter(Boolean) }) },
         render: renderSlider,
+    },
+    "content.results": {
+        category: "content",
+        name: L("Ergebnis-Raster", "Results grid"),
+        keywords: "results ergebnisse bento grid raster tiles kacheln figures zahlen pictures bilder tether",
+        slots: {
+            heading: { kind: "heading", label: L("Überschrift", "Heading"), required: true },
+            intro: { kind: "text", label: L("Eine Zeile darunter (optional)", "A line below (optional)") },
+            ...Object.fromEntries(picture("media", L("Hohes Bild links", "Tall picture on the left"))),
+            title: { kind: "heading", label: L("Kachel mit Worten: Titel", "Tile of words: title") },
+            text: { kind: "text", label: L("Kachel mit Worten: Text", "Tile of words: text") },
+            value1: { kind: "heading", label: L("Zahl 1", "Figure 1") }, line1: { kind: "text", label: L("Zahl 1: eine Zeile", "Figure 1: one line") },
+            ...Object.fromEntries(picture("media2", L("Bild auf der Akzentfarbe", "Picture on the accent colour"))),
+            value2: { kind: "heading", label: L("Zahl 2", "Figure 2") }, line2: { kind: "text", label: L("Zahl 2: eine Zeile", "Figure 2: one line") },
+        },
+        versions: {
+            grid: { name: L("Überschrift, darunter fünf Kacheln", "A heading, five tiles below"),
+                wire: [["heading", 30, 6, 40], ["line", 34, 12, 32], ["media", 4, 18, 44, 38], ["band", 50, 18, 22, 18], ["line", 76, 22, 16], ["heading", 76, 30, 10], ["media", 50, 38, 22, 18], ["heading", 76, 44, 10], ["line", 76, 50, 16]] },
+        },
+        magazine: { layout: "B", unit: (s, k) => ({ layout: "B", title: s.querySelector(".kalq-f-heading"), body: [...s.querySelectorAll(".kalq-f-rs__title, .kalq-f-rs__text, .kalq-f-rs__value, .kalq-f-rs__line")].map((x) => k.textOf(x, "p", "bk-body")).filter(Boolean) }) },
+        render: renderResults,
+    },
+    "testimonials.video": {
+        category: "testimonials",
+        name: L("Personenkarten mit Video", "Person cards with video"),
+        keywords: "testimonials stimmen video cards karten people personen swipe wischen quote zitat play tether",
+        slots: { heading: { kind: "heading", label: L("Überschrift", "Heading") } },
+        versions: {
+            row: { name: L("Personen und Zitate in einer Reihe zum Wischen", "People and quotes in a row to swipe"),
+                wire: [["heading", 26, 6, 48], ["media", 0, 20, 20, 32], ["band", 22, 20, 26, 32], ["line", 24, 24, 20, "light"], ["media", 50, 20, 20, 32, "play"], ["band", 72, 20, 26, 32]], motion: "slide" },
+        },
+        initialOpts: () => ({ items: Array.from({ length: 4 }, () => ({ id: newId() })) }),
+        itemsEditor: { min: VCARDS_MIN, max: VCARDS_MAX, make: () => ({ id: newId() }) },
+        missing: (entry, page, get) => (vcardItems(entry).some((it) => has(get, page, entry, `n_${it.id}`) && (has(get, page, entry, `q_${it.id}`) || has(get, page, entry, `p_${it.id}`))) ? [] : [L("mindestens eine Karte mit Namen und Zitat oder Foto", "at least one card with a name and a quote or a photo")]),
+        magazine: { layout: "B", unit: (s, k) => ({ layout: "B", title: s.querySelector(".kalq-f-heading"), body: [...s.querySelectorAll(".kalq-f-vc__card.is-quote")].flatMap((c) => [...k.parasOf(c.querySelector(".kalq-f-vc__quote")), k.textOf(c.querySelector(".kalq-f-vc__name"), "p", "bk-small")]).filter(Boolean) }) },
+        render: renderVideoCards,
+    },
+    "scroll.services": {
+        category: "scroll",
+        name: L("Nummerierte Leistungen", "Numbered services"),
+        keywords: "services leistungen numbered nummeriert 01 02 03 cards karten colour farbe harbor sideways seitwärts",
+        slots: { heading: { kind: "heading", label: L("Überschrift", "Heading") } },
+        versions: {
+            numbered: { name: L("Große farbige Karten 01, 02, 03, seitwärts", "Large coloured cards 01, 02, 03, sideways"),
+                wire: [["heading", 5, 6, 30], ["band", 4, 14, 60, 42], ["heading", 7, 18, 10, "light"], ["line", 7, 44, 24, "light"], ["media", 40, 17, 20, 36], ["band", 67, 14, 33, 42]], motion: "slide" },
+        },
+        initialOpts: () => ({ items: Array.from({ length: 3 }, () => ({ id: newId() })) }),
+        itemsEditor: { min: SERVICES_MIN, max: SERVICES_MAX, make: () => ({ id: newId() }) },
+        missing: (entry, page, get) => (serviceItems(entry).some((it) => has(get, page, entry, `t_${it.id}`)) ? [] : [L("mindestens eine Leistung mit Titel", "at least one service with a title")]),
+        magazine: { layout: "E", unit: (s, k) => ({ layout: "E", cards: [...s.querySelectorAll(".kalq-f-sv__card")].map((c) => ({ media: k.mediaUrl(c.querySelector(".kalq-m-media")), title: c.querySelector(".kalq-f-sv__title"), body: k.parasOf(c.querySelector(".kalq-f-sv__text")) })).filter((c) => c.title) }) },
+        render: renderServices,
+    },
+    "content.pricing": {
+        category: "content",
+        name: L("Preise", "Pricing"),
+        keywords: "pricing preise plans pakete tarife price preis recommended empfohlen includes enthalten harbor",
+        slots: {
+            label: { kind: "eyebrow", label: L("Kleines Etikett (optional)", "Small label (optional)") },
+            heading: { kind: "heading", label: L("Überschrift", "Heading"), required: true },
+        },
+        versions: {
+            plans: { name: L("Pakete nebeneinander, Preis und Enthaltenes", "Plans side by side, price and what is included"),
+                wire: [["eyebrow", 45, 6, 10], ["heading", 22, 10, 56], ...[4, 36, 68].flatMap((x) => [["rule", x, 20, 28], ["line", x + 2, 23, 12, "bold"], ["line", x + 2, 27, 22], ["heading", x + 2, 33, 10], ["button", x + 2, 39, 22], ["line", x + 2, 46, 18], ["line", x + 2, 49, 16]])] },
+        },
+        initialOpts: () => ({ items: Array.from({ length: 3 }, () => ({ id: newId() })) }),
+        itemsEditor: { min: PLANS_MIN, max: PLANS_MAX, make: () => ({ id: newId() }) },
+        missing: (entry, page, get) => (planItems(entry).some((it) => has(get, page, entry, `n_${it.id}`)) ? [] : [L("mindestens ein Paket mit Namen", "at least one plan with a name")]),
+        magazine: { layout: "E", unit: (s, k) => ({ layout: "E", cards: [...s.querySelectorAll(".kalq-f-pr__plan")].map((c) => ({ title: c.querySelector(".kalq-f-pr__name"), body: [k.textOf(c.querySelector(".kalq-f-pr__price"), "p", "bk-body"), ...k.parasOf(c.querySelector(".kalq-f-pr__desc"))].filter(Boolean) })).filter((c) => c.title) }) },
+        render: renderPricing,
     },
     "content.lit": {
         category: "content",

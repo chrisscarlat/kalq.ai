@@ -35,3 +35,44 @@
     .qs-f-hs__card { min-height: 0; }
     .qs-f-hs__media { flex: 1 1 auto; min-height: 4.5rem; max-height: 62svh; aspect-ratio: auto; }
 }
+
+// Editors: an empty slot's label and its dashed outline in the colour of the text around it, as the picture
+// placeholders already are. The engine draws them in a fixed blue, which vanished on the accent colour (the big title
+// on colour showed editors an empty blue screen) and was faint over pictures and on dark sections. The selector
+// outweighs collab.css, which loads after this file.
+html body .qs-ph:empty {
+    outline-color: color-mix(in srgb, currentColor 55%, transparent);
+
+    &::before { color: currentColor; opacity: 0.6; }
+}
+
+// The rail (Q-Site 1.0) floats over the page's left edge: as a full column it covered the first 240 px of every
+// section for guests on a desktop, and even icons only it cut off the start of every line on a phone. Where it would
+// hide the page it folds to the person's own face below the header and opens while pointed at, tapped or used: for
+// guests everywhere (their rail is comment, history and log out), for editors on a phone. Folded and open, its head
+// stays on the same spot, so the tap that opens it lands on the face and never on a button the opening brings under the
+// finger (at the foot of the column that was log out). Making room for it instead clips the page's own type, which is
+// sized to the screen. The selectors outweigh collab.css, which loads later.
+@mixin kalq-rail-folding {
+    top: 76px;
+
+    .qs-rail__head { flex-direction: column; }
+    .qs-stack { display: flex; flex: none; justify-content: center; }
+    // until presence has drawn the face (or if it never connects): a dot in its place, folded and open, so the head
+    // keeps its height and the tap still lands on it
+    .qs-stack:not(:has(.qs-avatar))::before { content: ""; width: 30px; height: 30px; margin: 3px auto; border-radius: 50%; background: rgba(255, 255, 255, 0.3); }
+
+    &:not(:hover):not(:focus-within) {
+        bottom: auto;
+        width: 60px;
+        overflow: hidden;
+
+        > :not(.qs-rail__head) { display: none; }
+        .qs-rail__head { min-height: 36px; padding: 0; border-bottom: 0; }
+        .qs-rail__mini { display: none; }
+    }
+}
+html body .qs-toolbar.qs-rail:not(:has(.qs-design-tool)) { @include kalq-rail-folding; }
+@media (max-width: 700px) {
+    html body .qs-toolbar.qs-rail.qs-rail { @include kalq-rail-folding; } // outweighs the engine's .is-mini rules
+}

@@ -1,12 +1,12 @@
 # kalq.ai
 
 Kalq's website on the Q-Site engine. Q-Site began as this repository's code (its first commit imports kalq.ai main
-at 7958c8c); since Q-Site 1.1.0 Kalq consumes it like every other Q-Forge site.
+at 7958c8c); since Q-Site 1.1.0 (now 1.2.0) Kalq consumes it like every other Q-Forge site.
 
 ## Engine: Q-Site
 
 The engine (page builder, modules, editor, styles, gate, history, `/api`, middleware, Supabase schema) is Q-Site,
-an npm package from git (`package.json`: `"q-site": "github:chrisscarlat/q-site#v1.1.0"`). This repository holds
+an npm package from git (`package.json`: `"q-site": "github:chrisscarlat/q-site#v1.2.0"`). This repository holds
 only Kalq: its pages, copy and brand. `middleware.js` and `api/*.js` are one-line references to the engine;
 `site.config.json` tells the engine Kalq's pages, picture slots, logo, gate and sign-in message.
 

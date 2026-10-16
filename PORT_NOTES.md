@@ -1,5 +1,12 @@
 # Port notes
 
+## Kalq on Q-Site v1.2.0 (2026-10-17)
+
+The engine's editor work only (one tool window at a time, a page added at once, pages duplicated); no migration,
+no change to the site's files, the wiring or the site checks. `package-lock.json`: only the q-site entry changed (a
+fresh lock on a Mac drops the other platforms' optional @parcel/watcher binaries, which Vercel's Linux build needs).
+q-site check 15 of 15 with the browser run; the content comparison against the old code as on 1.1.0, unchanged.
+
 ## Kalq on Q-Site v1.1.0 (2026-10-16)
 
 Kalq is a Q-Site site now, like BelQ and Certil (whose port, certil.com PORT_NOTES.md, this one follows). Q-Site

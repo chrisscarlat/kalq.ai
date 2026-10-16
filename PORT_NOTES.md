@@ -1,5 +1,10 @@
 # Port notes
 
+## Kalq on Q-Site v1.2.1 (2026-10-17)
+
+One engine fix: a link to a part of the same page ("#id") scrolls there and moves the focus. No change to the
+site's files. q-site check 15 of 15 with the browser run; the content comparison unchanged.
+
 ## Kalq on Q-Site v1.2.0 (2026-10-17)
 
 The engine's editor work only (one tool window at a time, a page added at once, pages duplicated); no migration,

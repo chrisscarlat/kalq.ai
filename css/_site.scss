@@ -1,2 +1,37 @@
 // Kalq's own styles, compiled into main.css after Q-Site's (css/_site.scss is a site file the engine imports last).
-// Empty: Kalq's look is the engine's (Q-Site began as Kalq's code); its brand is in css/_brand.scss.
+// Kalq's look is the engine's (Q-Site began as Kalq's code); its brand is in css/_brand.scss.
+
+// The horizontal card row can be dragged by hand while it is pinned (js/kalq-site.js); a touch screen keeps up and
+// down for the page
+.qs-f-hs.is-armed .qs-f-hs__track {
+    cursor: grab;
+    touch-action: pan-y;
+
+    &.is-dragging { cursor: grabbing; user-select: none; }
+}
+
+// The pinned row: the stage is one screen high and the pictures take what is left, so every card's title, text and
+// link stay on the screen while the row slides. On a phone the heading, the intro and a 4:5 picture filled the screen,
+// the cards' words stayed below its edge for the whole slide and only the last card could be read, after the pin.
+.qs-f-hs.is-armed {
+    .qs-f-hs__pin {
+        // it pins below the section's own top padding, which already clears the header
+        height: calc(100svh - var(--f-pad-y));
+        min-height: 0;
+        box-sizing: border-box;
+        justify-content: flex-start;
+        padding-bottom: clamp(1rem, 3svh, 2rem);
+    }
+
+    .qs-f-hs__head { flex: none; margin-bottom: clamp(1rem, 3svh, 2.5rem); }
+
+    // a short screen (a phone or the iPhone Duo held sideways): the heading follows the screen's height, so the
+    // cards keep room for their words
+    @media (max-height: 720px) {
+        .qs-f-hs__head .qs-f-heading { font-size: clamp(1.5rem, 7svh, 3.25rem); }
+        .qs-f-hs__head .qs-f-text { margin-top: 0.6rem; }
+    }
+    .qs-f-hs__track { flex: 1 1 auto; min-height: 0; align-items: stretch; }
+    .qs-f-hs__card { min-height: 0; }
+    .qs-f-hs__media { flex: 1 1 auto; min-height: 4.5rem; max-height: 62svh; aspect-ratio: auto; }
+}

@@ -11,5 +11,8 @@
         "build": "q-site build",
         "dev": "q-site dev",
         "test": "q-site check"
+    },
+    "devDependencies": {
+        "playwright-core": "1.64.0"
     }
 }

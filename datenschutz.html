@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kalq | Datenschutz</title>
     <!-- Pages are German; hide translatable text until js/i18n.js has applied another stored language -->
-    <script>try { var l = localStorage.getItem("kalq-lang"); if (l && l !== "de") document.documentElement.classList.add("i18n-pending"); } catch (e) { }</script>
+    <script>try { var l = localStorage.getItem("qs-lang"); if (l && l !== "de") document.documentElement.classList.add("i18n-pending"); } catch (e) { }</script>
     <!-- Style variant: start in the last applied look (colours, fonts) before the first paint; js/variants.js takes over -->
-    <script>try { document.documentElement.dataset.mode = localStorage.getItem("kalq-mode") === "dark" ? "dark" : "light"; var v = JSON.parse(localStorage.getItem("kalq-variant-look") || "null"); if (v && v.look && (v.mode || "light") === document.documentElement.dataset.mode) for (var k in v.look) if (/^--kalq-[a-z-]+$/.test(k)) document.documentElement.style.setProperty(k, String(v.look[k]).replace(/[;{}<>]/g, "")); } catch (e) { }</script>
+    <script>try { document.documentElement.dataset.mode = localStorage.getItem("qs-mode") === "dark" ? "dark" : "light"; var v = JSON.parse(localStorage.getItem("qs-variant-look") || "null"); if (v && v.look && (v.mode || "light") === document.documentElement.dataset.mode) for (var k in v.look) if (/^--qs-[a-z-]+$/.test(k)) document.documentElement.style.setProperty(k, String(v.look[k]).replace(/[;{}<>]/g, "")); } catch (e) { }</script>
     <!-- Edited content: keyed blocks stay hidden until js/content.js applied it (1.5 s max, 3 s if scripts fail) -->
-    <script>document.documentElement.classList.add("kalq-loading"); setTimeout(function () { document.documentElement.classList.remove("kalq-loading"); }, 3000);</script>
+    <script>document.documentElement.classList.add("qs-loading"); setTimeout(function () { document.documentElement.classList.remove("qs-loading"); }, 3000);</script>
     <meta name="description" content="Kalq macht aus der Geometrie eines Teils eine technische Wahrheit und zwei getrennte kommerzielle Engines, für Einkäufer und Lieferanten von Fertigungsteilen.">
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="./assets/favicon.png" type="image/png">
@@ -51,26 +51,26 @@
     <!-- Header (outside the Barba container, persists across transitions) -->
     <header class="site-header">
         <a href="index.html" class="site-logo" aria-label="Kalq Startseite" data-i18n-aria="aria.home">
-            <svg class="site-logo__mark" viewBox="0 0 174 174" fill="none" stroke="currentColor" stroke-width="11" aria-hidden="true"><line data-ray="e" x1="111" y1="86.99" x2="173.98" y2="86.99"/><line data-ray="w" x1="63" y1="87.01" x2="0" y2="87.01"/><line data-ray="s" x1="87.01" y1="111" x2="87.01" y2="174"/><line data-ray="n" x1="87.01" y1="63" x2="87.01" y2="0"/><line data-ray="se" x1="94.07" y1="94.07" x2="135.29" y2="135.29"/><line data-ray="ne" x1="104.3" y1="70.36" x2="132.83" y2="41.82"/><line data-ray="sw" x1="70.2" y1="104.14" x2="40.85" y2="133.49"/><line data-ray="nw" x1="70.19" y1="69.87" x2="40.83" y2="40.51"/></svg>
-            <span class="site-logo__word"><span><svg viewBox="56 0 2490 690" fill="currentColor" aria-hidden="true"><path d="M164 680H56V10H164V296H319L495 10H618L410 342L617 680H493L321 400H164ZM772 680H659L920 10H1075L1336 680H1219L1151 506H840ZM948 232 878 409H1113L1043 232L1000 108H992ZM1897 680H1432V10H1540V583H1897ZM2234 690Q2091 690 2006 596Q1921 502 1921 345Q1921 188 2006 94Q2091 0 2234 0Q2376 0 2461 94Q2546 188 2546 345Q2546 502 2461 596Q2376 690 2234 690ZM2082.5 530.5Q2129 586 2234 586Q2339 586 2385 530.5Q2431 475 2431 345Q2431 215 2385 159.5Q2339 104 2234 104Q2129 104 2082.5 159.5Q2036 215 2036 345Q2036 475 2082.5 530.5Z"/><path d="M2270.3 330.7 L2546.0 606.5 L2546.0 680.0 L2472.5 680.0 L2196.7 404.3Z"/></svg><span class="kalq-wordmark" aria-hidden="true">KALQ</span></span></span>
+            <svg class="site-logo__mark" aria-hidden="true"></svg>
+            <span class="site-logo__word"><span><svg viewBox="56 0 2490 690" fill="currentColor" aria-hidden="true"><path d="M164 680H56V10H164V296H319L495 10H618L410 342L617 680H493L321 400H164ZM772 680H659L920 10H1075L1336 680H1219L1151 506H840ZM948 232 878 409H1113L1043 232L1000 108H992ZM1897 680H1432V10H1540V583H1897ZM2234 690Q2091 690 2006 596Q1921 502 1921 345Q1921 188 2006 94Q2091 0 2234 0Q2376 0 2461 94Q2546 188 2546 345Q2546 502 2461 596Q2376 690 2234 690ZM2082.5 530.5Q2129 586 2234 586Q2339 586 2385 530.5Q2431 475 2431 345Q2431 215 2385 159.5Q2339 104 2234 104Q2129 104 2082.5 159.5Q2036 215 2036 345Q2036 475 2082.5 530.5Z"/><path d="M2270.3 330.7 L2546.0 606.5 L2546.0 680.0 L2472.5 680.0 L2196.7 404.3Z"/></svg><span class="qs-wordmark" aria-hidden="true">KALQ</span></span></span>
         </a>
         <nav class="site-nav" id="site-nav" aria-label="Hauptnavigation" data-i18n-aria="aria.nav">
             <ul class="site-nav__links">
-                <li><a class="site-nav__link" href="index.html"><span class="site-roll" data-label="Start"><span data-i18n="nav.home" data-kalq-key="site.nav.home">Start</span></span></a></li>
+                <li><a class="site-nav__link" href="index.html"><span class="site-roll" data-label="Start"><span data-i18n="nav.home" data-qs-key="site.nav.home">Start</span></span></a></li>
                 <li class="site-nav__mega">
-                    <a class="site-nav__link" href="platform.html"><span class="site-roll" data-label="Plattform"><span data-i18n="nav.platform" data-kalq-key="site.nav.platform">Plattform</span></span></a>
+                    <a class="site-nav__link" href="platform.html"><span class="site-roll" data-label="Plattform"><span data-i18n="nav.platform" data-qs-key="site.nav.platform">Plattform</span></span></a>
                 </li>
-                <li><a class="site-nav__link" href="company.html"><span class="site-roll" data-label="Unternehmen"><span data-i18n="nav.company" data-kalq-key="site.nav.company">Unternehmen</span></span></a></li>
+                <li><a class="site-nav__link" href="company.html"><span class="site-roll" data-label="Unternehmen"><span data-i18n="nav.company" data-qs-key="site.nav.company">Unternehmen</span></span></a></li>
             </ul>
-            <a class="site-nav__cta kalq-btn-round" href="mailto:office@kalq.ai?subject=Kalq%20pilot"><span class="kalq-btn-round__text" data-i18n="nav.cta" data-kalq-key="site.nav.cta">Pilotprojekt starten</span><span class="kalq-btn-round__circle" aria-hidden="true"><span class="kalq-btn-round__arrow"><svg viewBox="0 0 16 16" focusable="false"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="kalq-btn-round__arrow is-next"><svg viewBox="0 0 16 16" focusable="false"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></a>
+            <a class="site-nav__cta qs-btn-round" href="mailto:office@kalq.ai?subject=Kalq%20pilot"><span class="qs-btn-round__text" data-i18n="nav.cta" data-qs-key="site.nav.cta">Pilotprojekt starten</span><span class="qs-btn-round__circle" aria-hidden="true"><span class="qs-btn-round__arrow"><svg viewBox="0 0 16 16" focusable="false"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="qs-btn-round__arrow is-next"><svg viewBox="0 0 16 16" focusable="false"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></a>
             <button type="button" class="site-nav__close" aria-label="Menü schließen" data-i18n-aria="aria.menuClose"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
         </nav>
         <div class="site-header__right">
             <!-- Light and dark: a sun that morphs into a thin crescent moon (js/variants.js) -->
             <button type="button" class="mode-toggle" aria-pressed="false" aria-label="Dunkles Design">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <mask id="kalq-moon-bite"><rect width="24" height="24" fill="#fff"/><circle class="mode-toggle__bite" cx="24" cy="2" r="7.4" fill="#000"/></mask>
-                    <circle class="mode-toggle__core" cx="12" cy="12" r="4.4" fill="currentColor" mask="url(#kalq-moon-bite)"/>
+                    <mask id="qs-moon-bite"><rect width="24" height="24" fill="#fff"/><circle class="mode-toggle__bite" cx="24" cy="2" r="7.4" fill="#000"/></mask>
+                    <circle class="mode-toggle__core" cx="12" cy="12" r="4.4" fill="currentColor" mask="url(#qs-moon-bite)"/>
                     <g class="mode-toggle__rays" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
                         <path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.5 5.5l1.5 1.5M17 17l1.5 1.5M5.5 18.5l1.5-1.5M17 7l1.5-1.5"/>
                     </g>
@@ -97,9 +97,9 @@
 
     <!-- Menu dropdown (not a nav, not inside the blended header) -->
     <div class="site-menu" id="site-menu" aria-label="Hauptmenü" data-i18n-aria="aria.menu">
-        <a href="index.html" data-i18n="nav.home" data-kalq-key="site.menu.home">Start</a>
-        <a href="platform.html" data-i18n="nav.platform" data-kalq-key="site.menu.platform">Plattform</a>
-        <a href="company.html" data-i18n="nav.company" data-kalq-key="site.menu.company">Unternehmen</a>
+        <a href="index.html" data-i18n="nav.home" data-qs-key="site.menu.home">Start</a>
+        <a href="platform.html" data-i18n="nav.platform" data-qs-key="site.menu.platform">Plattform</a>
+        <a href="company.html" data-i18n="nav.company" data-qs-key="site.menu.company">Unternehmen</a>
     </div>
 
     <!-- Image for platform hover list -->
@@ -112,9 +112,9 @@
                 <!-- Datenschutz. TODO: insert privacy policy -->
                 <section class="legal" data-section="legal" data-section-builtin>
                     <div id="container">
-                        <h2 data-kalq-key="datenschutz.header.title" data-i18n="privacy.title">Datenschutzerklärung</h2>
+                        <h2 data-qs-key="datenschutz.header.title" data-i18n="privacy.title">Datenschutzerklärung</h2>
                         <div class="legal_block">
-                            <p data-kalq-key="datenschutz.body.text" data-i18n="privacy.text">[TODO: Datenschutztext einfügen]</p>
+                            <p data-qs-key="datenschutz.body.text" data-i18n="privacy.text">[TODO: Datenschutztext einfügen]</p>
                         </div>
                     </div>
                 </section>
@@ -124,15 +124,15 @@
                     <div id="container">
                         <div class="footer_header">
                             <div class="footer_heading">
-                                <h2 data-i18n="footer.heading" data-kalq-key="site.footer.heading" data-kalq-format="lines">Der Beweis<br>am echten Teil</h2>
+                                <h2 data-i18n="footer.heading" data-qs-key="site.footer.heading" data-qs-format="lines">Der Beweis<br>am echten Teil</h2>
                             </div>
-                            <p class="footer_sub" data-i18n="footer.sub" data-kalq-key="site.footer.sub">Wir starten mit CNC-Drehteilen in Deutschland. Wenn Sie solche Teile einkaufen oder fertigen, bewerben Sie sich für das Pilotprojekt.</p>
+                            <p class="footer_sub" data-i18n="footer.sub" data-qs-key="site.footer.sub">Wir starten mit CNC-Drehteilen in Deutschland. Wenn Sie solche Teile einkaufen oder fertigen, bewerben Sie sich für das Pilotprojekt.</p>
                             <div class="footer_btns_wrapper">
                                 <a href="mailto:office@kalq.ai" class="btn">
-                                    <span data-kalq-key="site.footer.email">office@kalq.ai</span>
+                                    <span data-qs-key="site.footer.email">office@kalq.ai</span>
                                 </a>
                                 <a href="mailto:office@kalq.ai?subject=Kalq%20pilot" class="btn">
-                                    <span data-i18n="footer.pilot" data-kalq-key="site.footer.pilot">Für das Pilotprojekt bewerben</span>
+                                    <span data-i18n="footer.pilot" data-qs-key="site.footer.pilot">Für das Pilotprojekt bewerben</span>
                                 </a>
                             </div>
                         </div>
@@ -140,75 +140,75 @@
                             <p>
                                 <span>© 2026 Kalq</span>
                                 <span aria-hidden="true">·</span>
-                                <a href="impressum.html" class="underLine_Link" data-i18n="footer.impressum" data-kalq-key="site.footer.impressum">Impressum</a>
+                                <a href="impressum.html" class="underLine_Link" data-i18n="footer.impressum" data-qs-key="site.footer.impressum">Impressum</a>
                                 <span aria-hidden="true">·</span>
-                                <a href="datenschutz.html" class="underLine_Link" data-i18n="footer.privacy" data-kalq-key="site.footer.privacy">Datenschutz</a>
+                                <a href="datenschutz.html" class="underLine_Link" data-i18n="footer.privacy" data-qs-key="site.footer.privacy">Datenschutz</a>
                             </p>
                         </div>
                     </div>
                     <div class="footer-harbor">
-                        <p class="footer-harbor__cta"><a href="mailto:office@kalq.ai?subject=Kalq%20pilot" data-i18n="footer.cta" data-kalq-key="site.footer2.cta">Bereit für den Beweis? Bewerben Sie sich für das Pilotprojekt.</a></p>
+                        <p class="footer-harbor__cta"><a href="mailto:office@kalq.ai?subject=Kalq%20pilot" data-i18n="footer.cta" data-qs-key="site.footer2.cta">Bereit für den Beweis? Bewerben Sie sich für das Pilotprojekt.</a></p>
                         <div class="footer-harbor__top">
                             <div class="footer-harbor__contact">
-                                <h2 class="footer-harbor__heading" data-i18n="footer.contactHeading" data-kalq-key="site.footer2.heading">Kontakt</h2>
+                                <h2 class="footer-harbor__heading" data-i18n="footer.contactHeading" data-qs-key="site.footer2.heading">Kontakt</h2>
                                 <address class="footer-harbor__lines">
-                                    <span class="footer-harbor__address" data-kalq-key="site.footer2.address" data-kalq-format="lines"></span>
-                                    <a href="mailto:office@kalq.ai" data-kalq-key="site.footer2.email">office@kalq.ai</a>
+                                    <span class="footer-harbor__address" data-qs-key="site.footer2.address" data-qs-format="lines"></span>
+                                    <a href="mailto:office@kalq.ai" data-qs-key="site.footer2.email">office@kalq.ai</a>
                                 </address>
                             </div>
                             <nav class="footer-harbor__nav" aria-label="Footer-Links" data-i18n-aria="aria.footerNav">
                                 <ul>
-                                    <li><a href="index.html"><span class="site-roll" data-label="Start"><span data-i18n="nav.home" data-kalq-key="site.footer2.home">Start</span></span></a></li>
-                                    <li><a href="platform.html"><span class="site-roll" data-label="Plattform"><span data-i18n="nav.platform" data-kalq-key="site.footer2.platform">Plattform</span></span></a></li>
-                                    <li><a href="company.html"><span class="site-roll" data-label="Unternehmen"><span data-i18n="nav.company" data-kalq-key="site.footer2.company">Unternehmen</span></span></a></li>
+                                    <li><a href="index.html"><span class="site-roll" data-label="Start"><span data-i18n="nav.home" data-qs-key="site.footer2.home">Start</span></span></a></li>
+                                    <li><a href="platform.html"><span class="site-roll" data-label="Plattform"><span data-i18n="nav.platform" data-qs-key="site.footer2.platform">Plattform</span></span></a></li>
+                                    <li><a href="company.html"><span class="site-roll" data-label="Unternehmen"><span data-i18n="nav.company" data-qs-key="site.footer2.company">Unternehmen</span></span></a></li>
                                 </ul>
                             </nav>
                             <ul class="footer-harbor__social">
-                                <li><a href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9.5h3V19H5zM6.5 5a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5zM10.5 9.5h2.9v1.3h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.6V19h-3v-4.6c0-1.1-.02-2.5-1.52-2.5-1.52 0-1.76 1.19-1.76 2.42V19h-3z" fill="currentColor"/></svg><span class="kalq-sr">LinkedIn</span></a></li>
+                                <li><a href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9.5h3V19H5zM6.5 5a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5zM10.5 9.5h2.9v1.3h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.6V19h-3v-4.6c0-1.1-.02-2.5-1.52-2.5-1.52 0-1.76 1.19-1.76 2.42V19h-3z" fill="currentColor"/></svg><span class="qs-sr">LinkedIn</span></a></li>
                             </ul>
                         </div>
-                        <p class="footer-harbor__legal"><span>© <span data-current-year>2026</span> Kalq</span><span aria-hidden="true">·</span><a href="impressum.html" data-i18n="footer.impressum" data-kalq-key="site.footer2.impressum">Impressum</a><span aria-hidden="true">·</span><a href="datenschutz.html" data-i18n="footer.privacy" data-kalq-key="site.footer2.privacy">Datenschutz</a></p>
+                        <p class="footer-harbor__legal"><span>© <span data-current-year>2026</span> Kalq</span><span aria-hidden="true">·</span><a href="impressum.html" data-i18n="footer.impressum" data-qs-key="site.footer2.impressum">Impressum</a><span aria-hidden="true">·</span><a href="datenschutz.html" data-i18n="footer.privacy" data-qs-key="site.footer2.privacy">Datenschutz</a></p>
                         <div class="footer-harbor__wordmark" aria-hidden="true"><svg viewBox="56 0 2490 690" fill="currentColor" aria-hidden="true"><path d="M164 680H56V10H164V296H319L495 10H618L410 342L617 680H493L321 400H164ZM772 680H659L920 10H1075L1336 680H1219L1151 506H840ZM948 232 878 409H1113L1043 232L1000 108H992ZM1897 680H1432V10H1540V583H1897ZM2234 690Q2091 690 2006 596Q1921 502 1921 345Q1921 188 2006 94Q2091 0 2234 0Q2376 0 2461 94Q2546 188 2546 345Q2546 502 2461 596Q2376 690 2234 690ZM2082.5 530.5Q2129 586 2234 586Q2339 586 2385 530.5Q2431 475 2431 345Q2431 215 2385 159.5Q2339 104 2234 104Q2129 104 2082.5 159.5Q2036 215 2036 345Q2036 475 2082.5 530.5Z"/><path d="M2270.3 330.7 L2546.0 606.5 L2546.0 680.0 L2472.5 680.0 L2196.7 404.3Z"/></svg></div>
                     </div>
                     <div class="footer-tether">
-                        <p class="footer-tether__tagline" data-i18n="footer.tagline" data-kalq-key="site.footer3.tagline">Ein technischer Kern. Zwei kommerzielle Engines.</p>
+                        <p class="footer-tether__tagline" data-i18n="footer.tagline" data-qs-key="site.footer3.tagline">Ein technischer Kern. Zwei kommerzielle Engines.</p>
                         <nav class="footer-tether__nav" aria-label="Footer-Links" data-i18n-aria="aria.footerNav">
                             <div class="footer-tether__col">
-                                <p class="footer-tether__label" data-i18n="footer.pages" data-kalq-key="site.footer3.pages">Seiten</p>
+                                <p class="footer-tether__label" data-i18n="footer.pages" data-qs-key="site.footer3.pages">Seiten</p>
                                 <ul>
-                                    <li><a href="index.html" data-i18n="nav.home" data-kalq-key="site.footer3.home">Start</a></li>
-                                    <li><a href="platform.html" data-i18n="nav.platform" data-kalq-key="site.footer3.platform">Plattform</a></li>
-                                    <li><a href="company.html" data-i18n="nav.company" data-kalq-key="site.footer3.company">Unternehmen</a></li>
+                                    <li><a href="index.html" data-i18n="nav.home" data-qs-key="site.footer3.home">Start</a></li>
+                                    <li><a href="platform.html" data-i18n="nav.platform" data-qs-key="site.footer3.platform">Plattform</a></li>
+                                    <li><a href="company.html" data-i18n="nav.company" data-qs-key="site.footer3.company">Unternehmen</a></li>
                                 </ul>
                             </div>
                             <div class="footer-tether__col">
-                                <p class="footer-tether__label" data-i18n="footer.legal" data-kalq-key="site.footer3.legal">Rechtliches</p>
+                                <p class="footer-tether__label" data-i18n="footer.legal" data-qs-key="site.footer3.legal">Rechtliches</p>
                                 <ul>
-                                    <li><a href="impressum.html" data-i18n="footer.impressum" data-kalq-key="site.footer3.impressum">Impressum</a></li>
-                                    <li><a href="datenschutz.html" data-i18n="footer.privacy" data-kalq-key="site.footer3.privacy">Datenschutz</a></li>
+                                    <li><a href="impressum.html" data-i18n="footer.impressum" data-qs-key="site.footer3.impressum">Impressum</a></li>
+                                    <li><a href="datenschutz.html" data-i18n="footer.privacy" data-qs-key="site.footer3.privacy">Datenschutz</a></li>
                                 </ul>
                             </div>
                         </nav>
-                        <p class="footer-tether__legal"><span>© <span data-current-year>2026</span> Kalq.</span> <span data-i18n="footer.rights" data-kalq-key="site.footer3.rights">Alle Rechte vorbehalten.</span></p>
+                        <p class="footer-tether__legal"><span>© <span data-current-year>2026</span> Kalq.</span> <span data-i18n="footer.rights" data-qs-key="site.footer3.rights">Alle Rechte vorbehalten.</span></p>
                         <ul class="footer-tether__social">
-                            <li><a href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9.5h3V19H5zM6.5 5a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5zM10.5 9.5h2.9v1.3h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.6V19h-3v-4.6c0-1.1-.02-2.5-1.52-2.5-1.52 0-1.76 1.19-1.76 2.42V19h-3z" fill="currentColor"/></svg><span class="kalq-sr">LinkedIn</span></a></li>
+                            <li><a href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9.5h3V19H5zM6.5 5a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5zM10.5 9.5h2.9v1.3h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.6V19h-3v-4.6c0-1.1-.02-2.5-1.52-2.5-1.52 0-1.76 1.19-1.76 2.42V19h-3z" fill="currentColor"/></svg><span class="qs-sr">LinkedIn</span></a></li>
                         </ul>
                     </div>
                     <div class="footer-signal">
                         <form class="footer-signal__form" action="mailto:office@kalq.ai" method="post" enctype="text/plain">
-                            <label class="footer-signal__field"><span data-i18n="footer.formName" data-kalq-key="site.footer4.formName">Name</span><input type="text" name="name" autocomplete="name"></label>
-                            <label class="footer-signal__field"><span data-i18n="footer.formEmail" data-kalq-key="site.footer4.formEmail">E-Mail</span><input type="email" name="email" autocomplete="email"></label>
-                            <label class="footer-signal__field is-wide"><span data-i18n="footer.formMessage" data-kalq-key="site.footer4.formMessage">Nachricht</span><textarea name="message" rows="3"></textarea></label>
-                            <button type="submit" class="footer-signal__send" data-i18n="footer.formSend" data-kalq-key="site.footer4.formSend">Aus Ihrem Mailprogramm senden</button>
+                            <label class="footer-signal__field"><span data-i18n="footer.formName" data-qs-key="site.footer4.formName">Name</span><input type="text" name="name" autocomplete="name"></label>
+                            <label class="footer-signal__field"><span data-i18n="footer.formEmail" data-qs-key="site.footer4.formEmail">E-Mail</span><input type="email" name="email" autocomplete="email"></label>
+                            <label class="footer-signal__field is-wide"><span data-i18n="footer.formMessage" data-qs-key="site.footer4.formMessage">Nachricht</span><textarea name="message" rows="3"></textarea></label>
+                            <button type="submit" class="footer-signal__send" data-i18n="footer.formSend" data-qs-key="site.footer4.formSend">Aus Ihrem Mailprogramm senden</button>
                         </form>
                         <div class="footer-signal__contact">
-                            <p class="footer-signal__label" data-i18n="footer.sayHello" data-kalq-key="site.footer4.hello">Schreiben Sie uns</p>
-                            <a class="footer-signal__email" href="mailto:office@kalq.ai" data-kalq-key="site.footer4.email">office@kalq.ai</a>
-                            <p class="footer-signal__label" data-i18n="footer.social" data-kalq-key="site.footer4.follow">Folgen</p>
+                            <p class="footer-signal__label" data-i18n="footer.sayHello" data-qs-key="site.footer4.hello">Schreiben Sie uns</p>
+                            <a class="footer-signal__email" href="mailto:office@kalq.ai" data-qs-key="site.footer4.email">office@kalq.ai</a>
+                            <p class="footer-signal__label" data-i18n="footer.social" data-qs-key="site.footer4.follow">Folgen</p>
                             <ul class="footer-signal__social">
                                 <li><a href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener">LinkedIn</a></li>
                             </ul>
-                            <p class="footer-signal__legal"><span>© <span data-current-year>2026</span> Kalq</span><span aria-hidden="true">·</span><a href="impressum.html" data-i18n="footer.impressum" data-kalq-key="site.footer4.impressum">Impressum</a><span aria-hidden="true">·</span><a href="datenschutz.html" data-i18n="footer.privacy" data-kalq-key="site.footer4.privacy">Datenschutz</a></p>
+                            <p class="footer-signal__legal"><span>© <span data-current-year>2026</span> Kalq</span><span aria-hidden="true">·</span><a href="impressum.html" data-i18n="footer.impressum" data-qs-key="site.footer4.impressum">Impressum</a><span aria-hidden="true">·</span><a href="datenschutz.html" data-i18n="footer.privacy" data-qs-key="site.footer4.privacy">Datenschutz</a></p>
                         </div>
                         <div class="footer-signal__wordmark" aria-hidden="true"><svg viewBox="56 0 2490 690" fill="currentColor" aria-hidden="true"><path d="M164 680H56V10H164V296H319L495 10H618L410 342L617 680H493L321 400H164ZM772 680H659L920 10H1075L1336 680H1219L1151 506H840ZM948 232 878 409H1113L1043 232L1000 108H992ZM1897 680H1432V10H1540V583H1897ZM2234 690Q2091 690 2006 596Q1921 502 1921 345Q1921 188 2006 94Q2091 0 2234 0Q2376 0 2461 94Q2546 188 2546 345Q2546 502 2461 596Q2376 690 2234 690ZM2082.5 530.5Q2129 586 2234 586Q2339 586 2385 530.5Q2431 475 2431 345Q2431 215 2385 159.5Q2339 104 2234 104Q2129 104 2082.5 159.5Q2036 215 2036 345Q2036 475 2082.5 530.5Z"/><path d="M2270.3 330.7 L2546.0 606.5 L2546.0 680.0 L2472.5 680.0 L2196.7 404.3Z"/></svg></div>
                     </div>

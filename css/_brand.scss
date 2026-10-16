@@ -1,0 +1,20 @@
+// Kalq's brand: Clash Grotesk (Fontshare, self-hosted) and the font every engine surface uses
+@each $name, $weight in (Extralight: 200, Light: 300, Regular: 400, Medium: 500, Semibold: 600, Bold: 700) {
+    @font-face {
+        font-family: "Clash Grotesk";
+        src: url(../fonts/ClashGrotesk-#{$name}.woff2) format("woff2"),
+            url(../fonts/ClashGrotesk-#{$name}.woff) format("woff");
+        font-weight: $weight;
+        font-style: normal;
+        font-display: swap;
+    }
+}
+
+:root {
+    --qs-font: "Clash Grotesk", "Helvetica Neue", Arial, sans-serif;
+}
+
+// The gate's dark card on Kalq's own black, as the gate was before Q-Site
+.gate[data-theme="dark"] {
+    --gate-page: #101010;
+}

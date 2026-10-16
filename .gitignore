@@ -2,5 +2,12 @@
 node_modules/
 .env
 .env.*
+!.env.example
 .vercel/
 .vercel
+
+# Supabase CLI link state (never commit a project link)
+supabase/.temp/
+
+# Q-Site build output
+dist/

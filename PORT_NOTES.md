@@ -1,5 +1,43 @@
 # Port notes
 
+## Kalq on Q-Site v1.1.0 (2026-10-16)
+
+Kalq is a Q-Site site now, like BelQ and Certil (whose port, certil.com PORT_NOTES.md, this one follows). Q-Site
+began as Kalq's code at 7958c8c, so nothing of Kalq's behaviour had to be carried into the engine: the move is the
+engine's newer code (0.1.0 to 1.1.0) under Kalq's unchanged content.
+
+### How it landed
+
+- Engine code removed: `js/` (except the copy, the logo animation and the chat's words), `lib/`, `scripts/`, the CSS
+  and its compiled output. `middleware.js` and `api/*.js` are references to the engine (`q-site init`);
+  `middleware.js` runs on Node.js (Vercel's edge bundler rejects the JSON import of `site.config.json`).
+- The engine's namespace: `data-qs-key`, `data-qs-type`, `data-qs-format`, `qs-media-slot`, `qs-paras`,
+  `qs-btn-round`, `qs-wordmark`, `qs-sr`, localStorage `qs-*`, the gate cookie `qs_gate`. `tools/build_pages.py`
+  regenerated the pages: only these names and the empty logo slot changed (checked line by line); `js/strings.js`
+  is byte for byte as before. Block keys are unchanged, so everything stored in Supabase applies as before.
+- The logo: `assets/logo.svg` is the 8-line symbol the header drew inline; `js/logoAnimation.js` finds the rays by
+  their order instead of `data-ray` (the engine's check refuses an old mark in a logo slot).
+- The gate: Q-Site's login card, dark on Kalq's black, the home hero's video, Kalq's slogan as its subline, the
+  Impressum and Datenschutz links below. The sign-in refusal keeps Kalq's words (site.config.json `access.rejection`).
+- The chat's words (`js/inquiry-text.js`) are Kalq's, taken from its `js/inquiry.js`; the book's chapters come from
+  site.config.json (the engine's `js/book/site.js` is Kalq's book, generalised).
+
+### Database
+
+Nothing was applied to Kalq's project. Kalq's seven migrations are archived in
+`supabase/archive/migrations-before-q-site/`; the engine's versions of them differ only in seeds (Kalq's admins,
+domains, variant A), so the schema is the same. The engine's four newer ones were tested on a local copy (Kalq's
+seven migrations, then the production content, 501 blocks and 782 revisions, read only): they apply cleanly, again
+without change, add six tables, re-create four functions, and leave `latest_content` identical for every page.
+
+### Checked
+
+- `npm test` (q-site check): 15 of 15, with the browser run.
+- Every page in German and English, served by `q-site dev` with the local copy's content, against the old code's
+  render of the same rows: every keyed text and picture the same. The home hero's first HTML now carries style A's
+  own video, which the old code only set in the browser (its server render read no style id).
+
+
 What to carry from kalq.ai to certil.com, unit by unit. Each section lists the files, the dependencies on Kalq
 internals, and what certil.com will need to change.
 

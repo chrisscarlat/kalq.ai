@@ -1,4 +1,7 @@
 {
+    "installCommand": "sh tools/vercel-install.sh",
+    "buildCommand": "npm run build",
+    "outputDirectory": "dist",
     "headers": [
         {
             "source": "/(.*)",
@@ -11,8 +14,8 @@
         }
     ],
     "functions": {
-        "api/page.js": {
-            "includeFiles": "{index,platform,company,impressum,datenschutz,gate}.html"
+        "api/*.js": {
+            "includeFiles": "{site.config.json,{index,platform,company,impressum,datenschutz,gate}.html,js/strings.js,js/strings-public.js,assets/logo.svg}"
         }
     }
 }

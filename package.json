@@ -2,9 +2,14 @@
     "name": "kalq-ai",
     "private": true,
     "type": "module",
-    "description": "Kalq website. Static pages plus Vercel middleware and functions, no build step.",
+    "description": "Kalq website: its pages, copy and brand on the Q-Site engine (an npm package from git).",
     "dependencies": {
         "@vercel/functions": "3.9.9",
-        "linkedom": "0.18.13"
+        "q-site": "github:chrisscarlat/q-site#v1.1.0"
+    },
+    "scripts": {
+        "build": "q-site build",
+        "dev": "q-site dev",
+        "test": "q-site check"
     }
 }

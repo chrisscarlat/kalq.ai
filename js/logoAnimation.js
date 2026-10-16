@@ -1,4 +1,5 @@
-// Header symbol animation. The letters K, A, L, Q are formed only from the mark's own rays:
+// Kalq's mark animation (the site's own js/logoAnimation.js; Q-Site calls it because site.config.json sets
+// "logoAnimation"). The letters K, A, L, Q are formed only from the mark's own rays:
 // every ray stays on its own axis and just grows or shrinks along it. Between letters the mark opens again.
 // Then the mark turns in 3D (perspective projection, depth shading) and the loop restarts.
 
@@ -45,6 +46,9 @@ const LETTERS = [
     { n: [62, 87], s: [62, 87], e: [62, 87], w: [62, 87], ne: [62, 87], nw: [62, 87], sw: [62, 87], se: [0, 87] },
 ];
 
+// The rays in the order assets/logo.svg draws its lines
+const ORDER = ["e", "w", "s", "n", "se", "ne", "sw", "nw"];
+
 // Diagonals tilt out of the plane during the 3D turn (sign per ray keeps opposite rays on one straight axis)
 const LIFT = { ne: 1, sw: -1, nw: -1, se: 1, n: 0, s: 0, e: 0, w: 0 };
 
@@ -52,10 +56,14 @@ const LIFT = { ne: 1, sw: -1, nw: -1, se: 1, n: 0, s: 0, e: 0, w: 0 };
 export function logoAnimation(svg = document.querySelector(".site-logo__mark"), { delay = 2.5 } = {}) {
     if (!svg || svg.dataset.animated) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // The engine draws assets/logo.svg in every logo slot: its eight lines in ORDER. Anything else (a style's own
+    // logo) stays as drawn.
+    const drawn = svg.querySelectorAll("line");
+    if (drawn.length !== ORDER.length) return;
     svg.dataset.animated = "true";
 
     const lines = {};
-    svg.querySelectorAll("line[data-ray]").forEach(line => { lines[line.dataset.ray] = line; });
+    drawn.forEach((line, i) => { lines[ORDER[i]] = line; });
 
     // Animated values: t per ray, plus the 3D view
     const t = Object.fromEntries(Object.keys(RAYS).map(r => [r, { a: MARK[r][0], b: MARK[r][1] }]));

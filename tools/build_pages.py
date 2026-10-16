@@ -8,7 +8,7 @@ wm = open(f"{ROOT}/assets/kalq-wordmark.svg").read().strip()
 wm_paths = re.search(r'aria-label="KALQ">(.*)</svg>', wm).group(1)
 wm_vb = re.search(r'viewBox="([^"]+)"', wm).group(1)
 
-MARK = '<svg class="site-logo__mark" viewBox="0 0 174 174" fill="none" stroke="currentColor" stroke-width="11" aria-hidden="true"><line data-ray="e" x1="111" y1="86.99" x2="173.98" y2="86.99"/><line data-ray="w" x1="63" y1="87.01" x2="0" y2="87.01"/><line data-ray="s" x1="87.01" y1="111" x2="87.01" y2="174"/><line data-ray="n" x1="87.01" y1="63" x2="87.01" y2="0"/><line data-ray="se" x1="94.07" y1="94.07" x2="135.29" y2="135.29"/><line data-ray="ne" x1="104.3" y1="70.36" x2="132.83" y2="41.82"/><line data-ray="sw" x1="70.2" y1="104.14" x2="40.85" y2="133.49"/><line data-ray="nw" x1="70.19" y1="69.87" x2="40.83" y2="40.51"/></svg>'
+MARK = '<svg class="site-logo__mark" aria-hidden="true"></svg>'
 WORD = f'<svg viewBox="{wm_vb}" fill="currentColor" aria-hidden="true">{wm_paths}</svg>'
 HERO_WORD = f'<svg viewBox="{wm_vb}" fill="currentColor" role="img" aria-label="KALQ">{wm_paths}</svg>'
 
@@ -27,16 +27,16 @@ MODULE_KEYS = ["shouldCost", "supplierFit", "rfq", "machine", "mfgCost", "quote"
 
 def roll(key, en, kkey):
     # the label once; its rolling copy is drawn by CSS (::after, from data-label, kept in step by js/header.js)
-    return f'<span class="site-roll" data-label="{en}"><span data-i18n="{key}" data-kalq-key="{kkey}">{en}</span></span>'
+    return f'<span class="site-roll" data-label="{en}"><span data-i18n="{key}" data-qs-key="{kkey}">{en}</span></span>'
 
 def mega_html():
     # no stock pictures: each image is an empty slot showing the placeholder glyph until a Kalq picture is set
     items = "\n".join(
-        f'''                        <li><a class="site-mega__item" href="platform.html"><span class="kalq-media-slot site-mega__thumb" data-kalq-key="site.nav.mega.{SLUGS[i]}.image" data-kalq-type="image"></span><span><span class="site-mega__title" data-i18n="module.{k}" data-kalq-key="site.nav.mega.{SLUGS[i]}.title">{MODULES[i][0]}</span><span class="site-mega__text" data-i18n="platform.{k}.lead" data-kalq-key="site.nav.mega.{SLUGS[i]}.text">{MODULES[i][2]}</span></span></a></li>'''
+        f'''                        <li><a class="site-mega__item" href="platform.html"><span class="qs-media-slot site-mega__thumb" data-qs-key="site.nav.mega.{SLUGS[i]}.image" data-qs-type="image"></span><span><span class="site-mega__title" data-i18n="module.{k}" data-qs-key="site.nav.mega.{SLUGS[i]}.title">{MODULES[i][0]}</span><span class="site-mega__text" data-i18n="platform.{k}.lead" data-qs-key="site.nav.mega.{SLUGS[i]}.text">{MODULES[i][2]}</span></span></a></li>'''
         for i, k in enumerate(MODULE_KEYS))
     return f'''
                     <div class="site-mega" id="site-mega">
-                        <a class="site-mega__card" href="platform.html"><span class="kalq-media-slot site-mega__media" data-kalq-key="site.nav.mega.card.image" data-kalq-type="image"></span><span class="site-mega__card-title" data-i18n="nav.platform" data-kalq-key="site.nav.mega.card.title">Platform</span><span class="site-mega__card-text" data-i18n="home.platformText" data-kalq-key="site.nav.mega.card.text">A part enters as a STEP file and a drawing. Kalq turns it into features, process alternatives and a route on real machines.</span></a>
+                        <a class="site-mega__card" href="platform.html"><span class="qs-media-slot site-mega__media" data-qs-key="site.nav.mega.card.image" data-qs-type="image"></span><span class="site-mega__card-title" data-i18n="nav.platform" data-qs-key="site.nav.mega.card.title">Platform</span><span class="site-mega__card-text" data-i18n="home.platformText" data-qs-key="site.nav.mega.card.text">A part enters as a STEP file and a drawing. Kalq turns it into features, process alternatives and a route on real machines.</span></a>
                         <ul class="site-mega__items">
 {items}
                         </ul>
@@ -53,7 +53,7 @@ def nav_html(public=False):
 {"" if public else mega_html()}                </li>
                 <li><a class="site-nav__link" href="company.html">{roll("nav.company", "Company", "site.nav.company")}</a></li>
             </ul>
-            <a class="site-nav__cta kalq-btn-round" href="mailto:office@kalq.ai?subject=Kalq%20pilot"><span class="kalq-btn-round__text" data-i18n="nav.cta" data-kalq-key="site.nav.cta">Start a pilot</span><span class="kalq-btn-round__circle" aria-hidden="true"><span class="kalq-btn-round__arrow"><svg viewBox="0 0 16 16" focusable="false"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="kalq-btn-round__arrow is-next"><svg viewBox="0 0 16 16" focusable="false"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></a>
+            <a class="site-nav__cta qs-btn-round" href="mailto:office@kalq.ai?subject=Kalq%20pilot"><span class="qs-btn-round__text" data-i18n="nav.cta" data-qs-key="site.nav.cta">Start a pilot</span><span class="qs-btn-round__circle" aria-hidden="true"><span class="qs-btn-round__arrow"><svg viewBox="0 0 16 16" focusable="false"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="qs-btn-round__arrow is-next"><svg viewBox="0 0 16 16" focusable="false"><path d="M4.5 11.5l7-7M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></a>
             <button type="button" class="site-nav__close" aria-label="Close menu" data-i18n-aria="aria.menuClose"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
         </nav>'''
 
@@ -66,11 +66,11 @@ def head(title, public=False):
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title}</title>
     <!-- Pages are German; hide translatable text until js/i18n.js has applied another stored language -->
-    <script>try {{ var l = localStorage.getItem("kalq-lang"); if (l && l !== "de") document.documentElement.classList.add("i18n-pending"); }} catch (e) {{ }}</script>
+    <script>try {{ var l = localStorage.getItem("qs-lang"); if (l && l !== "de") document.documentElement.classList.add("i18n-pending"); }} catch (e) {{ }}</script>
     <!-- Style variant: start in the last applied look (colours, fonts) before the first paint; js/variants.js takes over -->
-    <script>try {{ document.documentElement.dataset.mode = localStorage.getItem("kalq-mode") === "dark" ? "dark" : "light"; var v = JSON.parse(localStorage.getItem("kalq-variant-look") || "null"); if (v && v.look && (v.mode || "light") === document.documentElement.dataset.mode) for (var k in v.look) if (/^--kalq-[a-z-]+$/.test(k)) document.documentElement.style.setProperty(k, String(v.look[k]).replace(/[;{{}}<>]/g, "")); }} catch (e) {{ }}</script>
+    <script>try {{ document.documentElement.dataset.mode = localStorage.getItem("qs-mode") === "dark" ? "dark" : "light"; var v = JSON.parse(localStorage.getItem("qs-variant-look") || "null"); if (v && v.look && (v.mode || "light") === document.documentElement.dataset.mode) for (var k in v.look) if (/^--qs-[a-z-]+$/.test(k)) document.documentElement.style.setProperty(k, String(v.look[k]).replace(/[;{{}}<>]/g, "")); }} catch (e) {{ }}</script>
     <!-- Edited content: keyed blocks stay hidden until js/content.js applied it (1.5 s max, 3 s if scripts fail) -->
-    <script>document.documentElement.classList.add("kalq-loading"); setTimeout(function () {{ document.documentElement.classList.remove("kalq-loading"); }}, 3000);</script>
+    <script>document.documentElement.classList.add("qs-loading"); setTimeout(function () {{ document.documentElement.classList.remove("qs-loading"); }}, 3000);</script>
     <meta name="description" content="{DESC}">
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="./assets/favicon.png" type="image/png">
@@ -112,15 +112,15 @@ def head(title, public=False):
     <header class="site-header">
         <a href="index.html" class="site-logo" aria-label="Kalq home" data-i18n-aria="aria.home">
             {MARK}
-            <span class="site-logo__word"><span>{WORD}<span class="kalq-wordmark" aria-hidden="true">KALQ</span></span></span>
+            <span class="site-logo__word"><span>{WORD}<span class="qs-wordmark" aria-hidden="true">KALQ</span></span></span>
         </a>
 {nav_html(public)}
         <div class="site-header__right">
             <!-- Light and dark: a sun that morphs into a thin crescent moon (js/variants.js) -->
             <button type="button" class="mode-toggle" aria-pressed="false" aria-label="Dunkles Design">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <mask id="kalq-moon-bite"><rect width="24" height="24" fill="#fff"/><circle class="mode-toggle__bite" cx="24" cy="2" r="7.4" fill="#000"/></mask>
-                    <circle class="mode-toggle__core" cx="12" cy="12" r="4.4" fill="currentColor" mask="url(#kalq-moon-bite)"/>
+                    <mask id="qs-moon-bite"><rect width="24" height="24" fill="#fff"/><circle class="mode-toggle__bite" cx="24" cy="2" r="7.4" fill="#000"/></mask>
+                    <circle class="mode-toggle__core" cx="12" cy="12" r="4.4" fill="currentColor" mask="url(#qs-moon-bite)"/>
                     <g class="mode-toggle__rays" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
                         <path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.5 5.5l1.5 1.5M17 17l1.5 1.5M5.5 18.5l1.5-1.5M17 7l1.5-1.5"/>
                     </g>
@@ -185,54 +185,54 @@ SOCIAL = f'''
 # (html.footer-harbor). One <footer> either way: one contentinfo landmark. Empty lines (the address) render nothing.
 LINKEDIN = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9.5h3V19H5zM6.5 5a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5zM10.5 9.5h2.9v1.3h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.6V19h-3v-4.6c0-1.1-.02-2.5-1.52-2.5-1.52 0-1.76 1.19-1.76 2.42V19h-3z" fill="currentColor"/></svg>'
 FOOTER_HARBOR = f'''                    <div class="footer-harbor">
-                        <p class="footer-harbor__cta"><a href="mailto:office@kalq.ai?subject=Kalq%20pilot" data-i18n="footer.cta" data-kalq-key="site.footer2.cta">Ready to prove it? Apply for the pilot.</a></p>
+                        <p class="footer-harbor__cta"><a href="mailto:office@kalq.ai?subject=Kalq%20pilot" data-i18n="footer.cta" data-qs-key="site.footer2.cta">Ready to prove it? Apply for the pilot.</a></p>
                         <div class="footer-harbor__top">
                             <div class="footer-harbor__contact">
-                                <h2 class="footer-harbor__heading" data-i18n="footer.contactHeading" data-kalq-key="site.footer2.heading">Contact</h2>
+                                <h2 class="footer-harbor__heading" data-i18n="footer.contactHeading" data-qs-key="site.footer2.heading">Contact</h2>
                                 <address class="footer-harbor__lines">
-                                    <span class="footer-harbor__address" data-kalq-key="site.footer2.address" data-kalq-format="lines"></span>
-                                    <a href="mailto:office@kalq.ai" data-kalq-key="site.footer2.email">office@kalq.ai</a>
+                                    <span class="footer-harbor__address" data-qs-key="site.footer2.address" data-qs-format="lines"></span>
+                                    <a href="mailto:office@kalq.ai" data-qs-key="site.footer2.email">office@kalq.ai</a>
                                 </address>
                             </div>
                             <nav class="footer-harbor__nav" aria-label="Footer links" data-i18n-aria="aria.footerNav">
                                 <ul>
-                                    <li><a href="index.html"><span class="site-roll" data-label="Home"><span data-i18n="nav.home" data-kalq-key="site.footer2.home">Home</span></span></a></li>
-                                    <li><a href="platform.html"><span class="site-roll" data-label="Platform"><span data-i18n="nav.platform" data-kalq-key="site.footer2.platform">Platform</span></span></a></li>
-                                    <li><a href="company.html"><span class="site-roll" data-label="Company"><span data-i18n="nav.company" data-kalq-key="site.footer2.company">Company</span></span></a></li>
+                                    <li><a href="index.html"><span class="site-roll" data-label="Home"><span data-i18n="nav.home" data-qs-key="site.footer2.home">Home</span></span></a></li>
+                                    <li><a href="platform.html"><span class="site-roll" data-label="Platform"><span data-i18n="nav.platform" data-qs-key="site.footer2.platform">Platform</span></span></a></li>
+                                    <li><a href="company.html"><span class="site-roll" data-label="Company"><span data-i18n="nav.company" data-qs-key="site.footer2.company">Company</span></span></a></li>
                                 </ul>
                             </nav>
                             <ul class="footer-harbor__social">
-                                <li><a href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener">{LINKEDIN}<span class="kalq-sr">LinkedIn</span></a></li>
+                                <li><a href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener">{LINKEDIN}<span class="qs-sr">LinkedIn</span></a></li>
                             </ul>
                         </div>
-                        <p class="footer-harbor__legal"><span>© <span data-current-year>2026</span> Kalq</span><span aria-hidden="true">·</span><a href="impressum.html" data-i18n="footer.impressum" data-kalq-key="site.footer2.impressum">Legal notice</a><span aria-hidden="true">·</span><a href="datenschutz.html" data-i18n="footer.privacy" data-kalq-key="site.footer2.privacy">Privacy</a></p>
+                        <p class="footer-harbor__legal"><span>© <span data-current-year>2026</span> Kalq</span><span aria-hidden="true">·</span><a href="impressum.html" data-i18n="footer.impressum" data-qs-key="site.footer2.impressum">Legal notice</a><span aria-hidden="true">·</span><a href="datenschutz.html" data-i18n="footer.privacy" data-qs-key="site.footer2.privacy">Privacy</a></p>
                         <div class="footer-harbor__wordmark" aria-hidden="true">{WORD}</div>
                     </div>'''
 
 # Tether's footer (the library, style variant: footer "tether"): the site's line large on the left, the pages and the
 # legal links in two columns, the year and the rights below, the social links on the right
 FOOTER_TETHER = f'''                    <div class="footer-tether">
-                        <p class="footer-tether__tagline" data-i18n="footer.tagline" data-kalq-key="site.footer3.tagline">One technical core. Two commercial engines.</p>
+                        <p class="footer-tether__tagline" data-i18n="footer.tagline" data-qs-key="site.footer3.tagline">One technical core. Two commercial engines.</p>
                         <nav class="footer-tether__nav" aria-label="Footer links" data-i18n-aria="aria.footerNav">
                             <div class="footer-tether__col">
-                                <p class="footer-tether__label" data-i18n="footer.pages" data-kalq-key="site.footer3.pages">Pages</p>
+                                <p class="footer-tether__label" data-i18n="footer.pages" data-qs-key="site.footer3.pages">Pages</p>
                                 <ul>
-                                    <li><a href="index.html" data-i18n="nav.home" data-kalq-key="site.footer3.home">Home</a></li>
-                                    <li><a href="platform.html" data-i18n="nav.platform" data-kalq-key="site.footer3.platform">Platform</a></li>
-                                    <li><a href="company.html" data-i18n="nav.company" data-kalq-key="site.footer3.company">Company</a></li>
+                                    <li><a href="index.html" data-i18n="nav.home" data-qs-key="site.footer3.home">Home</a></li>
+                                    <li><a href="platform.html" data-i18n="nav.platform" data-qs-key="site.footer3.platform">Platform</a></li>
+                                    <li><a href="company.html" data-i18n="nav.company" data-qs-key="site.footer3.company">Company</a></li>
                                 </ul>
                             </div>
                             <div class="footer-tether__col">
-                                <p class="footer-tether__label" data-i18n="footer.legal" data-kalq-key="site.footer3.legal">Legal</p>
+                                <p class="footer-tether__label" data-i18n="footer.legal" data-qs-key="site.footer3.legal">Legal</p>
                                 <ul>
-                                    <li><a href="impressum.html" data-i18n="footer.impressum" data-kalq-key="site.footer3.impressum">Legal notice</a></li>
-                                    <li><a href="datenschutz.html" data-i18n="footer.privacy" data-kalq-key="site.footer3.privacy">Privacy</a></li>
+                                    <li><a href="impressum.html" data-i18n="footer.impressum" data-qs-key="site.footer3.impressum">Legal notice</a></li>
+                                    <li><a href="datenschutz.html" data-i18n="footer.privacy" data-qs-key="site.footer3.privacy">Privacy</a></li>
                                 </ul>
                             </div>
                         </nav>
-                        <p class="footer-tether__legal"><span>© <span data-current-year>2026</span> Kalq.</span> <span data-i18n="footer.rights" data-kalq-key="site.footer3.rights">All rights reserved.</span></p>
+                        <p class="footer-tether__legal"><span>© <span data-current-year>2026</span> Kalq.</span> <span data-i18n="footer.rights" data-qs-key="site.footer3.rights">All rights reserved.</span></p>
                         <ul class="footer-tether__social">
-                            <li><a href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener">{LINKEDIN}<span class="kalq-sr">LinkedIn</span></a></li>
+                            <li><a href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener">{LINKEDIN}<span class="qs-sr">LinkedIn</span></a></li>
                         </ul>
                     </div>'''
 
@@ -241,19 +241,19 @@ FOOTER_TETHER = f'''                    <div class="footer-tether">
 # right, the wordmark across the bottom (decoration)
 FOOTER_SIGNAL = f'''                    <div class="footer-signal">
                         <form class="footer-signal__form" action="mailto:office@kalq.ai" method="post" enctype="text/plain">
-                            <label class="footer-signal__field"><span data-i18n="footer.formName" data-kalq-key="site.footer4.formName">Name</span><input type="text" name="name" autocomplete="name"></label>
-                            <label class="footer-signal__field"><span data-i18n="footer.formEmail" data-kalq-key="site.footer4.formEmail">Email</span><input type="email" name="email" autocomplete="email"></label>
-                            <label class="footer-signal__field is-wide"><span data-i18n="footer.formMessage" data-kalq-key="site.footer4.formMessage">Message</span><textarea name="message" rows="3"></textarea></label>
-                            <button type="submit" class="footer-signal__send" data-i18n="footer.formSend" data-kalq-key="site.footer4.formSend">Send from your email app</button>
+                            <label class="footer-signal__field"><span data-i18n="footer.formName" data-qs-key="site.footer4.formName">Name</span><input type="text" name="name" autocomplete="name"></label>
+                            <label class="footer-signal__field"><span data-i18n="footer.formEmail" data-qs-key="site.footer4.formEmail">Email</span><input type="email" name="email" autocomplete="email"></label>
+                            <label class="footer-signal__field is-wide"><span data-i18n="footer.formMessage" data-qs-key="site.footer4.formMessage">Message</span><textarea name="message" rows="3"></textarea></label>
+                            <button type="submit" class="footer-signal__send" data-i18n="footer.formSend" data-qs-key="site.footer4.formSend">Send from your email app</button>
                         </form>
                         <div class="footer-signal__contact">
-                            <p class="footer-signal__label" data-i18n="footer.sayHello" data-kalq-key="site.footer4.hello">Say hello</p>
-                            <a class="footer-signal__email" href="mailto:office@kalq.ai" data-kalq-key="site.footer4.email">office@kalq.ai</a>
-                            <p class="footer-signal__label" data-i18n="footer.social" data-kalq-key="site.footer4.follow">Follow</p>
+                            <p class="footer-signal__label" data-i18n="footer.sayHello" data-qs-key="site.footer4.hello">Say hello</p>
+                            <a class="footer-signal__email" href="mailto:office@kalq.ai" data-qs-key="site.footer4.email">office@kalq.ai</a>
+                            <p class="footer-signal__label" data-i18n="footer.social" data-qs-key="site.footer4.follow">Follow</p>
                             <ul class="footer-signal__social">
                                 <li><a href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener">LinkedIn</a></li>
                             </ul>
-                            <p class="footer-signal__legal"><span>© <span data-current-year>2026</span> Kalq</span><span aria-hidden="true">·</span><a href="impressum.html" data-i18n="footer.impressum" data-kalq-key="site.footer4.impressum">Legal notice</a><span aria-hidden="true">·</span><a href="datenschutz.html" data-i18n="footer.privacy" data-kalq-key="site.footer4.privacy">Privacy</a></p>
+                            <p class="footer-signal__legal"><span>© <span data-current-year>2026</span> Kalq</span><span aria-hidden="true">·</span><a href="impressum.html" data-i18n="footer.impressum" data-qs-key="site.footer4.impressum">Legal notice</a><span aria-hidden="true">·</span><a href="datenschutz.html" data-i18n="footer.privacy" data-qs-key="site.footer4.privacy">Privacy</a></p>
                         </div>
                         <div class="footer-signal__wordmark" aria-hidden="true">{WORD}</div>
                     </div>'''
@@ -264,7 +264,7 @@ FOOTER = '''
                     <div id="container">
                         <div class="footer_header">
                             <div class="footer_heading">
-                                <h2 data-i18n="footer.heading" data-kalq-key="site.footer.heading" data-kalq-format="lines">Prove it on<br>real parts</h2>
+                                <h2 data-i18n="footer.heading" data-qs-key="site.footer.heading" data-qs-format="lines">Prove it on<br>real parts</h2>
                             </div>
                             <p class="footer_sub">
                                 We are starting with CNC turned parts in Germany. If you buy or make them, apply for the
@@ -272,7 +272,7 @@ FOOTER = '''
                             </p>
                             <div class="footer_btns_wrapper">
                                 <a href="mailto:office@kalq.ai" class="btn">
-                                    <span data-kalq-key="site.footer.email">office@kalq.ai</span>
+                                    <span data-qs-key="site.footer.email">office@kalq.ai</span>
                                 </a>
                                 <a href="mailto:office@kalq.ai?subject=Kalq%20pilot" class="btn">
                                     <span>Apply for the pilot</span>
@@ -376,7 +376,7 @@ def to_html(text, fmt):
 def localize(html, page, lang=None):
     """Swap tagged English text for the default language (formatted blocks become HTML)."""
     def fill(m):
-        fmt = re.search(r'data-kalq-format="(\w+)"', m.group(1))
+        fmt = re.search(r'data-qs-format="(\w+)"', m.group(1))
         value = tr(m.group(3), lang or DEFAULT_LANG)
         return m.group(1) + (to_html(value, fmt.group(1)) if fmt else escape(value, quote=False)) + m.group(5)
     html = re.sub(r'(<(\w+)[^>]*\sdata-i18n="([^"]+)"[^>]*>)(.*?)(</\2>)', fill, html, flags=re.S)
@@ -403,7 +403,7 @@ def tag(html):
         html = pattern.sub(lambda m: f'<{m.group(1)}{m.group(2)} data-i18n="{key}">{m.group(3)}</{m.group(1)}>', html)
     return html
 
-# data-kalq-key for every translated element: page.section.item. Keys must never change once shipped.
+# data-qs-key for every translated element: page.section.item. Keys must never change once shipped.
 # Header, menu, social and footer are shared on every page ("site.*"), so one edit changes them everywhere.
 MODULE_SLUGS = {"shouldCost": "should-cost", "supplierFit": "supplier-fit", "rfq": "rfq-award",
                 "machine": "machine-intelligence", "mfgCost": "manufacturing-cost", "quote": "price-quote"}
@@ -438,15 +438,15 @@ def assign_keys(html, page):
         if i18n.startswith("platform.") and i18n.count(".") == 2:
             _, mod, part = i18n.split(".")
             return f"platform.cards.{MODULE_SLUGS[mod]}.{'body' if part == 'text' else part}"
-        raise KeyError(f"no data-kalq-key rule for {i18n} on {page}")
+        raise KeyError(f"no data-qs-key rule for {i18n} on {page}")
 
     def add(m):
-        if "data-kalq-key" in m.group(0):
+        if "data-qs-key" in m.group(0):
             return m.group(0)
-        return m.group(0)[:-1] + f' data-kalq-key="{key_for(m.group(1), m.group(2))}">'
+        return m.group(0)[:-1] + f' data-qs-key="{key_for(m.group(1), m.group(2))}">'
 
     html = re.sub(r'<(\w+)[^>]*\sdata-i18n="([^"]+)"[^>]*>', add, html)
-    return html.replace('data-i18n-marquee="social.marquee">', 'data-i18n-marquee="social.marquee" data-kalq-key="site.social.marquee">')
+    return html.replace('data-i18n-marquee="social.marquee">', 'data-i18n-marquee="social.marquee" data-qs-key="site.social.marquee">')
 
 def section_ids(html):
     """Every top-level section gets a stable id (its first class), the unit the page builder moves, copies and removes"""
@@ -466,7 +466,7 @@ def write(name, html):
     open(f"{ROOT}/{name}", "w", encoding="utf-8").write(html)
 
 # ---------------- Home ----------------
-rows = "\n".join(f'''                        <div class="elem" data-image="{IMGS[i]}" data-kalq-key="home.platform.{SLUGS[i]}.image" data-kalq-type="image">
+rows = "\n".join(f'''                        <div class="elem" data-image="{IMGS[i]}" data-qs-key="home.platform.{SLUGS[i]}.image" data-qs-type="image">
                             <div class="overlay"></div>
                             <div class="title">
                                 <p>{i + 1:02d}</p>
@@ -477,7 +477,7 @@ rows = "\n".join(f'''                        <div class="elem" data-image="{IMGS
 home = head("Kalq | The decision layer for manufactured parts") + f'''                <!-- Hero -->
                 <section class="header">
                     <!-- No autoplay or preload here: the 7 MB video would take the bandwidth the page scripts need; js/main.js starts it -->
-                    <video class="hero_video" data-kalq-key="home.hero.video" data-kalq-type="video" muted loop playsinline preload="none" aria-hidden="true">
+                    <video class="hero_video" data-qs-key="home.hero.video" data-qs-type="video" muted loop playsinline preload="none" aria-hidden="true">
                         <source src="assets/video-hero-6mb-low.mp4" type="video/mp4">
                     </video>
                     <div class="hero_overlay"></div>
@@ -485,9 +485,9 @@ home = head("Kalq | The decision layer for manufactured parts") + f'''          
                     <div class="hero_layer">
                     <div class="hero_content">
                         <!-- The outlined wordmark; with a style variant's own heading font the text version shows instead -->
-                        <h1 class="hero_title">{HERO_WORD}<span class="kalq-wordmark">KALQ</span></h1>
+                        <h1 class="hero_title">{HERO_WORD}<span class="qs-wordmark">KALQ</span></h1>
                         <!-- One block, one animated line per line break -->
-                        <p class="hero_slogan" data-i18n="hero.slogan" data-kalq-key="home.hero.slogan" data-kalq-format="lines">One technical core. Two commercial engines.<br>Better industrial decisions.</p>
+                        <p class="hero_slogan" data-i18n="hero.slogan" data-qs-key="home.hero.slogan" data-qs-format="lines">One technical core. Two commercial engines.<br>Better industrial decisions.</p>
                     </div>
                     <div class="block"></div>
                     </div>
@@ -503,20 +503,20 @@ home = head("Kalq | The decision layer for manufactured parts") + f'''          
                         </h5>
                         <div class="numbering">
                             <div>
-                                <h2 data-kalq-key="home.about.count1.value">2</h2>
+                                <h2 data-qs-key="home.about.count1.value">2</h2>
                                 <p>Commercial engines</p>
                             </div>
                             <div>
-                                <h2 data-kalq-key="home.about.count2.value">3</h2>
+                                <h2 data-qs-key="home.about.count2.value">3</h2>
                                 <p>Price truths, never mixed</p>
                             </div>
                             <div>
-                                <h2 data-kalq-key="home.about.count3.value">8</h2>
+                                <h2 data-qs-key="home.about.count3.value">8</h2>
                                 <p>Platform modules</p>
                             </div>
                         </div>
                         <!-- A picture for the section (the magazine's About spread shows it too); nothing until one is set -->
-                        <div class="kalq-media-slot about_media" data-kalq-key="home.about.media" data-kalq-type="image"></div>
+                        <div class="qs-media-slot about_media" data-qs-key="home.about.media" data-qs-type="image"></div>
                     </div>
                 </section>
 
@@ -546,7 +546,7 @@ home = head("Kalq | The decision layer for manufactured parts") + f'''          
                         <h2>Our approach</h2>
                         <div class="borderSeprator"></div>
                         <div>
-                            <div class="kalq-paras" data-i18n="home.approachText" data-kalq-key="home.approach.text" data-kalq-format="paragraphs"></div>
+                            <div class="qs-paras" data-i18n="home.approachText" data-qs-key="home.approach.text" data-qs-format="paragraphs"></div>
                         </div>
                     </div>
                 </section>
@@ -557,7 +557,7 @@ write("index.html", home)
 def card(i, m):
     return f'''                                <div class="card">
                                     <div class="parallax_img">
-                                        <img src="{IMGS[i]}" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="platform.cards.{SLUGS[i]}.image" data-kalq-type="image">
+                                        <img src="{IMGS[i]}" alt="" loading="lazy" width="auto" height="auto" data-qs-key="platform.cards.{SLUGS[i]}.image" data-qs-type="image">
                                     </div>
                                     <p class="tag"><span>{m[0]}</span> <span class="card_side">· {m[1]}</span></p>
                                     <h5>
@@ -570,7 +570,7 @@ def card(i, m):
 
 platform = head("Kalq | Platform") + f'''                <!-- Header -->
                 <section class="expertise_header">
-                    <div class="hero_media" data-kalq-key="platform.hero.media" data-kalq-type="image"></div>
+                    <div class="hero_media" data-qs-key="platform.hero.media" data-qs-type="image"></div>
                     <div id="container">
                         <h2>
                             One technical core. Two commercial engines.
@@ -582,7 +582,7 @@ platform = head("Kalq | Platform") + f'''                <!-- Header -->
                 <!-- Header img. TODO: replace placeholder image -->
                 <section class="expertise_header_img">
                     <div class="parallax_img">
-                        <img src="{IMGS[3]}" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="platform.header.image" data-kalq-type="image">
+                        <img src="{IMGS[3]}" alt="" loading="lazy" width="auto" height="auto" data-qs-key="platform.header.image" data-qs-type="image">
                     </div>
                 </section>
 
@@ -621,7 +621,7 @@ write("platform.html", platform)
 # ---------------- Company ----------------
 company = head("Kalq | Company") + '''                <!-- Header -->
                 <section class="about_header">
-                    <div class="hero_media" data-kalq-key="company.hero.media" data-kalq-type="image"></div>
+                    <div class="hero_media" data-qs-key="company.hero.media" data-qs-type="image"></div>
                     <div id="container">
                         <h2>
                             One part truth. Two commercial engines. Better industrial decisions.
@@ -633,7 +633,7 @@ company = head("Kalq | Company") + '''                <!-- Header -->
                 <!-- Header img. TODO: replace placeholder image -->
                 <section class="about_header_img">
                     <div class="parallax_img">
-                        <img src="assets/about/about_header.webp" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="company.header.image" data-kalq-type="image">
+                        <img src="assets/about/about_header.webp" alt="" loading="lazy" width="auto" height="auto" data-qs-key="company.header.image" data-qs-type="image">
                     </div>
                 </section>
 
@@ -652,10 +652,10 @@ company = head("Kalq | Company") + '''                <!-- Header -->
                         <!-- TODO: replace placeholder images -->
                         <div class="img_wrapper">
                             <div class="parallax_img">
-                                <img src="assets/about/goals1.avif" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="company.why.image1" data-kalq-type="image">
+                                <img src="assets/about/goals1.avif" alt="" loading="lazy" width="auto" height="auto" data-qs-key="company.why.image1" data-qs-type="image">
                             </div>
                             <div class="parallax_img">
-                                <img src="assets/about/goals2.jpg" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="company.why.image2" data-kalq-type="image">
+                                <img src="assets/about/goals2.jpg" alt="" loading="lazy" width="auto" height="auto" data-qs-key="company.why.image2" data-qs-type="image">
                             </div>
                         </div>
                     </div>
@@ -670,13 +670,13 @@ company = head("Kalq | Company") + '''                <!-- Header -->
                         <div class="borderSeprator"></div>
                         <div class="para">
                             <div>
-                                <div class="kalq-paras" data-i18n="company.sharedText" data-kalq-key="company.shared.text" data-kalq-format="paragraphs"></div>
+                                <div class="qs-paras" data-i18n="company.sharedText" data-qs-key="company.shared.text" data-qs-format="paragraphs"></div>
                             </div>
                         </div>
 
                         <!-- TODO: replace placeholder image -->
                         <div class="parallax_img">
-                            <img src="assets/about/weDo.avif" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="company.shared.image" data-kalq-type="image">
+                            <img src="assets/about/weDo.avif" alt="" loading="lazy" width="auto" height="auto" data-qs-key="company.shared.image" data-qs-type="image">
                         </div>
                     </div>
                 </section>
@@ -701,7 +701,7 @@ company = head("Kalq | Company") + '''                <!-- Header -->
 
                         <!-- TODO: replace placeholder image -->
                         <div class="parallax_img">
-                            <img src="https://images.unsplash.com/photo-1483058712412-4245e9b90334?q=80&w=2070&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto" data-kalq-key="company.prices.image" data-kalq-type="image">
+                            <img src="https://images.unsplash.com/photo-1483058712412-4245e9b90334?q=80&w=2070&auto=format&fit=crop" alt="" loading="lazy" width="auto" height="auto" data-qs-key="company.prices.image" data-qs-type="image">
                         </div>
                     </div>
                 </section>
@@ -712,32 +712,32 @@ write("company.html", company)
 impressum = head("Kalq | Legal notice", public=True) + '''                <!-- Impressum. TODO: fill in company data -->
                 <section class="legal">
                     <div id="container">
-                        <h2 data-kalq-key="impressum.header.title">Legal notice</h2>
-                        <p class="legal_lead" data-kalq-key="impressum.header.lead">Information pursuant to § 5 DDG</p>
+                        <h2 data-qs-key="impressum.header.title">Legal notice</h2>
+                        <p class="legal_lead" data-qs-key="impressum.header.lead">Information pursuant to § 5 DDG</p>
 
                         <div class="legal_block">
-                            <h5 data-kalq-key="impressum.provider.title">Provider</h5>
-                            <p data-i18n="legal.address" data-kalq-key="impressum.provider.address" data-kalq-format="lines"></p>
+                            <h5 data-qs-key="impressum.provider.title">Provider</h5>
+                            <p data-i18n="legal.address" data-qs-key="impressum.provider.address" data-qs-format="lines"></p>
                         </div>
 
                         <div class="legal_block">
-                            <h5 data-kalq-key="impressum.representative.title">Represented by</h5>
-                            <p data-kalq-key="impressum.representative.name">[TODO: Managing director]</p>
+                            <h5 data-qs-key="impressum.representative.title">Represented by</h5>
+                            <p data-qs-key="impressum.representative.name">[TODO: Managing director]</p>
                         </div>
 
                         <div class="legal_block">
-                            <h5 data-kalq-key="impressum.contact.title">Contact</h5>
-                            <p><span data-kalq-key="impressum.contact.label">Email:</span> <a href="mailto:office@kalq.ai" data-kalq-key="impressum.contact.email">office@kalq.ai</a></p>
+                            <h5 data-qs-key="impressum.contact.title">Contact</h5>
+                            <p><span data-qs-key="impressum.contact.label">Email:</span> <a href="mailto:office@kalq.ai" data-qs-key="impressum.contact.email">office@kalq.ai</a></p>
                         </div>
 
                         <div class="legal_block">
-                            <h5 data-kalq-key="impressum.register.title">Register entry</h5>
-                            <p data-i18n="legal.registerText" data-kalq-key="impressum.register.text" data-kalq-format="lines"></p>
+                            <h5 data-qs-key="impressum.register.title">Register entry</h5>
+                            <p data-i18n="legal.registerText" data-qs-key="impressum.register.text" data-qs-format="lines"></p>
                         </div>
 
                         <div class="legal_block">
-                            <h5 data-kalq-key="impressum.vat.title">VAT ID</h5>
-                            <p data-kalq-key="impressum.vat.text">VAT identification number pursuant to § 27a of the German VAT Act: [TODO]</p>
+                            <h5 data-qs-key="impressum.vat.title">VAT ID</h5>
+                            <p data-qs-key="impressum.vat.text">VAT identification number pursuant to § 27a of the German VAT Act: [TODO]</p>
                         </div>
                     </div>
                 </section>
@@ -747,18 +747,23 @@ write("impressum.html", impressum)
 datenschutz = head("Kalq | Privacy policy", public=True) + '''                <!-- Datenschutz. TODO: insert privacy policy -->
                 <section class="legal">
                     <div id="container">
-                        <h2 data-kalq-key="datenschutz.header.title">Privacy policy</h2>
+                        <h2 data-qs-key="datenschutz.header.title">Privacy policy</h2>
                         <div class="legal_block">
-                            <p data-kalq-key="datenschutz.body.text">[TODO: insert privacy policy]</p>
+                            <p data-qs-key="datenschutz.body.text">[TODO: insert privacy policy]</p>
                         </div>
                     </div>
                 </section>
 ''' + FOOTER + TAIL
 write("datenschutz.html", datenschutz)
-# ---------------- Gate (temporary, see middleware.js) ----------------
-# Standalone: only files the middleware lets through without a cookie. Copy lives in js/gate.js (EN and DE).
+# ---------------- Gate (Q-Site's login card, see site.config.json "gate") ----------------
+# Standalone: only files the middleware lets through without a cookie. Copy lives in the engine's js/gate.js (EN and DE);
+# the subline is Kalq's hero slogan. Without a gate video of its own the card shows the home hero's video.
 GATE_MARK = MARK.replace('class="site-logo__mark"', 'class="gate_mark"')
-cells = "\n".join(f'                    <input class="gate_cell" type="text" inputmode="text" maxlength="1" autocomplete="{"one-time-code" if i == 0 else "off"}" autocapitalize="characters" spellcheck="false" aria-label="Code {i + 1}/6">' for i in range(6))
+GATE_WORD = WORD.replace('aria-hidden="true"', 'role="img" aria-label="KALQ"')
+GATE_SUN = '<svg class="gate_sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
+GATE_MOON = '<svg class="gate_moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>'
+GATE_SUBLINE = {lang: STRINGS["hero.slogan"][lang].replace("\n", " ") for lang in ("de", "en")}
+cells = "\n".join(f'                        <input class="gate_cell" type="text" inputmode="text" maxlength="1" autocomplete="{"one-time-code" if i == 0 else "off"}" autocapitalize="characters" spellcheck="false" aria-label="Code {i + 1}/6">' for i in range(6))
 gate_html = f"""<!DOCTYPE html>
 <html lang="de">
 
@@ -774,33 +779,43 @@ gate_html = f"""<!DOCTYPE html>
 </head>
 
 <body>
-    <main class="gate">
+    <!-- Q-Site's login card: the home hero's video on top with the mark and KALQ top left, Anmeldung and Kalq's slogan
+         bottom left, the sun and moon top right; the code, Google and LinkedIn below -->
+    <main class="gate" data-theme="dark">
         <div class="gate_card">
-            <div class="gate_logo">
-                <!-- One layer per published style variant, crossfading every second (js/gate.js) -->
-                <div class="gate_logo__stack"><div class="gate_logo__layer is-active" data-variant="default">{GATE_MARK}</div></div>
-                <span class="gate_word">{WORD}</span>
+            <div class="gate_media">
+                <video class="gate_video" muted loop playsinline autoplay preload="metadata" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1" hidden></video>
+                <div class="gate_brand">{GATE_MARK}<span class="gate_word">{GATE_WORD}</span></div>
+                <div class="gate_heading">
+                    <h1 class="gate_title" data-gate-text="title">Anmeldung</h1>
+                    <p class="gate_subline"><span lang="de">{escape(GATE_SUBLINE["de"])}</span><span lang="en">{escape(GATE_SUBLINE["en"])}</span></p>
+                </div>
+                <button type="button" class="gate_theme" aria-label="Helles Farbschema">{GATE_SUN}{GATE_MOON}</button>
             </div>
 
-            <form class="gate_form" novalidate>
-                <p class="gate_label" data-gate-text="label">Zugangscode</p>
-                <div class="gate_cells">
+            <div class="gate_body">
+                <form class="gate_form" novalidate>
+                    <p class="gate_label" data-gate-text="label">Zugangscode</p>
+                    <div class="gate_cells">
 {cells}
+                    </div>
+                    <p class="gate_message" role="alert" aria-live="polite"></p>
+                    <hr class="gate_line">
+                    <button type="submit" class="gate_submit" data-gate-text="submit">Anmelden</button>
+                </form>
+
+                <div class="gate_or"><span data-gate-text="or">oder</span></div>
+
+                <div class="gate_logins">
+                    <button type="button" class="gate_login" data-provider="google">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.2-2.1 3.5-5.1 3.5-8.8z"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-2.9l-3.9-3c-1.1.7-2.5 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.3v3.1A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6h-4a12 12 0 0 0 0 10.8l4-3.1z"/><path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4A12 12 0 0 0 1.3 6.6l4 3.1c.9-2.9 3.6-4.9 6.7-4.9z"/></svg>
+                        <span data-gate-text="google">Weiter mit Google</span>
+                    </button>
+                    <button type="button" class="gate_login" data-provider="linkedin_oidc">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#0A66C2" d="M20.4 20.5h-3.6v-5.6c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9v5.7H9.4V9h3.4v1.6c.5-.9 1.6-1.8 3.4-1.8 3.6 0 4.3 2.4 4.3 5.5v6.2zM5.3 7.4a2.1 2.1 0 1 1 0-4.2 2.1 2.1 0 0 1 0 4.2zm1.8 13.1H3.6V9h3.5v11.5zM22.2 0H1.8C.8 0 0 .8 0 1.7v20.6c0 .9.8 1.7 1.8 1.7h20.4c1 0 1.8-.8 1.8-1.7V1.7C24 .8 23.2 0 22.2 0z"/></svg>
+                        <span data-gate-text="linkedin">Weiter mit LinkedIn</span>
+                    </button>
                 </div>
-                <p class="gate_message" role="alert" aria-live="polite"></p>
-            </form>
-
-            <div class="gate_or"><span data-gate-text="or">oder</span></div>
-
-            <div class="gate_logins">
-                <button type="button" class="gate_login" data-provider="google">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.35 11.1H12v2.98h5.35c-.23 1.42-1.66 4.17-5.35 4.17-3.22 0-5.85-2.67-5.85-5.95S8.78 6.35 12 6.35c1.83 0 3.06.78 3.76 1.45l2.57-2.47C16.68 3.78 14.55 2.8 12 2.8 6.92 2.8 2.8 6.92 2.8 12s4.12 9.2 9.2 9.2c5.31 0 8.83-3.73 8.83-8.99 0-.6-.07-1.06-.15-1.51Z"/></svg>
-                    <span data-gate-text="google">Weiter mit Google</span>
-                </button>
-                <button type="button" class="gate_login" data-provider="linkedin_oidc">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0Z"/></svg>
-                    <span data-gate-text="linkedin">Weiter mit LinkedIn</span>
-                </button>
             </div>
         </div>
         <p class="gate_footer">
@@ -823,7 +838,7 @@ open(f"{ROOT}/gate.html", "w", encoding="utf-8").write(gate_html)
 
 # Block keys: unique per page, page.* keys only on their own page
 for n in ["index.html", "platform.html", "company.html", "impressum.html", "datenschutz.html"]:
-    keys = re.findall(r'data-kalq-key="([^"]+)"', open(f"{ROOT}/{n}", encoding="utf-8").read())
+    keys = re.findall(r'data-qs-key="([^"]+)"', open(f"{ROOT}/{n}", encoding="utf-8").read())
     dupes = {k for k in keys if keys.count(k) > 1}
     assert not dupes, f"duplicate keys on {n}: {dupes}"
     page = n[:-5] if n != "index.html" else "home"

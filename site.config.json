@@ -1,0 +1,201 @@
+{
+    "name": "Kalq",
+    "email": "office@kalq.ai",
+    "url": "https://www.kalq.ai",
+    "logo": "assets/logo.svg",
+    "logoAnimation": true,
+    "gate": {
+        "theme": "dark"
+    },
+    "access": {
+        "rejection": {
+            "de": "Dieser Login ist für Kolleginnen und Kollegen von CERTIL und Neurawork. Nutzen Sie den Zugangscode oder bitten Sie um eine Einladung.",
+            "en": "This login is for Certil and Neurawork colleagues. Use the access code or ask for an invite."
+        }
+    },
+    "languages": [
+        "de",
+        "en"
+    ],
+    "pages": [
+        {
+            "id": "home",
+            "file": "index.html",
+            "label": {
+                "de": "Start",
+                "en": "Home"
+            },
+            "nav": "nav.home"
+        },
+        {
+            "id": "platform",
+            "file": "platform.html",
+            "label": {
+                "de": "Plattform",
+                "en": "Platform"
+            },
+            "nav": "nav.platform"
+        },
+        {
+            "id": "company",
+            "file": "company.html",
+            "label": {
+                "de": "Unternehmen",
+                "en": "Company"
+            },
+            "nav": "nav.company"
+        },
+        {
+            "id": "impressum",
+            "file": "impressum.html",
+            "label": {
+                "de": "Impressum",
+                "en": "Legal notice"
+            },
+            "public": true,
+            "appendix": true,
+            "nav": "footer.impressum"
+        },
+        {
+            "id": "datenschutz",
+            "file": "datenschutz.html",
+            "label": {
+                "de": "Datenschutz",
+                "en": "Privacy"
+            },
+            "public": true,
+            "appendix": true,
+            "nav": "privacy.title"
+        }
+    ],
+    "heroKey": "home.hero.video",
+    "media": [
+        "home.about.media"
+    ],
+    "sitemap": [
+        {
+            "page": "home",
+            "items": [
+                {
+                    "hero": "home.hero.video"
+                },
+                {
+                    "text": 4
+                },
+                {
+                    "list": [
+                        "home.platform.should-cost.image",
+                        "home.platform.machine-intelligence.image",
+                        "home.platform.supplier-fit.image",
+                        "home.platform.manufacturing-cost.image",
+                        "home.platform.rfq-award.image",
+                        "home.platform.price-quote.image"
+                    ]
+                },
+                {
+                    "text": 3
+                }
+            ]
+        },
+        {
+            "page": "platform",
+            "items": [
+                {
+                    "hero": "platform.hero.media"
+                },
+                {
+                    "text": 2
+                },
+                {
+                    "full": "platform.header.image"
+                },
+                {
+                    "text": 3
+                },
+                {
+                    "grid": [
+                        "platform.cards.should-cost.image",
+                        "platform.cards.machine-intelligence.image",
+                        "platform.cards.supplier-fit.image",
+                        "platform.cards.manufacturing-cost.image",
+                        "platform.cards.rfq-award.image",
+                        "platform.cards.price-quote.image"
+                    ],
+                    "cols": 2
+                }
+            ]
+        },
+        {
+            "page": "company",
+            "items": [
+                {
+                    "hero": "company.hero.media"
+                },
+                {
+                    "text": 2
+                },
+                {
+                    "full": "company.header.image"
+                },
+                {
+                    "text": 3
+                },
+                {
+                    "grid": [
+                        "company.why.image1",
+                        "company.why.image2"
+                    ],
+                    "cols": 2
+                },
+                {
+                    "text": 3
+                },
+                {
+                    "full": "company.shared.image"
+                },
+                {
+                    "text": 2
+                },
+                {
+                    "full": "company.prices.image"
+                }
+            ]
+        },
+        {
+            "page": "impressum",
+            "items": [
+                {
+                    "text": 9
+                }
+            ]
+        },
+        {
+            "page": "datenschutz",
+            "items": [
+                {
+                    "text": 5
+                }
+            ]
+        },
+        {
+            "page": "site",
+            "items": [
+                {
+                    "full": "site.nav.mega.card.image"
+                },
+                {
+                    "list": [
+                        "site.nav.mega.should-cost.image",
+                        "site.nav.mega.machine-intelligence.image",
+                        "site.nav.mega.supplier-fit.image",
+                        "site.nav.mega.manufacturing-cost.image",
+                        "site.nav.mega.rfq-award.image",
+                        "site.nav.mega.price-quote.image"
+                    ]
+                }
+            ]
+        }
+    ],
+    "publicFiles": [],
+    "publicScripts": []
+}

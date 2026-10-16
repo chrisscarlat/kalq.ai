@@ -1,0 +1,14 @@
+# Never deployed: notes, the database and the build inputs Vercel does not need.
+# The build (q-site build) needs site.config.json, the pages, assets/, fonts/, js/ and css/*.scss; the functions
+# need api/ and the files vercel.json includes.
+/docs
+/shots
+*.md
+/supabase
+/i18n
+*.py
+.env
+.env.*
+!.env.example
+.vercel
+.DS_Store

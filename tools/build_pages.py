@@ -102,7 +102,7 @@ def head(title, public=False):
 </head>
 
 <body data-barba="wrapper">
-    <!-- Kalq: under construction, on every page above the header (css/_site.scss); its own strip, never over the page -->
+    <!-- Kalq: under construction, a small glass pill floating over the page (css/_site.scss), taking no room -->
     <div class="kalq-construction" role="note"><span class="kalq-construction__dot" aria-hidden="true"></span><span class="kalq-construction__text">Under construction. Not launched yet.</span></div>
     <!-- Progress Bar -->
     <div class="progressBar"></div>

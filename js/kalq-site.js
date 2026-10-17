@@ -131,3 +131,39 @@ window.addEventListener("load", chatAccess);
 new MutationObserver((records) => {
     if (records.some((r) => [...r.addedNodes].some((n) => n.nodeType === 1 && (n.matches(".qs-chat, .qs-chat__window") || n.querySelector?.(".qs-chat__window"))))) chatAccess();
 }).observe(document.body, { childList: true, subtree: true });
+
+// 4. The "under construction" pill steps aside while text of the page is under it (a heading that starts high on a
+// short screen, text scrolling past) and comes back once the spot is clear; pictures and video under it are fine.
+const pill = () => document.querySelector(".kalq-construction");
+const TEXT = "h1, h2, h3, h4, h5, h6, p, li, blockquote, figcaption, a, button, label, [data-qs-key]";
+function textUnderPill() {
+    const el = pill();
+    if (!el) return false;
+    const r = el.getBoundingClientRect();
+    for (const y of [r.top + 3, r.top + r.height / 2, r.bottom - 3]) {
+        for (const x of [r.left + 6, r.left + r.width * 0.25, r.left + r.width / 2, r.left + r.width * 0.75, r.right - 6]) {
+            // the topmost thing of the page at this point (the pill lets the pointer through, so it is not in the list)
+            const top = document.elementsFromPoint(x, y).find((e) => !el.contains(e) && e.closest('[data-barba="container"]'));
+            if (!top) continue;
+            const text = top.closest(TEXT);
+            if (text && text.closest('[data-barba="container"]') && text.textContent.trim()) return true;
+        }
+    }
+    return false;
+}
+let pillQueued = false;
+const placePill = () => {
+    if (pillQueued) return;
+    pillQueued = true;
+    requestAnimationFrame(() => { pillQueued = false; document.documentElement.classList.toggle("kalq-pill-aside", textUnderPill()); });
+};
+window.addEventListener("load", () => {
+    placePill();
+    const c = document.querySelector(".scrollbar-container");
+    const sb = c && window.Scrollbar ? window.Scrollbar.get(c) : null;
+    if (sb) sb.addListener(placePill);
+});
+["scroll", "resize"].forEach((ev) => window.addEventListener(ev, placePill, { passive: true }));
+["qs:layout", "qs:content", "qs:language"].forEach((ev) => document.addEventListener(ev, placePill));
+document.addEventListener("click", () => setTimeout(placePill, 400)); // a page change (Barba) or an opened panel
+setInterval(placePill, 1500); // and now and then, for anything that moves without telling (a page change, an animation)

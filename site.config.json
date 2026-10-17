@@ -200,5 +200,6 @@
     "publicScripts": [
         "lookParts",
         "kalq-site"
-    ]
+    ],
+    "styles": "lockable"
 }

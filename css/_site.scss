@@ -92,3 +92,26 @@ body.qs-edit .qs-f-hero__glass > .qs-m-alt-field { flex: 1 0 100%; order: 9; }
 body.qs-edit :is(.qs-f-hero, .qs-f-lit):has(> :is(.qs-f-hero__media, .qs-f-lit__media) > .qs-ph-media) {
     padding-bottom: calc(var(--f-pad-y, 4.5rem) + 2.75rem);
 }
+
+// The module previews (the picker's devices, the module panel's device window) draw a module at a device's width inside
+// the editor's window. Rules on the window's width (@media in Q-Site's css/components/_final.scss) kept the desktop
+// layout there, so the phone preview of a hero, the lit statement, the FAQ, results, pricing, services and swipe cards
+// did not match the phone. The same rules on the module's own width (each module is a size container,
+// css/components/_modules.scss) make the preview show what the device renders; on the page nothing changes, a module
+// is as wide as the window there.
+@container (max-width: 999px) {
+    .qs-f-rs__grid { grid-template-columns: 1fr 1fr; }
+    .qs-f-pr__plans { grid-template-columns: 1fr; }
+    .qs-f-pr__plan + .qs-f-pr__plan { border-left: 0; border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent); }
+}
+@container (max-width: 690px) {
+    .qs-f-hero__row { grid-template-columns: 1fr; text-align: center; .qs-f-hero__caption { text-align: center; } }
+    .qs-f-hero__cards { grid-template-columns: 1fr; }
+    .qs-f-hero__bottom, .qs-f-hero__note { grid-template-columns: 1fr; }
+    .qs-f-lit__stats { grid-template-columns: 1fr; }
+    .qs-f-sw__card { flex-basis: 72cqi; }
+    .qs-f-faq__grid { grid-template-columns: 1fr; }
+    .qs-f-rs__grid { grid-template-columns: 1fr; }
+    .qs-f-rs__tile.is-tall { grid-row: auto; min-height: 20rem; }
+    .qs-f-sv__card { grid-template-columns: 1fr; }
+}

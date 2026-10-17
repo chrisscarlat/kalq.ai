@@ -61,7 +61,7 @@ html body .qs-ph:empty {
 // finger (at the foot of the column that was log out). Making room for it instead clips the page's own type, which is
 // sized to the screen. The selectors outweigh collab.css, which loads later.
 @mixin kalq-rail-folding {
-    top: 76px;
+    top: calc(76px + var(--kalq-bar-h, 0px));
 
     .qs-rail__head { flex-direction: column; }
     .qs-stack { display: flex; flex: none; justify-content: center; }
@@ -134,3 +134,50 @@ html body .qs-f-lit .qs-m-alt-field { max-width: min(100%, 34rem); }
     font-size: 0.95rem;
     opacity: 1;
 }
+
+// Under construction: a slim strip on every page above the header (tools/build_pages.py, copy site.construction). It
+// is its own strip, never over the page: the header, the scrolling page, the progress bar, the menu and the rail all
+// start below it.
+:root { --kalq-bar-h: 30px; }
+@media (max-width: 540px) { :root { --kalq-bar-h: 28px; } }
+
+.kalq-construction {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 950; // above the page and the header, below the editor's windows (1000 and up)
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    height: var(--kalq-bar-h);
+    padding: 0 1rem;
+    background: #101010;
+    color: #f5f5f2;
+    font: 500 12px/1 var(--qs-font, "Helvetica Neue", Arial, sans-serif);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+
+    @media (max-width: 540px) { font-size: 11px; gap: 0.5rem; }
+}
+.kalq-construction__text { overflow: hidden; text-overflow: ellipsis; }
+.kalq-construction__dot {
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #f5b83d;
+    box-shadow: 0 0 0 3px rgba(245, 184, 61, 0.22);
+    animation: kalq-construction-pulse 2.4s ease-in-out infinite;
+}
+@keyframes kalq-construction-pulse { 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { .kalq-construction__dot { animation: none; } }
+html[data-mode="dark"] .kalq-construction { background: #f2f1ee; color: #101010; }
+
+// everything that sat at the top of the screen starts below the strip (the page's own height is the screen less it)
+.site-header { top: var(--kalq-bar-h); }
+.progressBar { top: var(--kalq-bar-h); }
+.site-menu { top: calc(4.9rem + var(--kalq-bar-h)); }
+.scrollbar-container { margin-top: var(--kalq-bar-h); height: calc(100vh - var(--kalq-bar-h)) !important; }
+html body .qs-toolbar.qs-rail { top: calc(var(--qs-rail-gap, 12px) + var(--kalq-bar-h)); }

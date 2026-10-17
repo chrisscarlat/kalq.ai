@@ -102,6 +102,8 @@ def head(title, public=False):
 </head>
 
 <body data-barba="wrapper">
+    <!-- Kalq: under construction, on every page above the header (css/_site.scss); its own strip, never over the page -->
+    <div class="kalq-construction" role="note"><span class="kalq-construction__dot" aria-hidden="true"></span><span class="kalq-construction__text">Under construction. Not launched yet.</span></div>
     <!-- Progress Bar -->
     <div class="progressBar"></div>
 
@@ -413,6 +415,7 @@ FIXED_KEYS = {
     "nav.home": "site.menu.home", "nav.company": "site.menu.company", 
     "social.label": "site.social.label",
     "footer.sub": "site.footer.sub",
+    "site.construction": "site.construction.text",
     "footer.pilot": "site.footer.pilot", "footer.impressum": "site.footer.impressum", "footer.privacy": "site.footer.privacy",
     "home.about": "home.about.text", "home.count1": "home.about.count1.label", "home.count2": "home.about.count2.label",
     "home.count3": "home.about.count3.label", "home.platformCta": "home.platform.cta", "home.platformText": "home.platform.text", "home.approach": "home.approach.title",

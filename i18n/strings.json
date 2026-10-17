@@ -439,5 +439,9 @@
     "privacy.rightsText": {
         "en": "You have the right to access, rectification, erasure, restriction of processing, data portability and objection (Art. 15 to 21 GDPR). Please write to us at office@kalq.ai.\n\nYou may also lodge a complaint with a data protection supervisory authority, for example the authority responsible for us, the Bavarian Data Protection Authority (Bayerisches Landesamt für Datenschutzaufsicht), Promenade 18, 91522 Ansbach, Germany.",
         "de": "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch (Art. 15 bis 21 DSGVO). Schreiben Sie uns dazu an office@kalq.ai.\n\nSie können sich außerdem bei einer Datenschutzaufsichtsbehörde beschweren, zum Beispiel beim für uns zuständigen Bayerischen Landesamt für Datenschutzaufsicht, Promenade 18, 91522 Ansbach."
+    },
+    "site.construction": {
+        "en": "Under construction. Not launched yet.",
+        "de": "Im Aufbau. Noch nicht offiziell gestartet."
     }
 }

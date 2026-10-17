@@ -103,3 +103,31 @@ const endTouch = (e) => {
 };
 document.addEventListener("touchend", endTouch, true);
 document.addEventListener("touchcancel", endTouch, true);
+
+// 3. The chat only for editors until it has a WhatsApp number (the Design panel's Chat: site.chat.whatsapp). Visitors
+// see no chat; editors see it with a small note saying the number is missing. Hidden by css/_site.scss until this
+// decides (html.kalq-chat-shown), so it never flashes for visitors.
+import { storedEntry } from "./content.js";
+const whatsapp = () => { const e = storedEntry("site.chat.whatsapp"); return String(e?.de ?? e?.en ?? "").replace(/<[^>]+>/g, "").trim(); };
+let isEditor = false;
+function chatAccess() {
+    const missing = !whatsapp();
+    document.documentElement.classList.toggle("kalq-chat-shown", !missing || isEditor);
+    document.querySelectorAll(".qs-chat__window").forEach((win) => {
+        let note = win.querySelector(".kalq-chat-note");
+        if (missing && isEditor) {
+            if (note) return;
+            note = Object.assign(document.createElement("p"), { className: "kalq-chat-note", textContent: "WhatsApp number missing" });
+            const head = win.querySelector(".qs-chat__head");
+            if (head) head.after(note); else win.prepend(note);
+        } else note?.remove();
+    });
+}
+fetch("/api/me", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null)).catch(() => null)
+    .then((me) => { isEditor = me?.kind === "editor"; chatAccess(); });
+["qs:content", "qs:site-settings", "qs:language"].forEach((ev) => document.addEventListener(ev, () => requestAnimationFrame(chatAccess)));
+window.addEventListener("load", chatAccess);
+// the chat draws its window again on a language change or a settings change: the note goes back in
+new MutationObserver((records) => {
+    if (records.some((r) => [...r.addedNodes].some((n) => n.nodeType === 1 && (n.matches(".qs-chat, .qs-chat__window") || n.querySelector?.(".qs-chat__window"))))) chatAccess();
+}).observe(document.body, { childList: true, subtree: true });

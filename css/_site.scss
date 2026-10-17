@@ -181,3 +181,15 @@ html[data-mode="dark"] .kalq-construction { background: #f2f1ee; color: #101010;
 .site-menu { top: calc(4.9rem + var(--kalq-bar-h)); }
 .scrollbar-container { margin-top: var(--kalq-bar-h); height: calc(100vh - var(--kalq-bar-h)) !important; }
 html body .qs-toolbar.qs-rail { top: calc(var(--qs-rail-gap, 12px) + var(--kalq-bar-h)); }
+
+// The chat: hidden until js/kalq-site.js lets it show (a WhatsApp number is set, or an editor is signed in); for
+// editors without the number a small note in the chat window
+html:not(.kalq-chat-shown) .qs-chat { display: none !important; }
+.kalq-chat-note {
+    margin: 0.6rem 0.9rem 0.5rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 8px;
+    background: rgba(245, 184, 61, 0.16);
+    color: inherit;
+    font: 500 0.78rem/1.3 var(--qs-font, "Helvetica Neue", Arial, sans-serif);
+}

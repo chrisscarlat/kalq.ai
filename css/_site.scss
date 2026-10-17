@@ -123,3 +123,14 @@ html body .qs-f-lit .qs-m-alt-field { max-width: min(100%, 34rem); }
     .qs-f-rs__tile.is-tall { grid-row: auto; min-height: 20rem; }
     .qs-f-sv__card { grid-template-columns: 1fr; }
 }
+
+// The Datenschutz draft notice: set apart, so nobody reads the page as final
+.legal .legal_draft {
+    display: block;
+    margin-bottom: 2.5rem;
+    padding: 0.9rem 1.1rem;
+    border: 1px dashed currentColor;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    opacity: 1;
+}

@@ -711,7 +711,7 @@ company = head("Kalq | Company") + '''                <!-- Header -->
 write("company.html", company)
 
 # ---------------- Legal ----------------
-impressum = head("Kalq | Legal notice", public=True) + '''                <!-- Impressum. TODO: fill in company data -->
+impressum = head("Kalq | Legal notice", public=True) + '''                <!-- Impressum: Neurawork GmbH & Co. KG, as on neurawork.ai/de/impressum (2026-10-17); contact office@kalq.ai -->
                 <section class="legal">
                     <div id="container">
                         <h2 data-qs-key="impressum.header.title">Legal notice</h2>
@@ -724,12 +724,13 @@ impressum = head("Kalq | Legal notice", public=True) + '''                <!-- I
 
                         <div class="legal_block">
                             <h5 data-qs-key="impressum.representative.title">Represented by</h5>
-                            <p data-qs-key="impressum.representative.name">[TODO: Managing director]</p>
+                            <p data-i18n="legal.director" data-qs-key="impressum.representative.name"></p>
                         </div>
 
                         <div class="legal_block">
                             <h5 data-qs-key="impressum.contact.title">Contact</h5>
-                            <p><span data-qs-key="impressum.contact.label">Email:</span> <a href="mailto:office@kalq.ai" data-qs-key="impressum.contact.email">office@kalq.ai</a></p>
+                            <p><span data-i18n="legal.phone" data-qs-key="impressum.contact.phoneLabel">Phone:</span> <a href="tel:+498636239830" data-i18n="legal.phoneNumber" data-qs-key="impressum.contact.phone">+49 8636 23983 0</a><br>
+                            <span data-qs-key="impressum.contact.label">Email:</span> <a href="mailto:office@kalq.ai" data-qs-key="impressum.contact.email">office@kalq.ai</a></p>
                         </div>
 
                         <div class="legal_block">
@@ -739,19 +740,57 @@ impressum = head("Kalq | Legal notice", public=True) + '''                <!-- I
 
                         <div class="legal_block">
                             <h5 data-qs-key="impressum.vat.title">VAT ID</h5>
-                            <p data-qs-key="impressum.vat.text">VAT identification number pursuant to § 27a of the German VAT Act: [TODO]</p>
+                            <p data-i18n="legal.vatText" data-qs-key="impressum.vat.text"></p>
                         </div>
                     </div>
                 </section>
 ''' + FOOTER + TAIL
 write("impressum.html", impressum)
 
-datenschutz = head("Kalq | Privacy policy", public=True) + '''                <!-- Datenschutz. TODO: insert privacy policy -->
+datenschutz = head("Kalq | Privacy policy", public=True) + '''                <!-- Datenschutz: a draft for legal review (i18n/strings.json privacy.*), what the site really uses -->
                 <section class="legal">
                     <div id="container">
                         <h2 data-qs-key="datenschutz.header.title">Privacy policy</h2>
+                        <p class="legal_lead legal_draft" data-i18n="privacy.draft" data-qs-key="datenschutz.draft.note"></p>
                         <div class="legal_block">
-                            <p data-qs-key="datenschutz.body.text">[TODO: insert privacy policy]</p>
+                            <h5 data-i18n="privacy.controller" data-qs-key="datenschutz.controller.title"></h5>
+                            <div data-i18n="privacy.controllerText" data-qs-key="datenschutz.controller.text" data-qs-format="paragraphs"></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.overview" data-qs-key="datenschutz.overview.title"></h5>
+                            <div data-i18n="privacy.overviewText" data-qs-key="datenschutz.overview.text" data-qs-format="paragraphs"></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.hosting" data-qs-key="datenschutz.hosting.title"></h5>
+                            <div data-i18n="privacy.hostingText" data-qs-key="datenschutz.hosting.text" data-qs-format="paragraphs"></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.supabase" data-qs-key="datenschutz.supabase.title"></h5>
+                            <div data-i18n="privacy.supabaseText" data-qs-key="datenschutz.supabase.text" data-qs-format="paragraphs"></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.login" data-qs-key="datenschutz.login.title"></h5>
+                            <div data-i18n="privacy.loginText" data-qs-key="datenschutz.login.text" data-qs-format="paragraphs"></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.cookies" data-qs-key="datenschutz.cookies.title"></h5>
+                            <div data-i18n="privacy.cookiesText" data-qs-key="datenschutz.cookies.text" data-qs-format="paragraphs"></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.chat" data-qs-key="datenschutz.chat.title"></h5>
+                            <div data-i18n="privacy.chatText" data-qs-key="datenschutz.chat.text" data-qs-format="paragraphs"></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.thirdparty" data-qs-key="datenschutz.thirdparty.title"></h5>
+                            <div data-i18n="privacy.thirdpartyText" data-qs-key="datenschutz.thirdparty.text" data-qs-format="paragraphs"></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.retention" data-qs-key="datenschutz.retention.title"></h5>
+                            <div data-i18n="privacy.retentionText" data-qs-key="datenschutz.retention.text" data-qs-format="paragraphs"></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.rights" data-qs-key="datenschutz.rights.title"></h5>
+                            <div data-i18n="privacy.rightsText" data-qs-key="datenschutz.rights.text" data-qs-format="paragraphs"></div>
                         </div>
                     </div>
                 </section>

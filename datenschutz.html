@@ -109,12 +109,50 @@
     <div id="site-main">
         <div class="scrollbar-container" data-scrollbar style="overflow: hidden; height: 100vh;">
             <div id="main" data-barba="container" data-page="datenschutz">
-                <!-- Datenschutz. TODO: insert privacy policy -->
+                <!-- Datenschutz: a draft for legal review (i18n/strings.json privacy.*), what the site really uses -->
                 <section class="legal" data-section="legal" data-section-builtin>
                     <div id="container">
                         <h2 data-qs-key="datenschutz.header.title" data-i18n="privacy.title">Datenschutzerklärung</h2>
+                        <p class="legal_lead legal_draft" data-i18n="privacy.draft" data-qs-key="datenschutz.draft.note">Entwurf zur rechtlichen Prüfung, Stand 17. Oktober 2026. Diese Datenschutzerklärung beschreibt, was die Website tatsächlich nutzt; sie ist noch nicht rechtlich geprüft.</p>
                         <div class="legal_block">
-                            <p data-qs-key="datenschutz.body.text" data-i18n="privacy.text">[TODO: Datenschutztext einfügen]</p>
+                            <h5 data-i18n="privacy.controller" data-qs-key="datenschutz.controller.title">Verantwortlicher</h5>
+                            <div data-i18n="privacy.controllerText" data-qs-key="datenschutz.controller.text" data-qs-format="paragraphs"><p>Verantwortlich für die Datenverarbeitung auf dieser Website ist die Neurawork GmbH &amp; Co. KG, Schweppermannpark 1, 84539 Ampfing, Deutschland, vertreten durch die persönlich haftende Gesellschafterin Neurawork Verwaltungs GmbH, diese vertreten durch die Geschäftsführung Christoph Knöll und Sylvia Knöll.</p><p>Telefon: +49 8636 23983 0. E-Mail: office@kalq.ai. An diese Adresse richten Sie bitte auch alle Fragen zum Datenschutz.</p></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.overview" data-qs-key="datenschutz.overview.title">Das Wichtigste in Kürze</h5>
+                            <div data-i18n="privacy.overviewText" data-qs-key="datenschutz.overview.text" data-qs-format="paragraphs"><p>Wir setzen keine Analyse-, Tracking- oder Werbewerkzeuge ein und erstellen keine Nutzungsprofile. Personenbezogene Daten verarbeiten wir nur, soweit es für den Betrieb der Website, die Anmeldung unseres Teams und die Bearbeitung der Inhalte nötig ist.</p></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.hosting" data-qs-key="datenschutz.hosting.title">Hosting bei Vercel</h5>
+                            <div data-i18n="privacy.hostingText" data-qs-key="datenschutz.hosting.text" data-qs-format="paragraphs"><p>Die Website wird von Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, USA, bereitgestellt. Beim Aufruf jeder Seite verarbeitet Vercel technisch notwendige Daten: Ihre IP-Adresse, Datum und Uhrzeit, die aufgerufene Adresse, die übertragene Datenmenge, den Browser und das Betriebssystem sowie die zuvor besuchte Seite. Diese Daten dienen der Auslieferung und Sicherheit der Website und werden nicht mit anderen Daten zusammengeführt.</p><p>Die Serverfunktionen der Website laufen in einem Rechenzentrum von Vercel in den USA. Rechtsgrundlage ist unser berechtigtes Interesse an einem sicheren und zuverlässigen Betrieb (Art. 6 Abs. 1 lit. f DSGVO). Die Übermittlung in die USA stützt sich auf das EU-US Data Privacy Framework und ergänzend auf Standardvertragsklauseln (Art. 45, 46 DSGVO).</p></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.supabase" data-qs-key="datenschutz.supabase.title">Datenbank und Speicher bei Supabase</h5>
+                            <div data-i18n="privacy.supabaseText" data-qs-key="datenschutz.supabase.text" data-qs-format="paragraphs"><p>Inhalte, Bilder und Videos der Website sowie die Daten unseres Teams speichern wir bei Supabase Inc. in einem Rechenzentrum in der EU (Frankfurt am Main, Deutschland). Dort liegen: die Texte und Bilder der Seiten mit ihrem Bearbeitungsverlauf, die Konten unseres Teams (Name, E-Mail-Adresse, Profilbild), Kommentare zu den Seiten, Stimmen zu Gestaltungsvarianten sowie für Gäste ein zufälliges Tier-Pseudonym und Zugangsversuche, beide nur unter einem verschlüsselten Kürzel (Hash) Ihrer IP-Adresse, nie unter der Adresse selbst.</p><p>Wer gerade auf einer Seite ist und wo sein Mauszeiger steht, wird nur live übertragen und nicht gespeichert. Rechtsgrundlage ist unser berechtigtes Interesse an einer geschützten, gemeinsam bearbeitbaren Website (Art. 6 Abs. 1 lit. f DSGVO), für die Konten unseres Teams Art. 6 Abs. 1 lit. b DSGVO.</p></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.login" data-qs-key="datenschutz.login.title">Anmeldung mit Google und LinkedIn</h5>
+                            <div data-i18n="privacy.loginText" data-qs-key="datenschutz.login.text" data-qs-format="paragraphs"><p>Mitglieder unseres Teams können sich mit Google (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland) oder LinkedIn (LinkedIn Ireland Unlimited Company, Wilton Plaza, Wilton Place, Dublin 2, Irland) anmelden. Die Anmeldung läuft über Supabase. Wir erhalten dabei Ihren Namen, Ihre E-Mail-Adresse und Ihr Profilbild; bei Google oder LinkedIn gelten deren eigene Datenschutzbestimmungen.</p><p>Nur eingeladene oder freigegebene Konten können Inhalte bearbeiten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b und f DSGVO.</p></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.cookies" data-qs-key="datenschutz.cookies.title">Cookies, lokaler Speicher und Cookie-Hinweis</h5>
+                            <div data-i18n="privacy.cookiesText" data-qs-key="datenschutz.cookies.text" data-qs-format="paragraphs"><p>Wir verwenden nur technisch notwendige Speicherungen in Ihrem Browser (§ 25 Abs. 2 Nr. 2 TDDDG), keine Tracking-Cookies:</p><p>Das Cookie „qs_gate“ merkt sich für 30 Tage, dass Sie angemeldet sind; es ist signiert und für Skripte nicht lesbar. Im lokalen Speicher Ihres Browsers merken wir uns Ihre Sprache, hell oder dunkel, die Ansicht der Website, die Einstellungen der Bearbeitungswerkzeuge und, nur bei Anmeldung unseres Teams, die Sitzung der Anmeldung.</p><p>Der Cookie-Hinweis informiert Sie über diese Speicherungen; er merkt sich im lokalen Speicher nur, dass er bereits angezeigt wurde („qs-dontpanic-seen“).</p></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.chat" data-qs-key="datenschutz.chat.title">Chat</h5>
+                            <div data-i18n="privacy.chatText" data-qs-key="datenschutz.chat.text" data-qs-format="paragraphs"><p>Der Chat für Anfragen läuft vollständig in Ihrem Browser. Ihre Antworten werden von der Website weder gespeichert noch übertragen. Am Ende können Sie die Zusammenfassung selbst über WhatsApp, Telegram, SMS oder E-Mail an uns senden; dafür öffnet sich die jeweilige App, und es gelten die Bestimmungen ihres Anbieters (zum Beispiel WhatsApp Ireland Limited oder Telegram). Die Nachricht, die wir so erhalten, nutzen wir nur zur Bearbeitung Ihrer Anfrage (Art. 6 Abs. 1 lit. b und f DSGVO).</p></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.thirdparty" data-qs-key="datenschutz.thirdparty.title">Schriften, Skripte und Medien von Dritten</h5>
+                            <div data-i18n="privacy.thirdpartyText" data-qs-key="datenschutz.thirdparty.text" data-qs-format="paragraphs"><p>Einige Programmbibliotheken und das Symbolset Font Awesome laden wir von cdnjs.cloudflare.com (Cloudflare, Inc., USA), cdn.jsdelivr.net (jsDelivr) und unpkg.com. Dabei erhalten diese Anbieter Ihre IP-Adresse und technische Angaben Ihres Browsers. Rechtsgrundlage ist unser berechtigtes Interesse an einer schnellen und zuverlässigen Darstellung (Art. 6 Abs. 1 lit. f DSGVO).</p><p>Die Hausschrift Clash Grotesk liefern wir selbst aus. Wählen Sie eine andere Gestaltungsvariante der Website, die Google Fonts verwendet, werden diese Schriften von Google (Google Ireland Limited) geladen; dabei wird Ihre IP-Adresse an Google übertragen.</p><p>Bilder und Videos kommen von unserem eigenen Speicher bei Supabase (Frankfurt am Main). Links zu LinkedIn sind einfache Links; erst wenn Sie ihnen folgen, gelten die Bestimmungen von LinkedIn.</p></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.retention" data-qs-key="datenschutz.retention.title">Speicherdauer</h5>
+                            <div data-i18n="privacy.retentionText" data-qs-key="datenschutz.retention.text" data-qs-format="paragraphs"><p>Wir speichern Daten nur so lange, wie es für den jeweiligen Zweck nötig ist: das Anmelde-Cookie 30 Tage, Konten unseres Teams bis zu ihrer Löschung, abgelehnte Zugangsanfragen 30 Tage, Inhalte und ihren Bearbeitungsverlauf für die Dauer des Betriebs der Website. Die Protokolle von Vercel werden nach dessen Vorgaben gelöscht.</p></div>
+                        </div>
+                        <div class="legal_block">
+                            <h5 data-i18n="privacy.rights" data-qs-key="datenschutz.rights.title">Ihre Rechte</h5>
+                            <div data-i18n="privacy.rightsText" data-qs-key="datenschutz.rights.text" data-qs-format="paragraphs"><p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch (Art. 15 bis 21 DSGVO). Schreiben Sie uns dazu an office@kalq.ai.</p><p>Sie können sich außerdem bei einer Datenschutzaufsichtsbehörde beschweren, zum Beispiel beim für uns zuständigen Bayerischen Landesamt für Datenschutzaufsicht, Promenade 18, 91522 Ansbach.</p></div>
                         </div>
                     </div>
                 </section>

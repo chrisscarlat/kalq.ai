@@ -73,8 +73,8 @@ export const STRINGS = {
         "de": "Vertreten durch"
     },
     "legal.director": {
-        "en": "[TODO: Managing director]",
-        "de": "[TODO: Geschäftsführung]"
+        "en": "the personally liable partner (general partner) Neurawork Verwaltungs GmbH, represented by its management, Christoph Knöll and Sylvia Knöll",
+        "de": "die persönlich haftende Gesellschafterin (Komplementärin) Neurawork Verwaltungs GmbH, diese vertreten durch die Geschäftsführung Christoph Knöll und Sylvia Knöll"
     },
     "legal.contact": {
         "en": "Contact",
@@ -93,28 +93,24 @@ export const STRINGS = {
         "de": "Umsatzsteuer-ID"
     },
     "legal.vatText": {
-        "en": "VAT identification number pursuant to § 27a of the German VAT Act: [TODO]",
-        "de": "Umsatzsteuer-Identifikationsnummer gemäß § 27a Umsatzsteuergesetz: [TODO]"
+        "en": "VAT identification number pursuant to § 27a UStG (German VAT Act): DE366333533",
+        "de": "Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: DE366333533"
     },
     "privacy.title": {
         "en": "Privacy policy",
         "de": "Datenschutzerklärung"
-    },
-    "privacy.text": {
-        "en": "[TODO: insert privacy policy]",
-        "de": "[TODO: Datenschutztext einfügen]"
     },
     "footer.heading": {
         "de": "Der Beweis\nam echten Teil",
         "en": "Prove it on\nreal parts"
     },
     "legal.address": {
-        "de": "[TODO: Firmenname]\n[TODO: Straße und Hausnummer]\n[TODO: PLZ und Ort]\n[TODO: Land]",
-        "en": "[TODO: Company name]\n[TODO: Street and number]\n[TODO: Postcode and city]\n[TODO: Country]"
+        "en": "Neurawork GmbH & Co. KG\nSchweppermannpark 1\n84539 Ampfing\nGermany",
+        "de": "Neurawork GmbH & Co. KG\nSchweppermannpark 1\n84539 Ampfing\nDeutschland"
     },
     "legal.registerText": {
-        "de": "Registergericht: [TODO]\nRegisternummer: [TODO]",
-        "en": "Register court: [TODO]\nRegister number: [TODO]"
+        "en": "Commercial register (KG): Amtsgericht Traunstein (local court), HRA 14942\nCommercial register (general partner GmbH): Amtsgericht Traunstein (local court), HRB 34833",
+        "de": "Handelsregister (KG): Amtsgericht Traunstein, HRA 14942\nHandelsregister (Komplementär-GmbH): Amtsgericht Traunstein, HRB 34833"
     },
     "nav.cta": {
         "en": "Start a pilot",
@@ -175,5 +171,97 @@ export const STRINGS = {
     "footer.legal": {
         "en": "Legal",
         "de": "Rechtliches"
+    },
+    "legal.phone": {
+        "en": "Phone:",
+        "de": "Telefon:"
+    },
+    "legal.phoneNumber": {
+        "en": "+49 8636 23983 0",
+        "de": "+49 8636 23983 0"
+    },
+    "privacy.draft": {
+        "en": "Draft for legal review, as of 17 October 2026. This privacy policy describes what the website actually uses; it has not been legally reviewed yet.",
+        "de": "Entwurf zur rechtlichen Prüfung, Stand 17. Oktober 2026. Diese Datenschutzerklärung beschreibt, was die Website tatsächlich nutzt; sie ist noch nicht rechtlich geprüft."
+    },
+    "privacy.controller": {
+        "en": "Controller",
+        "de": "Verantwortlicher"
+    },
+    "privacy.controllerText": {
+        "en": "The controller responsible for data processing on this website is Neurawork GmbH & Co. KG, Schweppermannpark 1, 84539 Ampfing, Germany, represented by its general partner Neurawork Verwaltungs GmbH, in turn represented by its management, Christoph Knöll and Sylvia Knöll.\n\nPhone: +49 8636 23983 0. Email: office@kalq.ai. Please send any questions about data protection to this address as well.",
+        "de": "Verantwortlich für die Datenverarbeitung auf dieser Website ist die Neurawork GmbH & Co. KG, Schweppermannpark 1, 84539 Ampfing, Deutschland, vertreten durch die persönlich haftende Gesellschafterin Neurawork Verwaltungs GmbH, diese vertreten durch die Geschäftsführung Christoph Knöll und Sylvia Knöll.\n\nTelefon: +49 8636 23983 0. E-Mail: office@kalq.ai. An diese Adresse richten Sie bitte auch alle Fragen zum Datenschutz."
+    },
+    "privacy.overview": {
+        "en": "In brief",
+        "de": "Das Wichtigste in Kürze"
+    },
+    "privacy.overviewText": {
+        "en": "We do not use any analytics, tracking or advertising tools and do not build usage profiles. We process personal data only as far as it is needed to run the website, to sign in our team and to edit the content.",
+        "de": "Wir setzen keine Analyse-, Tracking- oder Werbewerkzeuge ein und erstellen keine Nutzungsprofile. Personenbezogene Daten verarbeiten wir nur, soweit es für den Betrieb der Website, die Anmeldung unseres Teams und die Bearbeitung der Inhalte nötig ist."
+    },
+    "privacy.hosting": {
+        "en": "Hosting with Vercel",
+        "de": "Hosting bei Vercel"
+    },
+    "privacy.hostingText": {
+        "en": "The website is provided by Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, USA. Whenever a page is requested, Vercel processes technically necessary data: your IP address, date and time, the address requested, the amount of data transferred, your browser and operating system, and the page you came from. This data serves to deliver the website and keep it secure and is not combined with other data.\n\nThe website's server functions run in a Vercel data centre in the USA. The legal basis is our legitimate interest in operating the website securely and reliably (Art. 6(1)(f) GDPR). The transfer to the USA is based on the EU-US Data Privacy Framework and, in addition, on standard contractual clauses (Art. 45, 46 GDPR).",
+        "de": "Die Website wird von Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, USA, bereitgestellt. Beim Aufruf jeder Seite verarbeitet Vercel technisch notwendige Daten: Ihre IP-Adresse, Datum und Uhrzeit, die aufgerufene Adresse, die übertragene Datenmenge, den Browser und das Betriebssystem sowie die zuvor besuchte Seite. Diese Daten dienen der Auslieferung und Sicherheit der Website und werden nicht mit anderen Daten zusammengeführt.\n\nDie Serverfunktionen der Website laufen in einem Rechenzentrum von Vercel in den USA. Rechtsgrundlage ist unser berechtigtes Interesse an einem sicheren und zuverlässigen Betrieb (Art. 6 Abs. 1 lit. f DSGVO). Die Übermittlung in die USA stützt sich auf das EU-US Data Privacy Framework und ergänzend auf Standardvertragsklauseln (Art. 45, 46 DSGVO)."
+    },
+    "privacy.supabase": {
+        "en": "Database and storage with Supabase",
+        "de": "Datenbank und Speicher bei Supabase"
+    },
+    "privacy.supabaseText": {
+        "en": "We store the website's content, pictures and videos and our team's data with Supabase Inc. in a data centre in the EU (Frankfurt am Main, Germany). This includes: the pages' texts and pictures with their editing history, our team's accounts (name, email address, profile picture), comments on the pages, votes on design variants and, for guests, a random animal pseudonym and access attempts, both stored only under a hashed key of your IP address, never under the address itself.\n\nWho is currently on a page and where their pointer is, is only transmitted live and not stored. The legal basis is our legitimate interest in a protected website that our team can edit together (Art. 6(1)(f) GDPR), and for our team's accounts Art. 6(1)(b) GDPR.",
+        "de": "Inhalte, Bilder und Videos der Website sowie die Daten unseres Teams speichern wir bei Supabase Inc. in einem Rechenzentrum in der EU (Frankfurt am Main, Deutschland). Dort liegen: die Texte und Bilder der Seiten mit ihrem Bearbeitungsverlauf, die Konten unseres Teams (Name, E-Mail-Adresse, Profilbild), Kommentare zu den Seiten, Stimmen zu Gestaltungsvarianten sowie für Gäste ein zufälliges Tier-Pseudonym und Zugangsversuche, beide nur unter einem verschlüsselten Kürzel (Hash) Ihrer IP-Adresse, nie unter der Adresse selbst.\n\nWer gerade auf einer Seite ist und wo sein Mauszeiger steht, wird nur live übertragen und nicht gespeichert. Rechtsgrundlage ist unser berechtigtes Interesse an einer geschützten, gemeinsam bearbeitbaren Website (Art. 6 Abs. 1 lit. f DSGVO), für die Konten unseres Teams Art. 6 Abs. 1 lit. b DSGVO."
+    },
+    "privacy.login": {
+        "en": "Sign-in with Google and LinkedIn",
+        "de": "Anmeldung mit Google und LinkedIn"
+    },
+    "privacy.loginText": {
+        "en": "Members of our team can sign in with Google (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland) or LinkedIn (LinkedIn Ireland Unlimited Company, Wilton Plaza, Wilton Place, Dublin 2, Ireland). Sign-in runs through Supabase. We receive your name, your email address and your profile picture; Google and LinkedIn apply their own privacy policies.\n\nOnly invited or approved accounts can edit content. The legal basis is Art. 6(1)(b) and (f) GDPR.",
+        "de": "Mitglieder unseres Teams können sich mit Google (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland) oder LinkedIn (LinkedIn Ireland Unlimited Company, Wilton Plaza, Wilton Place, Dublin 2, Irland) anmelden. Die Anmeldung läuft über Supabase. Wir erhalten dabei Ihren Namen, Ihre E-Mail-Adresse und Ihr Profilbild; bei Google oder LinkedIn gelten deren eigene Datenschutzbestimmungen.\n\nNur eingeladene oder freigegebene Konten können Inhalte bearbeiten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b und f DSGVO."
+    },
+    "privacy.cookies": {
+        "en": "Cookies, local storage and the cookie notice",
+        "de": "Cookies, lokaler Speicher und Cookie-Hinweis"
+    },
+    "privacy.cookiesText": {
+        "en": "We only use technically necessary storage in your browser (§ 25(2) no. 2 TDDDG), no tracking cookies:\n\nThe cookie \"qs_gate\" remembers for 30 days that you are signed in; it is signed and cannot be read by scripts. In your browser's local storage we remember your language, light or dark, the view of the website, the settings of the editing tools and, only when our team signs in, the sign-in session.\n\nThe cookie notice informs you about this storage; in local storage it only remembers that it has already been shown (\"qs-dontpanic-seen\").",
+        "de": "Wir verwenden nur technisch notwendige Speicherungen in Ihrem Browser (§ 25 Abs. 2 Nr. 2 TDDDG), keine Tracking-Cookies:\n\nDas Cookie „qs_gate“ merkt sich für 30 Tage, dass Sie angemeldet sind; es ist signiert und für Skripte nicht lesbar. Im lokalen Speicher Ihres Browsers merken wir uns Ihre Sprache, hell oder dunkel, die Ansicht der Website, die Einstellungen der Bearbeitungswerkzeuge und, nur bei Anmeldung unseres Teams, die Sitzung der Anmeldung.\n\nDer Cookie-Hinweis informiert Sie über diese Speicherungen; er merkt sich im lokalen Speicher nur, dass er bereits angezeigt wurde („qs-dontpanic-seen“)."
+    },
+    "privacy.chat": {
+        "en": "Chat",
+        "de": "Chat"
+    },
+    "privacy.chatText": {
+        "en": "The chat for inquiries runs entirely in your browser. The website neither stores nor transmits your answers. At the end you can send the summary to us yourself via WhatsApp, Telegram, SMS or email; this opens the respective app, and its provider's terms apply (for example WhatsApp Ireland Limited or Telegram). We use the message we receive this way only to handle your inquiry (Art. 6(1)(b) and (f) GDPR).",
+        "de": "Der Chat für Anfragen läuft vollständig in Ihrem Browser. Ihre Antworten werden von der Website weder gespeichert noch übertragen. Am Ende können Sie die Zusammenfassung selbst über WhatsApp, Telegram, SMS oder E-Mail an uns senden; dafür öffnet sich die jeweilige App, und es gelten die Bestimmungen ihres Anbieters (zum Beispiel WhatsApp Ireland Limited oder Telegram). Die Nachricht, die wir so erhalten, nutzen wir nur zur Bearbeitung Ihrer Anfrage (Art. 6 Abs. 1 lit. b und f DSGVO)."
+    },
+    "privacy.thirdparty": {
+        "en": "Fonts, scripts and media from third parties",
+        "de": "Schriften, Skripte und Medien von Dritten"
+    },
+    "privacy.thirdpartyText": {
+        "en": "We load some program libraries and the Font Awesome icon set from cdnjs.cloudflare.com (Cloudflare, Inc., USA), cdn.jsdelivr.net (jsDelivr) and unpkg.com. These providers receive your IP address and technical information about your browser. The legal basis is our legitimate interest in fast and reliable display (Art. 6(1)(f) GDPR).\n\nWe serve the house typeface Clash Grotesk ourselves. If you choose another design variant of the website that uses Google Fonts, those fonts are loaded from Google (Google Ireland Limited), and your IP address is transmitted to Google.\n\nPictures and videos come from our own storage at Supabase (Frankfurt am Main). Links to LinkedIn are plain links; LinkedIn's terms only apply once you follow them.",
+        "de": "Einige Programmbibliotheken und das Symbolset Font Awesome laden wir von cdnjs.cloudflare.com (Cloudflare, Inc., USA), cdn.jsdelivr.net (jsDelivr) und unpkg.com. Dabei erhalten diese Anbieter Ihre IP-Adresse und technische Angaben Ihres Browsers. Rechtsgrundlage ist unser berechtigtes Interesse an einer schnellen und zuverlässigen Darstellung (Art. 6 Abs. 1 lit. f DSGVO).\n\nDie Hausschrift Clash Grotesk liefern wir selbst aus. Wählen Sie eine andere Gestaltungsvariante der Website, die Google Fonts verwendet, werden diese Schriften von Google (Google Ireland Limited) geladen; dabei wird Ihre IP-Adresse an Google übertragen.\n\nBilder und Videos kommen von unserem eigenen Speicher bei Supabase (Frankfurt am Main). Links zu LinkedIn sind einfache Links; erst wenn Sie ihnen folgen, gelten die Bestimmungen von LinkedIn."
+    },
+    "privacy.retention": {
+        "en": "Retention",
+        "de": "Speicherdauer"
+    },
+    "privacy.retentionText": {
+        "en": "We keep data only as long as its purpose requires: the sign-in cookie for 30 days, our team's accounts until they are deleted, declined access requests for 30 days, content and its editing history for as long as the website is operated. Vercel's logs are deleted according to its own rules.",
+        "de": "Wir speichern Daten nur so lange, wie es für den jeweiligen Zweck nötig ist: das Anmelde-Cookie 30 Tage, Konten unseres Teams bis zu ihrer Löschung, abgelehnte Zugangsanfragen 30 Tage, Inhalte und ihren Bearbeitungsverlauf für die Dauer des Betriebs der Website. Die Protokolle von Vercel werden nach dessen Vorgaben gelöscht."
+    },
+    "privacy.rights": {
+        "en": "Your rights",
+        "de": "Ihre Rechte"
+    },
+    "privacy.rightsText": {
+        "en": "You have the right to access, rectification, erasure, restriction of processing, data portability and objection (Art. 15 to 21 GDPR). Please write to us at office@kalq.ai.\n\nYou may also lodge a complaint with a data protection supervisory authority, for example the authority responsible for us, the Bavarian Data Protection Authority (Bayerisches Landesamt für Datenschutzaufsicht), Promenade 18, 91522 Ansbach, Germany.",
+        "de": "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch (Art. 15 bis 21 DSGVO). Schreiben Sie uns dazu an office@kalq.ai.\n\nSie können sich außerdem bei einer Datenschutzaufsichtsbehörde beschweren, zum Beispiel beim für uns zuständigen Bayerischen Landesamt für Datenschutzaufsicht, Promenade 18, 91522 Ansbach."
     }
 };

@@ -7,4 +7,8 @@ use `currentColor`.
 
 Site fix (kalq.ai `css/_site.scss`): label and dashed outline in `currentColor` (60 %, outline 55 %).
 
-Engine fix: the same in `css/collab.scss`.
+Also: a long empty label (the stacking testimonials' link, "LinkedIn, Wikipedia or a website") did not wrap and,
+in the link row (`.qs-f-ts__social`, a flex row), pushed past the card on a phone. Site fix: empty placeholders wrap
+within their box, the link row and its field may shrink.
+
+Engine fix: the same in `css/collab.scss` and `css/components/_final.scss`.

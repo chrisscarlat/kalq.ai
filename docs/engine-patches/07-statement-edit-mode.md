@@ -14,4 +14,9 @@ In `content.lit` (css/components/_final.scss, css/collab.scss):
 Site fix (kalq.ai `css/_site.scss`): an empty alt field as wide as its label (and in lit at most 34rem); the lit
 picture's controls start at 5.5rem; while the picture is empty the section keeps 2.75rem more at its foot.
 
-Engine fix: the same, best for every full-bleed background slot (the heroes' controls already use `.is-hero`).
+The same three in the heroes with a background (video, page, glass): their controls sat on the header, the empty
+background's caption on the last field; the glass card's alt field was a column of single words beside its button.
+Kalq's fix covers every full-bleed background (`.qs-f-hero__media`, `.qs-f-lit__media`) and puts that alt field on its
+own line.
+
+Engine fix: the same in css/collab.scss and css/components/_final.scss.

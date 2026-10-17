@@ -77,12 +77,18 @@ html body .qs-toolbar.qs-rail:not(:has(.qs-design-tool)) { @include kalq-rail-fo
     html body .qs-toolbar.qs-rail.qs-rail { @include kalq-rail-folding; } // outweighs the engine's .is-mini rules
 }
 
-// Editors, Statement that lights up (content.lit) and every picture's alt text field:
-// - an empty alt text field is as wide as its label, never wider than the statement (it ran across the whole section)
-// - the picture behind the statement: its controls start below the header (Replace and Style sat on the header's
-//   language and menu), and while it is empty the section keeps room at its foot for the slot's caption, which lay on
-//   the last figure
+// Editors, every picture's alt text field and the full-bleed backgrounds (the heroes, Statement that lights up):
+// - an empty alt text field is as wide as its label, never wider than the statement (it ran across the whole section);
+//   on the glass card it takes its own line under the card (beside the button it was a column of single words)
+// - a background's controls (Replace, Style) start below the header: in the section's top corner they sat on the
+//   header's language switch and menu
+// - while a background is empty, the section keeps room at its foot for the slot's caption, which lay on the last
+//   field (the figures, "A sentence or two beside it")
 body.qs-edit .qs-m-alt-field.qs-ph:empty { width: fit-content; max-width: 100%; }
 body.qs-edit .qs-f-lit .qs-m-alt-field { max-width: min(100%, 34rem); }
-.qs-f-lit__media .qs-media-tools { top: 5.5rem; }
-body.qs-edit .qs-f-lit:has(> .qs-f-lit__media > .qs-ph-media) { padding-bottom: calc(var(--f-pad-y) + 2.75rem); }
+body.qs-edit .qs-f-hero__glass:has(> .qs-m-alt-field) { flex-wrap: wrap; }
+body.qs-edit .qs-f-hero__glass > .qs-m-alt-field { flex: 1 0 100%; order: 9; }
+:is(.qs-f-hero__media, .qs-f-lit__media) .qs-media-tools:not(.is-hero) { top: 5.5rem; }
+body.qs-edit :is(.qs-f-hero, .qs-f-lit):has(> :is(.qs-f-hero__media, .qs-f-lit__media) > .qs-ph-media) {
+    padding-bottom: calc(var(--f-pad-y, 4.5rem) + 2.75rem);
+}

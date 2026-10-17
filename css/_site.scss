@@ -76,3 +76,13 @@ html body .qs-toolbar.qs-rail:not(:has(.qs-design-tool)) { @include kalq-rail-fo
 @media (max-width: 700px) {
     html body .qs-toolbar.qs-rail.qs-rail { @include kalq-rail-folding; } // outweighs the engine's .is-mini rules
 }
+
+// Editors, Statement that lights up (content.lit) and every picture's alt text field:
+// - an empty alt text field is as wide as its label, never wider than the statement (it ran across the whole section)
+// - the picture behind the statement: its controls start below the header (Replace and Style sat on the header's
+//   language and menu), and while it is empty the section keeps room at its foot for the slot's caption, which lay on
+//   the last figure
+body.qs-edit .qs-m-alt-field.qs-ph:empty { width: fit-content; max-width: 100%; }
+body.qs-edit .qs-f-lit .qs-m-alt-field { max-width: min(100%, 34rem); }
+.qs-f-lit__media .qs-media-tools { top: 5.5rem; }
+body.qs-edit .qs-f-lit:has(> .qs-f-lit__media > .qs-ph-media) { padding-bottom: calc(var(--f-pad-y) + 2.75rem); }

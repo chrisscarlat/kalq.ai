@@ -8,14 +8,14 @@ a throwaway local Postgres loaded with a read-only copy of the content).
 2. **Browser test** runs on every `npm test` (`d180f63`, playwright-core 1.64.0 as a dev dependency). No install needed.
 3. **Full suite**: engine 126/126, site 15/15. Fixed: legal pages without the code failed to load the style code (`9189d23`).
 4. **Module audit**: 28 module versions, filled and empty, guest and editor, iPhone 13 mini, iPhone Duo vertical and
-   horizontal, MacBook Pro 14 (AUDIT_RESULT). Fixed:
+   horizontal, MacBook Pro 14: 360 sections, no page error, no sideways scroll. Fixed:
    - scroll modules never started for visitors (stack, tether, horizontal, lit, pill, swipes, belts) (`ab53db9`)
    - horizontal row: pinned stage fits the screen, every card's text and link stay visible; draggable by mouse,
      pen and finger, a drag never opens a link (`ab53db9`)
    - the rail covered the left of every section (240 px on desktop for guests, every line start on a phone): folds
      to your face and opens when pointed at or tapped (`d055e9d`)
    - empty-slot labels invisible on the accent colour (`d055e9d`)
-   - background controls sat on the header; empty captions lay on fields; glass card alt field (`fdba859`)
+   - background controls sat on the header; empty captions and long labels ran over fields (`fdba859`, `bb0aa93`)
    - phone previews in the picker showed desktop columns in 6 of 7 modules (`064fd93`)
 5. **Statement**: the "))" and "Small portrait (optional)" were certil.com's own module (deleted 2026-10-08); Q-Site has
    no "))" (scanned, edit mode, DE and EN). Fixed the same symptoms in Statement that lights up (`d065ad2`).
@@ -33,4 +33,4 @@ a throwaway local Postgres loaded with a read-only copy of the content).
 - "Text under the first card at the end" did not reproduce once the row worked; most likely the rail.
 - iPhone Duo hinge and segments cannot be emulated headless: Duo sizes only.
 - Editors on a desktop keep the full rail over the left edge (their workspace; fold with the rail's own button).
-AUDIT_OPEN
+- Audit flags left are by design: stacked and tether cards cover each other, closed FAQ answers, the logo belt.

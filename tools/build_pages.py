@@ -238,27 +238,7 @@ FOOTER_TETHER = f'''                    <div class="footer-tether">
                         </ul>
                     </div>'''
 
-# Signal's footer (style variant: footer "signal"): a short message form on the left that opens the visitor's own
-# email app (a mailto form: nothing is sent through the site), "say hello" with the email and the social links on the
-# right, the wordmark across the bottom (decoration)
-FOOTER_SIGNAL = f'''                    <div class="footer-signal">
-                        <form class="footer-signal__form" action="mailto:office@kalq.ai" method="post" enctype="text/plain">
-                            <label class="footer-signal__field"><span data-i18n="footer.formName" data-qs-key="site.footer4.formName">Name</span><input type="text" name="name" autocomplete="name"></label>
-                            <label class="footer-signal__field"><span data-i18n="footer.formEmail" data-qs-key="site.footer4.formEmail">Email</span><input type="email" name="email" autocomplete="email"></label>
-                            <label class="footer-signal__field is-wide"><span data-i18n="footer.formMessage" data-qs-key="site.footer4.formMessage">Message</span><textarea name="message" rows="3"></textarea></label>
-                            <button type="submit" class="footer-signal__send" data-i18n="footer.formSend" data-qs-key="site.footer4.formSend">Send from your email app</button>
-                        </form>
-                        <div class="footer-signal__contact">
-                            <p class="footer-signal__label" data-i18n="footer.sayHello" data-qs-key="site.footer4.hello">Say hello</p>
-                            <a class="footer-signal__email" href="mailto:office@kalq.ai" data-qs-key="site.footer4.email">office@kalq.ai</a>
-                            <p class="footer-signal__label" data-i18n="footer.social" data-qs-key="site.footer4.follow">Follow</p>
-                            <ul class="footer-signal__social">
-                                <li><a href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener">LinkedIn</a></li>
-                            </ul>
-                            <p class="footer-signal__legal"><span>© <span data-current-year>2026</span> Kalq</span><span aria-hidden="true">·</span><a href="impressum.html" data-i18n="footer.impressum" data-qs-key="site.footer4.impressum">Legal notice</a><span aria-hidden="true">·</span><a href="datenschutz.html" data-i18n="footer.privacy" data-qs-key="site.footer4.privacy">Privacy</a></p>
-                        </div>
-                        <div class="footer-signal__wordmark" aria-hidden="true">{WORD}</div>
-                    </div>'''
+# (Signal's "Message and wordmark" footer was removed in Q-Site 1.5; the engine strips its markup, so none is built)
 
 FOOTER = '''
                 <!-- Footer -->
@@ -293,7 +273,7 @@ FOOTER = '''
                     </div>
 ''' + FOOTER_HARBOR + '''
 ''' + FOOTER_TETHER + '''
-''' + FOOTER_SIGNAL + '''
+
                 </footer>
 '''
 

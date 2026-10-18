@@ -140,30 +140,6 @@ export const STRINGS = {
         "en": "All rights reserved.",
         "de": "Alle Rechte vorbehalten."
     },
-    "footer.sayHello": {
-        "en": "Say hello",
-        "de": "Schreiben Sie uns"
-    },
-    "footer.social": {
-        "en": "Follow",
-        "de": "Folgen"
-    },
-    "footer.formName": {
-        "en": "Name",
-        "de": "Name"
-    },
-    "footer.formEmail": {
-        "en": "Email",
-        "de": "E-Mail"
-    },
-    "footer.formMessage": {
-        "en": "Message",
-        "de": "Nachricht"
-    },
-    "footer.formSend": {
-        "en": "Send from your email app",
-        "de": "Aus Ihrem Mailprogramm senden"
-    },
     "footer.pages": {
         "en": "Pages",
         "de": "Seiten"

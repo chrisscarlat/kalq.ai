@@ -177,3 +177,35 @@ html:not(.kalq-chat-shown) .qs-chat { display: none !important; }
 }
 // text of the page under the pill: it steps aside (js/kalq-site.js) and comes back when the spot is clear
 html.kalq-pill-aside .kalq-construction { opacity: 0; visibility: hidden; }
+
+// The magazine cover's sticker (js/kalq-site.js): round, glossy and see-through, a light yellow tint over a slight blur,
+// brown words round the edge and a bigger brown cone in the middle; slightly over the lower right of the wordmark,
+// turned a little, as a sticker on a magazine
+.bk-cover__title { position: relative; }
+.kalq-sticker {
+    position: absolute;
+    right: 1.5%; // inside the page: the wordmark runs nearly to its edge
+    top: 70%; // over the foot of the Q only, so KALQ still reads as KALQ
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: clamp(92px, 32%, 140px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 244, 200, 0.85);
+    background:
+        radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0) 42%),
+        rgba(255, 234, 150, 0.6);
+    -webkit-backdrop-filter: blur(5px) saturate(150%);
+    backdrop-filter: blur(5px) saturate(150%);
+    box-shadow: 0 10px 26px rgba(50, 32, 0, 0.28), inset 0 -6px 14px rgba(150, 95, 10, 0.18), inset 0 2px 0 rgba(255, 255, 255, 0.6);
+    color: #5a3a10;
+    transform: rotate(-12deg);
+    pointer-events: none;
+}
+.qs-mag-page.is-cover .bk-cover__title .kalq-sticker svg.kalq-sticker__ring { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; overflow: visible; }
+.kalq-sticker__ring text { fill: currentColor; font: 700 9.6px/1 var(--qs-font, "Helvetica Neue", Arial, sans-serif); letter-spacing: 0.02em; }
+.qs-mag-page.is-cover .bk-cover__title .kalq-sticker svg.kalq-sticker__icon { position: absolute; left: 29%; top: 27%; width: 42%; height: 42%; max-width: none; } // inside the ring of words (the cover's own svg rules outweighed)
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .kalq-sticker { background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0) 42%), rgba(255, 226, 130, 0.92); }
+}

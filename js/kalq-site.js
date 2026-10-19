@@ -167,3 +167,27 @@ window.addEventListener("load", () => {
 ["qs:layout", "qs:content", "qs:language"].forEach((ev) => document.addEventListener(ev, placePill));
 document.addEventListener("click", () => setTimeout(placePill, 400)); // a page change (Barba) or an opened panel
 setInterval(placePill, 1500); // and now and then, for anything that moves without telling (a page change, an animation)
+
+// 5. The magazine's cover (two screens, js/magazine.js): the pill steps aside while the magazine is open
+// (css/_site.scss); the cover gets a round sticker instead, slightly over the KALQ wordmark: the notice round its edge
+// in the page's language (the pill's own words), a construction cone in the middle.
+const CONE = '<svg class="kalq-sticker__icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M20.6 6h6.8l11.3 34H9.3z" fill="currentColor"/>'
+    + '<path d="M17.8 16.6h12.4l1.9 5.6H15.9zM14.5 26.5h19l1.9 5.7H12.6z" fill="#fff4cf" opacity="0.92"/><rect x="5" y="39.5" width="38" height="4.5" rx="1.6" fill="currentColor"/></svg>';
+function stickerFor(title) {
+    const words = (document.querySelector(".kalq-construction__text")?.textContent || "").trim();
+    if (!words) return;
+    let s = title.querySelector(":scope > .kalq-sticker");
+    if (!s) { s = document.createElement("span"); s.className = "kalq-sticker"; s.setAttribute("aria-hidden", "true"); title.append(s); }
+    if (s.dataset.words === words) return;
+    s.dataset.words = words;
+    // the words twice round the ring if they are short, separated by dots
+    const ring = (words.replace(/\.\s*$/, "").replace(/\.\s+/g, " · ") + " · ").toUpperCase();
+    const id = `kalq-ring-${Math.random().toString(36).slice(2, 7)}`;
+    s.innerHTML = `<svg class="kalq-sticker__ring" viewBox="0 0 120 120"><defs><path id="${id}" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0"/></defs>`
+        + `<text><textPath href="#${id}" textLength="276" lengthAdjust="spacingAndGlyphs">${ring.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</textPath></text></svg>${CONE}`;
+}
+function stickers() { document.querySelectorAll(".is-front-cover .bk-cover__title").forEach(stickerFor); }
+new MutationObserver((records) => {
+    if (records.some((r) => [...r.addedNodes].some((n) => n.nodeType === 1 && (n.matches?.(".qs-magazine, .is-front-cover, .bk-cover__title") || n.querySelector?.(".bk-cover__title"))))) stickers();
+}).observe(document.body, { childList: true, subtree: true });
+["qs:language", "qs:content"].forEach((ev) => document.addEventListener(ev, () => setTimeout(stickers, 50)));

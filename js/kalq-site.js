@@ -191,3 +191,17 @@ new MutationObserver((records) => {
     if (records.some((r) => [...r.addedNodes].some((n) => n.nodeType === 1 && (n.matches?.(".qs-magazine, .is-front-cover, .bk-cover__title") || n.querySelector?.(".bk-cover__title"))))) stickers();
 }).observe(document.body, { childList: true, subtree: true });
 ["qs:language", "qs:content"].forEach((ev) => document.addEventListener(ev, () => setTimeout(stickers, 50)));
+
+// 6. The magazine on a public site (docs/engine-patches/09-magazine-on-public-pages.md). Q-Site loads the magazine only
+// on gated pages (js/main.js: "the book of the gated pages"); with the gate gone every Kalq page is public, so Kalq
+// starts it itself, as the engine does on a gated page: on every page, after a page change too. Its files are public
+// (site.config.json publicScripts "magazine", publicFiles js/book/*, js/vendor/page-flip.js).
+let magazineModule = null;
+function startMagazine() {
+    magazineModule ||= import("./magazine.js");
+    magazineModule.then((m) => m.initMagazine()).catch((error) => { magazineModule = null; console.error("magazine", error); });
+}
+window.addEventListener("load", startMagazine);
+new MutationObserver((records) => {
+    if (records.some((r) => [...r.addedNodes].some((n) => n.nodeType === 1 && n.matches?.('[data-barba="container"]')))) setTimeout(startMagazine, 0);
+}).observe(document.querySelector('[data-barba="wrapper"]') || document.body, { childList: true, subtree: true });

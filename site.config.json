@@ -25,7 +25,8 @@
                 "de": "Start",
                 "en": "Home"
             },
-            "nav": "nav.home"
+            "nav": "nav.home",
+            "public": true
         },
         {
             "id": "platform",
@@ -34,7 +35,8 @@
                 "de": "Plattform",
                 "en": "Platform"
             },
-            "nav": "nav.platform"
+            "nav": "nav.platform",
+            "public": true
         },
         {
             "id": "company",
@@ -43,7 +45,8 @@
                 "de": "Unternehmen",
                 "en": "Company"
             },
-            "nav": "nav.company"
+            "nav": "nav.company",
+            "public": true
         },
         {
             "id": "impressum",
@@ -196,10 +199,15 @@
             ]
         }
     ],
-    "publicFiles": [],
+    "publicFiles": [
+        "/js/strings.js",
+        "/js/vendor/page-flip.js",
+        "re:^/js/book/[a-z-]+\\.js$"
+    ],
     "publicScripts": [
+        "kalq-site",
         "lookParts",
-        "kalq-site"
+        "magazine"
     ],
     "styles": "lockable",
     "domainInvites": true

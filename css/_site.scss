@@ -209,3 +209,45 @@ html.kalq-pill-aside .kalq-construction { opacity: 0; visibility: hidden; }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .kalq-sticker { background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0) 42%), rgba(255, 226, 130, 0.92); }
 }
+
+// The classic footer as certil.com's (certil.com-website css/_site.scss): the pages large in a row, then the entity line
+// and the email, the copyright and legal line under its rule, and the wordmark as a watermark at the very bottom: across
+// the footer's content width, a tint just off the footer's own ground, the lower quarter cut by the footer's edge and
+// fading into the ground towards the bottom (the gradient on the letters). aria-hidden: the name is in the footer as text.
+.footer_nav ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 2rem;
+    margin: 0;
+    padding: 0;
+    font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+
+    a { color: inherit; text-decoration: none; &:hover, &:focus-visible { text-decoration: underline; text-underline-offset: 4px; } }
+}
+.footer_facts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-top: 2rem;
+    font-style: normal;
+
+    a { color: inherit; }
+}
+.kalq-watermark {
+    grid-column: 1 / -1;
+    align-self: stretch;
+    width: 100%;
+    max-width: 960px;
+    aspect-ratio: 2490 / 517.5; // the wordmark's letters, the lower quarter cut by the edge
+    margin: -6rem 0 calc(-1 * var(--wm-pad, 0px)); // under the line, through the footer's bottom padding to its edge
+    overflow: hidden;
+    line-height: 0;
+    color: color-mix(in srgb, var(--qs-light, #f2f1ee) 12%, var(--qs-dark, #1c1c1c));
+    pointer-events: none;
+    user-select: none;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.75) 35%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.75) 35%, transparent 100%);
+
+    svg { display: block; width: 100%; height: auto; }
+}

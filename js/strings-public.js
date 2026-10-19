@@ -44,14 +44,6 @@ export const STRINGS = {
         "en": "Company",
         "de": "Unternehmen"
     },
-    "footer.sub": {
-        "en": "We are starting with CNC turned parts in Germany. If you buy or make them, apply for the pilot.",
-        "de": "Wir starten mit CNC-Drehteilen in Deutschland. Wenn Sie solche Teile einkaufen oder fertigen, bewerben Sie sich für das Pilotprojekt."
-    },
-    "footer.pilot": {
-        "en": "Apply for the pilot",
-        "de": "Für das Pilotprojekt bewerben"
-    },
     "footer.impressum": {
         "en": "Legal notice",
         "de": "Impressum"
@@ -99,10 +91,6 @@ export const STRINGS = {
     "privacy.title": {
         "en": "Privacy policy",
         "de": "Datenschutzerklärung"
-    },
-    "footer.heading": {
-        "de": "Der Beweis\nam echten Teil",
-        "en": "Prove it on\nreal parts"
     },
     "legal.address": {
         "en": "Neurawork GmbH & Co. KG\nSchweppermannpark 1\n84539 Ampfing\nGermany",
@@ -243,5 +231,9 @@ export const STRINGS = {
     "site.construction": {
         "en": "Under construction. Not launched yet.",
         "de": "Im Aufbau. Noch nicht offiziell gestartet."
+    },
+    "footer.entity": {
+        "en": "Neurawork GmbH & Co. KG, Schweppermannpark 1, 84539 Ampfing",
+        "de": "Neurawork GmbH & Co. KG, Schweppermannpark 1, 84539 Ampfing"
     }
 };

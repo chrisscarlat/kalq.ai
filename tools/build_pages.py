@@ -241,25 +241,18 @@ FOOTER_TETHER = f'''                    <div class="footer-tether">
 # (Signal's "Message and wordmark" footer was removed in Q-Site 1.5; the engine strips its markup, so none is built)
 
 FOOTER = '''
-                <!-- Footer -->
+                <!-- Footer (classic): certil.com's, with Kalq's pages, entity and email, and the KALQ watermark -->
                 <footer>
                     <div id="container">
                         <div class="footer_header">
-                            <div class="footer_heading">
-                                <h2 data-i18n="footer.heading" data-qs-key="site.footer.heading" data-qs-format="lines">Prove it on<br>real parts</h2>
-                            </div>
-                            <p class="footer_sub">
-                                We are starting with CNC turned parts in Germany. If you buy or make them, apply for the
-                                pilot.
-                            </p>
-                            <div class="footer_btns_wrapper">
-                                <a href="mailto:office@kalq.ai" class="btn">
-                                    <span data-qs-key="site.footer.email">office@kalq.ai</span>
-                                </a>
-                                <a href="mailto:office@kalq.ai?subject=Kalq%20pilot" class="btn">
-                                    <span>Apply for the pilot</span>
-                                </a>
-                            </div>
+                            <nav class="footer_nav" aria-label="Footer links" data-i18n-aria="aria.footerNav">
+                                <ul>
+                                    <li><a href="index.html" data-i18n="nav.home" data-qs-key="site.footer.home">Home</a></li>
+                                    <li><a href="platform.html" data-i18n="nav.platform" data-qs-key="site.footer.platform">Platform</a></li>
+                                    <li><a href="company.html" data-i18n="nav.company" data-qs-key="site.footer.company">Company</a></li>
+                                </ul>
+                            </nav>
+                            <address class="footer_facts"><span data-i18n="footer.entity" data-qs-key="site.footer.entity">Neurawork GmbH &amp; Co. KG, Schweppermannpark 1, 84539 Ampfing</span><a href="mailto:office@kalq.ai" data-qs-key="site.footer.email">office@kalq.ai</a></address>
                         </div>
                         <div class="footer_bottom">
                             <p>
@@ -270,8 +263,9 @@ FOOTER = '''
                                 <a href="datenschutz.html" class="underLine_Link">Privacy</a>
                             </p>
                         </div>
+                        <div class="kalq-watermark" aria-hidden="true"><svg viewBox="{WM_VB}" fill="currentColor" focusable="false">{WM_PATHS}</svg></div>
                     </div>
-''' + FOOTER_HARBOR + '''
+'''.replace("{WM_VB}", wm_vb).replace("{WM_PATHS}", wm_paths) + FOOTER_HARBOR + '''
 ''' + FOOTER_TETHER + '''
 
                 </footer>

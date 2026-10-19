@@ -64,14 +64,6 @@
         "en": "Social Media and Contacts",
         "de": "Social Media und Kontakt"
     },
-    "footer.sub": {
-        "en": "We are starting with CNC turned parts in Germany. If you buy or make them, apply for the pilot.",
-        "de": "Wir starten mit CNC-Drehteilen in Deutschland. Wenn Sie solche Teile einkaufen oder fertigen, bewerben Sie sich für das Pilotprojekt."
-    },
-    "footer.pilot": {
-        "en": "Apply for the pilot",
-        "de": "Für das Pilotprojekt bewerben"
-    },
     "home.about": {
         "en": "Kalq is the decision layer for manufactured parts. From a STEP file and a drawing, it builds one technical truth about a part. That truth feeds two separate commercial engines: one for the buyers who source the part, one for the suppliers who make it.",
         "de": "Kalq ist die Entscheidungsebene für Fertigungsteile. Aus einer STEP-Datei und einer Zeichnung entsteht eine technische Wahrheit über ein Teil. Diese Wahrheit speist zwei getrennte kommerzielle Engines: eine für die Einkäufer, die das Teil beschaffen, eine für die Lieferanten, die es fertigen."
@@ -264,10 +256,6 @@
         "de": "Ein technischer Kern. Zwei kommerzielle Engines.\nBessere industrielle Entscheidungen.",
         "en": "One technical core. Two commercial engines.\nBetter industrial decisions."
     },
-    "footer.heading": {
-        "de": "Der Beweis\nam echten Teil",
-        "en": "Prove it on\nreal parts"
-    },
     "home.approachText": {
         "de": "Jedes Fertigungsteil wird zweimal kalkuliert. Der Einkäufer schätzt, was es kosten sollte. Der Lieferant ermittelt, was die Fertigung kosten wird. Beide gehen von derselben Zeichnung aus, und beide bauen dasselbe technische Verständnis von Grund auf neu auf, von Hand und unter Zeitdruck.\n\nKalq erledigt diese Arbeit einmal. Es liest die Geometrie, leitet Features und Prozessrouten ab und ordnet sie realen Maschinen und deren Wirtschaftlichkeit zu. Einkäufer und Lieferanten teilen die technische Wahrheit. Ihre kommerziellen Daten bleiben voneinander abgeschottet. Verglichen, nie vermischt.",
         "en": "Every manufactured part is priced twice. The buyer estimates what it should cost. The supplier works out what it will cost to make. Both start from the same drawing, and both rebuild the same technical understanding from scratch, by hand, under time pressure.\n\nKalq does that work once. It reads the geometry, derives features and process routes, and matches them to real machines and their economics. Buyers and suppliers share the technical truth. Their commercial data stays sealed from each other. Compared, never mixed."
@@ -419,5 +407,9 @@
     "site.construction": {
         "en": "Under construction. Not launched yet.",
         "de": "Im Aufbau. Noch nicht offiziell gestartet."
+    },
+    "footer.entity": {
+        "en": "Neurawork GmbH & Co. KG, Schweppermannpark 1, 84539 Ampfing",
+        "de": "Neurawork GmbH & Co. KG, Schweppermannpark 1, 84539 Ampfing"
     }
 }

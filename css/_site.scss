@@ -146,7 +146,7 @@ html body .qs-f-lit .qs-m-alt-field { max-width: min(100%, 34rem); }
     }
 }
 // an open menu has the room, and the magazine is its own world: the pill steps aside
-html:has(.site-menu.is-open, .nav-open) .kalq-construction,
+html:has(.site-menu.is-open, .nav-open, #qs-login-card:not([hidden])) .kalq-construction,
 html.qs-magazine-open .kalq-construction { opacity: 0; visibility: hidden; }
 // without blur (older browsers): a more solid tint, still readable
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {

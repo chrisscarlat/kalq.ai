@@ -232,8 +232,20 @@ export const STRINGS = {
         "en": "Under construction. Not launched yet.",
         "de": "Im Aufbau. Noch nicht offiziell gestartet."
     },
-    "footer.entity": {
-        "en": "Neurawork GmbH & Co. KG, Schweppermannpark 1, 84539 Ampfing",
-        "de": "Neurawork GmbH & Co. KG, Schweppermannpark 1, 84539 Ampfing"
+    "footer.emailLabel": {
+        "de": "E-Mail",
+        "en": "Email"
+    },
+    "footer.addressLabel": {
+        "de": "Adresse",
+        "en": "Address"
+    },
+    "footer.mapsHint": {
+        "de": "(öffnet Google Maps in einem neuen Tab)",
+        "en": "(opens Google Maps in a new tab)"
+    },
+    "footer.linkedinLabel": {
+        "de": "Kalq auf LinkedIn",
+        "en": "Kalq on LinkedIn"
     }
 };

@@ -191,3 +191,26 @@ new MutationObserver((records) => {
     if (records.some((r) => [...r.addedNodes].some((n) => n.nodeType === 1 && (n.matches?.(".qs-magazine, .is-front-cover, .bk-cover__title") || n.querySelector?.(".bk-cover__title"))))) stickers();
 }).observe(document.body, { childList: true, subtree: true });
 ["qs:language", "qs:content"].forEach((ev) => document.addEventListener(ev, () => setTimeout(stickers, 50)));
+
+// 6. The footer's contacts row (tools/build_pages.py contacts_row): the links' addresses follow their fields. E-Mail
+// writes to the email field's address; the address opens Google Maps for the address field's text, in a new tab (a
+// plain link: nothing loads from Google before the click); LinkedIn shows only with a LinkedIn address filled in, so it
+// never points anywhere unchecked. The fields are the page's own text, so every copy of the row (the "Pages and
+// wordmark" footer copies it) follows, as soon as an edit lands or the content arrives.
+const fieldText = (link) => (link.querySelector(".kalq-contact__field, [data-qs-key$='.contact.address']")?.textContent || "").replace(/\s+/g, " ").trim();
+const EMAIL = /^[^\s@<>"]+@[^\s@<>"]+\.[a-z]{2,}$/i;
+const LINKEDIN_URL = /^https:\/\/([a-z]{2,3}\.)?linkedin\.com\/[^\s<>"]+$/i;
+function contacts() {
+    document.querySelectorAll(".kalq-contact--email").forEach((a) => { const v = fieldText(a); if (EMAIL.test(v)) a.href = `mailto:${v}`; });
+    document.querySelectorAll(".kalq-contact--address").forEach((a) => { const v = fieldText(a); if (v) a.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v)}`; });
+    document.querySelectorAll(".kalq-contact--linkedin").forEach((a) => {
+        const v = fieldText(a);
+        if (LINKEDIN_URL.test(v)) { a.href = v; a.hidden = false; } else { a.removeAttribute("href"); a.hidden = true; }
+    });
+}
+contacts();
+["qs:content", "qs:language", "qs:layout"].forEach((ev) => document.addEventListener(ev, () => requestAnimationFrame(contacts)));
+window.addEventListener("load", contacts);
+// an edit in place changes the field's text without an event of its own
+new MutationObserver((records) => { if (records.some((r) => (r.target.nodeType === 1 ? r.target : r.target.parentElement)?.closest?.(".kalq-contacts"))) contacts(); })
+    .observe(document.body, { childList: true, characterData: true, subtree: true });

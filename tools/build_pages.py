@@ -186,15 +186,26 @@ SOCIAL = f'''
 # The library's footer (old/KALQ_MODULE_LIBRARY_SPEC.md 1.4), shown instead of the classic one when the style says so
 # (html.footer-harbor). One <footer> either way: one contentinfo landmark. Empty lines (the address) render nothing.
 LINKEDIN = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9.5h3V19H5zM6.5 5a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5zM10.5 9.5h2.9v1.3h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.6V19h-3v-4.6c0-1.1-.02-2.5-1.52-2.5-1.52 0-1.76 1.19-1.76 2.42V19h-3z" fill="currentColor"/></svg>'
+# The footer's contacts row (Kalq): three real links, every part an editable footer field. E-Mail opens a mail to the
+# stored address; the address opens Google Maps in a new tab (a plain link: nothing loads from Google before the click);
+# LinkedIn stays hidden until a LinkedIn address is filled in. js/kalq-site.js keeps the links' addresses in step with
+# the fields; the address fields show only while editing. The full company details are in the Impressum.
+MAIL_ICON = '<svg class="kalq-contact__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.75 6.5h16.5v11H3.75z M4.25 7l7.75 6.25L19.75 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>'
+PIN_ICON = '<svg class="kalq-contact__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s-6.25-6.1-6.25-11a6.25 6.25 0 0 1 12.5 0C18.25 14.9 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.2" fill="currentColor"/></svg>'
+MAPS = "https://www.google.com/maps/search/?api=1&amp;query=Schweppermannpark%201%2C%2084539%20Ampfing"
+def contacts_row(cls, ns):
+    li_icon = LINKEDIN.replace('<svg ', '<svg class="kalq-contact__icon" ', 1)
+    return (f'<address class="{cls} kalq-contacts">'
+        f'<a class="kalq-contact kalq-contact--email" href="mailto:office@kalq.ai">{MAIL_ICON}<span data-i18n="footer.emailLabel" data-qs-key="{ns}.contact.emailLabel">Email</span><span class="kalq-contact__field" data-qs-key="{ns}.email" data-placeholder="office@kalq.ai">office@kalq.ai</span></a>'
+        f'<a class="kalq-contact kalq-contact--address" href="{MAPS}" target="_blank" rel="noopener">{PIN_ICON}<span class="qs-sr" data-i18n="footer.addressLabel" data-qs-key="{ns}.contact.addressLabel">Address</span><span class="qs-sr">: </span><span data-qs-key="{ns}.contact.address">Schweppermannpark 1, 84539 Ampfing</span><span class="qs-sr"> </span><span class="qs-sr" data-i18n="footer.mapsHint" data-qs-key="{ns}.contact.mapsHint">(opens Google Maps in a new tab)</span></a>'
+        f'<a class="kalq-contact kalq-contact--linkedin" target="_blank" rel="noopener" hidden>{li_icon}<span class="qs-sr" data-i18n="footer.linkedinLabel" data-qs-key="{ns}.contact.linkedinLabel">Kalq on LinkedIn</span><span class="kalq-contact__field" data-qs-key="{ns}.contact.linkedin" data-placeholder="https://www.linkedin.com/company/…"></span></a>'
+        '</address>')
 FOOTER_HARBOR = f'''                    <div class="footer-harbor">
                         <p class="footer-harbor__cta"><a href="mailto:office@kalq.ai?subject=Kalq%20pilot" data-i18n="footer.cta" data-qs-key="site.footer2.cta">Ready to prove it? Apply for the pilot.</a></p>
                         <div class="footer-harbor__top">
                             <div class="footer-harbor__contact">
                                 <h2 class="footer-harbor__heading" data-i18n="footer.contactHeading" data-qs-key="site.footer2.heading">Contact</h2>
-                                <address class="footer-harbor__lines">
-                                    <span class="footer-harbor__address" data-qs-key="site.footer2.address" data-qs-format="lines"></span>
-                                    <a href="mailto:office@kalq.ai" data-qs-key="site.footer2.email">office@kalq.ai</a>
-                                </address>
+                                {contacts_row('footer-harbor__lines', 'site.footer2')}
                             </div>
                             <nav class="footer-harbor__nav" aria-label="Footer links" data-i18n-aria="aria.footerNav">
                                 <ul>
@@ -203,9 +214,6 @@ FOOTER_HARBOR = f'''                    <div class="footer-harbor">
                                     <li><a href="company.html"><span class="site-roll" data-label="Company"><span data-i18n="nav.company" data-qs-key="site.footer2.company">Company</span></span></a></li>
                                 </ul>
                             </nav>
-                            <ul class="footer-harbor__social">
-                                <li><a href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener">{LINKEDIN}<span class="qs-sr">LinkedIn</span></a></li>
-                            </ul>
                         </div>
                         <p class="footer-harbor__legal"><span>© <span data-current-year>2026</span> Kalq</span><span aria-hidden="true">·</span><a href="impressum.html" data-i18n="footer.impressum" data-qs-key="site.footer2.impressum">Legal notice</a><span aria-hidden="true">·</span><a href="datenschutz.html" data-i18n="footer.privacy" data-qs-key="site.footer2.privacy">Privacy</a></p>
                         <div class="footer-harbor__wordmark" aria-hidden="true">{WORD}</div>
@@ -233,9 +241,6 @@ FOOTER_TETHER = f'''                    <div class="footer-tether">
                             </div>
                         </nav>
                         <p class="footer-tether__legal"><span>© <span data-current-year>2026</span> Kalq.</span> <span data-i18n="footer.rights" data-qs-key="site.footer3.rights">All rights reserved.</span></p>
-                        <ul class="footer-tether__social">
-                            <li><a href="https://www.linkedin.com/company/kalq" target="_blank" rel="noopener">{LINKEDIN}<span class="qs-sr">LinkedIn</span></a></li>
-                        </ul>
                     </div>'''
 
 # (Signal's "Message and wordmark" footer was removed in Q-Site 1.5; the engine strips its markup, so none is built)
@@ -245,6 +250,7 @@ FOOTER = '''
                 <footer>
                     <div id="container">
                         <div class="footer_header">
+                            {CONTACTS}
                             <nav class="footer_nav" aria-label="Footer links" data-i18n-aria="aria.footerNav">
                                 <ul>
                                     <li><a href="index.html" data-i18n="nav.home" data-qs-key="site.footer.home">Home</a></li>
@@ -252,7 +258,6 @@ FOOTER = '''
                                     <li><a href="company.html" data-i18n="nav.company" data-qs-key="site.footer.company">Company</a></li>
                                 </ul>
                             </nav>
-                            <address class="footer_facts"><span data-i18n="footer.entity" data-qs-key="site.footer.entity">Neurawork GmbH &amp; Co. KG, Schweppermannpark 1, 84539 Ampfing</span><a href="mailto:office@kalq.ai" data-qs-key="site.footer.email">office@kalq.ai</a></address>
                         </div>
                         <div class="footer_bottom">
                             <p>
@@ -265,7 +270,7 @@ FOOTER = '''
                         </div>
                         <div class="kalq-watermark" aria-hidden="true"><svg viewBox="{WM_VB}" fill="currentColor" focusable="false">{WM_PATHS}</svg></div>
                     </div>
-'''.replace("{WM_VB}", wm_vb).replace("{WM_PATHS}", wm_paths) + FOOTER_HARBOR + '''
+'''.replace("{CONTACTS}", contacts_row("footer_facts", "site.footer")).replace("{WM_VB}", wm_vb).replace("{WM_PATHS}", wm_paths) + FOOTER_HARBOR + '''
 ''' + FOOTER_TETHER + '''
 
                 </footer>

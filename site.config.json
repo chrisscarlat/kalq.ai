@@ -201,5 +201,6 @@
         "lookParts",
         "kalq-site"
     ],
-    "styles": "lockable"
+    "styles": "lockable",
+    "domainInvites": true
 }

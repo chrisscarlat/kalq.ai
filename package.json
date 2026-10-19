@@ -5,7 +5,7 @@
     "description": "Kalq website: its pages, copy and brand on the Q-Site engine (an npm package from git).",
     "dependencies": {
         "@vercel/functions": "3.9.9",
-        "q-site": "github:chrisscarlat/q-site#v1.6.5"
+        "q-site": "github:chrisscarlat/q-site#v1.6.6"
     },
     "scripts": {
         "build": "q-site build",

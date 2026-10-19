@@ -199,15 +199,9 @@
             ]
         }
     ],
-    "publicFiles": [
-        "/js/strings.js",
-        "/js/vendor/page-flip.js",
-        "re:^/js/book/[a-z-]+\\.js$"
-    ],
+    "publicFiles": [],
     "publicScripts": [
-        "kalq-site",
-        "lookParts",
-        "magazine"
+        "kalq-site"
     ],
     "styles": "lockable",
     "domainInvites": true

@@ -11,3 +11,6 @@ main.js does on gated pages.
 
 Engine fix: load the magazine on public pages too when the site has no gated page (or always, now that its copy is the
 site's public copy), with its files public in that case.
+
+Done in Q-Site 1.6.1 (lib/site-config.js OPEN_SITE_FILES; js/main.js loads the magazine on every page of an all-public
+site). Kalq's bridge removed on 1.6.1.

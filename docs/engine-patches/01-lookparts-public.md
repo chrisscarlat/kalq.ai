@@ -8,3 +8,5 @@ Site workaround (kalq.ai): `"publicScripts": ["lookParts"]` in site.config.json.
 
 Engine fix (q-site `middleware.js`): add `"lookParts"` to `ENGINE_SCRIPTS`; a site check that loads every public
 page without the cookie and fails on any 401 for a file under `/js/` would have caught it.
+
+Done in Q-Site 1.6.1 (with a test that walks every public entry's static imports). Kalq's publicScripts entry removed.

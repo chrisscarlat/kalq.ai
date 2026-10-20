@@ -192,11 +192,13 @@ LINKEDIN = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path 
 # the fields; the address fields show only while editing. The full company details are in the Impressum.
 MAIL_ICON = '<svg class="kalq-contact__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.75 6.5h16.5v11H3.75z M4.25 7l7.75 6.25L19.75 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>'
 PIN_ICON = '<svg class="kalq-contact__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s-6.25-6.1-6.25-11a6.25 6.25 0 0 1 12.5 0C18.25 14.9 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.2" fill="currentColor"/></svg>'
+PHONE_ICON = '<svg class="kalq-contact__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.6 3.75h2.6l1.45 4.1-2 1.35a10.6 10.6 0 0 0 6.15 6.15l1.35-2 4.1 1.45v2.6a1.85 1.85 0 0 1-2 1.85A15.9 15.9 0 0 1 4.75 5.75a1.85 1.85 0 0 1 1.85-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>'
 MAPS = "https://www.google.com/maps/search/?api=1&amp;query=Schweppermannpark%201%2C%2084539%20Ampfing"
 def contacts_row(cls, ns):
     li_icon = LINKEDIN.replace('<svg ', '<svg class="kalq-contact__icon" ', 1)
     return (f'<address class="{cls} kalq-contacts">'
-        f'<a class="kalq-contact kalq-contact--email" href="mailto:office@kalq.ai">{MAIL_ICON}<span data-i18n="footer.emailLabel" data-qs-key="{ns}.contact.emailLabel">Email</span><span class="kalq-contact__field" data-qs-key="{ns}.email" data-placeholder="office@kalq.ai">office@kalq.ai</span></a>'
+        f'<a class="kalq-contact kalq-contact--email" href="mailto:m.esser@kalq.ai">{MAIL_ICON}<span data-i18n="footer.emailLabel" data-qs-key="{ns}.contact.emailLabel">Email</span><span class="kalq-contact__field" data-qs-key="{ns}.email" data-placeholder="name@kalq.ai">m.esser@kalq.ai</span></a>'
+        f'<a class="kalq-contact kalq-contact--phone" href="tel:+491722154422">{PHONE_ICON}<span class="qs-sr" data-i18n="footer.phoneLabel" data-qs-key="{ns}.contact.phoneLabel">Phone</span><span class="qs-sr">: </span><span data-qs-key="{ns}.contact.phone">+49 172 2154422</span></a>'
         f'<a class="kalq-contact kalq-contact--address" href="{MAPS}" target="_blank" rel="noopener">{PIN_ICON}<span class="qs-sr" data-i18n="footer.addressLabel" data-qs-key="{ns}.contact.addressLabel">Address</span><span class="qs-sr">: </span><span data-qs-key="{ns}.contact.address">Schweppermannpark 1, 84539 Ampfing</span><span class="qs-sr"> </span><span class="qs-sr" data-i18n="footer.mapsHint" data-qs-key="{ns}.contact.mapsHint">(opens Google Maps in a new tab)</span></a>'
         f'<a class="kalq-contact kalq-contact--linkedin" target="_blank" rel="noopener" hidden>{li_icon}<span class="qs-sr" data-i18n="footer.linkedinLabel" data-qs-key="{ns}.contact.linkedinLabel">Kalq on LinkedIn</span><span class="kalq-contact__field" data-qs-key="{ns}.contact.linkedin" data-placeholder="https://www.linkedin.com/company/…"></span></a>'
         '</address>')
@@ -215,7 +217,7 @@ FOOTER_HARBOR = f'''                    <div class="footer-harbor">
                                 </ul>
                             </nav>
                         </div>
-                        <p class="footer-harbor__legal"><span>© <span data-current-year>2026</span> Kalq</span><span aria-hidden="true">·</span><a href="impressum.html" data-i18n="footer.impressum" data-qs-key="site.footer2.impressum">Legal notice</a><span aria-hidden="true">·</span><a href="datenschutz.html" data-i18n="footer.privacy" data-qs-key="site.footer2.privacy">Privacy</a></p>
+                        <p class="footer-harbor__legal"><span>© <span data-current-year>2026</span> KALQ AI</span><span aria-hidden="true">·</span><a href="impressum.html" data-i18n="footer.impressum" data-qs-key="site.footer2.impressum">Legal notice</a><span aria-hidden="true">·</span><a href="datenschutz.html" data-i18n="footer.privacy" data-qs-key="site.footer2.privacy">Privacy</a></p>
                         <div class="footer-harbor__wordmark" aria-hidden="true">{WORD}</div>
                     </div>'''
 
@@ -240,7 +242,7 @@ FOOTER_TETHER = f'''                    <div class="footer-tether">
                                 </ul>
                             </div>
                         </nav>
-                        <p class="footer-tether__legal"><span>© <span data-current-year>2026</span> Kalq.</span> <span data-i18n="footer.rights" data-qs-key="site.footer3.rights">All rights reserved.</span></p>
+                        <p class="footer-tether__legal"><span>© <span data-current-year>2026</span> KALQ AI.</span> <span data-i18n="footer.rights" data-qs-key="site.footer3.rights">All rights reserved.</span></p>
                     </div>'''
 
 # (Signal's "Message and wordmark" footer was removed in Q-Site 1.5; the engine strips its markup, so none is built)
@@ -261,7 +263,7 @@ FOOTER = '''
                         </div>
                         <div class="footer_bottom">
                             <p>
-                                <span>© 2026 Kalq</span>
+                                <span>© 2026 KALQ AI</span>
                                 <span aria-hidden="true">·</span>
                                 <a href="impressum.html" class="underLine_Link">Legal notice</a>
                                 <span aria-hidden="true">·</span>
@@ -693,7 +695,7 @@ company = head("Kalq | Company") + '''                <!-- Header -->
 write("company.html", company)
 
 # ---------------- Legal ----------------
-impressum = head("Kalq | Legal notice", public=True) + '''                <!-- Impressum: Neurawork GmbH & Co. KG, as on neurawork.ai/de/impressum (2026-10-17); contact office@kalq.ai -->
+impressum = head("Kalq | Legal notice", public=True) + '''                <!-- Impressum: Neurawork GmbH & Co. KG, as on neurawork.ai/de/impressum (2026-10-17); contact KALQ AI, +49 172 2154422, m.esser@kalq.ai -->
                 <section class="legal">
                     <div id="container">
                         <h2 data-qs-key="impressum.header.title">Legal notice</h2>
@@ -711,8 +713,8 @@ impressum = head("Kalq | Legal notice", public=True) + '''                <!-- I
 
                         <div class="legal_block">
                             <h5 data-qs-key="impressum.contact.title">Contact</h5>
-                            <p><span data-i18n="legal.phone" data-qs-key="impressum.contact.phoneLabel">Phone:</span> <a href="tel:+498636239830" data-i18n="legal.phoneNumber" data-qs-key="impressum.contact.phone">+49 8636 23983 0</a><br>
-                            <span data-qs-key="impressum.contact.label">Email:</span> <a href="mailto:office@kalq.ai" data-qs-key="impressum.contact.email">office@kalq.ai</a></p>
+                            <p><span data-i18n="legal.phone" data-qs-key="impressum.contact.phoneLabel">Phone:</span> <a href="tel:+491722154422" data-i18n="legal.phoneNumber" data-qs-key="impressum.contact.phone">+49 8636 23983 0</a><br>
+                            <span data-qs-key="impressum.contact.label">Email:</span> <a href="mailto:m.esser@kalq.ai" data-qs-key="impressum.contact.email">m.esser@kalq.ai</a></p>
                         </div>
 
                         <div class="legal_block">

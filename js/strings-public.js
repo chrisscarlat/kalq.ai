@@ -141,8 +141,8 @@ export const STRINGS = {
         "de": "Telefon:"
     },
     "legal.phoneNumber": {
-        "en": "+49 8636 23983 0",
-        "de": "+49 8636 23983 0"
+        "de": "+49 172 2154422",
+        "en": "+49 172 2154422"
     },
     "privacy.draft": {
         "en": "Draft for legal review, as of 17 October 2026. This privacy policy describes what the website actually uses; it has not been legally reviewed yet.",
@@ -201,8 +201,8 @@ export const STRINGS = {
         "de": "Chat"
     },
     "privacy.chatText": {
-        "en": "The chat for inquiries runs entirely in your browser. The website neither stores nor transmits your answers. At the end you can send the summary to us yourself via WhatsApp, Telegram, SMS or email; this opens the respective app, and its provider's terms apply (for example WhatsApp Ireland Limited or Telegram). We use the message we receive this way only to handle your inquiry (Art. 6(1)(b) and (f) GDPR).",
-        "de": "Der Chat für Anfragen läuft vollständig in Ihrem Browser. Ihre Antworten werden von der Website weder gespeichert noch übertragen. Am Ende können Sie die Zusammenfassung selbst über WhatsApp, Telegram, SMS oder E-Mail an uns senden; dafür öffnet sich die jeweilige App, und es gelten die Bestimmungen ihres Anbieters (zum Beispiel WhatsApp Ireland Limited oder Telegram). Die Nachricht, die wir so erhalten, nutzen wir nur zur Bearbeitung Ihrer Anfrage (Art. 6 Abs. 1 lit. b und f DSGVO)."
+        "en": "The chat for inquiries runs entirely in your browser. The website neither stores nor transmits your answers. At the end you can send the summary to us yourself via WhatsApp, SMS or email; this opens the respective app, and its provider's terms apply (for example WhatsApp Ireland Limited). We use the message we receive this way only to handle your inquiry (Art. 6(1)(b) and (f) GDPR).",
+        "de": "Der Chat für Anfragen läuft vollständig in Ihrem Browser. Ihre Antworten werden von der Website weder gespeichert noch übertragen. Am Ende können Sie die Zusammenfassung selbst über WhatsApp, SMS oder E-Mail an uns senden; dafür öffnet sich die jeweilige App, und es gelten die Bestimmungen ihres Anbieters (zum Beispiel WhatsApp Ireland Limited). Die Nachricht, die wir so erhalten, nutzen wir nur zur Bearbeitung Ihrer Anfrage (Art. 6 Abs. 1 lit. b und f DSGVO)."
     },
     "privacy.thirdparty": {
         "en": "Fonts, scripts and media from third parties",
@@ -247,5 +247,9 @@ export const STRINGS = {
     "footer.linkedinLabel": {
         "de": "Kalq auf LinkedIn",
         "en": "Kalq on LinkedIn"
+    },
+    "footer.phoneLabel": {
+        "de": "Telefon",
+        "en": "Phone"
     }
 };

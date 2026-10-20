@@ -193,15 +193,16 @@ new MutationObserver((records) => {
 ["qs:language", "qs:content"].forEach((ev) => document.addEventListener(ev, () => setTimeout(stickers, 50)));
 
 // 6. The footer's contacts row (tools/build_pages.py contacts_row): the links' addresses follow their fields. E-Mail
-// writes to the email field's address; the address opens Google Maps for the address field's text, in a new tab (a
+// writes to the email field's address; the phone calls the phone field's number; the address opens Google Maps for the address field's text, in a new tab (a
 // plain link: nothing loads from Google before the click); LinkedIn shows only with a LinkedIn address filled in, so it
 // never points anywhere unchecked. The fields are the page's own text, so every copy of the row (the "Pages and
 // wordmark" footer copies it) follows, as soon as an edit lands or the content arrives.
-const fieldText = (link) => (link.querySelector(".kalq-contact__field, [data-qs-key$='.contact.address']")?.textContent || "").replace(/\s+/g, " ").trim();
+const fieldText = (link) => (link.querySelector(".kalq-contact__field, [data-qs-key$='.contact.address'], [data-qs-key$='.contact.phone']")?.textContent || "").replace(/\s+/g, " ").trim();
 const EMAIL = /^[^\s@<>"]+@[^\s@<>"]+\.[a-z]{2,}$/i;
 const LINKEDIN_URL = /^https:\/\/([a-z]{2,3}\.)?linkedin\.com\/[^\s<>"]+$/i;
 function contacts() {
     document.querySelectorAll(".kalq-contact--email").forEach((a) => { const v = fieldText(a); if (EMAIL.test(v)) a.href = `mailto:${v}`; });
+    document.querySelectorAll(".kalq-contact--phone").forEach((a) => { const d = fieldText(a).replace(/[^\d+]/g, "").replace(/^00/, "+"); if (/^\+\d{6,15}$/.test(d)) a.href = `tel:${d}`; });
     document.querySelectorAll(".kalq-contact--address").forEach((a) => { const v = fieldText(a); if (v) a.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v)}`; });
     document.querySelectorAll(".kalq-contact--linkedin").forEach((a) => {
         const v = fieldText(a);

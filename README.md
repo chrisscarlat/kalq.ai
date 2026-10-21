@@ -23,6 +23,12 @@ mark). Engine updates: change the tag in `package.json`, `npm install`, `npm tes
 On Vercel the install step (`tools/vercel-install.sh`) fetches the private engine with `Q_SITE_GITHUB_TOKEN`; the
 build command is `npm run build` and Vercel serves `dist/` (`vercel.json`).
 
+## Deploying
+
+Deploy only by pushing to `main`. Vercel's Git integration builds every push to `main` and puts it live on kalq.ai.
+Never deploy with the Vercel CLI (`vercel deploy`, `vercel --prod`, `vercel promote`): a CLI deploy and the automatic
+one from `main` race, and whichever finishes last goes live, which can be an older commit.
+
 ## Database
 
 Kalq's Supabase project already has the schema up to its seven migrations, kept in

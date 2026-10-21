@@ -282,3 +282,24 @@ body.qs-edit {
 
     svg { display: block; width: 100%; height: auto; }
 }
+
+// The cookie bar's link to the Datenschutz (tools/build_pages.py DONTPANIC): beside the sentence, the one thing in the
+// bar besides the buttons that takes a click
+.dontpanic-bar__link {
+    flex: 0 0 auto;
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    white-space: nowrap;
+    pointer-events: auto;
+
+    &:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 2px; }
+}
+
+// "A Kloepfel Engineering GmbH company, Düsseldorf": one quiet line under the copyright, in every footer style
+.kalq-parent {
+    margin-top: 0.5rem;
+    opacity: 0.75;
+
+    a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+}

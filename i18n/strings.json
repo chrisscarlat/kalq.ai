@@ -225,8 +225,8 @@
         "de": "Vertreten durch"
     },
     "legal.director": {
-        "en": "the personally liable partner (general partner) Neurawork Verwaltungs GmbH, represented by its management, Christoph Knöll and Sylvia Knöll",
-        "de": "die persönlich haftende Gesellschafterin (Komplementärin) Neurawork Verwaltungs GmbH, diese vertreten durch die Geschäftsführung Christoph Knöll und Sylvia Knöll"
+        "en": "The managing director(s): to be added",
+        "de": "Die Geschäftsführung: wird ergänzt"
     },
     "legal.contact": {
         "en": "Contact",
@@ -245,8 +245,8 @@
         "de": "Umsatzsteuer-ID"
     },
     "legal.vatText": {
-        "en": "VAT identification number pursuant to § 27a UStG (German VAT Act): DE366333533",
-        "de": "Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: DE366333533"
+        "en": "VAT identification number pursuant to § 27a UStG (German VAT Act): to be added",
+        "de": "Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: wird ergänzt"
     },
     "privacy.title": {
         "en": "Privacy policy",
@@ -265,12 +265,12 @@
         "en": "Buyers and suppliers use the same understanding of a part. Nothing else crosses over. Each tenant's prices, margins and machine data stay in their own space, used only for the purpose they were given for.\n\nData is hosted in the EU. Every automated result can be reviewed and overruled by a person. And Kalq stays neutral: it does not sell parts, and it does not take a side in the deal."
     },
     "legal.address": {
-        "en": "Neurawork GmbH & Co. KG\nSchweppermannpark 1\n84539 Ampfing\nGermany",
-        "de": "Neurawork GmbH & Co. KG\nSchweppermannpark 1\n84539 Ampfing\nDeutschland"
+        "en": "Kloepfel Engineering GmbH\nPempelforterstraße 50\n40211 Düsseldorf\nGermany",
+        "de": "Kloepfel Engineering GmbH\nPempelforterstraße 50\n40211 Düsseldorf\nDeutschland"
     },
     "legal.registerText": {
-        "en": "Commercial register (KG): Amtsgericht Traunstein (local court), HRA 14942\nCommercial register (general partner GmbH): Amtsgericht Traunstein (local court), HRB 34833",
-        "de": "Handelsregister (KG): Amtsgericht Traunstein, HRA 14942\nHandelsregister (Komplementär-GmbH): Amtsgericht Traunstein, HRB 34833"
+        "en": "Commercial register: register court and HRB number to be added",
+        "de": "Handelsregister: Registergericht und HRB-Nummer werden ergänzt"
     },
     "home.platformText": {
         "en": "A part enters as a STEP file and a drawing. Kalq turns it into features, process alternatives and a route on real machines.",
@@ -321,16 +321,16 @@
         "en": "+49 172 2154422"
     },
     "privacy.draft": {
-        "en": "Draft for legal review, as of 17 October 2026. This privacy policy describes what the website actually uses; it has not been legally reviewed yet.",
-        "de": "Entwurf zur rechtlichen Prüfung, Stand 17. Oktober 2026. Diese Datenschutzerklärung beschreibt, was die Website tatsächlich nutzt; sie ist noch nicht rechtlich geprüft."
+        "en": "Draft for legal review, as of 21 October 2026. This privacy policy describes what the website actually uses; it has not been legally reviewed yet.",
+        "de": "Entwurf zur rechtlichen Prüfung, Stand 21. Oktober 2026. Diese Datenschutzerklärung beschreibt, was die Website tatsächlich nutzt; sie ist noch nicht rechtlich geprüft."
     },
     "privacy.controller": {
         "en": "Controller",
         "de": "Verantwortlicher"
     },
     "privacy.controllerText": {
-        "en": "The controller responsible for data processing on this website is Neurawork GmbH & Co. KG, Schweppermannpark 1, 84539 Ampfing, Germany, represented by its general partner Neurawork Verwaltungs GmbH, in turn represented by its management, Christoph Knöll and Sylvia Knöll.\n\nPhone: +49 8636 23983 0. Email: office@kalq.ai. Please send any questions about data protection to this address as well.",
-        "de": "Verantwortlich für die Datenverarbeitung auf dieser Website ist die Neurawork GmbH & Co. KG, Schweppermannpark 1, 84539 Ampfing, Deutschland, vertreten durch die persönlich haftende Gesellschafterin Neurawork Verwaltungs GmbH, diese vertreten durch die Geschäftsführung Christoph Knöll und Sylvia Knöll.\n\nTelefon: +49 8636 23983 0. E-Mail: office@kalq.ai. An diese Adresse richten Sie bitte auch alle Fragen zum Datenschutz."
+        "en": "The controller responsible for data processing on this website is Kloepfel Engineering GmbH, Pempelforterstraße 50, 40211 Düsseldorf, Germany, a company of the Kloepfel Group, represented by its managing director(s) (to be added).\n\nPhone: +49 172 2154422. Email: m.esser@kalq.ai. Please send any questions about data protection to this address as well.",
+        "de": "Verantwortlich für die Datenverarbeitung auf dieser Website ist die Kloepfel Engineering GmbH, Pempelforterstraße 50, 40211 Düsseldorf, Deutschland, ein Unternehmen der Kloepfel Group, vertreten durch die Geschäftsführung (wird ergänzt).\n\nTelefon: +49 172 2154422. E-Mail: m.esser@kalq.ai. An diese Adresse richten Sie bitte auch alle Fragen zum Datenschutz."
     },
     "privacy.overview": {
         "en": "In brief",
@@ -401,8 +401,8 @@
         "de": "Ihre Rechte"
     },
     "privacy.rightsText": {
-        "en": "You have the right to access, rectification, erasure, restriction of processing, data portability and objection (Art. 15 to 21 GDPR). Please write to us at office@kalq.ai.\n\nYou may also lodge a complaint with a data protection supervisory authority, for example the authority responsible for us, the Bavarian Data Protection Authority (Bayerisches Landesamt für Datenschutzaufsicht), Promenade 18, 91522 Ansbach, Germany.",
-        "de": "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch (Art. 15 bis 21 DSGVO). Schreiben Sie uns dazu an office@kalq.ai.\n\nSie können sich außerdem bei einer Datenschutzaufsichtsbehörde beschweren, zum Beispiel beim für uns zuständigen Bayerischen Landesamt für Datenschutzaufsicht, Promenade 18, 91522 Ansbach."
+        "en": "You have the right to access, rectification, erasure, restriction of processing, data portability and objection (Art. 15 to 21 GDPR). Please write to us at m.esser@kalq.ai.\n\nYou may also lodge a complaint with a data protection supervisory authority, for example the authority responsible for us, the Bavarian Data Protection Authority (Bayerisches Landesamt für Datenschutzaufsicht), Promenade 18, 91522 Ansbach, Germany.",
+        "de": "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch (Art. 15 bis 21 DSGVO). Schreiben Sie uns dazu an m.esser@kalq.ai.\n\nSie können sich außerdem bei einer Datenschutzaufsichtsbehörde beschweren, zum Beispiel beim für uns zuständigen Bayerischen Landesamt für Datenschutzaufsicht, Promenade 18, 91522 Ansbach."
     },
     "site.construction": {
         "en": "Under construction. Not launched yet.",
@@ -427,5 +427,13 @@
     "footer.phoneLabel": {
         "de": "Telefon",
         "en": "Phone"
+    },
+    "legal.draft": {
+        "en": "Draft for legal review, as of 21 October 2026. Details marked \"to be added\" will follow from the official legal notice of Kloepfel Engineering GmbH.",
+        "de": "Entwurf zur rechtlichen Prüfung, Stand 21. Oktober 2026. Angaben mit „wird ergänzt“ folgen aus dem offiziellen Impressum der Kloepfel Engineering GmbH."
+    },
+    "footer.parent": {
+        "en": "A Kloepfel Engineering GmbH company, Düsseldorf",
+        "de": "Ein Angebot der Kloepfel Engineering GmbH, Düsseldorf"
     }
 }

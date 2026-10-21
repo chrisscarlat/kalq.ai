@@ -57,6 +57,15 @@ def nav_html(public=False):
             <button type="button" class="site-nav__close" aria-label="Close menu" data-i18n-aria="aria.menuClose"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
         </nav>'''
 
+ORG_JSONLD = json.dumps({
+    "@context": "https://schema.org", "@type": "Organization", "name": "Kalq", "url": "https://www.kalq.ai",
+    "logo": "https://www.kalq.ai/assets/logo.svg", "description": STRINGS["meta.description"]["de"],
+    "email": "m.esser@kalq.ai", "telephone": "+49 172 2154422",
+    "parentOrganization": {"@type": "Organization", "name": "Kloepfel Engineering GmbH", "url": "https://www.kloepfel-engineering.com/",
+        "address": {"@type": "PostalAddress", "streetAddress": "Pempelforterstraße 50", "postalCode": "40211", "addressLocality": "Düsseldorf", "addressCountry": "DE"},
+        "parentOrganization": {"@type": "Organization", "name": "Kloepfel Group"}},
+}, ensure_ascii=False).replace("</", "<\\/")
+
 def head(title, public=False):
     return f'''<!DOCTYPE html>
 <html lang="en">
@@ -72,6 +81,7 @@ def head(title, public=False):
     <!-- Edited content: keyed blocks stay hidden until js/content.js applied it (1.5 s max, 3 s if scripts fail) -->
     <script>document.documentElement.classList.add("qs-loading"); setTimeout(function () {{ document.documentElement.classList.remove("qs-loading"); }}, 3000);</script>
     <meta name="description" content="{DESC}">
+    <script type="application/ld+json">{ORG_JSONLD}</script>
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="./assets/favicon.png" type="image/png">
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
@@ -190,16 +200,20 @@ LINKEDIN = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path 
 # stored address; the address opens Google Maps in a new tab (a plain link: nothing loads from Google before the click);
 # LinkedIn stays hidden until a LinkedIn address is filled in. js/kalq-site.js keeps the links' addresses in step with
 # the fields; the address fields show only while editing. The full company details are in the Impressum.
+# The company behind Kalq, one line in every footer style, linking to its website
+KLOEPFEL_URL = "https://www.kloepfel-engineering.com/"
+def parent_line(cls, ns):
+    return f'<p class="{cls} kalq-parent"><a href="{KLOEPFEL_URL}" target="_blank" rel="noopener" data-i18n="footer.parent" data-qs-key="{ns}.parent">A Kloepfel Engineering GmbH company, Düsseldorf</a></p>'
 MAIL_ICON = '<svg class="kalq-contact__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.75 6.5h16.5v11H3.75z M4.25 7l7.75 6.25L19.75 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>'
 PIN_ICON = '<svg class="kalq-contact__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s-6.25-6.1-6.25-11a6.25 6.25 0 0 1 12.5 0C18.25 14.9 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.2" fill="currentColor"/></svg>'
 PHONE_ICON = '<svg class="kalq-contact__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.6 3.75h2.6l1.45 4.1-2 1.35a10.6 10.6 0 0 0 6.15 6.15l1.35-2 4.1 1.45v2.6a1.85 1.85 0 0 1-2 1.85A15.9 15.9 0 0 1 4.75 5.75a1.85 1.85 0 0 1 1.85-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>'
-MAPS = "https://www.google.com/maps/search/?api=1&amp;query=Schweppermannpark%201%2C%2084539%20Ampfing"
+MAPS = "https://www.google.com/maps/search/?api=1&amp;query=Pempelforterstra%C3%9Fe%2050%2C%2040211%20D%C3%BCsseldorf"
 def contacts_row(cls, ns):
     li_icon = LINKEDIN.replace('<svg ', '<svg class="kalq-contact__icon" ', 1)
     return (f'<address class="{cls} kalq-contacts">'
         f'<a class="kalq-contact kalq-contact--email" href="mailto:m.esser@kalq.ai">{MAIL_ICON}<span data-i18n="footer.emailLabel" data-qs-key="{ns}.contact.emailLabel">Email</span><span class="kalq-contact__field" data-qs-key="{ns}.email" data-placeholder="name@kalq.ai">m.esser@kalq.ai</span></a>'
         f'<a class="kalq-contact kalq-contact--phone" href="tel:+491722154422">{PHONE_ICON}<span class="qs-sr" data-i18n="footer.phoneLabel" data-qs-key="{ns}.contact.phoneLabel">Phone</span><span class="qs-sr">: </span><span data-qs-key="{ns}.contact.phone">+49 172 2154422</span></a>'
-        f'<a class="kalq-contact kalq-contact--address" href="{MAPS}" target="_blank" rel="noopener">{PIN_ICON}<span class="qs-sr" data-i18n="footer.addressLabel" data-qs-key="{ns}.contact.addressLabel">Address</span><span class="qs-sr">: </span><span data-qs-key="{ns}.contact.address">Schweppermannpark 1, 84539 Ampfing</span><span class="qs-sr"> </span><span class="qs-sr" data-i18n="footer.mapsHint" data-qs-key="{ns}.contact.mapsHint">(opens Google Maps in a new tab)</span></a>'
+        f'<a class="kalq-contact kalq-contact--address" href="{MAPS}" target="_blank" rel="noopener">{PIN_ICON}<span class="qs-sr" data-i18n="footer.addressLabel" data-qs-key="{ns}.contact.addressLabel">Address</span><span class="qs-sr">: </span><span data-qs-key="{ns}.contact.address">Pempelforterstraße 50, 40211 Düsseldorf</span><span class="qs-sr"> </span><span class="qs-sr" data-i18n="footer.mapsHint" data-qs-key="{ns}.contact.mapsHint">(opens Google Maps in a new tab)</span></a>'
         f'<a class="kalq-contact kalq-contact--linkedin" target="_blank" rel="noopener" hidden>{li_icon}<span class="qs-sr" data-i18n="footer.linkedinLabel" data-qs-key="{ns}.contact.linkedinLabel">Kalq on LinkedIn</span><span class="kalq-contact__field" data-qs-key="{ns}.contact.linkedin" data-placeholder="https://www.linkedin.com/company/…"></span></a>'
         '</address>')
 FOOTER_HARBOR = f'''                    <div class="footer-harbor">
@@ -218,6 +232,7 @@ FOOTER_HARBOR = f'''                    <div class="footer-harbor">
                             </nav>
                         </div>
                         <p class="footer-harbor__legal"><span>© <span data-current-year>2026</span> KALQ AI</span><span aria-hidden="true">·</span><a href="impressum.html" data-i18n="footer.impressum" data-qs-key="site.footer2.impressum">Legal notice</a><span aria-hidden="true">·</span><a href="datenschutz.html" data-i18n="footer.privacy" data-qs-key="site.footer2.privacy">Privacy</a></p>
+                        {parent_line('footer-harbor__legal', 'site.footer2')}
                         <div class="footer-harbor__wordmark" aria-hidden="true">{WORD}</div>
                     </div>'''
 
@@ -243,6 +258,7 @@ FOOTER_TETHER = f'''                    <div class="footer-tether">
                             </div>
                         </nav>
                         <p class="footer-tether__legal"><span>© <span data-current-year>2026</span> KALQ AI.</span> <span data-i18n="footer.rights" data-qs-key="site.footer3.rights">All rights reserved.</span></p>
+                        {parent_line('footer-tether__legal', 'site.footer3')}
                     </div>'''
 
 # (Signal's "Message and wordmark" footer was removed in Q-Site 1.5; the engine strips its markup, so none is built)
@@ -269,10 +285,11 @@ FOOTER = '''
                                 <span aria-hidden="true">·</span>
                                 <a href="datenschutz.html" class="underLine_Link">Privacy</a>
                             </p>
+                            {PARENT}
                         </div>
                         <div class="kalq-watermark" aria-hidden="true"><svg viewBox="{WM_VB}" fill="currentColor" focusable="false">{WM_PATHS}</svg></div>
                     </div>
-'''.replace("{CONTACTS}", contacts_row("footer_facts", "site.footer")).replace("{WM_VB}", wm_vb).replace("{WM_PATHS}", wm_paths) + FOOTER_HARBOR + '''
+'''.replace("{CONTACTS}", contacts_row("footer_facts", "site.footer")).replace("{PARENT}", parent_line("footer_parent", "site.footer")).replace("{WM_VB}", wm_vb).replace("{WM_PATHS}", wm_paths) + FOOTER_HARBOR + '''
 ''' + FOOTER_TETHER + '''
 
                 </footer>
@@ -280,13 +297,15 @@ FOOTER = '''
 
 
 # The bottom bar, "dontpanic" (js/dontpanic.js, css/components/_dontpanic.scss): notice or consent, as set in the design panel
-# (site.cookie.* blocks; the server writes them in, api/page.js). Both modes' texts, in both languages, are in the
+# (site.cookie.* blocks; the server writes them in, api/page.js). The link to the Datenschutz sits beside the sentence, so an
+# edited sentence (plain text) keeps it. Both modes' texts, in both languages, are in the
 # HTML; the stylesheet shows the current mode's in the page's language. Outside the page container: a page change
 # does not touch it.
 DONTPANIC = '''    <!-- dontpanic bar: tell (shown once) or ask (until Accept or Deny); js/dontpanic.js -->
     <div class="dontpanic-bar" data-mode="tell" role="status" aria-live="polite" hidden>
         <svg class="dontpanic-bar__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#fff" fill-rule="evenodd" d="M12 2.5a9.5 9.5 0 1 0 9.4 10.9 3 3 0 0 1-3.6-3.4 3 3 0 0 1-3.4-3.6A3 3 0 0 1 12 2.5zM6.9 9.4a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0-2.6 0z M8.1 15.4a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0z M13.5 14.2a1.1 1.1 0 1 0 2.2 0a1.1 1.1 0 1 0-2.2 0z M15.5 17.6a0.9 0.9 0 1 0 1.8 0a0.9 0.9 0 1 0-1.8 0z M11.6 6.6a0.7 0.7 0 1 0 1.4 0a0.7 0.7 0 1 0-1.4 0z"/><circle cx="19.4" cy="4.4" r="0.9" fill="#fff"/><circle cx="21.7" cy="7.4" r="0.6" fill="#fff"/><circle cx="16.9" cy="2.4" r="0.55" fill="#fff"/></svg>
-        <p class="dontpanic-bar__text" data-for="tell"><span lang="de">Diese Seite verwendet nur technisch notwendige Cookies. Keine Tracker, keine Analyse.</span><span lang="en">This site uses only strictly necessary cookies. No tracking, no analytics.</span></p>
+        <p class="dontpanic-bar__text" data-for="tell"><span lang="de">Kein Tracking, nur technisch notwendige Cookies.</span><span lang="en">No tracking, only essential cookies.</span></p>
+        <a class="dontpanic-bar__link" href="datenschutz.html"><span lang="de">Datenschutz</span><span lang="en">Privacy notice</span></a>
         <p class="dontpanic-bar__text" data-for="ask"><span lang="de">Diese Seite möchte zusätzlich optionale Cookies verwenden. Sie entscheiden.</span><span lang="en">This site would like to use optional cookies as well. You decide.</span></p>
         <div class="dontpanic-bar__actions">
             <button type="button" class="dontpanic-bar__accept"><span lang="de">Akzeptieren</span><span lang="en">Accept</span></button>
@@ -695,11 +714,13 @@ company = head("Kalq | Company") + '''                <!-- Header -->
 write("company.html", company)
 
 # ---------------- Legal ----------------
-impressum = head("Kalq | Legal notice", public=True) + '''                <!-- Impressum: Neurawork GmbH & Co. KG, as on neurawork.ai/de/impressum (2026-10-17); contact KALQ AI, +49 172 2154422, m.esser@kalq.ai -->
+impressum = head("Kalq | Legal notice", public=True) + '''                <!-- Impressum: Kloepfel Engineering GmbH, Pempelforterstraße 50, 40211 Düsseldorf (Kloepfel Group), a draft for legal review;
+                     managing director(s), register and VAT ID "to be added" from kloepfel-engineering.com's Impressum; contact +49 172 2154422, m.esser@kalq.ai -->
                 <section class="legal">
                     <div id="container">
                         <h2 data-qs-key="impressum.header.title">Legal notice</h2>
                         <p class="legal_lead" data-qs-key="impressum.header.lead">Information pursuant to § 5 DDG</p>
+                        <p class="legal_lead legal_draft" data-i18n="legal.draft" data-qs-key="impressum.draft.note"></p>
 
                         <div class="legal_block">
                             <h5 data-qs-key="impressum.provider.title">Provider</h5>
@@ -713,7 +734,7 @@ impressum = head("Kalq | Legal notice", public=True) + '''                <!-- I
 
                         <div class="legal_block">
                             <h5 data-qs-key="impressum.contact.title">Contact</h5>
-                            <p><span data-i18n="legal.phone" data-qs-key="impressum.contact.phoneLabel">Phone:</span> <a href="tel:+491722154422" data-i18n="legal.phoneNumber" data-qs-key="impressum.contact.phone">+49 8636 23983 0</a><br>
+                            <p><span data-i18n="legal.phone" data-qs-key="impressum.contact.phoneLabel">Phone:</span> <a href="tel:+491722154422" data-i18n="legal.phoneNumber" data-qs-key="impressum.contact.phone">+49 172 2154422</a><br>
                             <span data-qs-key="impressum.contact.label">Email:</span> <a href="mailto:m.esser@kalq.ai" data-qs-key="impressum.contact.email">m.esser@kalq.ai</a></p>
                         </div>
 

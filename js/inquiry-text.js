@@ -3,7 +3,7 @@
 export const W = {
     en: {
         open: "Open the chat", close: "Close the chat", title: "Project inquiry", answer: "Your answer", placeholder: "Type your message…", send: "Send",
-        greet: (n) => n ? `Hi! I'm ${n} from Kalq.` : "Hi! This is Kalq.",
+        greet: (n) => `Hi, I'm ${n || "Manfred"} from Kalq.`,
         intro: "We price manufactured parts from their drawing, and match them with the suppliers who can make them. What brings you here?",
         start: "What are we looking at?",
         chips: [["price", "Price a part"], ["supplier", "Find a supplier"], ["demo", "See Kalq in action"], ["other", "Something else"]],
@@ -40,7 +40,7 @@ export const W = {
     },
     de: {
         open: "Chat öffnen", close: "Chat schließen", title: "Projektanfrage", answer: "Ihre Antwort", placeholder: "Nachricht schreiben …", send: "Senden",
-        greet: (n) => n ? `Hallo! Ich bin ${n} von Kalq.` : "Hallo! Hier ist Kalq.",
+        greet: (n) => `Hi, ich bin ${n || "Manfred"} von Kalq.`,
         intro: "Wir bepreisen Fertigungsteile aus ihrer Zeichnung und finden die Lieferanten, die sie herstellen können. Was führt Sie her?",
         start: "Worum geht es?",
         chips: [["price", "Ein Teil bepreisen"], ["supplier", "Lieferanten finden"], ["demo", "Kalq in Aktion sehen"], ["other", "Etwas anderes"]],

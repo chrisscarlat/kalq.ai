@@ -112,7 +112,15 @@ const whatsapp = () => { const e = storedEntry("site.chat.whatsapp"); return Str
 let isEditor = false;
 // The chat's photo is Manfred Esser (the Design panel's Chat: site.chat.avatar); the engine draws it with an empty alt
 const AVATAR_ALT = "Manfred Esser";
+// The chat speaks the site's language: its own DE/EN switch is hidden (css/_site.scss) and set to the page's language
+// whenever the chat is drawn or the site's language changes, so the conversation so far is said again in it too
+function chatFollowsSite() {
+    const lang = document.documentElement.lang === "en" ? "en" : "de";
+    const item = document.querySelector(`.qs-chat:not(.is-preview) .qs-chat__head .qs-chat__langs [data-lang="${lang}"]`);
+    if (item && !item.classList.contains("is-active")) item.click();
+}
 function chatAccess() {
+    chatFollowsSite();
     document.querySelectorAll(".qs-chat__avatar img, .qs-chat__toggle-photo img").forEach((img) => { if (img.alt !== AVATAR_ALT) img.alt = AVATAR_ALT; });
     const missing = !whatsapp();
     document.documentElement.classList.toggle("kalq-chat-shown", !missing || isEditor);

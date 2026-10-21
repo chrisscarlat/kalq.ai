@@ -303,3 +303,6 @@ body.qs-edit {
 
     a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 }
+
+// The chat speaks the site's language (js/kalq-site.js): no language switch of its own
+.qs-chat__langs { display: none !important; }

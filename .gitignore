@@ -11,3 +11,6 @@ supabase/.temp/
 
 # Q-Site build output
 dist/
+
+# Local files, never committed
+private/

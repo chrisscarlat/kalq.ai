@@ -82,9 +82,9 @@ def head(title, public=False):
     <script>document.documentElement.classList.add("qs-loading"); setTimeout(function () {{ document.documentElement.classList.remove("qs-loading"); }}, 3000);</script>
     <meta name="description" content="{DESC}">
     <script type="application/ld+json">{ORG_JSONLD}</script>
-    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
-    <link rel="icon" href="./assets/favicon.png" type="image/png">
-    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+    <link rel="icon" href="./assets/favicon.svg?v=2" type="image/svg+xml">
+    <link rel="icon" href="./assets/favicon.png?v=2" type="image/png">
+    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png?v=2">
     <link rel="preload" href="./fonts/ClashGrotesk-Light.woff2" as="font" type="font/woff2" crossorigin>
     <!-- Every module the page script imports, fetched at once instead of one import level after the other -->
     <link rel="modulepreload" href="js/main.js">
@@ -820,9 +820,9 @@ gate_html = f"""<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>Kalq</title>
-    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-    <link rel="icon" href="/assets/favicon.png" type="image/png">
-    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+    <link rel="icon" href="/assets/favicon.svg?v=2" type="image/svg+xml">
+    <link rel="icon" href="/assets/favicon.png?v=2" type="image/png">
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png?v=2">
     <link rel="stylesheet" href="/css/gate.css">
 </head>
 

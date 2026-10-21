@@ -110,7 +110,10 @@ document.addEventListener("touchcancel", endTouch, true);
 import { storedEntry } from "./content.js";
 const whatsapp = () => { const e = storedEntry("site.chat.whatsapp"); return String(e?.de ?? e?.en ?? "").replace(/<[^>]+>/g, "").trim(); };
 let isEditor = false;
+// The chat's photo is Manfred Esser (the Design panel's Chat: site.chat.avatar); the engine draws it with an empty alt
+const AVATAR_ALT = "Manfred Esser";
 function chatAccess() {
+    document.querySelectorAll(".qs-chat__avatar img, .qs-chat__toggle-photo img").forEach((img) => { if (img.alt !== AVATAR_ALT) img.alt = AVATAR_ALT; });
     const missing = !whatsapp();
     document.documentElement.classList.toggle("kalq-chat-shown", !missing || isEditor);
     document.querySelectorAll(".qs-chat__window").forEach((win) => {
@@ -127,9 +130,11 @@ fetch("/api/me", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : 
     .then((me) => { isEditor = me?.kind === "editor"; chatAccess(); });
 ["qs:content", "qs:site-settings", "qs:language"].forEach((ev) => document.addEventListener(ev, () => requestAnimationFrame(chatAccess)));
 window.addEventListener("load", chatAccess);
-// the chat draws its window again on a language change or a settings change: the note goes back in
+// the chat draws its window again on a language change or a settings change: the note goes back in; every new
+// message and the toggle draw the photo again: its alt goes back on
+const CHAT_PARTS = ".qs-chat, .qs-chat__window, .qs-chat__avatar, .qs-chat__toggle-photo";
 new MutationObserver((records) => {
-    if (records.some((r) => [...r.addedNodes].some((n) => n.nodeType === 1 && (n.matches(".qs-chat, .qs-chat__window") || n.querySelector?.(".qs-chat__window"))))) chatAccess();
+    if (records.some((r) => [...r.addedNodes].some((n) => n.nodeType === 1 && (n.matches(CHAT_PARTS) || n.querySelector?.(CHAT_PARTS))))) chatAccess();
 }).observe(document.body, { childList: true, subtree: true });
 
 // 4. The "under construction" pill steps aside while text of the page is under it (a heading that starts high on a

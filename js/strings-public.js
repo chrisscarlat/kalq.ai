@@ -136,14 +136,6 @@ export const STRINGS = {
         "en": "Legal",
         "de": "Rechtliches"
     },
-    "legal.phone": {
-        "en": "Phone:",
-        "de": "Telefon:"
-    },
-    "legal.phoneNumber": {
-        "de": "+49 172 2154422",
-        "en": "+49 172 2154422"
-    },
     "privacy.draft": {
         "en": "Draft for legal review, as of 21 October 2026. This privacy policy describes what the website actually uses; it has not been legally reviewed yet.",
         "de": "Entwurf zur rechtlichen Prüfung, Stand 21. Oktober 2026. Diese Datenschutzerklärung beschreibt, was die Website tatsächlich nutzt; sie ist noch nicht rechtlich geprüft."
@@ -153,8 +145,8 @@ export const STRINGS = {
         "de": "Verantwortlicher"
     },
     "privacy.controllerText": {
-        "en": "The controller responsible for data processing on this website is Kloepfel Engineering GmbH, Pempelforterstraße 50, 40211 Düsseldorf, Germany, a company of the Kloepfel Group, represented by its managing director(s) (to be added).\n\nPhone: +49 172 2154422. Email: m.esser@kalq.ai. Please send any questions about data protection to this address as well.",
-        "de": "Verantwortlich für die Datenverarbeitung auf dieser Website ist die Kloepfel Engineering GmbH, Pempelforterstraße 50, 40211 Düsseldorf, Deutschland, ein Unternehmen der Kloepfel Group, vertreten durch die Geschäftsführung (wird ergänzt).\n\nTelefon: +49 172 2154422. E-Mail: m.esser@kalq.ai. An diese Adresse richten Sie bitte auch alle Fragen zum Datenschutz."
+        "en": "The controller responsible for data processing on this website is Kloepfel Engineering GmbH, Pempelforterstraße 50, 40211 Düsseldorf, Germany, a company of the Kloepfel Group, represented by its managing director(s) (to be added).\n\nEmail: m.esser@kalq.ai. Please send any questions about data protection to this address as well.",
+        "de": "Verantwortlich für die Datenverarbeitung auf dieser Website ist die Kloepfel Engineering GmbH, Pempelforterstraße 50, 40211 Düsseldorf, Deutschland, ein Unternehmen der Kloepfel Group, vertreten durch die Geschäftsführung (wird ergänzt).\n\nE-Mail: m.esser@kalq.ai. An diese Adresse richten Sie bitte auch alle Fragen zum Datenschutz."
     },
     "privacy.overview": {
         "en": "In brief",
@@ -247,10 +239,6 @@ export const STRINGS = {
     "footer.linkedinLabel": {
         "de": "Kalq auf LinkedIn",
         "en": "Kalq on LinkedIn"
-    },
-    "footer.phoneLabel": {
-        "de": "Telefon",
-        "en": "Phone"
     },
     "legal.draft": {
         "en": "Draft for legal review, as of 21 October 2026. Details marked \"to be added\" will follow from the official legal notice of Kloepfel Engineering GmbH.",

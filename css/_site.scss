@@ -306,3 +306,17 @@ body.qs-edit {
 
 // The chat speaks the site's language (js/kalq-site.js): no language switch of its own
 .qs-chat__langs { display: none !important; }
+// in a bottom line (the classic footer's, copied into the "Pages and wordmark" footer): a line of its own
+.kalq-parent--inline {
+    display: block;
+    flex-basis: 100%;
+    margin-top: 0.25rem;
+}
+.footer-mark__bottom .kalq-parent--inline { text-align: center; }
+
+// The big KALQ at the footer's bottom fades down into the footer's ground ("Pages and wordmark" and harbor footers)
+.footer-mark__wordmark,
+.footer-harbor__wordmark {
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
+}

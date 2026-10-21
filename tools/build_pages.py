@@ -60,7 +60,7 @@ def nav_html(public=False):
 ORG_JSONLD = json.dumps({
     "@context": "https://schema.org", "@type": "Organization", "name": "Kalq", "url": "https://www.kalq.ai",
     "logo": "https://www.kalq.ai/assets/logo.svg", "description": STRINGS["meta.description"]["de"],
-    "email": "m.esser@kalq.ai", "telephone": "+49 172 2154422",
+    "email": "m.esser@kalq.ai",
     "parentOrganization": {"@type": "Organization", "name": "Kloepfel Engineering GmbH", "url": "https://www.kloepfel-engineering.com/",
         "address": {"@type": "PostalAddress", "streetAddress": "Pempelforterstraße 50", "postalCode": "40211", "addressLocality": "Düsseldorf", "addressCountry": "DE"},
         "parentOrganization": {"@type": "Organization", "name": "Kloepfel Group"}},
@@ -196,23 +196,26 @@ SOCIAL = f'''
 # The library's footer (old/KALQ_MODULE_LIBRARY_SPEC.md 1.4), shown instead of the classic one when the style says so
 # (html.footer-harbor). One <footer> either way: one contentinfo landmark. Empty lines (the address) render nothing.
 LINKEDIN = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9.5h3V19H5zM6.5 5a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5zM10.5 9.5h2.9v1.3h.04c.4-.76 1.38-1.56 2.84-1.56 3.04 0 3.6 2 3.6 4.6V19h-3v-4.6c0-1.1-.02-2.5-1.52-2.5-1.52 0-1.76 1.19-1.76 2.42V19h-3z" fill="currentColor"/></svg>'
-# The footer's contacts row (Kalq): three real links, every part an editable footer field. E-Mail opens a mail to the
+# The footer's contacts row (Kalq): three real links (no phone: the number is only the chat's WhatsApp), every part an editable footer field. E-Mail opens a mail to the
 # stored address; the address opens Google Maps in a new tab (a plain link: nothing loads from Google before the click);
 # LinkedIn stays hidden until a LinkedIn address is filled in. js/kalq-site.js keeps the links' addresses in step with
 # the fields; the address fields show only while editing. The full company details are in the Impressum.
 # The company behind Kalq, one line in every footer style, linking to its website
 KLOEPFEL_URL = "https://www.kloepfel-engineering.com/"
+def parent_link(ns):
+    return f'<a href="{KLOEPFEL_URL}" target="_blank" rel="noopener" data-i18n="footer.parent" data-qs-key="{ns}.parent">A Kloepfel Engineering GmbH company, Düsseldorf</a>'
+# inside a bottom line (the classic footer's, which the "Pages and wordmark" footer copies): a line of its own
+def parent_inline(ns):
+    return f'<span class="kalq-parent kalq-parent--inline">{parent_link(ns)}</span>'
 def parent_line(cls, ns):
     return f'<p class="{cls} kalq-parent"><a href="{KLOEPFEL_URL}" target="_blank" rel="noopener" data-i18n="footer.parent" data-qs-key="{ns}.parent">A Kloepfel Engineering GmbH company, Düsseldorf</a></p>'
 MAIL_ICON = '<svg class="kalq-contact__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.75 6.5h16.5v11H3.75z M4.25 7l7.75 6.25L19.75 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>'
 PIN_ICON = '<svg class="kalq-contact__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s-6.25-6.1-6.25-11a6.25 6.25 0 0 1 12.5 0C18.25 14.9 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.2" fill="currentColor"/></svg>'
-PHONE_ICON = '<svg class="kalq-contact__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.6 3.75h2.6l1.45 4.1-2 1.35a10.6 10.6 0 0 0 6.15 6.15l1.35-2 4.1 1.45v2.6a1.85 1.85 0 0 1-2 1.85A15.9 15.9 0 0 1 4.75 5.75a1.85 1.85 0 0 1 1.85-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>'
 MAPS = "https://www.google.com/maps/search/?api=1&amp;query=Pempelforterstra%C3%9Fe%2050%2C%2040211%20D%C3%BCsseldorf"
 def contacts_row(cls, ns):
     li_icon = LINKEDIN.replace('<svg ', '<svg class="kalq-contact__icon" ', 1)
     return (f'<address class="{cls} kalq-contacts">'
         f'<a class="kalq-contact kalq-contact--email" href="mailto:m.esser@kalq.ai">{MAIL_ICON}<span data-i18n="footer.emailLabel" data-qs-key="{ns}.contact.emailLabel">Email</span><span class="kalq-contact__field" data-qs-key="{ns}.email" data-placeholder="name@kalq.ai">m.esser@kalq.ai</span></a>'
-        f'<a class="kalq-contact kalq-contact--phone" href="tel:+491722154422">{PHONE_ICON}<span class="qs-sr" data-i18n="footer.phoneLabel" data-qs-key="{ns}.contact.phoneLabel">Phone</span><span class="qs-sr">: </span><span data-qs-key="{ns}.contact.phone">+49 172 2154422</span></a>'
         f'<a class="kalq-contact kalq-contact--address" href="{MAPS}" target="_blank" rel="noopener">{PIN_ICON}<span class="qs-sr" data-i18n="footer.addressLabel" data-qs-key="{ns}.contact.addressLabel">Address</span><span class="qs-sr">: </span><span data-qs-key="{ns}.contact.address">Pempelforterstraße 50, 40211 Düsseldorf</span><span class="qs-sr"> </span><span class="qs-sr" data-i18n="footer.mapsHint" data-qs-key="{ns}.contact.mapsHint">(opens Google Maps in a new tab)</span></a>'
         f'<a class="kalq-contact kalq-contact--linkedin" target="_blank" rel="noopener" hidden>{li_icon}<span class="qs-sr" data-i18n="footer.linkedinLabel" data-qs-key="{ns}.contact.linkedinLabel">Kalq on LinkedIn</span><span class="kalq-contact__field" data-qs-key="{ns}.contact.linkedin" data-placeholder="https://www.linkedin.com/company/…"></span></a>'
         '</address>')
@@ -284,12 +287,12 @@ FOOTER = '''
                                 <a href="impressum.html" class="underLine_Link">Legal notice</a>
                                 <span aria-hidden="true">·</span>
                                 <a href="datenschutz.html" class="underLine_Link">Privacy</a>
+                                {PARENT}
                             </p>
-                            {PARENT}
                         </div>
                         <div class="kalq-watermark" aria-hidden="true"><svg viewBox="{WM_VB}" fill="currentColor" focusable="false">{WM_PATHS}</svg></div>
                     </div>
-'''.replace("{CONTACTS}", contacts_row("footer_facts", "site.footer")).replace("{PARENT}", parent_line("footer_parent", "site.footer")).replace("{WM_VB}", wm_vb).replace("{WM_PATHS}", wm_paths) + FOOTER_HARBOR + '''
+'''.replace("{CONTACTS}", contacts_row("footer_facts", "site.footer")).replace("{PARENT}", parent_inline("site.footer")).replace("{WM_VB}", wm_vb).replace("{WM_PATHS}", wm_paths) + FOOTER_HARBOR + '''
 ''' + FOOTER_TETHER + '''
 
                 </footer>
@@ -715,7 +718,7 @@ write("company.html", company)
 
 # ---------------- Legal ----------------
 impressum = head("Kalq | Legal notice", public=True) + '''                <!-- Impressum: Kloepfel Engineering GmbH, Pempelforterstraße 50, 40211 Düsseldorf (Kloepfel Group), a draft for legal review;
-                     managing director(s), register and VAT ID "to be added" from kloepfel-engineering.com's Impressum; contact +49 172 2154422, m.esser@kalq.ai -->
+                     managing director(s), register and VAT ID "to be added" from kloepfel-engineering.com's Impressum; contact m.esser@kalq.ai (no phone: it is not on Kloepfel's own site either) -->
                 <section class="legal">
                     <div id="container">
                         <h2 data-qs-key="impressum.header.title">Legal notice</h2>
@@ -734,8 +737,7 @@ impressum = head("Kalq | Legal notice", public=True) + '''                <!-- I
 
                         <div class="legal_block">
                             <h5 data-qs-key="impressum.contact.title">Contact</h5>
-                            <p><span data-i18n="legal.phone" data-qs-key="impressum.contact.phoneLabel">Phone:</span> <a href="tel:+491722154422" data-i18n="legal.phoneNumber" data-qs-key="impressum.contact.phone">+49 172 2154422</a><br>
-                            <span data-qs-key="impressum.contact.label">Email:</span> <a href="mailto:m.esser@kalq.ai" data-qs-key="impressum.contact.email">m.esser@kalq.ai</a></p>
+                            <p><span data-qs-key="impressum.contact.label">Email:</span> <a href="mailto:m.esser@kalq.ai" data-qs-key="impressum.contact.email">m.esser@kalq.ai</a></p>
                         </div>
 
                         <div class="legal_block">

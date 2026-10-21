@@ -320,3 +320,21 @@ body.qs-edit {
     -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
     mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
 }
+
+// Signing in only from the header's key (docs/engine-patches/10-login-item-in-menus.md): the menus' own "Anmelden" /
+// "Abmelden" entry is not shown. In the panel menu it was a fourth, full-width box that pushed the three panels from
+// the right edge into the middle; without it they drop from the top right, under the menu button.
+.qs-login-item { display: none !important; }
+
+// The panel menu opens under the menu button, right-aligned: the panels start below the header, so its right side keeps
+// its own colour (the engine turns it black for panels that start behind it)
+html.menu-panels {
+    .site-menu { top: 4.9rem; }
+    &.menu-is-open .site-header__right { color: inherit; }
+}
+@media (max-width: 720px) {
+    html.menu-panels .site-menu { top: 4.4rem; }
+}
+
+// The login card's Dashboard (js/kalq-site.js 7): as Log out, the one above the other
+.qs-login-card .kalq-login__dashboard { margin-bottom: 6px; }

@@ -227,3 +227,37 @@ window.addEventListener("load", contacts);
 // an edit in place changes the field's text without an event of its own
 new MutationObserver((records) => { if (records.some((r) => (r.target.nodeType === 1 ? r.target : r.target.parentElement)?.closest?.(".kalq-contacts"))) contacts(); })
     .observe(document.body, { childList: true, characterData: true, subtree: true });
+
+// 7. Signed in, the header's avatar opens the login card (js/loginKey.js: the name, the role, Log out). For an editor
+// the card also has Dashboard: it closes the card and switches the page into edit mode (the editor's pencil, "Edit"),
+// unless it is in edit mode already. Signing in and out only from the header (css/_site.scss: no entry in the menus).
+const DASHBOARD = { de: "Dashboard", en: "Dashboard" };
+const penButton = () => document.querySelector('.qs-toolbar__btn[aria-label="Edit (E)"], .qs-toolbar__btn[aria-label="Edit page"]');
+function dashboardEntry(card) {
+    const out = card.querySelector(".qs-login__logout");
+    const editor = card.querySelector(".qs-login__role.is-editor");
+    let entry = card.querySelector(".kalq-login__dashboard");
+    if (!out || !editor) return entry?.remove();
+    if (!entry) {
+        entry = Object.assign(document.createElement("button"), { type: "button", className: "qs-login__logout kalq-login__dashboard" });
+        entry.addEventListener("click", () => {
+            const pen = penButton();
+            if (pen && pen.getAttribute("aria-pressed") !== "true") pen.click();
+            document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); // the card closes
+        });
+        out.before(entry);
+    }
+    entry.textContent = DASHBOARD[document.documentElement.lang === "en" ? "en" : "de"];
+}
+function watchLoginCard() {
+    const card = document.querySelector(".qs-login-card");
+    if (!card || card.dataset.kalqWatched) return !!card;
+    card.dataset.kalqWatched = "1";
+    new MutationObserver(() => dashboardEntry(card)).observe(card, { childList: true });
+    dashboardEntry(card);
+    return true;
+}
+if (!watchLoginCard()) {
+    const waiting = new MutationObserver(() => { if (watchLoginCard()) waiting.disconnect(); });
+    waiting.observe(document.body, { childList: true });
+}
